@@ -1,5 +1,7 @@
 package org.microfuse.node.core.communication.routing;
 
+import org.microfuse.node.commons.messaging.Message;
+
 /**
  * The base class for listeners waiting for router events.
  */
@@ -9,5 +11,5 @@ public interface RouterListener {
      *
      * @param message The message that was received
      */
-    void onMessageReceived(String message);
+    void onMessageReceived(Message message);
 }

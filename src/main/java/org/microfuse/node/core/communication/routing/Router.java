@@ -44,7 +44,7 @@ public class Router implements NetworkHandlerListener {
                 routeToSource(msg);
             }
         } else {
-            routeToSource(msg);
+            route(routingTable.getRoutingTableNode(fromAddress), msg);
         }
     }
 
@@ -88,7 +88,7 @@ public class Router implements NetworkHandlerListener {
         int destinationNodeID = message.getDestinationNodeID();
         if (Manager.getConfigurationInstance().getNodeID() == destinationNodeID) {
             for (RouterListener routerListener : listenersList) {
-                routerListener.onMessageReceived(message.getContent());
+                routerListener.onMessageReceived(message);
             }
         } else {
             Node destinationNode = routingTable.getRoutingTableNode(destinationNodeID);
@@ -99,7 +99,7 @@ public class Router implements NetworkHandlerListener {
                 logger.debug("Routing message to node " + destinationNode.getNodeID() + ": " + outputMessage);
                 networkHandler.sendMessage(destinationNode.getAddress(), outputMessage);
             } else if (timeToLive > 0) {
-                List<Node> forwardingNodes = routingStrategy.getForwardingNode(routingTable, fromNode, message);
+                List<Node> forwardingNodes = routingStrategy.getForwardingNodes(routingTable, fromNode, message);
                 int pathKey = routingTable.putBackwardRoutingTableEntry(fromNode);
 
                 for (Node forwardNode : forwardingNodes) {
@@ -110,6 +110,9 @@ public class Router implements NetworkHandlerListener {
                     logger.debug("Routing message to " + forwardNode + ": " + outputMessage);
                     networkHandler.sendMessage(forwardNode.getAddress(), outputMessage);
                 }
+            } else {
+                message.setType(MessageType.DESTINATION_NOT_FOUND);
+                routeToSource(message);
             }
         }
     }
@@ -120,15 +123,19 @@ public class Router implements NetworkHandlerListener {
      * @param message The message to be routed
      */
     private void routeToSource(Message message) {
-        Node destinationNode = routingTable.removeBackwardRoutingTableEntry(message.popPathNode());
-
-        if (destinationNode != null) {
-            String outputMessage = new Gson().toJson(message);
-
-            logger.debug("Routing message to node " + destinationNode.getNodeID() + ": " + outputMessage);
-            networkHandler.sendMessage(destinationNode.getAddress(), outputMessage);
+        if (Manager.getConfigurationInstance().getNodeID() == message.getSourceNodeID()) {
+            for (RouterListener routerListener : listenersList) {
+                routerListener.onMessageReceived(message);
+            }
         } else {
-            logger.debug("Dropping unrecognized acknowledgement message: " + message.getContent());
+            Node destinationNode = routingTable.removeBackwardRoutingTableEntry(message.popPathNode());
+            if (destinationNode != null) {
+                String outputMessage = new Gson().toJson(message);
+                logger.debug("Routing message to node " + destinationNode.getNodeID() + ": " + outputMessage);
+                networkHandler.sendMessage(destinationNode.getAddress(), outputMessage);
+            } else {
+                logger.debug("Dropping unrecognized message: " + message.getContent());
+            }
         }
     }
 

@@ -26,5 +26,5 @@ public interface RoutingStrategy {
      * @param message      The message to be routed
      * @return The forwarding nodes list
      */
-    List<Node> getForwardingNode(RoutingTable routingTable, Node fromNode, Message message);
+    List<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message);
 }

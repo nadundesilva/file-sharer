@@ -7,7 +7,7 @@ import java.util.Map;
  * Routing strategy types.
  */
 public enum RoutingStrategyType {
-    FLOODING("Flooding");
+    FLOODING("Flooding"), RANDOM_WALK("Random Walk");
 
     /**
      * Contains the value to be displayed.
@@ -24,6 +24,7 @@ public enum RoutingStrategyType {
         // Populating the routing strategy class map
         routingStrategyClassMap = new HashMap<>();
         routingStrategyClassMap.put(RoutingStrategyType.FLOODING, FloodingRoutingStrategy.class);
+        routingStrategyClassMap.put(RoutingStrategyType.RANDOM_WALK, RandomWalkRoutingStrategy.class);
     }
 
     RoutingStrategyType(String value) {
