@@ -2,6 +2,7 @@ package org.microfuse.node.commons;
 
 import org.microfuse.node.core.communication.network.NetworkHandlerType;
 import org.microfuse.node.core.communication.routing.strategy.RoutingStrategyType;
+import org.microfuse.node.core.communication.ttl.TimeToLiveStrategyType;
 import org.microfuse.node.core.utils.Constants;
 
 /**
@@ -10,18 +11,20 @@ import org.microfuse.node.core.utils.Constants;
 public class Configuration {
     private int nodeID;
     private String address;
-    private int startingTimeToLive;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
+    private TimeToLiveStrategyType timeToLiveStrategyType;
     private int tcpListeningPort;
+    private int initialTimeToLive;
 
     public Configuration() {
         nodeID = -1;
         address = null;
-        startingTimeToLive = Constants.DEFAULT_STARTING_TIME_TO_LIVE;
         networkHandlerType = Constants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = Constants.DEFAULT_ROUTING_STRATEGY;
-        tcpListeningPort = 4444;
+        timeToLiveStrategyType = Constants.DEFAULT_TIME_TO_LIVE_STRATEGY;
+        tcpListeningPort = Constants.DEFAULT_TCP_LISTENER_PORT;
+        initialTimeToLive = Constants.DEFAULT_INITIAL_TIME_TO_LIVE;
     }
 
     public int getNodeID() {
@@ -40,14 +43,6 @@ public class Configuration {
         this.address = address;
     }
 
-    public int getStartingTimeToLive() {
-        return startingTimeToLive;
-    }
-
-    public void setStartingTimeToLive(int startingTimeToLive) {
-        this.startingTimeToLive = startingTimeToLive;
-    }
-
     public NetworkHandlerType getNetworkHandlerType() {
         return networkHandlerType;
     }
@@ -64,11 +59,27 @@ public class Configuration {
         this.routingStrategyType = routingStrategyType;
     }
 
+    public TimeToLiveStrategyType getTimeToLiveStrategyType() {
+        return timeToLiveStrategyType;
+    }
+
+    public void setTimeToLiveStrategyType(TimeToLiveStrategyType timeToLiveStrategyType) {
+        this.timeToLiveStrategyType = timeToLiveStrategyType;
+    }
+
     public int getTcpListeningPort() {
         return tcpListeningPort;
     }
 
     public void setTcpListeningPort(int tcpListeningPort) {
         this.tcpListeningPort = tcpListeningPort;
+    }
+
+    public int getInitialTimeToLive() {
+        return initialTimeToLive;
+    }
+
+    public void setInitialTimeToLive(int initialTimeToLive) {
+        this.initialTimeToLive = initialTimeToLive;
     }
 }

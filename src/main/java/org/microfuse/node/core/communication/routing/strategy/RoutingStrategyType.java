@@ -16,15 +16,15 @@ public enum RoutingStrategyType {
 
     /**
      * The routing strategy class map.
-     * Maps the routing strategy type to class
+     * Maps the routing strategy type to class.
      */
     private static Map<RoutingStrategyType, Class<? extends RoutingStrategy>> routingStrategyClassMap;
 
     static {
         // Populating the routing strategy class map
         routingStrategyClassMap = new HashMap<>();
-        routingStrategyClassMap.put(RoutingStrategyType.FLOODING, FloodingRoutingStrategy.class);
-        routingStrategyClassMap.put(RoutingStrategyType.RANDOM_WALK, RandomWalkRoutingStrategy.class);
+        routingStrategyClassMap.put(FLOODING, FloodingRoutingStrategy.class);
+        routingStrategyClassMap.put(RANDOM_WALK, RandomWalkRoutingStrategy.class);
     }
 
     RoutingStrategyType(String value) {

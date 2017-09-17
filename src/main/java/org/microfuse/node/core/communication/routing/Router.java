@@ -8,6 +8,8 @@ import org.microfuse.node.core.Manager;
 import org.microfuse.node.core.communication.network.NetworkHandler;
 import org.microfuse.node.core.communication.network.NetworkHandlerListener;
 import org.microfuse.node.core.communication.routing.strategy.RoutingStrategy;
+import org.microfuse.node.core.communication.ttl.TimeToLiveStrategy;
+import org.microfuse.node.core.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,13 +27,16 @@ public class Router implements NetworkHandlerListener {
     private List<RouterListener> listenersList;
     private RoutingTable routingTable;
 
+    private TimeToLiveStrategy timeToLiveStrategy;
     private RoutingStrategy routingStrategy;
     private NetworkHandler networkHandler;
 
-    public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy) {
+    public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy,
+                  TimeToLiveStrategy timeToLiveStrategy) {
         routingTable = new RoutingTable();
         this.networkHandler = networkHandler;
         this.routingStrategy = routingStrategy;
+        this.timeToLiveStrategy = timeToLiveStrategy;
     }
 
     @Override
@@ -62,7 +67,7 @@ public class Router implements NetworkHandlerListener {
     /**
      * Route a message through the P2P network.
      *
-     * @param fromNode The node from which the message was received
+     * @param fromNode The node from which the message was received by this node
      * @param message  The message to be sent
      */
     public void route(Node fromNode, Message message) {
@@ -82,14 +87,18 @@ public class Router implements NetworkHandlerListener {
      * @param message  The message to be routed
      */
     private void routeToDestination(Node fromNode, Message message) {
-        int timeToLive = message.getTimeToLive();
-        message.setTimeToLive(--timeToLive);
+        int timeToLive;
+        if (message.getTimeToLive() == Constants.UNASSIGNED_TIME_TO_LIVE) {
+            timeToLiveStrategy.updateInitialTimeToLive(message);
+            timeToLive = message.getTimeToLive();
+        } else {
+            timeToLive = message.getTimeToLive();
+            message.setTimeToLive(--timeToLive);
+        }
 
         int destinationNodeID = message.getDestinationNodeID();
         if (Manager.getConfigurationInstance().getNodeID() == destinationNodeID) {
-            for (RouterListener routerListener : listenersList) {
-                routerListener.onMessageReceived(message);
-            }
+            runTasksOnMessageReceived(message);
         } else {
             Node destinationNode = routingTable.getRoutingTableNode(destinationNodeID);
             if (destinationNode != null) {
@@ -124,8 +133,13 @@ public class Router implements NetworkHandlerListener {
      */
     private void routeToSource(Message message) {
         if (Manager.getConfigurationInstance().getNodeID() == message.getSourceNodeID()) {
-            for (RouterListener routerListener : listenersList) {
-                routerListener.onMessageReceived(message);
+            if (message.getType() == MessageType.DESTINATION_NOT_FOUND) {
+                timeToLiveStrategy.updateRetryingTimeToLive(message);
+            }
+            if (message.getTimeToLive() > 0) {
+                route(null, message);
+            } else {
+                runTasksOnMessageReceived(message);
             }
         } else {
             Node destinationNode = routingTable.removeBackwardRoutingTableEntry(message.popPathNode());
@@ -137,6 +151,18 @@ public class Router implements NetworkHandlerListener {
                 logger.debug("Dropping unrecognized message: " + message.getContent());
             }
         }
+    }
+
+    /**
+     * Run tasks to be run when a message intended for this node is received.
+     *
+     * @param message The message that was received
+     */
+    private void runTasksOnMessageReceived(Message message) {
+        for (RouterListener routerListener : listenersList) {
+            routerListener.onMessageReceived(message);
+        }
+
     }
 
     /**

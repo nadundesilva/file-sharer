@@ -10,6 +10,9 @@ import org.microfuse.node.core.communication.routing.Router;
 import org.microfuse.node.core.communication.routing.strategy.FloodingRoutingStrategy;
 import org.microfuse.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.node.core.communication.routing.strategy.RoutingStrategyType;
+import org.microfuse.node.core.communication.ttl.FixedTimeToLiveStrategy;
+import org.microfuse.node.core.communication.ttl.TimeToLiveStrategy;
+import org.microfuse.node.core.communication.ttl.TimeToLiveStrategyType;
 import org.microfuse.node.core.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +77,10 @@ public class Manager {
                 networkHandler = NetworkHandlerType.getNetworkHandlerClass(
                         configuration.getNetworkHandlerType()).newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                networkHandler = new SocketNetworkHandler();
-                configuration.setNetworkHandlerType(NetworkHandlerType.SOCKET);
                 logger.info("Failed to instantiate " + configuration.getNetworkHandlerType().getValue() + ". Using "
-                        + configuration.getNetworkHandlerType().getValue() + " instead");
+                        + NetworkHandlerType.SOCKET.getValue() + " instead");
+                configuration.setNetworkHandlerType(NetworkHandlerType.SOCKET);
+                networkHandler = new SocketNetworkHandler();
             }
 
             RoutingStrategy routingStrategy;
@@ -85,13 +88,24 @@ public class Manager {
                 routingStrategy = RoutingStrategyType.getRoutingStrategyClass(
                         configuration.getRoutingStrategyType()).newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
+                logger.info("Failed to instantiate " + configuration.getRoutingStrategyType().getValue()
+                        + ". Using " + RoutingStrategyType.FLOODING.getValue() + " instead");
                 configuration.setRoutingStrategyType(RoutingStrategyType.FLOODING);
                 routingStrategy = new FloodingRoutingStrategy();
-                logger.info("Failed to instantiate " + configuration.getRoutingStrategyType().getValue() + ". Using "
-                        + configuration.getRoutingStrategyType().getValue() + " instead");
             }
 
-            routerInstance = new Router(networkHandler, routingStrategy);
+            TimeToLiveStrategy timeToLiveStrategy;
+            try {
+                timeToLiveStrategy = TimeToLiveStrategyType.getRoutingStrategyClass(
+                        configuration.getTimeToLiveStrategyType()).newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                logger.info("Failed to instantiate " + configuration.getTimeToLiveStrategyType().getValue()
+                        + ". Using " + TimeToLiveStrategyType.FIXED.getValue() + " instead");
+                configuration.setTimeToLiveStrategyType(TimeToLiveStrategyType.FIXED);
+                timeToLiveStrategy = new FixedTimeToLiveStrategy();
+            }
+
+            routerInstance = new Router(networkHandler, routingStrategy, timeToLiveStrategy);
         }
         return routerInstance;
     }

@@ -1,6 +1,6 @@
 package org.microfuse.node.commons.messaging;
 
-import org.microfuse.node.core.Manager;
+import org.microfuse.node.core.utils.Constants;
 
 import java.util.Stack;
 
@@ -17,7 +17,7 @@ public class Message implements Cloneable {
     private int timeToLive;
 
     public Message() {
-        timeToLive = Manager.getConfigurationInstance().getStartingTimeToLive();
+        timeToLive = Constants.UNASSIGNED_TIME_TO_LIVE;
     }
 
     public int getSourceNodeID() {

@@ -23,7 +23,7 @@ public enum NetworkHandlerType {
     static {
         // Populating the network handler class map
         networkHandlerClassMap = new HashMap<>();
-        networkHandlerClassMap.put(NetworkHandlerType.SOCKET, SocketNetworkHandler.class);
+        networkHandlerClassMap.put(SOCKET, SocketNetworkHandler.class);
     }
 
     NetworkHandlerType(String value) {
