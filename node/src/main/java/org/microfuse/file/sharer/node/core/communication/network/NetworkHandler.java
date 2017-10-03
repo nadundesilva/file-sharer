@@ -50,10 +50,7 @@ public abstract class NetworkHandler {
      */
     protected void onMessageSendFailed(String toAddress, String message) {
         logger.debug("Failed to send message to " + toAddress + ": " + message);
-
-        for (NetworkHandlerListener listener : listenersList) {
-            listener.onMessageSendFailed(toAddress, message);
-        }
+        listenersList.forEach(listener -> listener.onMessageSendFailed(toAddress, message));
     }
 
     /**
@@ -64,10 +61,7 @@ public abstract class NetworkHandler {
      */
     protected void onMessageReceived(String fromAddress, String message) {
         logger.debug("Message received from " + fromAddress + ": " + message);
-
-        for (NetworkHandlerListener listener : listenersList) {
-            listener.onMessageReceived(fromAddress, message);
-        }
+        listenersList.forEach(listener -> listener.onMessageReceived(fromAddress, message));
     }
 
     /**

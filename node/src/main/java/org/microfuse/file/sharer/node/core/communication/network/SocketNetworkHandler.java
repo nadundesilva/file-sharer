@@ -67,7 +67,7 @@ public class SocketNetworkHandler extends NetworkHandler {
         ) {
             out.write(message.toString());
         } catch (IOException e) {
-            logger.debug("Message sent to " + ip + ":" + port + " : " + message);
+            logger.debug("Message sent to " + ip + ":" + port + " : " + message, e);
         }
     }
 }

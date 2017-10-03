@@ -4,9 +4,9 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The routing table containing the node information for super peers.
@@ -16,8 +16,8 @@ import java.util.Objects;
 public class SuperPeerRoutingTable extends RoutingTable {
     private static final Logger logger = LoggerFactory.getLogger(SuperPeerRoutingTable.class);
 
-    private List<Node> superPeerNetworkNodes;
-    private List<Node> assignedOrdinaryPeerNodes;
+    private Set<Node> superPeerNetworkNodes;
+    private Set<Node> assignedOrdinaryPeerNodes;
 
     /**
      * Put a new entry into the routing table of this router.
@@ -31,7 +31,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node   The node of the new entry
+     * @param node The node of the new entry
      */
     public void removeSuperPeerNetworkRoutingTableEntry(Node node) {
         superPeerNetworkNodes.remove(node);
@@ -42,29 +42,28 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @return The list of nodes in the routing table
      */
-    public List<Node> getAllSuperPeerNetworkRoutingTableNodes() {
-        return new ArrayList<>(superPeerNetworkNodes);
+    public Set<Node> getAllSuperPeerNetworkRoutingTableNodes() {
+        return new HashSet<>(superPeerNetworkNodes);
     }
 
     /**
      * Get a node from the routing table based on te node address.
      *
-     * @param ip The ip address of the node
+     * @param ip   The ip address of the node
+     * @param port The port of the node
      * @return The Node
      */
-    public Node getSuperPeerNetworkRoutingTableNode(String ip) {
-        for (Node node : superPeerNetworkNodes) {
-            if (Objects.equals(node.getIp(), ip)) {
-                return node;
-            }
-        }
-        return null;
+    public Node getSuperPeerNetworkRoutingTableNode(String ip, int port) {
+        return superPeerNetworkNodes.stream().parallel()
+                .filter(node -> Objects.equals(node.getIp(), ip) && Objects.equals(node.getPort(), port))
+                .findAny()
+                .orElse(null);
     }
 
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node   The node of the new entry
+     * @param node The node of the new entry
      */
     public void addAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
         assignedOrdinaryPeerNodes.add(node);
@@ -73,7 +72,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node   The node of the new entry
+     * @param node The node of the new entry
      */
     public void removeAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
         assignedOrdinaryPeerNodes.remove(node);
@@ -84,22 +83,21 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @return The list of nodes in the routing table
      */
-    public List<Node> getAllAssignedOrdinaryNetworkRoutingTableNodes() {
-        return new ArrayList<>(assignedOrdinaryPeerNodes);
+    public Set<Node> getAllAssignedOrdinaryNetworkRoutingTableNodes() {
+        return new HashSet<>(assignedOrdinaryPeerNodes);
     }
 
     /**
      * Get a node from the routing table based on te node address.
      *
-     * @param ip The ip address of the node
+     * @param ip   The ip address of the node
+     * @param port The port of the node
      * @return The Node
      */
-    public Node getAssignedOrdinaryNetworkRoutingTableNode(String ip) {
-        for (Node node : assignedOrdinaryPeerNodes) {
-            if (Objects.equals(node.getIp(), ip)) {
-                return node;
-            }
-        }
-        return null;
+    public Node getAssignedOrdinaryNetworkRoutingTableNode(String ip, int port) {
+        return assignedOrdinaryPeerNodes.stream().parallel()
+                .filter(node -> Objects.equals(node.getIp(), ip) && Objects.equals(node.getPort(), port))
+                .findAny()
+                .orElse(null);
     }
 }

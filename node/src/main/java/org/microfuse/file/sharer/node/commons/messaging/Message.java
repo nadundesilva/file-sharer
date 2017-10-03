@@ -67,8 +67,8 @@ public class Message implements Cloneable {
     @Override
     public String toString() {
         StringBuilder message = new StringBuilder(type.getValue()).append(" ");
-        for (String dataItem : data) {
-            message.append(dataItem);
+        for (int i = 0; i < data.size(); i++) {
+            message.append(data.get(0));
         }
         return String.format("%04d", message.length() + 5) + " " + message.toString();
     }

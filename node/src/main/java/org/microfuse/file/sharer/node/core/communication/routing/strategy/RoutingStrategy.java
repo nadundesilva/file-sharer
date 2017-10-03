@@ -4,7 +4,7 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Routing strategy base class.
@@ -26,5 +26,5 @@ public interface RoutingStrategy {
      * @param message      The message to be routed
      * @return The forwarding nodes list
      */
-    List<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message);
+    Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message);
 }

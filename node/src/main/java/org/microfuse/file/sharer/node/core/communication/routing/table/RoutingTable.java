@@ -4,9 +4,9 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The routing table containing the node information.
@@ -16,11 +16,11 @@ import java.util.Objects;
 public abstract class RoutingTable {
     private static final Logger logger = LoggerFactory.getLogger(RoutingTable.class);
 
-    private List<Node> unstructuredNetworkNodes;
+    private Set<Node> unstructuredNetworkNodes;
     private Node bootstrapServer;
 
     public RoutingTable() {
-        unstructuredNetworkNodes = new ArrayList<>();
+        unstructuredNetworkNodes = new HashSet<>();
     }
 
     /**
@@ -44,7 +44,7 @@ public abstract class RoutingTable {
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node   The node of the new entry
+     * @param node The node of the new entry
      */
     public void addUnstructuredNetworkRoutingTableEntry(Node node) {
         unstructuredNetworkNodes.add(node);
@@ -53,7 +53,7 @@ public abstract class RoutingTable {
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node   The node of the new entry
+     * @param node The node of the new entry
      */
     public void removeUnstructuredNetworkRoutingTableEntry(Node node) {
         unstructuredNetworkNodes.remove(node);
@@ -64,8 +64,8 @@ public abstract class RoutingTable {
      *
      * @return The list of nodes in the routing table
      */
-    public List<Node> getAllUnstructuredNetworkRoutingTableNodes() {
-        return new ArrayList<>(unstructuredNetworkNodes);
+    public Set<Node> getAllUnstructuredNetworkRoutingTableNodes() {
+        return new HashSet<>(unstructuredNetworkNodes);
     }
 
     /**
@@ -75,11 +75,9 @@ public abstract class RoutingTable {
      * @return The Node
      */
     public Node getUnstructuredNetworkRoutingTableNode(String ip) {
-        for (Node node : unstructuredNetworkNodes) {
-            if (Objects.equals(node.getIp(), ip)) {
-                return node;
-            }
-        }
-        return null;
+        return unstructuredNetworkNodes.stream().parallel()
+                .filter(node -> Objects.equals(node.getIp(), ip))
+                .findAny()
+                .orElse(null);
     }
 }

@@ -4,7 +4,7 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Routing Strategy based on flooding.
@@ -18,8 +18,8 @@ public class FloodingRoutingStrategy implements RoutingStrategy {
     }
 
     @Override
-    public List<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
-        List<Node> routingTableNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
+    public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
+        Set<Node> routingTableNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
         routingTableNodes.remove(fromNode);
         return routingTableNodes;
     }

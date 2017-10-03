@@ -1,20 +1,13 @@
 package org.microfuse.file.sharer.node.commons;
 
+import java.util.Objects;
+
 /**
  * The node base interface.
  */
 public class Node {
-    private int nodeID;
     private String ip;
     private int port;
-
-    public int getNodeID() {
-        return nodeID;
-    }
-
-    public void setNodeID(int nodeID) {
-        this.nodeID = nodeID;
-    }
 
     public String getIp() {
         return ip;
@@ -28,6 +21,10 @@ public class Node {
         return port;
     }
 
+    public void setPort(String port) {
+        setPort(Integer.parseInt(port));
+    }
+
     public void setPort(int port) {
         this.port = port;
     }
@@ -36,13 +33,14 @@ public class Node {
     public boolean equals(Object object) {
         if (object != null && object instanceof Node) {
             Node nodeObject = (Node) object;
-            return nodeObject.getNodeID() == nodeID;
+            return Objects.equals(nodeObject.getIp(), this.getIp())
+                    && Objects.equals(nodeObject.getPort(), this.getPort());
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return nodeID;
+        return (ip + ":" + port).hashCode();
     }
 }

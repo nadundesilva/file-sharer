@@ -39,7 +39,7 @@ public class Router implements NetworkHandlerListener {
             routingTable = PeerType.getRoutingTableClass(configuration.getPeerType()).newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             logger.error("Failed to instantiate routing table for " + configuration.getPeerType().getValue()
-                    + ". Using the routing table for " + PeerType.ORDINARY_PEER.getValue() + " instead");
+                    + ". Using the routing table for " + PeerType.ORDINARY_PEER.getValue() + " instead", e);
             configuration.setPeerType(PeerType.ORDINARY_PEER);
             routingTable = new OrdinaryPeerRoutingTable();
         }
@@ -82,12 +82,13 @@ public class Router implements NetworkHandlerListener {
             if (hopCount <= Manager.getConfigurationInstance().getTimeToLive()) {
                 List<Node> forwardingNodes = routingStrategy.getForwardingNodes(routingTable, fromNode, message);
 
-                for (Node forwardNode : forwardingNodes) {
-                    Message clonedMessage = message.clone();
+                forwardingNodes.stream().parallel()
+                        .forEach(forwardingNode -> {
+                            Message clonedMessage = message.clone();
 
-                    logger.debug("Routing message to " + forwardNode + ": " + clonedMessage.toString());
-                    networkHandler.sendMessage(forwardNode.getIp(), forwardNode.getPort(), clonedMessage);
-                }
+                            logger.debug("Routing message to " + forwardingNode + ": " + clonedMessage.toString());
+                            networkHandler.sendMessage(forwardingNode.getIp(), forwardingNode.getPort(), clonedMessage);
+                        });
             } else {
                 // Unable to find resource
                 Message serOkMessage = new Message();
@@ -106,10 +107,8 @@ public class Router implements NetworkHandlerListener {
      * @param message The message that was received
      */
     private void runTasksOnMessageReceived(Message message) {
-        for (RouterListener routerListener : listenersList) {
-            routerListener.onMessageReceived(message);
-        }
-
+        listenersList.stream().parallel()
+                .forEach(routerListener -> routerListener.onMessageReceived(message));
     }
 
     /**

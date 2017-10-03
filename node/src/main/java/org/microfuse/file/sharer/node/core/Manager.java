@@ -40,6 +40,8 @@ public class Manager {
                         Constants.DEFAULT_CHARSET));
                 configurationInstance = new Gson().fromJson(configString, Configuration.class);
             } catch (IOException e) {
+                logger.warn("Failed to load configuration from config file. Creating new configuration.", e);
+
                 // Creating a new configuration file based on default values
                 configurationInstance = new Configuration();
                 try {
@@ -52,7 +54,7 @@ public class Manager {
                         }
                     }
                 } catch (IOException e1) {
-                    logger.warn("Failed to create file " + configFile.getAbsolutePath());
+                    logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
                 }
             }
         }
@@ -73,8 +75,8 @@ public class Manager {
                 networkHandler = NetworkHandlerType.getNetworkHandlerClass(
                         configuration.getNetworkHandlerType()).newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.error("Failed to instantiate " + configuration.getNetworkHandlerType().getValue() + ". Using "
-                        + NetworkHandlerType.SOCKET.getValue() + " instead");
+                logger.error("Failed to instantiate " + configuration.getNetworkHandlerType().getValue()
+                        + ". Using " + NetworkHandlerType.SOCKET.getValue() + " instead", e);
                 configuration.setNetworkHandlerType(NetworkHandlerType.SOCKET);
                 networkHandler = new SocketNetworkHandler();
             }
@@ -85,7 +87,7 @@ public class Manager {
                         configuration.getRoutingStrategyType()).newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 logger.error("Failed to instantiate " + configuration.getRoutingStrategyType().getValue()
-                        + ". Using " + RoutingStrategyType.FLOODING.getValue() + " instead");
+                        + ". Using " + RoutingStrategyType.FLOODING.getValue() + " instead", e);
                 configuration.setRoutingStrategyType(RoutingStrategyType.FLOODING);
                 routingStrategy = new FloodingRoutingStrategy();
             }
