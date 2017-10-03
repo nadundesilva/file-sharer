@@ -12,17 +12,12 @@ import java.nio.charset.StandardCharsets;
  */
 public class Constants {
     public static final NetworkHandlerType DEFAULT_NETWORK_HANDLER = NetworkHandlerType.SOCKET;
-    public static final RoutingStrategyType DEFAULT_ROUTING_STRATEGY = RoutingStrategyType.FLOODING;
+    public static final RoutingStrategyType DEFAULT_ROUTING_STRATEGY = RoutingStrategyType.UNSTRUCTURED_FLOODING;
     public static final PeerType DEFAULT_PEER_TYPE = PeerType.ORDINARY_PEER;
 
     public static final int DEFAULT_TCP_LISTENER_PORT = 4444;
     public static final int DEFAULT_TIME_TO_LIVE = 5;
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
-    public static final String SER_OK_NOT_FOUND_IP = "0.0.0.0";
-    public static final String SER_OK_NOT_FOUND_PORT = "0";
-
-    public static final int SER_MESSAGE_HOP_COUNT_INDEX = 3;
 
     public static final int BOOTSTRAP_SERVER_LISTENER_PORT = 55555;
 

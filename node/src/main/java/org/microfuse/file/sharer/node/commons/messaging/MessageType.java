@@ -8,15 +8,17 @@ public enum MessageType {
     REG_OK("REGOK"),
     UNREG("UNREG"),
     UNREG_OK("UNROK"),
-    ECHO("ECHO"),
-    ECHO_OK("ECHOOK"),
     JOIN("JOIN"),
     JOIN_OK("JOINOK"),
     LEAVE("LEAVE"),
     LEAVE_OK("LEAVEOK"),
     SER("SER"),
     SER_OK("SEROK"),
-    ERROR("ERROR");
+    ERROR("ERROR"),
+
+    // Only used by the bootstrap server
+    ECHO("ECHO"),
+    ECHO_OK("ECHOK");
 
     /**
      * Constructor setting the message identifier.

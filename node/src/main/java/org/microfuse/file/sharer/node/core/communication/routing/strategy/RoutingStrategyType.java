@@ -7,7 +7,8 @@ import java.util.Map;
  * Routing strategy types.
  */
 public enum RoutingStrategyType {
-    FLOODING("Flooding"), RANDOM_WALK("Random Walk");
+    UNSTRUCTURED_FLOODING("Unstructured Flooding"), UNSTRUCTURED_RANDOM_WALK("Super Peer Random Walk"),
+    SUPER_PEER_FLOODING("Super-peer Flooding"), SUPER_PEER_RANDOM_WALK("Super-peer Random Walk");
 
     /**
      * The routing strategy class map.
@@ -18,8 +19,10 @@ public enum RoutingStrategyType {
     static {
         // Populating the routing strategy class map
         routingStrategyClassMap = new HashMap<>();
-        routingStrategyClassMap.put(FLOODING, FloodingRoutingStrategy.class);
-        routingStrategyClassMap.put(RANDOM_WALK, RandomWalkRoutingStrategy.class);
+        routingStrategyClassMap.put(UNSTRUCTURED_FLOODING, UnstructuredFloodingRoutingStrategy.class);
+        routingStrategyClassMap.put(UNSTRUCTURED_RANDOM_WALK, UnstructuredRandomWalkRoutingStrategy.class);
+        routingStrategyClassMap.put(SUPER_PEER_FLOODING, SuperPeerFloodingRoutingStrategy.class);
+        routingStrategyClassMap.put(SUPER_PEER_RANDOM_WALK, SuperPeerRandomWalkRoutingStrategy.class);
     }
 
     /**

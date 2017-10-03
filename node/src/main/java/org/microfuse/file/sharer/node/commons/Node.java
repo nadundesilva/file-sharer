@@ -8,6 +8,7 @@ import java.util.Objects;
 public class Node {
     private String ip;
     private int port;
+    private boolean isAlive;
 
     public String getIp() {
         return ip;
@@ -27,6 +28,14 @@ public class Node {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public void setAlive(boolean alive) {
+        isAlive = alive;
     }
 
     @Override

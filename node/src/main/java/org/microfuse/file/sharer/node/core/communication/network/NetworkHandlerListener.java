@@ -10,15 +10,17 @@ public interface NetworkHandlerListener {
      * Invoked when a new message is received.
      *
      * @param fromAddress The address from which the message was received
+     * @param fromPort    The port from which the message was received
      * @param message     The message received
      */
-    void onMessageReceived(String fromAddress, String message);
+    void onMessageReceived(String fromAddress, int fromPort, String message);
 
     /**
      * Invoked when an error is occurred in sending a message.
      *
      * @param toAddress The address to which the message should be sent
+     * @param toPort    The port to which the message should be sent
      * @param message   The message involved with the error
      */
-    void onMessageSendFailed(String toAddress, String message);
+    void onMessageSendFailed(String toAddress, int toPort, String message);
 }

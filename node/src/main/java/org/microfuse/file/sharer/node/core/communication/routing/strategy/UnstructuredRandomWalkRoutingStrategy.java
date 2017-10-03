@@ -4,18 +4,22 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Routing strategy based on randomly walking the p2p network.
+ * Routing strategy based on randomly walking the unstructured network.
  * <p>
  * Randomly selects a node from a node's neighbours to route the message to.
  */
-public class RandomWalkRoutingStrategy implements RoutingStrategy {
+public class UnstructuredRandomWalkRoutingStrategy implements RoutingStrategy {
     @Override
     public String getName() {
-        return RoutingStrategyType.RANDOM_WALK.getValue();
+        return RoutingStrategyType.UNSTRUCTURED_RANDOM_WALK.getValue();
     }
 
     @Override

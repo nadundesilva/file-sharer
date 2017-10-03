@@ -7,14 +7,14 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTa
 import java.util.Set;
 
 /**
- * Routing Strategy based on flooding.
+ * Routing Strategy based on flooding the unstructured network.
  * <p>
  * Floods received messages to all the connected nodes.
  */
-public class FloodingRoutingStrategy implements RoutingStrategy {
+public class UnstructuredFloodingRoutingStrategy implements RoutingStrategy {
     @Override
     public String getName() {
-        return RoutingStrategyType.FLOODING.getValue();
+        return RoutingStrategyType.UNSTRUCTURED_FLOODING.getValue();
     }
 
     @Override

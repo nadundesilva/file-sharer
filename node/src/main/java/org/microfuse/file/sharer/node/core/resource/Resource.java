@@ -1,14 +1,12 @@
 package org.microfuse.file.sharer.node.core.resource;
 
-import java.io.File;
 import java.util.Objects;
 
 /**
- * Resources stored by this node
+ * Resource base abstract class.
  */
-public class Resource {
+public abstract class Resource {
     private String name;
-    private File file;
 
     public String getName() {
         return name;
@@ -16,14 +14,6 @@ public class Resource {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public File getFile() {
-        return file;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
     }
 
     @Override
@@ -37,6 +27,10 @@ public class Resource {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        if (name != null) {
+            return name.hashCode();
+        } else {
+            return "".hashCode();
+        }
     }
 }

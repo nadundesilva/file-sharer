@@ -71,12 +71,13 @@ public abstract class RoutingTable {
     /**
      * Get a node from the routing table based on te node address.
      *
-     * @param ip The ip address of the node
+     * @param ip   The ip address of the node
+     * @param port The port of the node
      * @return The Node
      */
-    public Node getUnstructuredNetworkRoutingTableNode(String ip) {
+    public Node getUnstructuredNetworkRoutingTableNode(String ip, int port) {
         return unstructuredNetworkNodes.stream().parallel()
-                .filter(node -> Objects.equals(node.getIp(), ip))
+                .filter(node -> Objects.equals(node.getIp(), ip) && node.getPort() == port)
                 .findAny()
                 .orElse(null);
     }

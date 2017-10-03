@@ -3,8 +3,8 @@ package org.microfuse.file.sharer.node.core.communication.routing;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
-import org.microfuse.file.sharer.node.core.resource.OrdinaryPeerResourceIndex;
-import org.microfuse.file.sharer.node.core.resource.SuperPeerResourceIndex;
+import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
+import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +26,7 @@ public enum PeerType {
      * The resource index class map.
      * Maps the peer type to class.
      */
-    private static Map<PeerType, Class<? extends OrdinaryPeerResourceIndex>> resourceIndexClassMap;
+    private static Map<PeerType, Class<? extends ResourceIndex>> resourceIndexClassMap;
 
     static {
         // Populating the routing table class map
@@ -36,7 +36,7 @@ public enum PeerType {
 
         // Populating the resource index class map
         resourceIndexClassMap = new HashMap<>();
-        resourceIndexClassMap.put(ORDINARY_PEER, OrdinaryPeerResourceIndex.class);
+        resourceIndexClassMap.put(ORDINARY_PEER, ResourceIndex.class);
         resourceIndexClassMap.put(SUPER_PEER, SuperPeerResourceIndex.class);
     }
 
@@ -65,7 +65,7 @@ public enum PeerType {
      * @param peerType The peer type
      * @return The resource index class
      */
-    public static Class<? extends OrdinaryPeerResourceIndex> getResourceIndexClass(PeerType peerType) {
+    public static Class<? extends ResourceIndex> getResourceIndexClass(PeerType peerType) {
         return resourceIndexClassMap.get(peerType);
     }
 

@@ -55,7 +55,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      */
     public Node getSuperPeerNetworkRoutingTableNode(String ip, int port) {
         return superPeerNetworkNodes.stream().parallel()
-                .filter(node -> Objects.equals(node.getIp(), ip) && Objects.equals(node.getPort(), port))
+                .filter(node -> Objects.equals(node.getIp(), ip) && node.getPort() == port)
                 .findAny()
                 .orElse(null);
     }

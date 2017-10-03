@@ -29,7 +29,7 @@ public class SocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void startListening() {
-        int portNumber = Manager.getConfigurationInstance().getTcpListeningPort();
+        int portNumber = Manager.getConfiguration().getPeerListeningPort();
         new Thread(() -> {
             while (true) {
                 try (

@@ -9,30 +9,20 @@ import org.microfuse.file.sharer.node.core.utils.Constants;
  * Configuration of this Node.
  */
 public class Configuration {
-    private int nodeID;
     private String address;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
     private PeerType peerType;
-    private int tcpListeningPort;
+    private int peerListeningPort;
     private int timeToLive;
 
     public Configuration() {
-        nodeID = -1;
         address = null;
         networkHandlerType = Constants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = Constants.DEFAULT_ROUTING_STRATEGY;
         peerType = Constants.DEFAULT_PEER_TYPE;
-        tcpListeningPort = Constants.DEFAULT_TCP_LISTENER_PORT;
+        peerListeningPort = Constants.DEFAULT_TCP_LISTENER_PORT;
         timeToLive = Constants.DEFAULT_TIME_TO_LIVE;
-    }
-
-    public int getNodeID() {
-        return nodeID;
-    }
-
-    public void setNodeID(int nodeID) {
-        this.nodeID = nodeID;
     }
 
     public String getAddress() {
@@ -67,12 +57,12 @@ public class Configuration {
         this.peerType = peerType;
     }
 
-    public int getTcpListeningPort() {
-        return tcpListeningPort;
+    public int getPeerListeningPort() {
+        return peerListeningPort;
     }
 
-    public void setTcpListeningPort(int tcpListeningPort) {
-        this.tcpListeningPort = tcpListeningPort;
+    public void setPeerListeningPort(int peerListeningPort) {
+        this.peerListeningPort = peerListeningPort;
     }
 
     public int getTimeToLive() {

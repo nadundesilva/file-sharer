@@ -10,13 +10,17 @@ import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerL
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
-import org.microfuse.file.sharer.node.core.utils.Constants;
+import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
+import org.microfuse.file.sharer.node.core.resource.OwnedResource;
+import org.microfuse.file.sharer.node.core.utils.MessageConstants;
+import org.microfuse.file.sharer.node.core.utils.MessageIndexes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Router class.
@@ -33,7 +37,7 @@ public class Router implements NetworkHandlerListener {
     private NetworkHandler networkHandler;
 
     public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy) {
-        Configuration configuration = Manager.getConfigurationInstance();
+        Configuration configuration = Manager.getConfiguration();
 
         try {
             routingTable = PeerType.getRoutingTableClass(configuration.getPeerType()).newInstance();
@@ -48,19 +52,22 @@ public class Router implements NetworkHandlerListener {
     }
 
     @Override
-    public void onMessageReceived(String fromAddress, String messageString) {
+    public void onMessageReceived(String fromAddress, int fromPort, String messageString) {
         Message message = Message.parse(messageString);
-        route(routingTable.getUnstructuredNetworkRoutingTableNode(fromAddress), message);
+        route(routingTable.getUnstructuredNetworkRoutingTableNode(fromAddress, fromPort), message);
         runTasksOnMessageReceived(message);
     }
 
     @Override
-    public void onMessageSendFailed(String toAddress, String message) {
-        Message msg = Message.parse(message);
-        if (msg.getType() == MessageType.SER) {
-            String ip = msg.getData(0);
-            int port = Integer.parseInt(msg.getData(1));
-            networkHandler.sendMessage(ip, port, msg);
+    public void onMessageSendFailed(String toAddress, int toPort, String message) {
+        // Marking the node as inactive
+        Node receivingNode = routingTable.getUnstructuredNetworkRoutingTableNode(toAddress, toPort);
+        if (receivingNode == null && Manager.isSuperPeer()) {
+            receivingNode = ((SuperPeerRoutingTable) routingTable)
+                    .getSuperPeerNetworkRoutingTableNode(toAddress, toPort);
+        }
+        if (receivingNode != null) {
+            receivingNode.setAlive(false);
         }
     }
 
@@ -74,29 +81,49 @@ public class Router implements NetworkHandlerListener {
         MessageType messageType = message.getType();
 
         if (messageType == MessageType.SER) {
-            // Updating the hop count
-            Integer hopCount = Integer.parseInt(message.getData(Constants.SER_MESSAGE_HOP_COUNT_INDEX));
-            hopCount++;
-            message.setData(Constants.SER_MESSAGE_HOP_COUNT_INDEX, hopCount.toString());
-
-            if (hopCount <= Manager.getConfigurationInstance().getTimeToLive()) {
-                List<Node> forwardingNodes = routingStrategy.getForwardingNodes(routingTable, fromNode, message);
-
-                forwardingNodes.stream().parallel()
-                        .forEach(forwardingNode -> {
-                            Message clonedMessage = message.clone();
-
-                            logger.debug("Routing message to " + forwardingNode + ": " + clonedMessage.toString());
-                            networkHandler.sendMessage(forwardingNode.getIp(), forwardingNode.getPort(), clonedMessage);
-                        });
-            } else {
-                // Unable to find resource
+            // Checking owned resources
+            Set<OwnedResource> ownedResources = Manager.getResourceIndex()
+                    .findResources(message.getData(MessageIndexes.SER_FILE_NAME));
+            if (ownedResources.size() > 0) {
                 Message serOkMessage = new Message();
                 serOkMessage.setType(MessageType.SER_OK);
-                serOkMessage.setData(Arrays.asList("0", Constants.SER_OK_NOT_FOUND_IP,
-                        Constants.SER_OK_NOT_FOUND_PORT));
-                networkHandler.sendMessage(message.getData(0), Integer.parseInt(message.getData(1)),
-                        serOkMessage);
+
+                List<String> serOkData = Arrays.asList(
+                        Integer.toString(ownedResources.size()),
+                        Manager.getConfiguration().getAddress(),
+                        Integer.toString(Manager.getConfiguration().getPeerListeningPort())
+                );
+                ownedResources.forEach(resource -> serOkData.add(resource.getName()));
+
+                serOkMessage.setData(serOkData);
+                networkHandler.sendMessage(message.getData(MessageIndexes.SER_OK_SOURCE_IP),
+                        Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
+            } else {
+                // Updating the hop count
+                Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_HOP_COUNT));
+                hopCount++;
+                message.setData(MessageIndexes.SER_HOP_COUNT, hopCount.toString());
+
+                if (hopCount <= Manager.getConfiguration().getTimeToLive()) {
+                    Set<Node> forwardingNodes = routingStrategy.getForwardingNodes(routingTable, fromNode, message);
+
+                    forwardingNodes.stream().parallel()
+                            .forEach(forwardingNode -> {
+                                Message clonedMessage = message.clone();
+                                logger.debug("Routing message to " + forwardingNode + ": " + clonedMessage.toString());
+                                networkHandler.sendMessage(
+                                        forwardingNode.getIp(), forwardingNode.getPort(), clonedMessage
+                                );
+                            });
+                } else {
+                    // Unable to find resource
+                    Message serOkMessage = new Message();
+                    serOkMessage.setType(MessageType.SER_OK);
+                    serOkMessage.setData(Arrays.asList(MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT,
+                            MessageConstants.SER_OK_NOT_FOUND_IP, MessageConstants.SER_OK_NOT_FOUND_PORT));
+                    networkHandler.sendMessage(message.getData(MessageIndexes.SER_OK_SOURCE_IP),
+                            Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
+                }
             }
         }
     }
