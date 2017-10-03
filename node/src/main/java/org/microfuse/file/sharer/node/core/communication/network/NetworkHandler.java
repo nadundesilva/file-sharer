@@ -1,5 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
+import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +36,11 @@ public abstract class NetworkHandler {
     /**
      * Send a message to the specified node.
      *
-     * @param toAddress The address to which the message should be sent
-     * @param message   The message to be sent
+     * @param ip      The ip address to which the message should be sent
+     * @param port    The port to which the message should be sent
+     * @param message The message to be sent
      */
-    public abstract void sendMessage(String toAddress, String message);
+    public abstract void sendMessage(String ip, int port, Message message);
 
     /**
      * Runs tasks to be run when an error occurs in sending a message.

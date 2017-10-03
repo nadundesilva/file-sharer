@@ -8,7 +8,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.StringTokenizer;
 
 /**
  * Bootstrap Server which can act as the main server to which every node can connect to.
@@ -107,7 +111,7 @@ public class BootstrapServer {
                             incoming.getAddress(), incoming.getPort());
                     sock.send(dpReply);
                     break;
-                } else if (command == MessageType.UNREG.getValue()) {
+                } else if (Objects.equals(command, MessageType.UNREG.getValue())) {
                     int port = Integer.parseInt(st.nextToken());
                     for (int i = 0; i < nodes.size(); i++) {
                         if (nodes.get(i).getPort() == port) {
@@ -121,7 +125,7 @@ public class BootstrapServer {
                         }
                     }
                     break;
-                } else if (command == MessageType.ECHO.getValue()) {
+                } else if (Objects.equals(command, MessageType.ECHO.getValue())) {
                     for (Neighbour node : nodes) {
                         echo(node.getIp() + " " + node.getPort()
                                 + " " + node.getUsername());

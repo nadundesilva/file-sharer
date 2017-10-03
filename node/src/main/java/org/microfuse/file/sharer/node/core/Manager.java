@@ -48,11 +48,11 @@ public class Manager {
                             Files.write(new Gson().toJson(configurationInstance).getBytes(
                                     Constants.DEFAULT_CHARSET), configFile);
                         } catch (IOException e1) {
-                            logger.debug("Failed to create configuration file: " + configFile.getAbsolutePath(), e1);
+                            logger.warn("Failed to create configuration file: " + configFile.getAbsolutePath(), e1);
                         }
                     }
                 } catch (IOException e1) {
-                    logger.debug("Failed to create file " + configFile.getAbsolutePath());
+                    logger.warn("Failed to create file " + configFile.getAbsolutePath());
                 }
             }
         }
@@ -73,7 +73,7 @@ public class Manager {
                 networkHandler = NetworkHandlerType.getNetworkHandlerClass(
                         configuration.getNetworkHandlerType()).newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.info("Failed to instantiate " + configuration.getNetworkHandlerType().getValue() + ". Using "
+                logger.error("Failed to instantiate " + configuration.getNetworkHandlerType().getValue() + ". Using "
                         + NetworkHandlerType.SOCKET.getValue() + " instead");
                 configuration.setNetworkHandlerType(NetworkHandlerType.SOCKET);
                 networkHandler = new SocketNetworkHandler();
@@ -84,7 +84,7 @@ public class Manager {
                 routingStrategy = RoutingStrategyType.getRoutingStrategyClass(
                         configuration.getRoutingStrategyType()).newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.info("Failed to instantiate " + configuration.getRoutingStrategyType().getValue()
+                logger.error("Failed to instantiate " + configuration.getRoutingStrategyType().getValue()
                         + ". Using " + RoutingStrategyType.FLOODING.getValue() + " instead");
                 configuration.setRoutingStrategyType(RoutingStrategyType.FLOODING);
                 routingStrategy = new FloodingRoutingStrategy();

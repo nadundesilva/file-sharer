@@ -12,6 +12,11 @@ public class Message implements Cloneable {
     private MessageType type;
     private List<String> data;
 
+    public Message() {
+        type = MessageType.ERROR;
+        data = new ArrayList<>();
+    }
+
     public MessageType getType() {
         return type;
     }
@@ -28,6 +33,15 @@ public class Message implements Cloneable {
         this.data = data;
     }
 
+    public String getData(int index) {
+        return data.get(index);
+    }
+
+    public void setData(int index, String dataItem) {
+        data.remove(index);
+        data.add(index, dataItem);
+    }
+
     @Override
     public Message clone() {
         Message clone;
@@ -41,8 +55,8 @@ public class Message implements Cloneable {
         return clone;
     }
 
-    public static Message parse(String message) {
-        String[] messageSplit = message.split("\\s");
+    public static Message parse(String messageString) {
+        String[] messageSplit = messageString.split("\\s");
 
         Message parsedMessage = new Message();
         parsedMessage.setType(MessageType.valueOf(messageSplit[1]));

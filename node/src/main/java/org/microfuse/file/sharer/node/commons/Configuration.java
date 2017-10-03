@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.commons;
 
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerType;
+import org.microfuse.file.sharer.node.core.communication.routing.PeerType;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategyType;
 import org.microfuse.file.sharer.node.core.utils.Constants;
 
@@ -12,16 +13,18 @@ public class Configuration {
     private String address;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
+    private PeerType peerType;
     private int tcpListeningPort;
-    private int initialTimeToLive;
+    private int timeToLive;
 
     public Configuration() {
         nodeID = -1;
         address = null;
         networkHandlerType = Constants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = Constants.DEFAULT_ROUTING_STRATEGY;
+        peerType = Constants.DEFAULT_PEER_TYPE;
         tcpListeningPort = Constants.DEFAULT_TCP_LISTENER_PORT;
-        initialTimeToLive = Constants.DEFAULT_INITIAL_TIME_TO_LIVE;
+        timeToLive = Constants.DEFAULT_TIME_TO_LIVE;
     }
 
     public int getNodeID() {
@@ -56,6 +59,14 @@ public class Configuration {
         this.routingStrategyType = routingStrategyType;
     }
 
+    public PeerType getPeerType() {
+        return peerType;
+    }
+
+    public void setPeerType(PeerType peerType) {
+        this.peerType = peerType;
+    }
+
     public int getTcpListeningPort() {
         return tcpListeningPort;
     }
@@ -64,11 +75,11 @@ public class Configuration {
         this.tcpListeningPort = tcpListeningPort;
     }
 
-    public int getInitialTimeToLive() {
-        return initialTimeToLive;
+    public int getTimeToLive() {
+        return timeToLive;
     }
 
-    public void setInitialTimeToLive(int initialTimeToLive) {
-        this.initialTimeToLive = initialTimeToLive;
+    public void setTimeToLive(int timeToLive) {
+        this.timeToLive = timeToLive;
     }
 }

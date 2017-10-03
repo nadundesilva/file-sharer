@@ -2,7 +2,7 @@ package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.core.communication.routing.RoutingTable;
+import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ public class RandomWalkRoutingStrategy implements RoutingStrategy {
 
     @Override
     public List<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
-        List<Node> routingTableNodes = routingTable.getAllRoutingTableNodes();
+        List<Node> routingTableNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
         routingTableNodes.remove(fromNode);
         int forwardNodeIndex = ThreadLocalRandom.current().nextInt(0, routingTableNodes.size() - 1);
         return Collections.singletonList(routingTableNodes.get(forwardNodeIndex));

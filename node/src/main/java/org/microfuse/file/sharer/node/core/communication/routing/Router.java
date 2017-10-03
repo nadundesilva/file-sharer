@@ -1,6 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
-import com.google.gson.Gson;
+import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
@@ -8,11 +8,14 @@ import org.microfuse.file.sharer.node.core.Manager;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerListener;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
+import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
+import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,33 +33,34 @@ public class Router implements NetworkHandlerListener {
     private NetworkHandler networkHandler;
 
     public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy) {
-        routingTable = new RoutingTable();
-        this.networkHandler = networkHandler;
+        Configuration configuration = Manager.getConfigurationInstance();
+
+        try {
+            routingTable = PeerType.getRoutingTableClass(configuration.getPeerType()).newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            logger.error("Failed to instantiate routing table for " + configuration.getPeerType().getValue()
+                    + ". Using the routing table for " + PeerType.ORDINARY_PEER.getValue() + " instead");
+            configuration.setPeerType(PeerType.ORDINARY_PEER);
+            routingTable = new OrdinaryPeerRoutingTable();
+        }
         this.routingStrategy = routingStrategy;
+        this.networkHandler = networkHandler;
     }
 
     @Override
-    public void onMessageReceived(String fromAddress, String message) {
-        Message msg = new Gson().fromJson(message, Message.class);
-
-        if (msg.getType() == MessageType.DESTINATION_NOT_FOUND) {
-            int msgCount = routingTable.incrementBackwardRoutingMessageCount(msg.popPathNode(), -1);
-            if (msgCount == 0) {
-                routeToSource(msg);
-            }
-        } else {
-            route(routingTable.getRoutingTableNode(fromAddress), msg);
-        }
+    public void onMessageReceived(String fromAddress, String messageString) {
+        Message message = Message.parse(messageString);
+        route(routingTable.getUnstructuredNetworkRoutingTableNode(fromAddress), message);
+        runTasksOnMessageReceived(message);
     }
 
     @Override
     public void onMessageSendFailed(String toAddress, String message) {
-        Message msg = new Gson().fromJson(message, Message.class);
-        int msgCount = routingTable.incrementBackwardRoutingMessageCount(msg.peekPathNode(), -1);
-
-        if (msgCount == 0) {
-            msg.setType(MessageType.DESTINATION_NOT_FOUND);
-            routeToSource(msg);
+        Message msg = Message.parse(message);
+        if (msg.getType() == MessageType.SER) {
+            String ip = msg.getData(0);
+            int port = Integer.parseInt(msg.getData(1));
+            networkHandler.sendMessage(ip, port, msg);
         }
     }
 
@@ -69,41 +73,29 @@ public class Router implements NetworkHandlerListener {
     public void route(Node fromNode, Message message) {
         MessageType messageType = message.getType();
 
-        int timeToLive;
-        if (message.getTimeToLive() == Constants.UNASSIGNED_TIME_TO_LIVE) {
-            timeToLiveStrategy.updateInitialTimeToLive(message);
-            timeToLive = message.getTimeToLive();
-        } else {
-            timeToLive = message.getTimeToLive();
-            message.setTimeToLive(--timeToLive);
-        }
+        if (messageType == MessageType.SER) {
+            // Updating the hop count
+            Integer hopCount = Integer.parseInt(message.getData(Constants.SER_MESSAGE_HOP_COUNT_INDEX));
+            hopCount++;
+            message.setData(Constants.SER_MESSAGE_HOP_COUNT_INDEX, hopCount.toString());
 
-        int destinationNodeID = message.getDestinationNodeID();
-        if (Manager.getConfigurationInstance().getNodeID() == destinationNodeID) {
-            runTasksOnMessageReceived(message);
-        } else {
-            Node destinationNode = routingTable.getRoutingTableNode(destinationNodeID);
-            if (destinationNode != null) {
-                message.pushPathNode(routingTable.putBackwardRoutingTableEntry(fromNode));
-                String outputMessage = new Gson().toJson(message);
-
-                logger.debug("Routing message to node " + destinationNode.getNodeID() + ": " + outputMessage);
-                networkHandler.sendMessage(destinationNode.getAddress(), outputMessage);
-            } else if (timeToLive > 0) {
+            if (hopCount <= Manager.getConfigurationInstance().getTimeToLive()) {
                 List<Node> forwardingNodes = routingStrategy.getForwardingNodes(routingTable, fromNode, message);
-                int pathKey = routingTable.putBackwardRoutingTableEntry(fromNode);
 
                 for (Node forwardNode : forwardingNodes) {
                     Message clonedMessage = message.clone();
-                    clonedMessage.pushPathNode(pathKey);
-                    String outputMessage = new Gson().toJson(clonedMessage);
 
-                    logger.debug("Routing message to " + forwardNode + ": " + outputMessage);
-                    networkHandler.sendMessage(forwardNode.getAddress(), outputMessage);
+                    logger.debug("Routing message to " + forwardNode + ": " + clonedMessage.toString());
+                    networkHandler.sendMessage(forwardNode.getIp(), forwardNode.getPort(), clonedMessage);
                 }
             } else {
-                message.setType(MessageType.DESTINATION_NOT_FOUND);
-                routeToSource(message);
+                // Unable to find resource
+                Message serOkMessage = new Message();
+                serOkMessage.setType(MessageType.SER_OK);
+                serOkMessage.setData(Arrays.asList("0", Constants.SER_OK_NOT_FOUND_IP,
+                        Constants.SER_OK_NOT_FOUND_PORT));
+                networkHandler.sendMessage(message.getData(0), Integer.parseInt(message.getData(1)),
+                        serOkMessage);
             }
         }
     }

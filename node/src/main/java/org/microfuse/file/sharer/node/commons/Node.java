@@ -5,7 +5,8 @@ package org.microfuse.file.sharer.node.commons;
  */
 public class Node {
     private int nodeID;
-    private String address;
+    private String ip;
+    private int port;
 
     public int getNodeID() {
         return nodeID;
@@ -15,12 +16,20 @@ public class Node {
         this.nodeID = nodeID;
     }
 
-    public String getAddress() {
-        return address;
+    public String getIp() {
+        return ip;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     @Override

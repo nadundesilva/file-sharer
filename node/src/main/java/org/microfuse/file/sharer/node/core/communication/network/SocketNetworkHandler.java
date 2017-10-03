@@ -1,5 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
+import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.core.Manager;
 import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.slf4j.Logger;
@@ -58,19 +59,15 @@ public class SocketNetworkHandler extends NetworkHandler {
     }
 
     @Override
-    public void sendMessage(String toAddress, String message) {
-        String[] toAddressSplit = toAddress.split(":");
-        String ipAddress = toAddressSplit[0];
-        int port = Integer.parseInt(toAddressSplit[1]);
-
+    public void sendMessage(String ip, int port, Message message) {
         try (
-                Socket echoSocket = new Socket(ipAddress, port);
+                Socket echoSocket = new Socket(ip, port);
                 PrintWriter out = new PrintWriter(new OutputStreamWriter(echoSocket.getOutputStream(),
                         Constants.DEFAULT_CHARSET), true)
         ) {
-            out.write(message);
+            out.write(message.toString());
         } catch (IOException e) {
-            logger.debug("Message sent to " + toAddress + " : " + message);
+            logger.debug("Message sent to " + ip + ":" + port + " : " + message);
         }
     }
 }

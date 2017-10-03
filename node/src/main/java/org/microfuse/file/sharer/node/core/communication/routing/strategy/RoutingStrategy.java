@@ -2,7 +2,7 @@ package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.core.communication.routing.RoutingTable;
+import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 
 import java.util.List;
 
