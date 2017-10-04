@@ -4,6 +4,7 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -48,6 +49,15 @@ public abstract class RoutingTable {
      */
     public void addUnstructuredNetworkRoutingTableEntry(Node node) {
         unstructuredNetworkNodes.add(node);
+    }
+
+    /**
+     * Add all nodes into the unstructured network from a collection.
+     *
+     * @param nodes The nodes to be added
+     */
+    public void addAllUnstructuredNetworkRoutingTableEntry(Collection<Node> nodes) {
+        unstructuredNetworkNodes.addAll(nodes);
     }
 
     /**

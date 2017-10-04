@@ -19,6 +19,11 @@ public class SuperPeerRoutingTable extends RoutingTable {
     private Set<Node> superPeerNetworkNodes;
     private Set<Node> assignedOrdinaryPeerNodes;
 
+    public SuperPeerRoutingTable() {
+        superPeerNetworkNodes = new HashSet<>();
+        assignedOrdinaryPeerNodes = new HashSet<>();
+    }
+
     /**
      * Put a new entry into the routing table of this router.
      *

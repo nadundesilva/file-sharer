@@ -1,8 +1,8 @@
 package org.microfuse.file.sharer.node.commons.messaging;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base message class.
@@ -56,20 +56,78 @@ public class Message implements Cloneable {
     }
 
     public static Message parse(String messageString) {
-        String[] messageSplit = messageString.split("\\s");
-
+        // Skipping the first two words and fetching the message type
         Message parsedMessage = new Message();
-        parsedMessage.setType(MessageType.valueOf(messageSplit[1]));
-        parsedMessage.setData(Arrays.asList(Arrays.copyOfRange(messageSplit, 2, messageSplit.length)));
+        int i = 0;
+        int currentDataStartIndex = 0;
+        for (int j = 0; j < 2; j++) {
+            while (messageString.charAt(i) != ' ') {
+                i++;
+            }
+            i++;
+            if (currentDataStartIndex == 0) {
+                currentDataStartIndex = i;
+            }
+        }
+        parsedMessage.setType(MessageType.parseMessageType(messageString.substring(currentDataStartIndex, i - 1)));
+        currentDataStartIndex = i;
+
+        // Fetching the data
+        boolean isInsideQuote = false;
+        List<String> data = new ArrayList<>();
+        while (i < messageString.length()) {
+            if (messageString.charAt(i) == '"') {
+                if (isInsideQuote) {
+                    data.add(messageString.substring(currentDataStartIndex, i));
+                    if (i + 1 < messageString.length() && messageString.charAt(i + 1) == ' ') {
+                        i++;
+                    }
+                }
+                currentDataStartIndex = i + 1;
+                isInsideQuote = !isInsideQuote;
+            } else if (messageString.charAt(i) == ' ' && !isInsideQuote) {
+                data.add(messageString.substring(currentDataStartIndex, i));
+                currentDataStartIndex = i + 1;
+            }
+            i++;
+        }
+
+        // Adding the last data item
+        if (currentDataStartIndex < i) {
+            data.add(messageString.substring(currentDataStartIndex, i));
+        }
+
+        parsedMessage.setData(data);
         return parsedMessage;
     }
 
     @Override
     public String toString() {
-        StringBuilder message = new StringBuilder(type.getValue()).append(" ");
-        for (int i = 0; i < data.size(); i++) {
-            message.append(data.get(0));
+        StringBuilder message = new StringBuilder(type.getValue());
+        for (String aData : data) {
+            message.append(" ");
+            if (aData.contains(" ")) {
+                message.append("\"");
+            }
+            message.append(aData);
+            if (aData.contains(" ")) {
+                message.append("\"");
+            }
         }
         return String.format("%04d", message.length() + 5) + " " + message.toString();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object != null && object instanceof Message) {
+            Message messageObject = (Message) object;
+            return Objects.equals(messageObject.toString(), toString());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 }

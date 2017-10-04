@@ -45,7 +45,11 @@ public class SocketNetworkHandler extends NetworkHandler {
                             while ((inputLine = in.readLine()) != null) {
                                 message.append(inputLine);
                             }
-                            onMessageReceived(clientSocket.getRemoteSocketAddress().toString(), message.toString());
+                            onMessageReceived(
+                                    clientSocket.getRemoteSocketAddress().toString(),
+                                    clientSocket.getPort(),
+                                    message.toString()
+                            );
                         } catch (IOException e) {
                             logger.debug("Failed to receive message from "
                                     + clientSocket.getRemoteSocketAddress().toString(), e);

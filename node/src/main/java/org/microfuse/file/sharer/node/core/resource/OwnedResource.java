@@ -8,6 +8,10 @@ import java.io.File;
 public class OwnedResource extends Resource {
     private File file;
 
+    public OwnedResource(String name) {
+        super(name);
+    }
+
     public File getFile() {
         return file;
     }

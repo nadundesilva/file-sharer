@@ -17,7 +17,7 @@ public class Configuration {
     private int timeToLive;
 
     public Configuration() {
-        address = null;
+        address = Constants.DEFAULT_IP_ADDRESS;
         networkHandlerType = Constants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = Constants.DEFAULT_ROUTING_STRATEGY;
         peerType = Constants.DEFAULT_PEER_TYPE;

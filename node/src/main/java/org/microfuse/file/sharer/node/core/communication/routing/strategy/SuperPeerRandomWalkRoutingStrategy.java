@@ -12,7 +12,11 @@ import org.microfuse.file.sharer.node.core.utils.MessageIndexes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -31,7 +35,7 @@ public class SuperPeerRandomWalkRoutingStrategy implements RoutingStrategy {
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
         Set<Node> forwardingNodes = null;
-        if (Manager.isSuperPeer()) {
+        if (routingTable instanceof SuperPeerRoutingTable) {
             // Searching the aggregate index
             Set<AggregatedResource> resources = ((SuperPeerResourceIndex) Manager.getResourceIndex())
                     .findAggregatedResources(message.getData(MessageIndexes.SER_FILE_NAME));
@@ -53,7 +57,7 @@ public class SuperPeerRandomWalkRoutingStrategy implements RoutingStrategy {
                         fromNode
                 );
             }
-        } else {
+        } else if (routingTable instanceof OrdinaryPeerRoutingTable) {
             Node superPeer = ((OrdinaryPeerRoutingTable) routingTable).getAssignedSuperPeer();
             if (superPeer != null && superPeer.isAlive()) {
                 // Passing over to the super peer network
@@ -65,21 +69,24 @@ public class SuperPeerRandomWalkRoutingStrategy implements RoutingStrategy {
                         fromNode
                 );
             }
+        } else {
+            logger.warn("The node is recognized as a super-peer, " +
+                    "but does not contain a super-peer routing table");
         }
         return forwardingNodes;
     }
 
     /**
-     * Get a random node form a set of nodes
+     * Get a random node form a set of nodes.
      *
      * @param nodes    The set of nodes to pick from
      * @param fromNode The node which sent the message to this node
      * @return The randomly picked node
      */
     private Set<Node> getRandomNode(Set<Node> nodes, Node fromNode) {
-        List<Node> routingTableNodes = new ArrayList<>();
+        List<Node> routingTableNodes = new ArrayList<>(nodes);
         routingTableNodes.remove(fromNode);
-        int forwardNodeIndex = ThreadLocalRandom.current().nextInt(0, routingTableNodes.size() - 1);
+        int forwardNodeIndex = ThreadLocalRandom.current().nextInt(0, nodes.size() - 1);
         return new HashSet<>(Collections.singletonList(routingTableNodes.get(forwardNodeIndex)));
     }
 }

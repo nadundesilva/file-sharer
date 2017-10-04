@@ -1,5 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
+import com.google.common.collect.Lists;
 import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
@@ -12,13 +13,13 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryP
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.OwnedResource;
+import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.microfuse.file.sharer.node.core.utils.MessageConstants;
 import org.microfuse.file.sharer.node.core.utils.MessageIndexes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -44,27 +45,31 @@ public class Router implements NetworkHandlerListener {
         } catch (InstantiationException | IllegalAccessException e) {
             logger.error("Failed to instantiate routing table for " + configuration.getPeerType().getValue()
                     + ". Using the routing table for " + PeerType.ORDINARY_PEER.getValue() + " instead", e);
-            configuration.setPeerType(PeerType.ORDINARY_PEER);
+            Manager.demoteToOrdinaryPeer();
             routingTable = new OrdinaryPeerRoutingTable();
         }
         this.routingStrategy = routingStrategy;
         this.networkHandler = networkHandler;
+        this.listenersList = new ArrayList<>();
     }
 
     @Override
-    public void onMessageReceived(String fromAddress, int fromPort, String messageString) {
+    public synchronized void onMessageReceived(String fromAddress, int fromPort, String messageString) {
         Message message = Message.parse(messageString);
         route(routingTable.getUnstructuredNetworkRoutingTableNode(fromAddress, fromPort), message);
         runTasksOnMessageReceived(message);
     }
 
     @Override
-    public void onMessageSendFailed(String toAddress, int toPort, String message) {
+    public synchronized void onMessageSendFailed(String toAddress, int toPort, String message) {
         // Marking the node as inactive
         Node receivingNode = routingTable.getUnstructuredNetworkRoutingTableNode(toAddress, toPort);
         if (receivingNode == null && Manager.isSuperPeer()) {
-            receivingNode = ((SuperPeerRoutingTable) routingTable)
-                    .getSuperPeerNetworkRoutingTableNode(toAddress, toPort);
+            SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
+            receivingNode = superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode(toAddress, toPort);
+            if (receivingNode == null) {
+                receivingNode = superPeerRoutingTable.getAssignedOrdinaryNetworkRoutingTableNode(toAddress, toPort);
+            }
         }
         if (receivingNode != null) {
             receivingNode.setAlive(false);
@@ -77,10 +82,10 @@ public class Router implements NetworkHandlerListener {
      * @param fromNode The node from which the message was received by this node
      * @param message  The message to be sent
      */
-    public void route(Node fromNode, Message message) {
+    public synchronized void route(Node fromNode, Message message) {
         MessageType messageType = message.getType();
 
-        if (messageType == MessageType.SER) {
+        if (messageType != null && messageType == MessageType.SER) {
             // Checking owned resources
             Set<OwnedResource> ownedResources = Manager.getResourceIndex()
                     .findResources(message.getData(MessageIndexes.SER_FILE_NAME));
@@ -88,15 +93,16 @@ public class Router implements NetworkHandlerListener {
                 Message serOkMessage = new Message();
                 serOkMessage.setType(MessageType.SER_OK);
 
-                List<String> serOkData = Arrays.asList(
+                List<String> serOkData = Lists.newArrayList(
                         Integer.toString(ownedResources.size()),
                         Manager.getConfiguration().getAddress(),
-                        Integer.toString(Manager.getConfiguration().getPeerListeningPort())
+                        Integer.toString(Manager.getConfiguration().getPeerListeningPort()),
+                        Integer.toString(Constants.INITIAL_HOP_COUNT)
                 );
                 ownedResources.forEach(resource -> serOkData.add(resource.getName()));
 
                 serOkMessage.setData(serOkData);
-                networkHandler.sendMessage(message.getData(MessageIndexes.SER_OK_SOURCE_IP),
+                networkHandler.sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
                         Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
             } else {
                 // Updating the hop count
@@ -119,12 +125,38 @@ public class Router implements NetworkHandlerListener {
                     // Unable to find resource
                     Message serOkMessage = new Message();
                     serOkMessage.setType(MessageType.SER_OK);
-                    serOkMessage.setData(Arrays.asList(MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT,
+                    serOkMessage.setData(Lists.newArrayList(MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT,
                             MessageConstants.SER_OK_NOT_FOUND_IP, MessageConstants.SER_OK_NOT_FOUND_PORT));
-                    networkHandler.sendMessage(message.getData(MessageIndexes.SER_OK_SOURCE_IP),
+                    networkHandler.sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
                             Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
                 }
             }
+        }
+    }
+
+    /**
+     * Promote the current node to an ordinary peer.
+     */
+    public synchronized void promoteToSuperPeer() {
+        if (routingTable instanceof OrdinaryPeerRoutingTable) {
+            SuperPeerRoutingTable superPeerRoutingTable = new SuperPeerRoutingTable();
+            superPeerRoutingTable.setBootstrapServer(routingTable.getBootstrapServer());
+            superPeerRoutingTable.addAllUnstructuredNetworkRoutingTableEntry(
+                    routingTable.getAllUnstructuredNetworkRoutingTableNodes());
+            routingTable = superPeerRoutingTable;
+        }
+    }
+
+    /**
+     * Demote the current node to a super peer.
+     */
+    public synchronized void demoteToOrdinaryPeer() {
+        if (routingTable instanceof SuperPeerRoutingTable) {
+            OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable();
+            ordinaryPeerRoutingTable.setBootstrapServer(routingTable.getBootstrapServer());
+            ordinaryPeerRoutingTable.addAllUnstructuredNetworkRoutingTableEntry(
+                    routingTable.getAllUnstructuredNetworkRoutingTableNodes());
+            routingTable = ordinaryPeerRoutingTable;
         }
     }
 
@@ -133,9 +165,18 @@ public class Router implements NetworkHandlerListener {
      *
      * @param message The message that was received
      */
-    private void runTasksOnMessageReceived(Message message) {
+    public void runTasksOnMessageReceived(Message message) {
         listenersList.stream().parallel()
                 .forEach(routerListener -> routerListener.onMessageReceived(message));
+    }
+
+    /**
+     * Get the routing table used by this router.
+     *
+     * @return The routing table
+     */
+    public synchronized RoutingTable getRoutingTable() {
+        return routingTable;
     }
 
     /**

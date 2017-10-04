@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Manager singleton class.
@@ -30,18 +31,56 @@ public class Manager {
     private static volatile Router router;
     private static volatile ResourceIndex resourceIndex;
 
-    static {
-        // Creating instance of configuration
-        {
+    /**
+     * Promote the current node to an ordinary peer.
+     */
+    public static synchronized void promoteToSuperPeer() {
+        getConfiguration().setPeerType(PeerType.SUPER_PEER);
+        if (!(getResourceIndex() instanceof SuperPeerResourceIndex)) {
+            ResourceIndex newResourceIndex = new SuperPeerResourceIndex();
+            newResourceIndex.addAllResourceToIndex(getResourceIndex().getAllResourcesInIndex());
+            resourceIndex = newResourceIndex;
+        }
+        getRouter().promoteToSuperPeer();
+        // TODO : Implement promoting to super peer
+    }
+
+    /**
+     * Demote the current node to a super peer.
+     */
+    public static synchronized void demoteToOrdinaryPeer() {
+        getConfiguration().setPeerType(PeerType.ORDINARY_PEER);
+        if (getResourceIndex() instanceof SuperPeerResourceIndex) {
+            ResourceIndex newResourceIndex = new ResourceIndex();
+            newResourceIndex.addAllResourceToIndex(getResourceIndex().getAllResourcesInIndex());
+            resourceIndex = newResourceIndex;
+        }
+        getRouter().demoteToOrdinaryPeer();
+        // TODO : Implement demoting to ordinary peer
+    }
+
+    /**
+     * Get a singleton instance of this nodes configuration.
+     *
+     * @return The configuration of this node
+     */
+    public static synchronized Configuration getConfiguration() {
+        if (configuration == null) {
             File configFile = new File("config.json");
+            boolean configFileExists = false;
             try {
                 // Loading the configuration from config file
-                String configString = String.join("", Files.readLines(configFile,
-                        Constants.DEFAULT_CHARSET));
-                configuration = new Gson().fromJson(configString, Configuration.class);
+                List<String> configFileLines = Files.readLines(configFile, Constants.DEFAULT_CHARSET);
+                if (configFileLines.size() > 0) {
+                    String configString = String.join("", configFileLines);
+                    configuration = new Gson().fromJson(configString, Configuration.class);
+                    configFileExists = true;
+                }
             } catch (IOException e) {
                 logger.warn("Failed to load configuration from config file. Creating new configuration.", e);
+            }
 
+            if (!configFileExists) {
                 // Creating a new configuration file based on default values
                 configuration = new Configuration();
                 try {
@@ -58,8 +97,16 @@ public class Manager {
                 }
             }
         }
-        // Creating the instance of router
-        {
+        return configuration;
+    }
+
+    /**
+     * Get a singleton instance of the router used by this node.
+     *
+     * @return The router used by this node
+     */
+    public static synchronized Router getRouter() {
+        if (router == null) {
             NetworkHandler networkHandler;
             try {
                 networkHandler = NetworkHandlerType.getNetworkHandlerClass(configuration.getNetworkHandlerType())
@@ -84,51 +131,6 @@ public class Manager {
 
             router = new Router(networkHandler, routingStrategy);
         }
-        // Creating the instance of resource index
-        {
-            if (resourceIndex == null) {
-                try {
-                    resourceIndex = PeerType.getResourceIndexClass(configuration.getPeerType())
-                            .newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    logger.error("Failed to instantiate resource index for " + configuration.getPeerType().getValue()
-                            + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
-                    configuration.setPeerType(PeerType.ORDINARY_PEER);
-                    resourceIndex = new ResourceIndex();
-                }
-            }
-        }
-    }
-
-    /**
-     * Promote the current node to an ordinary peer.
-     */
-    public static synchronized void promoteToSuperPeer() {
-        // TODO : Implement promoting to super peer
-    }
-
-    /**
-     * Demote the current node to a super peer.
-     */
-    public static synchronized void demoteToOrdinaryPeer() {
-        // TODO : Implement demoting to ordinary peer
-    }
-
-    /**
-     * Get a singleton instance of this nodes configuration.
-     *
-     * @return The configuration of this node
-     */
-    public static synchronized Configuration getConfiguration() {
-        return configuration;
-    }
-
-    /**
-     * Get a singleton instance of the router used by this node.
-     *
-     * @return The router used by this node
-     */
-    public static synchronized Router getRouter() {
         return router;
     }
 
@@ -139,6 +141,17 @@ public class Manager {
      * @return The resource index instance
      */
     public static synchronized ResourceIndex getResourceIndex() {
+        if (resourceIndex == null) {
+            try {
+                resourceIndex = PeerType.getResourceIndexClass(configuration.getPeerType())
+                        .newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                logger.error("Failed to instantiate resource index for " + configuration.getPeerType().getValue()
+                        + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
+                resourceIndex = new ResourceIndex();
+                demoteToOrdinaryPeer();
+            }
+        }
         return resourceIndex;
     }
 

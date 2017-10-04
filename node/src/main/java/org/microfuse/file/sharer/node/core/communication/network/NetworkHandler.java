@@ -46,22 +46,24 @@ public abstract class NetworkHandler {
      * Runs tasks to be run when an error occurs in sending a message.
      *
      * @param toAddress The address to which the message should be sent
+     * @param toPort    The port to which the message should be sent
      * @param message   The message
      */
-    protected void onMessageSendFailed(String toAddress, String message) {
+    protected void onMessageSendFailed(String toAddress, int toPort, String message) {
         logger.debug("Failed to send message to " + toAddress + ": " + message);
-        listenersList.forEach(listener -> listener.onMessageSendFailed(toAddress, message));
+        listenersList.forEach(listener -> listener.onMessageSendFailed(toAddress, toPort, message));
     }
 
     /**
      * Run tasks to be run when a message is received.
      *
      * @param fromAddress The address from which the message was received
+     * @param fromPort    The port from which the message was received
      * @param message     The message received
      */
-    protected void onMessageReceived(String fromAddress, String message) {
+    protected void onMessageReceived(String fromAddress, int fromPort, String message) {
         logger.debug("Message received from " + fromAddress + ": " + message);
-        listenersList.forEach(listener -> listener.onMessageReceived(fromAddress, message));
+        listenersList.forEach(listener -> listener.onMessageReceived(fromAddress, fromPort, message));
     }
 
     /**

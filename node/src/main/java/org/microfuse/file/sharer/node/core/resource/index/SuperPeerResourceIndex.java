@@ -30,8 +30,7 @@ public class SuperPeerResourceIndex extends ResourceIndex {
     public void addResourceToAggregatedIndex(String resourceName, Node node) {
         AggregatedResource resourceIndexItem = getAggregatedResource(resourceName);
         if (resourceIndexItem == null) {
-            resourceIndexItem = new AggregatedResource();
-            resourceIndexItem.setName(resourceName);
+            resourceIndexItem = new AggregatedResource(resourceName);
             aggregatedResources.add(resourceIndexItem);
         }
         resourceIndexItem.addNode(node);
@@ -43,7 +42,7 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @param resourceName The resource to be removed
      * @param node         The node which contains the resource
      */
-    public void removeResourceToAggregatedIndex(String resourceName, Node node) {
+    public void removeResourceFromAggregatedIndex(String resourceName, Node node) {
         AggregatedResource resourceIndexItem = getAggregatedResource(resourceName);
         if (resourceIndexItem != null) {
             resourceIndexItem.removeNode(node);
@@ -68,6 +67,14 @@ public class SuperPeerResourceIndex extends ResourceIndex {
         ).stream().parallel()
                 .map(resource -> (AggregatedResource) resource)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Clear the resource index.
+     */
+    public void clear() {
+        super.clear();
+        aggregatedResources.clear();
     }
 
     /**

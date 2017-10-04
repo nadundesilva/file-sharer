@@ -1,5 +1,8 @@
 package org.microfuse.file.sharer.node.commons.messaging;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Message type enum.
  */
@@ -35,11 +38,28 @@ public enum MessageType {
     private String value;
 
     /**
+     * Used to store a map from values to MessageType.
+     */
+    private static Map<String, MessageType> valuesMap;
+
+    static {
+        // Initializing values map
+        valuesMap = new HashMap<>();
+        for (MessageType messageType : MessageType.values()) {
+            valuesMap.put(messageType.value, messageType);
+        }
+    }
+
+    /**
      * Get the message type identifier.
      *
      * @return The message type identifier
      */
     public String getValue() {
         return value;
+    }
+
+    public static MessageType parseMessageType(String messageType) {
+        return valuesMap.get(messageType);
     }
 }
