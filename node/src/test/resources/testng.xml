@@ -35,6 +35,7 @@
     <test name="file-sharer-node-routing-core-tests" enabled="true">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.communication.routing.RouterTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.Manager"/>
         </classes>
     </test>
 </suite>

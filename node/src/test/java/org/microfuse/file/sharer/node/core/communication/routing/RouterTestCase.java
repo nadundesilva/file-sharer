@@ -75,7 +75,7 @@ public class RouterTestCase extends BaseTestCase {
 
         router.route(fromNode, message);
 
-        Message message = Message.parse("0049 SEROK 1 " + Manager.getConfiguration().getAddress()
+        Message message = Message.parse("0049 SEROK 1 " + Manager.getConfiguration().getIp()
                 + " " + Integer.toString(Manager.getConfiguration().getPeerListeningPort())
                 + " " + Integer.toString(Constants.INITIAL_HOP_COUNT) + " \"" + ownedResource.getName() + "\"");
 

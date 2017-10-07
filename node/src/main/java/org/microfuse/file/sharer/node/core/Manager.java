@@ -27,6 +27,7 @@ import java.util.List;
 public class Manager {
     private static final Logger logger = LoggerFactory.getLogger(Manager.class);
 
+    private static volatile PeerType peerType;
     private static volatile Configuration configuration;
     private static volatile Router router;
     private static volatile ResourceIndex resourceIndex;
@@ -35,7 +36,7 @@ public class Manager {
      * Promote the current node to an ordinary peer.
      */
     public static synchronized void promoteToSuperPeer() {
-        getConfiguration().setPeerType(PeerType.SUPER_PEER);
+        peerType = PeerType.SUPER_PEER;
         if (!(getResourceIndex() instanceof SuperPeerResourceIndex)) {
             ResourceIndex newResourceIndex = new SuperPeerResourceIndex();
             newResourceIndex.addAllResourceToIndex(getResourceIndex().getAllResourcesInIndex());
@@ -49,7 +50,7 @@ public class Manager {
      * Demote the current node to a super peer.
      */
     public static synchronized void demoteToOrdinaryPeer() {
-        getConfiguration().setPeerType(PeerType.ORDINARY_PEER);
+        peerType = PeerType.ORDINARY_PEER;
         if (getResourceIndex() instanceof SuperPeerResourceIndex) {
             ResourceIndex newResourceIndex = new ResourceIndex();
             newResourceIndex.addAllResourceToIndex(getResourceIndex().getAllResourcesInIndex());
@@ -66,7 +67,7 @@ public class Manager {
      */
     public static synchronized Configuration getConfiguration() {
         if (configuration == null) {
-            File configFile = new File("config.json");
+            File configFile = new File(Constants.CONFIG_FILE);
             boolean configFileExists = false;
             try {
                 // Loading the configuration from config file
@@ -109,23 +110,24 @@ public class Manager {
         if (router == null) {
             NetworkHandler networkHandler;
             try {
-                networkHandler = NetworkHandlerType.getNetworkHandlerClass(configuration.getNetworkHandlerType())
+                networkHandler = NetworkHandlerType.getNetworkHandlerClass(getConfiguration().getNetworkHandlerType())
                         .newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.error("Failed to instantiate " + configuration.getNetworkHandlerType().getValue()
+                logger.error("Failed to instantiate " + getConfiguration().getNetworkHandlerType().getValue()
                         + ". Using " + NetworkHandlerType.SOCKET.getValue() + " instead.", e);
-                configuration.setNetworkHandlerType(NetworkHandlerType.SOCKET);
+                getConfiguration().setNetworkHandlerType(NetworkHandlerType.SOCKET);
                 networkHandler = new SocketNetworkHandler();
             }
 
             RoutingStrategy routingStrategy;
             try {
-                routingStrategy = RoutingStrategyType.getRoutingStrategyClass(configuration.getRoutingStrategyType())
+                routingStrategy = RoutingStrategyType
+                        .getRoutingStrategyClass(getConfiguration().getRoutingStrategyType())
                         .newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.error("Failed to instantiate " + configuration.getRoutingStrategyType().getValue()
+                logger.error("Failed to instantiate " + getConfiguration().getRoutingStrategyType().getValue()
                         + ". Using " + RoutingStrategyType.UNSTRUCTURED_FLOODING.getValue() + " instead.", e);
-                configuration.setRoutingStrategyType(RoutingStrategyType.UNSTRUCTURED_FLOODING);
+                getConfiguration().setRoutingStrategyType(RoutingStrategyType.UNSTRUCTURED_FLOODING);
                 routingStrategy = new UnstructuredFloodingRoutingStrategy();
             }
 
@@ -143,10 +145,10 @@ public class Manager {
     public static synchronized ResourceIndex getResourceIndex() {
         if (resourceIndex == null) {
             try {
-                resourceIndex = PeerType.getResourceIndexClass(configuration.getPeerType())
+                resourceIndex = PeerType.getResourceIndexClass(getPeerType())
                         .newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.error("Failed to instantiate resource index for " + configuration.getPeerType().getValue()
+                logger.error("Failed to instantiate resource index for " + getPeerType().getValue()
                         + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
                 resourceIndex = new ResourceIndex();
                 demoteToOrdinaryPeer();
@@ -156,11 +158,14 @@ public class Manager {
     }
 
     /**
-     * Return true if this is a super peer.
+     * Return the peer type of this node.
      *
-     * @return true if this is a super peer
+     * @return The peer type of the node
      */
-    public static synchronized boolean isSuperPeer() {
-        return resourceIndex instanceof SuperPeerResourceIndex;
+    public static synchronized PeerType getPeerType() {
+        if (peerType == null) {
+            peerType = PeerType.ORDINARY_PEER;
+        }
+        return peerType;
     }
 }

@@ -20,7 +20,9 @@ public class UnstructuredFloodingRoutingStrategy implements RoutingStrategy {
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
         Set<Node> routingTableNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
-        routingTableNodes.remove(fromNode);
+        if (fromNode != null) {
+            routingTableNodes.remove(fromNode);
+        }
         return routingTableNodes;
     }
 }

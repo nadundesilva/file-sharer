@@ -85,7 +85,9 @@ public class SuperPeerRandomWalkRoutingStrategy implements RoutingStrategy {
      */
     private Set<Node> getRandomNode(Set<Node> nodes, Node fromNode) {
         List<Node> routingTableNodes = new ArrayList<>(nodes);
-        routingTableNodes.remove(fromNode);
+        if (fromNode != null) {
+            routingTableNodes.remove(fromNode);
+        }
         int forwardNodeIndex = ThreadLocalRandom.current().nextInt(0, nodes.size() - 1);
         return new HashSet<>(Collections.singletonList(routingTableNodes.get(forwardNodeIndex)));
     }

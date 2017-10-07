@@ -1,7 +1,6 @@
 package org.microfuse.file.sharer.node.commons;
 
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerType;
-import org.microfuse.file.sharer.node.core.communication.routing.PeerType;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategyType;
 import org.microfuse.file.sharer.node.core.utils.Constants;
 
@@ -9,28 +8,26 @@ import org.microfuse.file.sharer.node.core.utils.Constants;
  * Configuration of this Node.
  */
 public class Configuration {
-    private String address;
+    private String ip;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
-    private PeerType peerType;
     private int peerListeningPort;
     private int timeToLive;
 
     public Configuration() {
-        address = Constants.DEFAULT_IP_ADDRESS;
+        ip = Constants.DEFAULT_IP_ADDRESS;
         networkHandlerType = Constants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = Constants.DEFAULT_ROUTING_STRATEGY;
-        peerType = Constants.DEFAULT_PEER_TYPE;
         peerListeningPort = Constants.DEFAULT_TCP_LISTENER_PORT;
         timeToLive = Constants.DEFAULT_TIME_TO_LIVE;
     }
 
-    public String getAddress() {
-        return address;
+    public String getIp() {
+        return ip;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     public NetworkHandlerType getNetworkHandlerType() {
@@ -47,14 +44,6 @@ public class Configuration {
 
     public void setRoutingStrategyType(RoutingStrategyType routingStrategyType) {
         this.routingStrategyType = routingStrategyType;
-    }
-
-    public PeerType getPeerType() {
-        return peerType;
-    }
-
-    public void setPeerType(PeerType peerType) {
-        this.peerType = peerType;
     }
 
     public int getPeerListeningPort() {

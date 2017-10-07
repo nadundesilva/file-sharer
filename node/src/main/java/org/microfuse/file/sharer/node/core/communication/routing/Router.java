@@ -1,7 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
 import com.google.common.collect.Lists;
-import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
@@ -38,12 +37,10 @@ public class Router implements NetworkHandlerListener {
     private NetworkHandler networkHandler;
 
     public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy) {
-        Configuration configuration = Manager.getConfiguration();
-
         try {
-            routingTable = PeerType.getRoutingTableClass(configuration.getPeerType()).newInstance();
+            routingTable = PeerType.getRoutingTableClass(Manager.getPeerType()).newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            logger.error("Failed to instantiate routing table for " + configuration.getPeerType().getValue()
+            logger.error("Failed to instantiate routing table for " + Manager.getPeerType().getValue()
                     + ". Using the routing table for " + PeerType.ORDINARY_PEER.getValue() + " instead", e);
             Manager.demoteToOrdinaryPeer();
             routingTable = new OrdinaryPeerRoutingTable();
@@ -51,6 +48,8 @@ public class Router implements NetworkHandlerListener {
         this.routingStrategy = routingStrategy;
         this.networkHandler = networkHandler;
         this.listenersList = new ArrayList<>();
+
+        this.networkHandler.registerListener(this);
     }
 
     @Override
@@ -64,7 +63,7 @@ public class Router implements NetworkHandlerListener {
     public synchronized void onMessageSendFailed(String toAddress, int toPort, String message) {
         // Marking the node as inactive
         Node receivingNode = routingTable.getUnstructuredNetworkRoutingTableNode(toAddress, toPort);
-        if (receivingNode == null && Manager.isSuperPeer()) {
+        if (receivingNode == null && Manager.getPeerType() == PeerType.SUPER_PEER) {
             SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
             receivingNode = superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode(toAddress, toPort);
             if (receivingNode == null) {
@@ -95,7 +94,7 @@ public class Router implements NetworkHandlerListener {
 
                 List<String> serOkData = Lists.newArrayList(
                         Integer.toString(ownedResources.size()),
-                        Manager.getConfiguration().getAddress(),
+                        Manager.getConfiguration().getIp(),
                         Integer.toString(Manager.getConfiguration().getPeerListeningPort()),
                         Integer.toString(Constants.INITIAL_HOP_COUNT)
                 );

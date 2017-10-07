@@ -59,4 +59,16 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(forwardingNodes.contains(node2));
         Assert.assertTrue(forwardingNodes.contains(node3));
     }
+
+    @Test
+    public void testGetForwardingNodesInStartingNode() {
+        Set<Node> forwardingNodes = unstructuredFloodingRoutingStrategy.getForwardingNodes(routingTable,
+                null, Mockito.mock(Message.class));
+
+        Assert.assertEquals(forwardingNodes.size(), 4);
+        Assert.assertTrue(forwardingNodes.contains(fromNode));
+        Assert.assertTrue(forwardingNodes.contains(node1));
+        Assert.assertTrue(forwardingNodes.contains(node2));
+        Assert.assertTrue(forwardingNodes.contains(node3));
+    }
 }

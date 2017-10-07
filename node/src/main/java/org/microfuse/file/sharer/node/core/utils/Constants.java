@@ -19,8 +19,9 @@ public class Constants {
     public static final int DEFAULT_TCP_LISTENER_PORT = 4444;
     public static final int DEFAULT_TIME_TO_LIVE = 5;
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    public static final int INITIAL_HOP_COUNT = 0;
 
+    public static final String CONFIG_FILE = "config.json";
+    public static final int INITIAL_HOP_COUNT = 0;
     public static final int BOOTSTRAP_SERVER_LISTENER_PORT = 55555;
 
     private Constants() {   // Preventing from being initiated

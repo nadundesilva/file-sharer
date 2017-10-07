@@ -55,4 +55,12 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
         Assert.assertEquals(forwardingNodes.size(), 1);
         Assert.assertFalse(forwardingNodes.contains(fromNode));
     }
+
+    @Test
+    public void testGetForwardingNodesInStartingNode() {
+        Set<Node> forwardingNodes = unstructuredRandomWalkRoutingStrategy.getForwardingNodes(routingTable,
+                null, Mockito.mock(Message.class));
+
+        Assert.assertEquals(forwardingNodes.size(), 1);
+    }
 }

@@ -25,7 +25,9 @@ public class UnstructuredRandomWalkRoutingStrategy implements RoutingStrategy {
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
         List<Node> routingTableNodes = new ArrayList<>(routingTable.getAllUnstructuredNetworkRoutingTableNodes());
-        routingTableNodes.remove(fromNode);
+        if (fromNode != null) {
+            routingTableNodes.remove(fromNode);
+        }
         int forwardNodeIndex = ThreadLocalRandom.current().nextInt(0, routingTableNodes.size() - 1);
         return new HashSet<>(Collections.singletonList(routingTableNodes.get(forwardNodeIndex)));
     }
