@@ -7,7 +7,8 @@ import java.util.Map;
  * Network handler types.
  */
 public enum NetworkHandlerType {
-    SOCKET("Socket");
+    TCP_SOCKET("TCP Socket"),
+    UDP_SOCKET("UDP Socket");
 
     /**
      * The network handler class map.
@@ -18,7 +19,8 @@ public enum NetworkHandlerType {
     static {
         // Populating the network handler class map
         networkHandlerClassMap = new HashMap<>();
-        networkHandlerClassMap.put(SOCKET, SocketNetworkHandler.class);
+        networkHandlerClassMap.put(TCP_SOCKET, TCPSocketNetworkHandler.class);
+        networkHandlerClassMap.put(UDP_SOCKET, UDPSocketNetworkHandler.class);
     }
 
     /**

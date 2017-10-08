@@ -59,6 +59,17 @@ public class RouterTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testSendMessage() {
+        Node toNode = Mockito.mock(Node.class);
+        Mockito.when(toNode.getIp()).thenReturn("192.168.1.2");
+        Mockito.when(toNode.getPort()).thenReturn(4532);
+
+        router.sendMessage(toNode, message);
+
+        Mockito.verify(networkHandler, Mockito.times(1)).sendMessage(toNode.getIp(), toNode.getPort(), message);
+    }
+
+    @Test
     public void testRouteWithNonSerTypeMessage() {
         message.setType(MessageType.REG);
 
@@ -130,7 +141,7 @@ public class RouterTestCase extends BaseTestCase {
                 .thenReturn(fromNode);
         Mockito.doNothing().when(router).route(fromNode, message);
 
-        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), message.toString());
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), message);
 
         Message usedMessage = Message.parse(message.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
@@ -146,7 +157,7 @@ public class RouterTestCase extends BaseTestCase {
                 .thenReturn(fromNode);
         Mockito.doNothing().when(router).route(fromNode, message);
 
-        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message.toString());
+        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message);
 
         Message usedMessage = Message.parse(message.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
@@ -171,7 +182,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.when(superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(fromNode);
 
-        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message.toString());
+        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message);
 
         Message usedMessage = Message.parse(message.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
@@ -199,7 +210,7 @@ public class RouterTestCase extends BaseTestCase {
                 superPeerRoutingTable.getAssignedOrdinaryNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(fromNode);
 
-        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message.toString());
+        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message);
 
         Message usedMessage = Message.parse(message.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,

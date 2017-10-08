@@ -53,14 +53,13 @@ public class Router implements NetworkHandlerListener {
     }
 
     @Override
-    public synchronized void onMessageReceived(String fromAddress, int fromPort, String messageString) {
-        Message message = Message.parse(messageString);
+    public synchronized void onMessageReceived(String fromAddress, int fromPort, Message message) {
         route(routingTable.getUnstructuredNetworkRoutingTableNode(fromAddress, fromPort), message);
         runTasksOnMessageReceived(message);
     }
 
     @Override
-    public synchronized void onMessageSendFailed(String toAddress, int toPort, String message) {
+    public synchronized void onMessageSendFailed(String toAddress, int toPort, Message message) {
         // Marking the node as inactive
         Node receivingNode = routingTable.getUnstructuredNetworkRoutingTableNode(toAddress, toPort);
         if (receivingNode == null && Manager.getPeerType() == PeerType.SUPER_PEER) {
@@ -73,6 +72,16 @@ public class Router implements NetworkHandlerListener {
         if (receivingNode != null) {
             receivingNode.setAlive(false);
         }
+    }
+
+    /**
+     * Send a message directly to a node.
+     *
+     * @param toNode  The node to which the message needs to be sent
+     * @param message The message to be sent
+     */
+    public synchronized void sendMessage(Node toNode, Message message) {
+        networkHandler.sendMessage(toNode.getIp(), toNode.getPort(), message);
     }
 
     /**

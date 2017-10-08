@@ -49,7 +49,7 @@ public abstract class NetworkHandler {
      * @param toPort    The port to which the message should be sent
      * @param message   The message
      */
-    protected void onMessageSendFailed(String toAddress, int toPort, String message) {
+    protected void onMessageSendFailed(String toAddress, int toPort, Message message) {
         logger.debug("Failed to send message to " + toAddress + ": " + message);
         listenersList.forEach(listener -> listener.onMessageSendFailed(toAddress, toPort, message));
     }
@@ -61,7 +61,7 @@ public abstract class NetworkHandler {
      * @param fromPort    The port from which the message was received
      * @param message     The message received
      */
-    protected void onMessageReceived(String fromAddress, int fromPort, String message) {
+    protected void onMessageReceived(String fromAddress, int fromPort, Message message) {
         logger.debug("Message received from " + fromAddress + ": " + message);
         listenersList.forEach(listener -> listener.onMessageReceived(fromAddress, fromPort, message));
     }

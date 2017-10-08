@@ -19,12 +19,12 @@ import java.net.Socket;
  * <p>
  * Uses TCP sockets to communicate with other nodes.
  */
-public class SocketNetworkHandler extends NetworkHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SocketNetworkHandler.class);
+public class TCPSocketNetworkHandler extends NetworkHandler {
+    private static final Logger logger = LoggerFactory.getLogger(TCPSocketNetworkHandler.class);
 
     @Override
     public String getName() {
-        return NetworkHandlerType.SOCKET.getValue();
+        return NetworkHandlerType.TCP_SOCKET.getValue();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class SocketNetworkHandler extends NetworkHandler {
                             onMessageReceived(
                                     clientSocket.getRemoteSocketAddress().toString(),
                                     clientSocket.getPort(),
-                                    message.toString()
+                                    Message.parse(message.toString())
                             );
                         } catch (IOException e) {
                             logger.debug("Failed to receive message from "

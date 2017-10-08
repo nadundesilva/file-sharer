@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerType;
-import org.microfuse.file.sharer.node.core.communication.network.SocketNetworkHandler;
+import org.microfuse.file.sharer.node.core.communication.network.TCPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.PeerType;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
@@ -114,9 +114,9 @@ public class Manager {
                         .newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 logger.error("Failed to instantiate " + getConfiguration().getNetworkHandlerType().getValue()
-                        + ". Using " + NetworkHandlerType.SOCKET.getValue() + " instead.", e);
-                getConfiguration().setNetworkHandlerType(NetworkHandlerType.SOCKET);
-                networkHandler = new SocketNetworkHandler();
+                        + ". Using " + NetworkHandlerType.TCP_SOCKET.getValue() + " instead.", e);
+                getConfiguration().setNetworkHandlerType(NetworkHandlerType.TCP_SOCKET);
+                networkHandler = new TCPSocketNetworkHandler();
             }
 
             RoutingStrategy routingStrategy;

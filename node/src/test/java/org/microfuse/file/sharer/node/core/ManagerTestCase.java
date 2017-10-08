@@ -32,7 +32,7 @@ public class ManagerTestCase extends BaseTestCase {
                 "\"ip\":\"192.168.1.3\"," +
                 "\"peerListeningPort\":4562," +
                 "\"timeToLive\":3," +
-                "\"networkHandlerType\":\"SOCKET\"," +
+                "\"networkHandlerType\":\"TCP_SOCKET\"," +
                 "\"routingStrategyType\":\"SUPER_PEER_RANDOM_WALK\"," +
                 "\"peerType\":\"SUPER_PEER\"" +
                 "}";
@@ -48,7 +48,7 @@ public class ManagerTestCase extends BaseTestCase {
         Assert.assertEquals(configuration.getIp(), "192.168.1.3");
         Assert.assertEquals(configuration.getPeerListeningPort(), 4562);
         Assert.assertEquals(configuration.getTimeToLive(), 3);
-        Assert.assertEquals(configuration.getNetworkHandlerType(), NetworkHandlerType.SOCKET);
+        Assert.assertEquals(configuration.getNetworkHandlerType(), NetworkHandlerType.TCP_SOCKET);
         Assert.assertEquals(configuration.getRoutingStrategyType(), RoutingStrategyType.SUPER_PEER_RANDOM_WALK);
     }
 

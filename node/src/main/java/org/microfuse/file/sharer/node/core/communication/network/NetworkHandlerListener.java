@@ -1,5 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
+import org.microfuse.file.sharer.node.commons.messaging.Message;
+
 /**
  * The network handler listener.
  * <p>
@@ -13,7 +15,7 @@ public interface NetworkHandlerListener {
      * @param fromPort    The port from which the message was received
      * @param message     The message received
      */
-    void onMessageReceived(String fromAddress, int fromPort, String message);
+    void onMessageReceived(String fromAddress, int fromPort, Message message);
 
     /**
      * Invoked when an error is occurred in sending a message.
@@ -22,5 +24,5 @@ public interface NetworkHandlerListener {
      * @param toPort    The port to which the message should be sent
      * @param message   The message involved with the error
      */
-    void onMessageSendFailed(String toAddress, int toPort, String message);
+    void onMessageSendFailed(String toAddress, int toPort, Message message);
 }
