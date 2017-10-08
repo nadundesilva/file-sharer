@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Test Case for org.microfuse.file.sharer.node.core.Manager class.
+ * Test Case for org.microfuse.file.sharer.node.core.ServiceHolder class.
  */
-public class ManagerTestCase extends BaseTestCase {
-    private static final Logger logger = LoggerFactory.getLogger(ManagerTestCase.class);
+public class ServiceHolderTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(ServiceHolderTestCase.class);
 
     @Test
     public void testGetConfigurationFromFileAtFirstTime() {
@@ -42,7 +42,7 @@ public class ManagerTestCase extends BaseTestCase {
             logger.warn("Failed to create config file. Failed to test get configuration from file.");
         }
 
-        Configuration configuration = Manager.getConfiguration();
+        Configuration configuration = ServiceHolder.getConfiguration();
 
         Assert.assertNotNull(configuration);
         Assert.assertEquals(configuration.getIp(), "192.168.1.3");
@@ -54,7 +54,7 @@ public class ManagerTestCase extends BaseTestCase {
 
     @Test
     public void testGetDefaultConfigurationAtFirstTime() {
-        Configuration configuration = Manager.getConfiguration();
+        Configuration configuration = ServiceHolder.getConfiguration();
 
         Assert.assertNotNull(configuration);
         Assert.assertEquals(configuration.getIp(), Constants.DEFAULT_IP_ADDRESS);
@@ -66,8 +66,8 @@ public class ManagerTestCase extends BaseTestCase {
 
     @Test
     public void testGetConfiguration() {
-        Configuration initialConfiguration = Manager.getConfiguration();
-        Configuration finalConfiguration = Manager.getConfiguration();
+        Configuration initialConfiguration = ServiceHolder.getConfiguration();
+        Configuration finalConfiguration = ServiceHolder.getConfiguration();
 
         Assert.assertNotNull(initialConfiguration);
         Assert.assertNotNull(finalConfiguration);
@@ -76,7 +76,7 @@ public class ManagerTestCase extends BaseTestCase {
 
     @Test
     public void testGetRouterAtFirstTime() {
-        Router router = Manager.getRouter();
+        Router router = ServiceHolder.getRouter();
 
         Assert.assertNotNull(router);
 
@@ -96,8 +96,8 @@ public class ManagerTestCase extends BaseTestCase {
 
     @Test
     public void testGetRouter() {
-        Router initialRouter = Manager.getRouter();
-        Router finalRouter = Manager.getRouter();
+        Router initialRouter = ServiceHolder.getRouter();
+        Router finalRouter = ServiceHolder.getRouter();
 
         Assert.assertNotNull(initialRouter);
         Assert.assertNotNull(finalRouter);
@@ -106,15 +106,15 @@ public class ManagerTestCase extends BaseTestCase {
 
     @Test
     public void testGetResourceIndexAtFirstTime() {
-        ResourceIndex resourceIndex = Manager.getResourceIndex();
+        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
 
         Assert.assertNotNull(resourceIndex);
     }
 
     @Test
     public void testGetResourceIndex() {
-        ResourceIndex initialResourceIndex = Manager.getResourceIndex();
-        ResourceIndex finalResourceIndex = Manager.getResourceIndex();
+        ResourceIndex initialResourceIndex = ServiceHolder.getResourceIndex();
+        ResourceIndex finalResourceIndex = ServiceHolder.getResourceIndex();
 
         Assert.assertNotNull(initialResourceIndex);
         Assert.assertNotNull(finalResourceIndex);

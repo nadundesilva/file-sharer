@@ -22,10 +22,13 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Manager singleton class.
+ * ServiceHolder singleton class.
+ *
+ * This holds different types of services and implements methods for managing them.
+ * This also holds the configuration and the peer type.
  */
-public class Manager {
-    private static final Logger logger = LoggerFactory.getLogger(Manager.class);
+public class ServiceHolder {
+    private static final Logger logger = LoggerFactory.getLogger(ServiceHolder.class);
 
     private static volatile PeerType peerType;
     private static volatile Configuration configuration;
@@ -43,7 +46,6 @@ public class Manager {
             resourceIndex = newResourceIndex;
         }
         getRouter().promoteToSuperPeer();
-        // TODO : Implement promoting to super peer
     }
 
     /**
@@ -57,7 +59,6 @@ public class Manager {
             resourceIndex = newResourceIndex;
         }
         getRouter().demoteToOrdinaryPeer();
-        // TODO : Implement demoting to ordinary peer
     }
 
     /**
@@ -167,5 +168,8 @@ public class Manager {
             peerType = PeerType.ORDINARY_PEER;
         }
         return peerType;
+    }
+
+    private ServiceHolder() {   // Preventing from being initiated
     }
 }

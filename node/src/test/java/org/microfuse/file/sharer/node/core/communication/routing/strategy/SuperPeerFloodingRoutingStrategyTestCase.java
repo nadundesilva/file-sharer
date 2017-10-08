@@ -3,7 +3,7 @@ package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 import org.microfuse.file.sharer.node.BaseTestCase;
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.core.Manager;
+import org.microfuse.file.sharer.node.core.ServiceHolder;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
@@ -139,8 +139,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        Manager.promoteToSuperPeer();
-        ResourceIndex resourceIndex = Manager.getResourceIndex();
+        ServiceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
@@ -162,8 +162,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        Manager.promoteToSuperPeer();
-        ResourceIndex resourceIndex = Manager.getResourceIndex();
+        ServiceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
@@ -185,8 +185,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        Manager.promoteToSuperPeer();
-        ResourceIndex resourceIndex = Manager.getResourceIndex();
+        ServiceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
@@ -202,8 +202,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        Manager.promoteToSuperPeer();
-        ResourceIndex resourceIndex = Manager.getResourceIndex();
+        ServiceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(superPeerRoutingTable,

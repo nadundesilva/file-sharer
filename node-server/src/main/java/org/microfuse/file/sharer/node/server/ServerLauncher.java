@@ -7,6 +7,7 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.microfuse.file.sharer.node.core.NodeManager;
 import org.microfuse.file.sharer.node.server.api.QueryEndPoint;
 import org.microfuse.file.sharer.node.server.filter.CORSFilter;
 import org.microfuse.file.sharer.node.server.utils.Constants;
@@ -33,6 +34,7 @@ public class ServerLauncher {
     };
 
     public static void main(String[] args) {
+        NodeManager.start();
         startTomcatServer();
     }
 

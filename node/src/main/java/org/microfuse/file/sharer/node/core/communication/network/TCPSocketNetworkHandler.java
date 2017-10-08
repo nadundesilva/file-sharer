@@ -1,7 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
 import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.core.Manager;
+import org.microfuse.file.sharer.node.core.ServiceHolder;
 import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void startListening() {
-        int portNumber = Manager.getConfiguration().getPeerListeningPort();
+        int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
         new Thread(() -> {
             while (true) {
                 try (

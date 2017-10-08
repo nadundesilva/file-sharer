@@ -1,6 +1,6 @@
 package org.microfuse.file.sharer.node;
 
-import org.microfuse.file.sharer.node.core.Manager;
+import org.microfuse.file.sharer.node.core.ServiceHolder;
 import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +19,17 @@ public class BaseTestCase {
 
     @BeforeMethod
     public void baseInitializeMethod() {
-        // Resetting Manager singleton fields
+        // Resetting ServiceHolder singleton fields
         List<String> managerFields = Arrays.asList("configuration", "router", "resourceIndex", "peerType");
         managerFields.forEach(managerField -> {
             try {
-                Field field = Manager.class.getDeclaredField(managerField);
+                Field field = ServiceHolder.class.getDeclaredField(managerField);
                 field.setAccessible(true);
-                field.set(Manager.class, null);
+                field.set(ServiceHolder.class, null);
                 field.setAccessible(false);
             } catch (IllegalAccessException | NoSuchFieldException e) {
                 logger.warn("Test Case Cleanup: Failed to reset field " + managerField
-                        + " in " + Manager.class.getName());
+                        + " in " + ServiceHolder.class.getName());
             }
         });
 

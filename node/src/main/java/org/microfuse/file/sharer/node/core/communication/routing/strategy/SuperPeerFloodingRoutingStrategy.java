@@ -2,7 +2,7 @@ package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.core.Manager;
+import org.microfuse.file.sharer.node.core.ServiceHolder;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
@@ -34,7 +34,7 @@ public class SuperPeerFloodingRoutingStrategy implements RoutingStrategy {
         Set<Node> forwardingNodes = null;
         if (routingTable instanceof SuperPeerRoutingTable) {
             // Searching the aggregate index
-            Set<AggregatedResource> resources = ((SuperPeerResourceIndex) Manager.getResourceIndex())
+            Set<AggregatedResource> resources = ((SuperPeerResourceIndex) ServiceHolder.getResourceIndex())
                     .findAggregatedResources(message.getData(MessageIndexes.SER_FILE_NAME));
 
             // Picking a node with a matching resource
