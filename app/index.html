@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Test</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <body>
-    Test
+<div id="display">Test</div>
+
+<script>
+    $.get("api/query/test", function (data) {
+        console.log(data);
+        $("#display").append("<br>").append(JSON.stringify(data));
+    });
+</script>
 </body>
 </html>
