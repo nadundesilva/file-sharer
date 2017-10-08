@@ -14,21 +14,11 @@
     <modules>
         <module>bootstrap-server</module>
         <module>node</module>
+        <module>node-server</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
@@ -40,6 +30,14 @@
                 <version>${guava.version}</version>
             </dependency>
 
+            <!-- Own dependencies -->
+            <dependency>
+                <groupId>org.microfuse.node</groupId>
+                <artifactId>node</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Testing dependencies -->
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
@@ -49,14 +47,81 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
-                <version>1.9.5</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
 
+            <!-- Logging dependencies -->
             <dependency>
-                <groupId>org.microfuse.node</groupId>
-                <artifactId>node</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <!-- Jersey dependencies -->
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-server</artifactId>
+                <version>${glassfish.jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-servlet-core</artifactId>
+                <version>${glassfish.jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-jetty-http</artifactId>
+                <version>${glassfish.jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-moxy</artifactId>
+                <version>${glassfish.jersey.version}</version>
+            </dependency>
+
+            <!-- Embedded tomcat dependencies -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-logging-log4j</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-jasper</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+
+            <!-- Embedded tomcat JSP dependencies -->
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jasper</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jasper-el</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jsp-api</artifactId>
+                <version>${tomcat.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -118,33 +183,14 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>${jar.plugin.version}</version>
-                    <configuration>
-                        <finalName>${project.artifactId}-unshaded</finalName>
-                        <archive>
-                            <manifest>
-                                <mainClass>Launcher</mainClass>
-                            </manifest>
-                        </archive>
-                    </configuration>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>appassembler-maven-plugin</artifactId>
+                    <version>${appassembler.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>${shade.plugin.version}</version>
-                    <configuration>
-                        <finalName>${project.artifactId}</finalName>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>shade</goal>
-                            </goals>
-                        </execution>
-                    </executions>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${assembly.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -163,20 +209,26 @@
     </scm>
 
     <properties>
-        <slf4j.version>1.7.22</slf4j.version>
-        <logback.version>1.2.3</logback.version>
-
         <gson.version>2.8.0</gson.version>
         <guava.version>23.0</guava.version>
+
+        <tomcat.version>8.5.2</tomcat.version>
+        <glassfish.jersey.version>2.7</glassfish.jersey.version>
+
+        <slf4j.version>1.7.22</slf4j.version>
+        <log4j.version>1.2.17</log4j.version>
 
         <compile.plugin.version>3.5.1</compile.plugin.version>
         <jar.plugin.version>3.0.2</jar.plugin.version>
         <shade.plugin.version>3.0.0</shade.plugin.version>
-
-        <testng.version>6.11</testng.version>
-        <surefire.plugin.version>2.19.1</surefire.plugin.version>
+        <assembly.plugin.version>3.1.0</assembly.plugin.version>
 
         <findbugs.plugin.version>3.0.3</findbugs.plugin.version>
         <checkstyle.plugin.version>2.17</checkstyle.plugin.version>
+        <appassembler.plugin.version>2.0.0</appassembler.plugin.version>
+
+        <testng.version>6.11</testng.version>
+        <mockito.version>1.9.5</mockito.version>
+        <surefire.plugin.version>2.19.1</surefire.plugin.version>
     </properties>
 </project>

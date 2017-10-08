@@ -16,18 +16,20 @@
     <description>Bootstrap Server for the P2P File Sharing System</description>
 
     <dependencies>
+        <!-- Own dependencies -->
+        <dependency>
+            <groupId>org.microfuse.node</groupId>
+            <artifactId>node</artifactId>
+        </dependency>
+
+        <!-- Logging dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.microfuse.node</groupId>
-            <artifactId>node</artifactId>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
         </dependency>
     </dependencies>
 </project>
