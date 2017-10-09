@@ -11,8 +11,11 @@ import java.util.Set;
 public class AggregatedResource extends Resource {
     private Set<Node> nodes;
 
+    private final Object nodesKey;
+
     public AggregatedResource(String name) {
         super(name);
+        nodesKey = new Object();
         nodes = new HashSet<>();
     }
 
@@ -22,7 +25,9 @@ public class AggregatedResource extends Resource {
      * @param node The node which contains the resource
      */
     public boolean addNode(Node node) {
-        return nodes.add(node);
+        synchronized (nodesKey) {
+            return nodes.add(node);
+        }
 
     }
 
@@ -32,7 +37,9 @@ public class AggregatedResource extends Resource {
      * @param node The node which contains the resource
      */
     public boolean removeNode(Node node) {
-        return nodes.remove(node);
+        synchronized (nodesKey) {
+            return nodes.remove(node);
+        }
     }
 
     /**
@@ -41,7 +48,9 @@ public class AggregatedResource extends Resource {
      * @return The nodes containing this resource
      */
     public Set<Node> getAllNodes() {
-        return new HashSet<>(nodes);
+        synchronized (nodesKey) {
+            return new HashSet<>(nodes);
+        }
     }
 
     /**
@@ -50,6 +59,8 @@ public class AggregatedResource extends Resource {
      * @return The number of resources containing this resource
      */
     public int getNodeCount() {
-        return nodes.size();
+        synchronized (nodesKey) {
+            return nodes.size();
+        }
     }
 }

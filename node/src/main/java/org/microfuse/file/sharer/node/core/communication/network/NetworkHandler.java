@@ -17,8 +17,11 @@ public abstract class NetworkHandler {
 
     private List<NetworkHandlerListener> listenersList;
 
+    private final Object listenersListKey;
+
     public NetworkHandler() {
-        clearListeners();
+        listenersListKey = new Object();
+        listenersList = new ArrayList<>();
     }
 
     /**
@@ -51,7 +54,9 @@ public abstract class NetworkHandler {
      */
     protected void onMessageSendFailed(String toAddress, int toPort, Message message) {
         logger.debug("Failed to send message to " + toAddress + ": " + message);
-        listenersList.forEach(listener -> listener.onMessageSendFailed(toAddress, toPort, message));
+        synchronized (listenersListKey) {
+            listenersList.forEach(listener -> listener.onMessageSendFailed(toAddress, toPort, message));
+        }
     }
 
     /**
@@ -63,7 +68,9 @@ public abstract class NetworkHandler {
      */
     protected void onMessageReceived(String fromAddress, int fromPort, Message message) {
         logger.debug("Message received from " + fromAddress + ": " + message);
-        listenersList.forEach(listener -> listener.onMessageReceived(fromAddress, fromPort, message));
+        synchronized (listenersListKey) {
+            listenersList.forEach(listener -> listener.onMessageReceived(fromAddress, fromPort, message));
+        }
     }
 
     /**
@@ -72,10 +79,12 @@ public abstract class NetworkHandler {
      * @param listener The new listener to be registered
      */
     public void registerListener(NetworkHandlerListener listener) {
-        if (listenersList.add(listener)) {
-            logger.debug("Registered network handler listener " + listener.getClass());
-        } else {
-            logger.debug("Failed to register network handler listener " + listener.getClass());
+        synchronized (listenersListKey) {
+            if (listenersList.add(listener)) {
+                logger.debug("Registered network handler listener " + listener.getClass());
+            } else {
+                logger.debug("Failed to register network handler listener " + listener.getClass());
+            }
         }
     }
 
@@ -85,10 +94,12 @@ public abstract class NetworkHandler {
      * @param listener The listener to be removed
      */
     public void unregisterListener(NetworkHandlerListener listener) {
-        if (listenersList.remove(listener)) {
-            logger.debug("Unregistered network handler listener " + listener.getClass());
-        } else {
-            logger.debug("Failed to unregister network handler listener " + listener.getClass());
+        synchronized (listenersListKey) {
+            if (listenersList.remove(listener)) {
+                logger.debug("Unregistered network handler listener " + listener.getClass());
+            } else {
+                logger.debug("Failed to unregister network handler listener " + listener.getClass());
+            }
         }
     }
 
@@ -96,7 +107,9 @@ public abstract class NetworkHandler {
      * Unregister all existing listener.
      */
     public void clearListeners() {
-        listenersList = new ArrayList<>();
+        synchronized (listenersListKey) {
+            listenersList.clear();
+        }
         logger.debug("Cleared network handler listeners");
     }
 }

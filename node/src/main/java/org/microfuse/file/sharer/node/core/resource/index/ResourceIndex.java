@@ -18,7 +18,10 @@ import java.util.stream.Collectors;
 public class ResourceIndex {
     private Set<OwnedResource> ownedResources;
 
+    private final Object ownedResourcesKey;
+
     public ResourceIndex() {
+        ownedResourcesKey = new Object();
         ownedResources = new HashSet<>();
     }
 
@@ -28,20 +31,7 @@ public class ResourceIndex {
      * @param resource The resource to be added
      */
     public void addResourceToIndex(OwnedResource resource) {
-        ownedResources.stream().parallel()
-                .filter(ownedResource -> ownedResource.equals(resource))
-                .findAny()
-                .ifPresent(ownedResource -> removeResourceFromIndex(resource));
-        ownedResources.add(resource);
-    }
-
-    /**
-     * Add all resources in a collection to the index.
-     *
-     * @param resources The resources to be added
-     */
-    public void addAllResourceToIndex(Collection<OwnedResource> resources) {
-        for (OwnedResource resource : resources) {
+        synchronized (ownedResourcesKey) {
             ownedResources.stream().parallel()
                     .filter(ownedResource -> ownedResource.equals(resource))
                     .findAny()
@@ -51,12 +41,31 @@ public class ResourceIndex {
     }
 
     /**
+     * Add all resources in a collection to the index.
+     *
+     * @param resources The resources to be added
+     */
+    public void addAllResourceToIndex(Collection<OwnedResource> resources) {
+        synchronized (ownedResourcesKey) {
+            for (OwnedResource resource : resources) {
+                ownedResources.stream().parallel()
+                        .filter(ownedResource -> ownedResource.equals(resource))
+                        .findAny()
+                        .ifPresent(ownedResource -> removeResourceFromIndex(resource));
+                ownedResources.add(resource);
+            }
+        }
+    }
+
+    /**
      * Remove entry from the resource index.
      *
      * @param resourceName The name of the resource to be removed
      */
     public void removeResourceFromIndex(String resourceName) {
-       removeResourceFromIndex(new OwnedResource(resourceName));
+        synchronized (ownedResourcesKey) {
+            removeResourceFromIndex(new OwnedResource(resourceName));
+        }
     }
 
     /**
@@ -65,7 +74,9 @@ public class ResourceIndex {
      * @param resource The resource to be removed
      */
     public void removeResourceFromIndex(OwnedResource resource) {
-        ownedResources.remove(resource);
+        synchronized (ownedResourcesKey) {
+            ownedResources.remove(resource);
+        }
     }
 
     /**
@@ -74,7 +85,9 @@ public class ResourceIndex {
      * @return The resources in this index
      */
     public Set<OwnedResource> getAllResourcesInIndex() {
-        return new HashSet<>(ownedResources);
+        synchronized (ownedResourcesKey) {
+            return new HashSet<>(ownedResources);
+        }
     }
 
     /**
@@ -84,21 +97,25 @@ public class ResourceIndex {
      * @return The list of ownedResources matching the resource name
      */
     public Set<OwnedResource> findResources(String resourceName) {
-        return matchResourcesWithName(
-                ownedResources.stream().parallel()
-                        .map(resource -> (Resource) resource)
-                        .collect(Collectors.toSet()),
-                resourceName
-        ).stream().parallel()
-                .map(resource -> (OwnedResource) resource)
-                .collect(Collectors.toSet());
+        synchronized (ownedResourcesKey) {
+            return matchResourcesWithName(
+                    ownedResources.stream().parallel()
+                            .map(resource -> (Resource) resource)
+                            .collect(Collectors.toSet()),
+                    resourceName
+            ).stream().parallel()
+                    .map(resource -> (OwnedResource) resource)
+                    .collect(Collectors.toSet());
+        }
     }
 
     /**
      * Clear the resource index.
      */
     public void clear() {
-        ownedResources.clear();
+        synchronized (ownedResourcesKey) {
+            ownedResources.clear();
+        }
     }
 
     /**

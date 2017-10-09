@@ -18,7 +18,10 @@ import java.util.stream.Collectors;
 public class SuperPeerResourceIndex extends ResourceIndex {
     private Set<AggregatedResource> aggregatedResources;
 
+    private final Object aggregatedResourcesKey;
+
     public SuperPeerResourceIndex() {
+        aggregatedResourcesKey = new Object();
         aggregatedResources = new HashSet<>();
     }
 
@@ -31,7 +34,10 @@ public class SuperPeerResourceIndex extends ResourceIndex {
         AggregatedResource resourceIndexItem = getAggregatedResource(resourceName);
         if (resourceIndexItem == null) {
             resourceIndexItem = new AggregatedResource(resourceName);
-            aggregatedResources.add(resourceIndexItem);
+
+            synchronized (aggregatedResourcesKey) {
+                aggregatedResources.add(resourceIndexItem);
+            }
         }
         resourceIndexItem.addNode(node);
     }
@@ -47,7 +53,9 @@ public class SuperPeerResourceIndex extends ResourceIndex {
         if (resourceIndexItem != null) {
             resourceIndexItem.removeNode(node);
             if (resourceIndexItem.getNodeCount() == 0) {
-                aggregatedResources.remove(resourceIndexItem);
+                synchronized (aggregatedResourcesKey) {
+                    aggregatedResources.remove(resourceIndexItem);
+                }
             }
         }
     }
@@ -59,14 +67,16 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @return The list of resources matching the resource name
      */
     public Set<AggregatedResource> findAggregatedResources(String resourceName) {
-        return matchResourcesWithName(
-                aggregatedResources.stream().parallel()
-                        .map(resource -> (Resource) resource)
-                        .collect(Collectors.toSet()),
-                resourceName
-        ).stream().parallel()
-                .map(resource -> (AggregatedResource) resource)
-                .collect(Collectors.toSet());
+        synchronized (aggregatedResourcesKey) {
+            return matchResourcesWithName(
+                    aggregatedResources.stream().parallel()
+                            .map(resource -> (Resource) resource)
+                            .collect(Collectors.toSet()),
+                    resourceName
+            ).stream().parallel()
+                    .map(resource -> (AggregatedResource) resource)
+                    .collect(Collectors.toSet());
+        }
     }
 
     /**
@@ -74,7 +84,9 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      */
     public void clear() {
         super.clear();
-        aggregatedResources.clear();
+        synchronized (aggregatedResourcesKey) {
+            aggregatedResources.clear();
+        }
     }
 
     /**
@@ -85,9 +97,11 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @return The aggregated resource
      */
     private AggregatedResource getAggregatedResource(String resourceName) {
-        return aggregatedResources.stream().parallel()
-                .filter(resource -> Objects.equals(resource.getName(), resourceName))
-                .findAny()
-                .orElse(null);
+        synchronized (aggregatedResourcesKey) {
+            return aggregatedResources.stream().parallel()
+                    .filter(resource -> Objects.equals(resource.getName(), resourceName))
+                    .findAny()
+                    .orElse(null);
+        }
     }
 }

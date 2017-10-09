@@ -1,8 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,12 +13,13 @@ import java.util.Set;
  * Contains the connections and the previous node in paths the message travels.
  */
 public abstract class RoutingTable {
-    private static final Logger logger = LoggerFactory.getLogger(RoutingTable.class);
-
     private Set<Node> unstructuredNetworkNodes;
     private Node bootstrapServer;
 
+    private final Object unstructuredNetworkNodesKey;
+
     public RoutingTable() {
+        unstructuredNetworkNodesKey = new Object();
         unstructuredNetworkNodes = new HashSet<>();
     }
 
@@ -48,7 +47,9 @@ public abstract class RoutingTable {
      * @param node The node of the new entry
      */
     public void addUnstructuredNetworkRoutingTableEntry(Node node) {
-        unstructuredNetworkNodes.add(node);
+        synchronized (unstructuredNetworkNodesKey) {
+            unstructuredNetworkNodes.add(node);
+        }
     }
 
     /**
@@ -57,7 +58,9 @@ public abstract class RoutingTable {
      * @param nodes The nodes to be added
      */
     public void addAllUnstructuredNetworkRoutingTableEntry(Collection<Node> nodes) {
-        unstructuredNetworkNodes.addAll(nodes);
+        synchronized (unstructuredNetworkNodesKey) {
+            unstructuredNetworkNodes.addAll(nodes);
+        }
     }
 
     /**
@@ -66,7 +69,9 @@ public abstract class RoutingTable {
      * @param node The node of the new entry
      */
     public void removeUnstructuredNetworkRoutingTableEntry(Node node) {
-        unstructuredNetworkNodes.remove(node);
+        synchronized (unstructuredNetworkNodesKey) {
+            unstructuredNetworkNodes.remove(node);
+        }
     }
 
     /**
@@ -75,7 +80,9 @@ public abstract class RoutingTable {
      * @return The list of nodes in the routing table
      */
     public Set<Node> getAllUnstructuredNetworkRoutingTableNodes() {
-        return new HashSet<>(unstructuredNetworkNodes);
+        synchronized (unstructuredNetworkNodesKey) {
+            return new HashSet<>(unstructuredNetworkNodes);
+        }
     }
 
     /**
@@ -86,9 +93,11 @@ public abstract class RoutingTable {
      * @return The Node
      */
     public Node getUnstructuredNetworkRoutingTableNode(String ip, int port) {
-        return unstructuredNetworkNodes.stream().parallel()
-                .filter(node -> Objects.equals(node.getIp(), ip) && node.getPort() == port)
-                .findAny()
-                .orElse(null);
+        synchronized (unstructuredNetworkNodesKey) {
+            return unstructuredNetworkNodes.stream().parallel()
+                    .filter(node -> Objects.equals(node.getIp(), ip) && node.getPort() == port)
+                    .findAny()
+                    .orElse(null);
+        }
     }
 }

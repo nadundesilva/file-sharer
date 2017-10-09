@@ -1,8 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -14,12 +12,15 @@ import java.util.Set;
  * Contains the connections and the previous node in paths the message travels.
  */
 public class SuperPeerRoutingTable extends RoutingTable {
-    private static final Logger logger = LoggerFactory.getLogger(SuperPeerRoutingTable.class);
-
     private Set<Node> superPeerNetworkNodes;
     private Set<Node> assignedOrdinaryPeerNodes;
 
+    private final Object superPeerNetworkNodesKey;
+    private final Object assignedOrdinaryPeerNodesKey;
+
     public SuperPeerRoutingTable() {
+        superPeerNetworkNodesKey = new Object();
+        assignedOrdinaryPeerNodesKey = new Object();
         superPeerNetworkNodes = new HashSet<>();
         assignedOrdinaryPeerNodes = new HashSet<>();
     }
@@ -30,7 +31,9 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @param node   The node of the new entry
      */
     public void addSuperPeerNetworkRoutingTableEntry(Node node) {
-        superPeerNetworkNodes.add(node);
+        synchronized (superPeerNetworkNodesKey) {
+            superPeerNetworkNodes.add(node);
+        }
     }
 
     /**
@@ -39,7 +42,9 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @param node The node of the new entry
      */
     public void removeSuperPeerNetworkRoutingTableEntry(Node node) {
-        superPeerNetworkNodes.remove(node);
+        synchronized (superPeerNetworkNodesKey) {
+            superPeerNetworkNodes.remove(node);
+        }
     }
 
     /**
@@ -48,7 +53,9 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return The list of nodes in the routing table
      */
     public Set<Node> getAllSuperPeerNetworkRoutingTableNodes() {
-        return new HashSet<>(superPeerNetworkNodes);
+        synchronized (superPeerNetworkNodesKey) {
+            return new HashSet<>(superPeerNetworkNodes);
+        }
     }
 
     /**
@@ -59,10 +66,12 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return The Node
      */
     public Node getSuperPeerNetworkRoutingTableNode(String ip, int port) {
-        return superPeerNetworkNodes.stream().parallel()
-                .filter(node -> Objects.equals(node.getIp(), ip) && node.getPort() == port)
-                .findAny()
-                .orElse(null);
+        synchronized (superPeerNetworkNodesKey) {
+            return superPeerNetworkNodes.stream().parallel()
+                    .filter(node -> Objects.equals(node.getIp(), ip) && node.getPort() == port)
+                    .findAny()
+                    .orElse(null);
+        }
     }
 
     /**
@@ -71,7 +80,9 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @param node The node of the new entry
      */
     public void addAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
-        assignedOrdinaryPeerNodes.add(node);
+        synchronized (assignedOrdinaryPeerNodesKey) {
+            assignedOrdinaryPeerNodes.add(node);
+        }
     }
 
     /**
@@ -80,7 +91,9 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @param node The node of the new entry
      */
     public void removeAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
-        assignedOrdinaryPeerNodes.remove(node);
+        synchronized (assignedOrdinaryPeerNodesKey) {
+            assignedOrdinaryPeerNodes.remove(node);
+        }
     }
 
     /**
@@ -89,7 +102,9 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return The list of nodes in the routing table
      */
     public Set<Node> getAllAssignedOrdinaryNetworkRoutingTableNodes() {
-        return new HashSet<>(assignedOrdinaryPeerNodes);
+        synchronized (assignedOrdinaryPeerNodesKey) {
+            return new HashSet<>(assignedOrdinaryPeerNodes);
+        }
     }
 
     /**
@@ -100,9 +115,11 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return The Node
      */
     public Node getAssignedOrdinaryNetworkRoutingTableNode(String ip, int port) {
-        return assignedOrdinaryPeerNodes.stream().parallel()
-                .filter(node -> Objects.equals(node.getIp(), ip) && Objects.equals(node.getPort(), port))
-                .findAny()
-                .orElse(null);
+        synchronized (assignedOrdinaryPeerNodesKey) {
+            return assignedOrdinaryPeerNodes.stream().parallel()
+                    .filter(node -> Objects.equals(node.getIp(), ip) && Objects.equals(node.getPort(), port))
+                    .findAny()
+                    .orElse(null);
+        }
     }
 }

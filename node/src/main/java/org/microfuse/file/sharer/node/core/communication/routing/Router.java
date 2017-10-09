@@ -36,7 +36,10 @@ public class Router implements NetworkHandlerListener {
     private RoutingStrategy routingStrategy;
     private NetworkHandler networkHandler;
 
+    private final Object listenersListKey;
+
     public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy) {
+        listenersListKey = new Object();
         try {
             routingTable = PeerType.getRoutingTableClass(ServiceHolder.getPeerType()).newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
@@ -48,12 +51,11 @@ public class Router implements NetworkHandlerListener {
         this.routingStrategy = routingStrategy;
         this.networkHandler = networkHandler;
         this.listenersList = new ArrayList<>();
-
         this.networkHandler.registerListener(this);
     }
 
     @Override
-    public synchronized void onMessageReceived(String fromAddress, int fromPort, Message message) {
+    public void onMessageReceived(String fromAddress, int fromPort, Message message) {
         MessageType messageType = message.getType();
         if (messageType != null && messageType == MessageType.SER) {
             route(routingTable.getUnstructuredNetworkRoutingTableNode(fromAddress, fromPort), message);
@@ -63,7 +65,7 @@ public class Router implements NetworkHandlerListener {
     }
 
     @Override
-    public synchronized void onMessageSendFailed(String toAddress, int toPort, Message message) {
+    public void onMessageSendFailed(String toAddress, int toPort, Message message) {
         // Marking the node as inactive
         Node receivingNode = routingTable.getUnstructuredNetworkRoutingTableNode(toAddress, toPort);
         if (receivingNode == null && ServiceHolder.getPeerType() == PeerType.SUPER_PEER) {
@@ -84,7 +86,7 @@ public class Router implements NetworkHandlerListener {
      * @param toNode  The node to which the message needs to be sent
      * @param message The message to be sent
      */
-    public synchronized void sendMessage(Node toNode, Message message) {
+    public void sendMessage(Node toNode, Message message) {
         networkHandler.sendMessage(toNode.getIp(), toNode.getPort(), message);
     }
 
@@ -93,7 +95,7 @@ public class Router implements NetworkHandlerListener {
      *
      * @param message  The message to be sent
      */
-    public synchronized void route(Message message) {
+    public void route(Message message) {
         route(null, message);
     }
 
@@ -103,7 +105,7 @@ public class Router implements NetworkHandlerListener {
      * @param fromNode The node from which the message was received by this node
      * @param message  The message to be sent
      */
-    private synchronized void route(Node fromNode, Message message) {
+    private void route(Node fromNode, Message message) {
         MessageType messageType = message.getType();
 
         if (messageType != null && messageType == MessageType.SER) {
@@ -161,7 +163,7 @@ public class Router implements NetworkHandlerListener {
     /**
      * Promote the current node to an ordinary peer.
      */
-    public synchronized void promoteToSuperPeer() {
+    public void promoteToSuperPeer() {
         if (routingTable instanceof OrdinaryPeerRoutingTable) {
             SuperPeerRoutingTable superPeerRoutingTable = new SuperPeerRoutingTable();
             superPeerRoutingTable.setBootstrapServer(routingTable.getBootstrapServer());
@@ -174,7 +176,7 @@ public class Router implements NetworkHandlerListener {
     /**
      * Demote the current node to a super peer.
      */
-    public synchronized void demoteToOrdinaryPeer() {
+    public void demoteToOrdinaryPeer() {
         if (routingTable instanceof SuperPeerRoutingTable) {
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable();
             ordinaryPeerRoutingTable.setBootstrapServer(routingTable.getBootstrapServer());
@@ -189,7 +191,7 @@ public class Router implements NetworkHandlerListener {
      *
      * @param networkHandler The network handler to be used
      */
-    public synchronized void changeNetworkHandler(NetworkHandler networkHandler) {
+    public void changeNetworkHandler(NetworkHandler networkHandler) {
         this.networkHandler = networkHandler;
         logger.info("Network handler changed to " + this.networkHandler.getName());
     }
@@ -199,7 +201,7 @@ public class Router implements NetworkHandlerListener {
      *
      * @param routingStrategy The routing strategy to be used
      */
-    public synchronized void changeRoutingStrategy(RoutingStrategy routingStrategy) {
+    public void changeRoutingStrategy(RoutingStrategy routingStrategy) {
         this.routingStrategy = routingStrategy;
         logger.info("Routing strategy changed to " + this.routingStrategy.getName());
     }
@@ -210,8 +212,10 @@ public class Router implements NetworkHandlerListener {
      * @param message The message that was received
      */
     public void runTasksOnMessageReceived(Message message) {
-        listenersList.stream().parallel()
-                .forEach(routerListener -> routerListener.onMessageReceived(message));
+        synchronized (listenersListKey) {
+            listenersList.stream().parallel()
+                    .forEach(routerListener -> routerListener.onMessageReceived(message));
+        }
     }
 
     /**
@@ -219,7 +223,7 @@ public class Router implements NetworkHandlerListener {
      *
      * @return The routing table
      */
-    public synchronized RoutingTable getRoutingTable() {
+    public RoutingTable getRoutingTable() {
         return routingTable;
     }
 
@@ -233,16 +237,6 @@ public class Router implements NetworkHandlerListener {
     }
 
     /**
-     * Set the routing strategy currently used by this router.
-     *
-     * @param routingStrategy The routing strategy used by this router
-     */
-    public void setRoutingStrategy(RoutingStrategy routingStrategy) {
-        this.routingStrategy = routingStrategy;
-        logger.debug("Changed routing strategy to " + routingStrategy.getName());
-    }
-
-    /**
      * Get the network handler used by this router.
      *
      * @return The network handler used by this router
@@ -252,24 +246,17 @@ public class Router implements NetworkHandlerListener {
     }
 
     /**
-     * Set a new Network handler.
-     *
-     * @param networkHandler The new network handler
-     */
-    public void setNetworkHandler(NetworkHandler networkHandler) {
-        this.networkHandler = networkHandler;
-    }
-
-    /**
      * Register a new listener.
      *
      * @param listener The new listener to be registered
      */
     public void registerListener(RouterListener listener) {
-        if (listenersList.add(listener)) {
-            logger.debug("Registered network handler listener " + listener.getClass());
-        } else {
-            logger.debug("Failed to register network handler listener " + listener.getClass());
+        synchronized (listenersListKey) {
+            if (listenersList.add(listener)) {
+                logger.debug("Registered network handler listener " + listener.getClass());
+            } else {
+                logger.debug("Failed to register network handler listener " + listener.getClass());
+            }
         }
     }
 
@@ -279,10 +266,12 @@ public class Router implements NetworkHandlerListener {
      * @param listener The listener to be removed
      */
     public void unregisterListener(RouterListener listener) {
-        if (listenersList.remove(listener)) {
-            logger.debug("Unregistered network handler listener " + listener.getClass());
-        } else {
-            logger.debug("Failed to unregister network handler listener " + listener.getClass());
+        synchronized (listenersListKey) {
+            if (listenersList.remove(listener)) {
+                logger.debug("Unregistered network handler listener " + listener.getClass());
+            } else {
+                logger.debug("Failed to unregister network handler listener " + listener.getClass());
+            }
         }
     }
 
@@ -290,7 +279,9 @@ public class Router implements NetworkHandlerListener {
      * Unregister all existing listener.
      */
     public void clearListeners() {
-        listenersList = new ArrayList<>();
-        logger.debug("Cleared network handler listeners");
+        synchronized (listenersListKey) {
+            listenersList.clear();
+            logger.debug("Cleared network handler listeners");
+        }
     }
 }
