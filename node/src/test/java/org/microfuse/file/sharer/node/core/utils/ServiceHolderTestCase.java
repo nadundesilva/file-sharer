@@ -1,14 +1,11 @@
-package org.microfuse.file.sharer.node.core;
+package org.microfuse.file.sharer.node.core.utils;
 
 import com.google.common.io.Files;
 import org.microfuse.file.sharer.node.BaseTestCase;
 import org.microfuse.file.sharer.node.commons.Configuration;
-import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerType;
-import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategyType;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
-import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Test Case for org.microfuse.file.sharer.node.core.ServiceHolder class.
+ * Test Case for org.microfuse.file.sharer.node.core.utils.ServiceHolder class.
  */
 public class ServiceHolderTestCase extends BaseTestCase {
     private static final Logger logger = LoggerFactory.getLogger(ServiceHolderTestCase.class);
@@ -75,33 +72,53 @@ public class ServiceHolderTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testGetRouterAtFirstTime() {
-        Router router = ServiceHolder.getRouter();
+    public void testGetBootstrappingManagerAtFirstTime() {
+        BootstrappingManager bootstrappingManager = ServiceHolder.getBootstrappingManager();
 
-        Assert.assertNotNull(router);
+        Assert.assertNotNull(bootstrappingManager);
 
-        Object routingStrategyInternalState = Whitebox.getInternalState(router, "routingStrategy");
-        Assert.assertNotNull(routingStrategyInternalState);
-
-        Object networkHandlerInternalState = Whitebox.getInternalState(router, "networkHandler");
-        Assert.assertNotNull(networkHandlerInternalState);
-        Assert.assertTrue(networkHandlerInternalState instanceof NetworkHandler);
-        NetworkHandler networkHandler = (NetworkHandler) networkHandlerInternalState;
-        Object networkHandlerListenersInternalList = Whitebox.getInternalState(networkHandler, "listenersList");
-        Assert.assertTrue(networkHandlerListenersInternalList instanceof List<?>);
-        List<?> networkHandlerListeners = (List<?>) networkHandlerListenersInternalList;
-        Assert.assertEquals(networkHandlerListeners.size(), 1);
-        Assert.assertTrue(networkHandlerListeners.get(0) == router);
+        Object routerInternalState = Whitebox.getInternalState(bootstrappingManager, "router");
+        Assert.assertNotNull(routerInternalState);
+        Object listenersListInternalState = Whitebox.getInternalState(routerInternalState, "listenersList");
+        Assert.assertTrue(listenersListInternalState instanceof List<?>);
+        List<?> routerListeners = (List<?>) listenersListInternalState;
+        Assert.assertEquals(routerListeners.size(), 1);
+        Assert.assertTrue(routerListeners.get(0) == bootstrappingManager);
     }
 
     @Test
-    public void testGetRouter() {
-        Router initialRouter = ServiceHolder.getRouter();
-        Router finalRouter = ServiceHolder.getRouter();
+    public void testGetBootstrappingManager() {
+        BootstrappingManager initialBootstrappingManager = ServiceHolder.getBootstrappingManager();
+        BootstrappingManager finalBootstrappingManager = ServiceHolder.getBootstrappingManager();
 
-        Assert.assertNotNull(initialRouter);
-        Assert.assertNotNull(finalRouter);
-        Assert.assertTrue(initialRouter == finalRouter);
+        Assert.assertNotNull(initialBootstrappingManager);
+        Assert.assertNotNull(finalBootstrappingManager);
+        Assert.assertTrue(initialBootstrappingManager == finalBootstrappingManager);
+    }
+
+    @Test
+    public void testGetQueryManagerAtFirstTime() {
+        QueryManager queryManager = ServiceHolder.getQueryManager();
+
+        Assert.assertNotNull(queryManager);
+
+        Object routerInternalState = Whitebox.getInternalState(queryManager, "router");
+        Assert.assertNotNull(routerInternalState);
+        Object listenersListInternalState = Whitebox.getInternalState(routerInternalState, "listenersList");
+        Assert.assertTrue(listenersListInternalState instanceof List<?>);
+        List<?> routerListeners = (List<?>) listenersListInternalState;
+        Assert.assertEquals(routerListeners.size(), 1);
+        Assert.assertTrue(routerListeners.get(0) == queryManager);
+    }
+
+    @Test
+    public void testGetQueryManager() {
+        QueryManager initialQueryManager = ServiceHolder.getQueryManager();
+        QueryManager finalQueryManager = ServiceHolder.getQueryManager();
+
+        Assert.assertNotNull(initialQueryManager);
+        Assert.assertNotNull(finalQueryManager);
+        Assert.assertTrue(initialQueryManager == finalQueryManager);
     }
 
     @Test

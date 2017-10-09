@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
-import org.microfuse.file.sharer.node.core.ServiceHolder;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerListener;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
@@ -15,6 +14,7 @@ import org.microfuse.file.sharer.node.core.resource.OwnedResource;
 import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.microfuse.file.sharer.node.core.utils.MessageConstants;
 import org.microfuse.file.sharer.node.core.utils.MessageIndexes;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

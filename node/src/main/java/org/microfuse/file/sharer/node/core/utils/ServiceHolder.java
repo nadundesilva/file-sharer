@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.core;
+package org.microfuse.file.sharer.node.core.utils;
 
 import com.google.common.io.Files;
 import com.google.gson.Gson;
@@ -13,7 +13,6 @@ import org.microfuse.file.sharer.node.core.communication.routing.strategy.Routin
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
-import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +33,8 @@ public class ServiceHolder {
     private static volatile Configuration configuration;
     private static volatile Router router;
     private static volatile ResourceIndex resourceIndex;
+    private static volatile BootstrappingManager bootstrappingManager;
+    private static volatile QueryManager queryManager;
 
     /**
      * Promote the current node to an ordinary peer.
@@ -103,11 +104,68 @@ public class ServiceHolder {
     }
 
     /**
+     * Returns the resource index instance used by this node.
+     * This is not a singleton.
+     *
+     * @return The resource index instance
+     */
+    public static synchronized ResourceIndex getResourceIndex() {
+        if (resourceIndex == null) {
+            try {
+                resourceIndex = PeerType.getResourceIndexClass(getPeerType())
+                        .newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                logger.error("Failed to instantiate resource index for " + getPeerType().getValue()
+                        + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
+                resourceIndex = new ResourceIndex();
+                demoteToOrdinaryPeer();
+            }
+        }
+        return resourceIndex;
+    }
+
+    /**
+     * Get the bootstrapping manager singleton instance.
+     *
+     * @return The Bootstrapping Manager
+     */
+    public static synchronized BootstrappingManager getBootstrappingManager() {
+        if (bootstrappingManager == null) {
+            bootstrappingManager = new BootstrappingManager(getRouter());
+        }
+        return bootstrappingManager;
+    }
+
+    /**
+     * Get the query manager singleton instance.
+     *
+     * @return The Query Manager
+     */
+    public static synchronized QueryManager getQueryManager() {
+        if (queryManager == null) {
+            queryManager = new QueryManager(getRouter());
+        }
+        return queryManager;
+    }
+
+    /**
+     * Return the peer type of this node.
+     *
+     * @return The peer type of the node
+     */
+    public static synchronized PeerType getPeerType() {
+        if (peerType == null) {
+            peerType = PeerType.ORDINARY_PEER;
+        }
+        return peerType;
+    }
+
+    /**
      * Get a singleton instance of the router used by this node.
      *
      * @return The router used by this node
      */
-    public static synchronized Router getRouter() {
+    private static synchronized Router getRouter() {
         if (router == null) {
             NetworkHandler networkHandler;
             try {
@@ -135,39 +193,6 @@ public class ServiceHolder {
             router = new Router(networkHandler, routingStrategy);
         }
         return router;
-    }
-
-    /**
-     * Returns the resource index instance used by this node.
-     * This is not a singleton.
-     *
-     * @return The resource index instance
-     */
-    public static synchronized ResourceIndex getResourceIndex() {
-        if (resourceIndex == null) {
-            try {
-                resourceIndex = PeerType.getResourceIndexClass(getPeerType())
-                        .newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                logger.error("Failed to instantiate resource index for " + getPeerType().getValue()
-                        + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
-                resourceIndex = new ResourceIndex();
-                demoteToOrdinaryPeer();
-            }
-        }
-        return resourceIndex;
-    }
-
-    /**
-     * Return the peer type of this node.
-     *
-     * @return The peer type of the node
-     */
-    public static synchronized PeerType getPeerType() {
-        if (peerType == null) {
-            peerType = PeerType.ORDINARY_PEER;
-        }
-        return peerType;
     }
 
     private ServiceHolder() {   // Preventing from being initiated
