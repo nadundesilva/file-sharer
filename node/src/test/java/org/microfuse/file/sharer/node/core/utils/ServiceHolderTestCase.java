@@ -3,8 +3,13 @@ package org.microfuse.file.sharer.node.core.utils;
 import com.google.common.io.Files;
 import org.microfuse.file.sharer.node.BaseTestCase;
 import org.microfuse.file.sharer.node.commons.Configuration;
+import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerType;
+import org.microfuse.file.sharer.node.core.communication.network.TCPSocketNetworkHandler;
+import org.microfuse.file.sharer.node.core.communication.routing.Router;
+import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategyType;
+import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredRandomWalkRoutingStrategy;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.Logger;
@@ -14,6 +19,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -136,5 +142,107 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertNotNull(initialResourceIndex);
         Assert.assertNotNull(finalResourceIndex);
         Assert.assertTrue(initialResourceIndex == finalResourceIndex);
+    }
+
+    @Test
+    public void testChangeNetworkHandler() {
+        ServiceHolder.getQueryManager();
+
+        Router router = null;
+        try {
+            Field field = ServiceHolder.class.getDeclaredField("router");
+            field.setAccessible(true);
+            Object internalState = field.get(ServiceHolder.class);
+            Assert.assertTrue(internalState instanceof Router);
+            router = (Router) internalState;
+            field.setAccessible(false);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Assert.fail("Test Case Change Network Handler : Failed to fetch router.");
+        }
+
+        Assert.assertNotNull(router);
+
+        NetworkHandler initialNetworkHandler = null;
+        try {
+            Field field = Router.class.getDeclaredField("networkHandler");
+            field.setAccessible(true);
+            Object internalState = field.get(router);
+            Assert.assertTrue(internalState instanceof NetworkHandler);
+            initialNetworkHandler = (NetworkHandler) internalState;
+            field.setAccessible(false);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Assert.fail("Test Case Change Network Handler : Failed to fetch router's network handler.");
+        }
+
+        Assert.assertNotNull(initialNetworkHandler);
+
+        ServiceHolder.changeNetworkHandler(NetworkHandlerType.TCP_SOCKET);
+
+        NetworkHandler finalNetworkHandler = null;
+        try {
+            Field field = Router.class.getDeclaredField("networkHandler");
+            field.setAccessible(true);
+            Object internalState = field.get(router);
+            Assert.assertTrue(internalState instanceof NetworkHandler);
+            finalNetworkHandler = (NetworkHandler) internalState;
+            field.setAccessible(false);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Assert.fail("Test Case Change Network Handler : Failed to fetch router's network handler.");
+        }
+
+        Assert.assertNotNull(finalNetworkHandler);
+        Assert.assertFalse(initialNetworkHandler == finalNetworkHandler);
+        Assert.assertTrue(finalNetworkHandler instanceof TCPSocketNetworkHandler);
+    }
+
+    @Test
+    public void testChangeRoutingStrategy() {
+        ServiceHolder.getQueryManager();
+
+        Router router = null;
+        try {
+            Field field = ServiceHolder.class.getDeclaredField("router");
+            field.setAccessible(true);
+            Object internalState = field.get(ServiceHolder.class);
+            Assert.assertTrue(internalState instanceof Router);
+            router = (Router) internalState;
+            field.setAccessible(false);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Assert.fail("Test Case Change Routing Strategy : Failed to fetch router.");
+        }
+
+        Assert.assertNotNull(router);
+
+        RoutingStrategy initialRoutingStrategy = null;
+        try {
+            Field field = Router.class.getDeclaredField("routingStrategy");
+            field.setAccessible(true);
+            Object internalState = field.get(router);
+            Assert.assertTrue(internalState instanceof RoutingStrategy);
+            initialRoutingStrategy = (RoutingStrategy) internalState;
+            field.setAccessible(false);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Assert.fail("Test Case Change Routing Strategy : Failed to fetch router's routing strategy.");
+        }
+
+        Assert.assertNotNull(initialRoutingStrategy);
+
+        ServiceHolder.changeRoutingStrategy(RoutingStrategyType.UNSTRUCTURED_RANDOM_WALK);
+
+        RoutingStrategy finalRoutingStrategy = null;
+        try {
+            Field field = Router.class.getDeclaredField("routingStrategy");
+            field.setAccessible(true);
+            Object internalState = field.get(router);
+            Assert.assertTrue(internalState instanceof RoutingStrategy);
+            finalRoutingStrategy = (RoutingStrategy) internalState;
+            field.setAccessible(false);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Assert.fail("Test Case Change Routing Strategy : Failed to fetch router's routing strategy.");
+        }
+
+        Assert.assertNotNull(finalRoutingStrategy);
+        Assert.assertFalse(initialRoutingStrategy == finalRoutingStrategy);
+        Assert.assertTrue(finalRoutingStrategy instanceof UnstructuredRandomWalkRoutingStrategy);
     }
 }

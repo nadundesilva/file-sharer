@@ -161,38 +161,74 @@ public class ServiceHolder {
     }
 
     /**
+     * Change the network handler used by the system.
+     *
+     * @param networkHandlerType The network handler type to be used
+     */
+    public static synchronized void changeNetworkHandler(NetworkHandlerType networkHandlerType) {
+        getConfiguration().setNetworkHandlerType(networkHandlerType);
+        getRouter().changeNetworkHandler(instantiateNetworkHandler());
+    }
+
+    /**
+     * Change the network handler used by the system.
+     *
+     * @param routingStrategyType The network handler type to be used
+     */
+    public static synchronized void changeRoutingStrategy(RoutingStrategyType routingStrategyType) {
+        getConfiguration().setRoutingStrategyType(routingStrategyType);
+        getRouter().changeRoutingStrategy(instantiateRoutingStrategy());
+    }
+
+    /**
      * Get a singleton instance of the router used by this node.
      *
      * @return The router used by this node
      */
     private static synchronized Router getRouter() {
         if (router == null) {
-            NetworkHandler networkHandler;
-            try {
-                networkHandler = NetworkHandlerType.getNetworkHandlerClass(getConfiguration().getNetworkHandlerType())
-                        .newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                logger.error("Failed to instantiate " + getConfiguration().getNetworkHandlerType().getValue()
-                        + ". Using " + NetworkHandlerType.TCP_SOCKET.getValue() + " instead.", e);
-                getConfiguration().setNetworkHandlerType(NetworkHandlerType.TCP_SOCKET);
-                networkHandler = new TCPSocketNetworkHandler();
-            }
-
-            RoutingStrategy routingStrategy;
-            try {
-                routingStrategy = RoutingStrategyType
-                        .getRoutingStrategyClass(getConfiguration().getRoutingStrategyType())
-                        .newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                logger.error("Failed to instantiate " + getConfiguration().getRoutingStrategyType().getValue()
-                        + ". Using " + RoutingStrategyType.UNSTRUCTURED_FLOODING.getValue() + " instead.", e);
-                getConfiguration().setRoutingStrategyType(RoutingStrategyType.UNSTRUCTURED_FLOODING);
-                routingStrategy = new UnstructuredFloodingRoutingStrategy();
-            }
-
-            router = new Router(networkHandler, routingStrategy);
+            router = new Router(instantiateNetworkHandler(), instantiateRoutingStrategy());
         }
         return router;
+    }
+
+    /**
+     * Instantiate network handler based on configuration.
+     *
+     * @return The network handler
+     */
+    private static synchronized NetworkHandler instantiateNetworkHandler() {
+        NetworkHandler networkHandler;
+        try {
+            networkHandler = NetworkHandlerType.getNetworkHandlerClass(getConfiguration().getNetworkHandlerType())
+                    .newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            logger.error("Failed to instantiate " + getConfiguration().getNetworkHandlerType().getValue()
+                    + ". Using " + NetworkHandlerType.TCP_SOCKET.getValue() + " instead.", e);
+            getConfiguration().setNetworkHandlerType(NetworkHandlerType.TCP_SOCKET);
+            networkHandler = new TCPSocketNetworkHandler();
+        }
+        return networkHandler;
+    }
+
+    /**
+     * Instantiate routing strategy based on configuration.
+     *
+     * @return The routing strategy
+     */
+    private static synchronized RoutingStrategy instantiateRoutingStrategy() {
+        RoutingStrategy routingStrategy;
+        try {
+            routingStrategy = RoutingStrategyType
+                    .getRoutingStrategyClass(getConfiguration().getRoutingStrategyType())
+                    .newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            logger.error("Failed to instantiate " + getConfiguration().getRoutingStrategyType().getValue()
+                    + ". Using " + RoutingStrategyType.UNSTRUCTURED_FLOODING.getValue() + " instead.", e);
+            getConfiguration().setRoutingStrategyType(RoutingStrategyType.UNSTRUCTURED_FLOODING);
+            routingStrategy = new UnstructuredFloodingRoutingStrategy();
+        }
+        return routingStrategy;
     }
 
     private ServiceHolder() {   // Preventing from being initiated

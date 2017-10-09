@@ -185,6 +185,26 @@ public class Router implements NetworkHandlerListener {
     }
 
     /**
+     * Change the network handler used by the router.
+     *
+     * @param networkHandler The network handler to be used
+     */
+    public synchronized void changeNetworkHandler(NetworkHandler networkHandler) {
+        this.networkHandler = networkHandler;
+        logger.info("Network handler changed to " + this.networkHandler.getName());
+    }
+
+    /**
+     * Change the routing strategy used by the router.
+     *
+     * @param routingStrategy The routing strategy to be used
+     */
+    public synchronized void changeRoutingStrategy(RoutingStrategy routingStrategy) {
+        this.routingStrategy = routingStrategy;
+        logger.info("Routing strategy changed to " + this.routingStrategy.getName());
+    }
+
+    /**
      * Run tasks to be run when a message intended for this node is received.
      *
      * @param message The message that was received

@@ -20,7 +20,8 @@ public class BaseTestCase {
     @BeforeMethod
     public void baseInitializeMethod() {
         // Resetting ServiceHolder singleton fields
-        List<String> managerFields = Arrays.asList("configuration", "router", "resourceIndex", "peerType");
+        List<String> managerFields = Arrays.asList("configuration", "router", "resourceIndex", "peerType",
+                "queryManager", "bootstrappingManager");
         managerFields.forEach(managerField -> {
             try {
                 Field field = ServiceHolder.class.getDeclaredField(managerField);
