@@ -3,10 +3,14 @@ package org.microfuse.file.sharer.node.core.resource.index;
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
 import org.microfuse.file.sharer.node.core.resource.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
@@ -16,12 +20,14 @@ import java.util.stream.Collectors;
  * Indexes resources owned by the assigned ordinary peers.
  */
 public class SuperPeerResourceIndex extends ResourceIndex {
+    private static final Logger logger = LoggerFactory.getLogger(SuperPeerResourceIndex.class);
+
     private Set<AggregatedResource> aggregatedResources;
 
-    private final Object aggregatedResourcesKey;
+    private final ReadWriteLock aggregatedResourcesLock;
 
     public SuperPeerResourceIndex() {
-        aggregatedResourcesKey = new Object();
+        aggregatedResourcesLock = new ReentrantReadWriteLock();
         aggregatedResources = new HashSet<>();
     }
 
@@ -31,12 +37,22 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @param resourceName The resource to be added
      */
     public void addResourceToAggregatedIndex(String resourceName, Node node) {
+        boolean isSuccessful;
         AggregatedResource resourceIndexItem = getAggregatedResource(resourceName);
         if (resourceIndexItem == null) {
             resourceIndexItem = new AggregatedResource(resourceName);
 
-            synchronized (aggregatedResourcesKey) {
-                aggregatedResources.add(resourceIndexItem);
+            aggregatedResourcesLock.writeLock().lock();
+            try {
+                isSuccessful = aggregatedResources.add(resourceIndexItem);
+                if (isSuccessful) {
+                    logger.debug("Added resource " + resourceIndexItem.toString() + " to aggregated resources.");
+                } else {
+                    logger.debug("Failed to add resource " + resourceIndexItem.toString()
+                            + " to aggregated resources.");
+                }
+            } finally {
+                aggregatedResourcesLock.writeLock().unlock();
             }
         }
         resourceIndexItem.addNode(node);
@@ -48,16 +64,27 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @param resourceName The resource to be removed
      * @param node         The node which contains the resource
      */
-    public void removeResourceFromAggregatedIndex(String resourceName, Node node) {
+    public boolean removeResourceFromAggregatedIndex(String resourceName, Node node) {
+        boolean isSuccessful = false;
         AggregatedResource resourceIndexItem = getAggregatedResource(resourceName);
         if (resourceIndexItem != null) {
-            resourceIndexItem.removeNode(node);
+            isSuccessful = resourceIndexItem.removeNode(node);
             if (resourceIndexItem.getNodeCount() == 0) {
-                synchronized (aggregatedResourcesKey) {
-                    aggregatedResources.remove(resourceIndexItem);
+                aggregatedResourcesLock.writeLock().lock();
+                try {
+                    if (aggregatedResources.remove(resourceIndexItem)) {
+                        logger.debug("Removed resource " + resourceIndexItem.toString()
+                                + " from aggregated resources since it does not have any more nodes.");
+                    } else {
+                        logger.debug("Failed to remove resource " + resourceIndexItem.toString()
+                                + " from aggregated resources although it does not have any more nodes.");
+                    }
+                } finally {
+                    aggregatedResourcesLock.writeLock().unlock();
                 }
             }
         }
+        return isSuccessful;
     }
 
     /**
@@ -67,8 +94,10 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @return The list of resources matching the resource name
      */
     public Set<AggregatedResource> findAggregatedResources(String resourceName) {
-        synchronized (aggregatedResourcesKey) {
-            return matchResourcesWithName(
+        Set<AggregatedResource> requestedResource;
+        aggregatedResourcesLock.readLock().lock();
+        try {
+            requestedResource = matchResourcesWithName(
                     aggregatedResources.stream().parallel()
                             .map(resource -> (Resource) resource)
                             .collect(Collectors.toSet()),
@@ -76,7 +105,10 @@ public class SuperPeerResourceIndex extends ResourceIndex {
             ).stream().parallel()
                     .map(resource -> (AggregatedResource) resource)
                     .collect(Collectors.toSet());
+        } finally {
+            aggregatedResourcesLock.readLock().unlock();
         }
+        return requestedResource;
     }
 
     /**
@@ -84,8 +116,12 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      */
     public void clear() {
         super.clear();
-        synchronized (aggregatedResourcesKey) {
+        aggregatedResourcesLock.writeLock().lock();
+        try {
             aggregatedResources.clear();
+            logger.debug("Cleared aggregated resources.");
+        } finally {
+            aggregatedResourcesLock.writeLock().unlock();
         }
     }
 
@@ -97,11 +133,16 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @return The aggregated resource
      */
     private AggregatedResource getAggregatedResource(String resourceName) {
-        synchronized (aggregatedResourcesKey) {
-            return aggregatedResources.stream().parallel()
+        AggregatedResource requestedResource;
+        aggregatedResourcesLock.readLock().lock();
+        try {
+            requestedResource = aggregatedResources.stream().parallel()
                     .filter(resource -> Objects.equals(resource.getName(), resourceName))
                     .findAny()
                     .orElse(null);
+        } finally {
+            aggregatedResourcesLock.readLock().unlock();
         }
+        return requestedResource;
     }
 }

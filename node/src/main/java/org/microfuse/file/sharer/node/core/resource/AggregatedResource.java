@@ -1,21 +1,27 @@
 package org.microfuse.file.sharer.node.core.resource;
 
 import org.microfuse.file.sharer.node.commons.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Resources stored by the ordinary peers assigned to this super peer node.
  */
 public class AggregatedResource extends Resource {
+    private static final Logger logger = LoggerFactory.getLogger(AggregatedResource.class);
+
     private Set<Node> nodes;
 
-    private final Object nodesKey;
+    private final ReadWriteLock nodeLock;
 
     public AggregatedResource(String name) {
         super(name);
-        nodesKey = new Object();
+        nodeLock = new ReentrantReadWriteLock();
         nodes = new HashSet<>();
     }
 
@@ -25,10 +31,19 @@ public class AggregatedResource extends Resource {
      * @param node The node which contains the resource
      */
     public boolean addNode(Node node) {
-        synchronized (nodesKey) {
-            return nodes.add(node);
+        boolean isSuccessful;
+        nodeLock.writeLock().lock();
+        try {
+            isSuccessful = nodes.add(node);
+            if (isSuccessful) {
+                logger.debug("Added node " + node.toString() + " to aggregated resource " + toString());
+            } else {
+                logger.debug("Failed to add node " + node.toString() + " to aggregated resource " + toString());
+            }
+        } finally {
+            nodeLock.writeLock().unlock();
         }
-
+        return isSuccessful;
     }
 
     /**
@@ -37,9 +52,19 @@ public class AggregatedResource extends Resource {
      * @param node The node which contains the resource
      */
     public boolean removeNode(Node node) {
-        synchronized (nodesKey) {
-            return nodes.remove(node);
+        boolean isSuccessful;
+        nodeLock.writeLock().lock();
+        try {
+            isSuccessful = nodes.remove(node);
+            if (isSuccessful) {
+                logger.debug("Removed node " + node.toString() + " from aggregated resource " + toString());
+            } else {
+                logger.debug("Failed to remove node " + node.toString() + " from aggregated resource " + toString());
+            }
+        } finally {
+            nodeLock.writeLock().unlock();
         }
+        return isSuccessful;
     }
 
     /**
@@ -48,9 +73,7 @@ public class AggregatedResource extends Resource {
      * @return The nodes containing this resource
      */
     public Set<Node> getAllNodes() {
-        synchronized (nodesKey) {
-            return new HashSet<>(nodes);
-        }
+        return new HashSet<>(nodes);
     }
 
     /**
@@ -59,8 +82,13 @@ public class AggregatedResource extends Resource {
      * @return The number of resources containing this resource
      */
     public int getNodeCount() {
-        synchronized (nodesKey) {
-            return nodes.size();
+        int nodesCount;
+        nodeLock.readLock().lock();
+        try {
+            nodesCount = nodes.size();
+        } finally {
+            nodeLock.readLock().unlock();
         }
+        return nodesCount;
     }
 }

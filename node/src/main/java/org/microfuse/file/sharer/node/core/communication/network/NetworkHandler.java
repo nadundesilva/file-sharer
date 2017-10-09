@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * The Network Handler SuperClass.
@@ -17,10 +19,10 @@ public abstract class NetworkHandler {
 
     private List<NetworkHandlerListener> listenersList;
 
-    private final Object listenersListKey;
+    private final ReadWriteLock listenersListLock;
 
     public NetworkHandler() {
-        listenersListKey = new Object();
+        listenersListLock = new ReentrantReadWriteLock();
         listenersList = new ArrayList<>();
     }
 
@@ -54,8 +56,11 @@ public abstract class NetworkHandler {
      */
     protected void onMessageSendFailed(String toAddress, int toPort, Message message) {
         logger.debug("Failed to send message to " + toAddress + ": " + message);
-        synchronized (listenersListKey) {
+        listenersListLock.readLock().lock();
+        try {
             listenersList.forEach(listener -> listener.onMessageSendFailed(toAddress, toPort, message));
+        } finally {
+            listenersListLock.readLock().unlock();
         }
     }
 
@@ -68,8 +73,11 @@ public abstract class NetworkHandler {
      */
     protected void onMessageReceived(String fromAddress, int fromPort, Message message) {
         logger.debug("Message received from " + fromAddress + ": " + message);
-        synchronized (listenersListKey) {
+        listenersListLock.readLock().lock();
+        try {
             listenersList.forEach(listener -> listener.onMessageReceived(fromAddress, fromPort, message));
+        } finally {
+            listenersListLock.readLock().unlock();
         }
     }
 
@@ -78,14 +86,20 @@ public abstract class NetworkHandler {
      *
      * @param listener The new listener to be registered
      */
-    public void registerListener(NetworkHandlerListener listener) {
-        synchronized (listenersListKey) {
-            if (listenersList.add(listener)) {
+    public boolean registerListener(NetworkHandlerListener listener) {
+        boolean isSuccessul;
+        listenersListLock.writeLock().lock();
+        try {
+            isSuccessul = listenersList.add(listener);
+            if (isSuccessul) {
                 logger.debug("Registered network handler listener " + listener.getClass());
             } else {
                 logger.debug("Failed to register network handler listener " + listener.getClass());
             }
+        } finally {
+            listenersListLock.writeLock().unlock();
         }
+        return isSuccessul;
     }
 
     /**
@@ -94,12 +108,15 @@ public abstract class NetworkHandler {
      * @param listener The listener to be removed
      */
     public void unregisterListener(NetworkHandlerListener listener) {
-        synchronized (listenersListKey) {
+        listenersListLock.writeLock().lock();
+        try {
             if (listenersList.remove(listener)) {
                 logger.debug("Unregistered network handler listener " + listener.getClass());
             } else {
                 logger.debug("Failed to unregister network handler listener " + listener.getClass());
             }
+        } finally {
+            listenersListLock.writeLock().unlock();
         }
     }
 
@@ -107,10 +124,13 @@ public abstract class NetworkHandler {
      * Unregister all existing listener.
      */
     public void clearListeners() {
-        synchronized (listenersListKey) {
+        listenersListLock.writeLock().lock();
+        try {
             listenersList.clear();
+            logger.debug("Cleared network handler listeners");
+        } finally {
+            listenersListLock.writeLock().unlock();
         }
-        logger.debug("Cleared network handler listeners");
     }
 }
 

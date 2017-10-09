@@ -1,10 +1,14 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * The routing table containing the node information for super peers.
@@ -12,15 +16,17 @@ import java.util.Set;
  * Contains the connections and the previous node in paths the message travels.
  */
 public class SuperPeerRoutingTable extends RoutingTable {
+    private static final Logger logger = LoggerFactory.getLogger(SuperPeerRoutingTable.class);
+
     private Set<Node> superPeerNetworkNodes;
     private Set<Node> assignedOrdinaryPeerNodes;
 
-    private final Object superPeerNetworkNodesKey;
-    private final Object assignedOrdinaryPeerNodesKey;
+    private final ReadWriteLock superPeerNetworkNodesLock;
+    private final ReadWriteLock assignedOrdinaryPeerNodesLock;
 
     public SuperPeerRoutingTable() {
-        superPeerNetworkNodesKey = new Object();
-        assignedOrdinaryPeerNodesKey = new Object();
+        superPeerNetworkNodesLock = new ReentrantReadWriteLock();
+        assignedOrdinaryPeerNodesLock = new ReentrantReadWriteLock();
         superPeerNetworkNodes = new HashSet<>();
         assignedOrdinaryPeerNodes = new HashSet<>();
     }
@@ -30,10 +36,20 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @param node   The node of the new entry
      */
-    public void addSuperPeerNetworkRoutingTableEntry(Node node) {
-        synchronized (superPeerNetworkNodesKey) {
-            superPeerNetworkNodes.add(node);
+    public boolean addSuperPeerNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessul;
+        superPeerNetworkNodesLock.writeLock().lock();
+        try {
+            isSuccessul = superPeerNetworkNodes.add(node);
+            if (isSuccessul) {
+                logger.debug("Added node " + node.toString() + " to super peer network.");
+            } else {
+                logger.debug("Failed to add node " + node.toString() + " to super peer network.");
+            }
+        } finally {
+            superPeerNetworkNodesLock.writeLock().unlock();
         }
+        return isSuccessul;
     }
 
     /**
@@ -41,10 +57,20 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @param node The node of the new entry
      */
-    public void removeSuperPeerNetworkRoutingTableEntry(Node node) {
-        synchronized (superPeerNetworkNodesKey) {
-            superPeerNetworkNodes.remove(node);
+    public boolean removeSuperPeerNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        superPeerNetworkNodesLock.writeLock().lock();
+        try {
+            isSuccessful = superPeerNetworkNodes.remove(node);
+            if (isSuccessful) {
+                logger.debug("Removed node " + node.toString() + " from super peer network.");
+            } else {
+                logger.debug("Failed to remove node " + node.toString() + " from super peer network.");
+            }
+        } finally {
+            superPeerNetworkNodesLock.writeLock().unlock();
         }
+        return isSuccessful;
     }
 
     /**
@@ -53,9 +79,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return The list of nodes in the routing table
      */
     public Set<Node> getAllSuperPeerNetworkRoutingTableNodes() {
-        synchronized (superPeerNetworkNodesKey) {
-            return new HashSet<>(superPeerNetworkNodes);
-        }
+        return new HashSet<>(superPeerNetworkNodes);
     }
 
     /**
@@ -66,12 +90,17 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return The Node
      */
     public Node getSuperPeerNetworkRoutingTableNode(String ip, int port) {
-        synchronized (superPeerNetworkNodesKey) {
-            return superPeerNetworkNodes.stream().parallel()
+        Node requestedNode;
+        superPeerNetworkNodesLock.readLock().lock();
+        try {
+            requestedNode = superPeerNetworkNodes.stream().parallel()
                     .filter(node -> Objects.equals(node.getIp(), ip) && node.getPort() == port)
                     .findAny()
                     .orElse(null);
+        } finally {
+            superPeerNetworkNodesLock.readLock().unlock();
         }
+        return requestedNode;
     }
 
     /**
@@ -79,10 +108,20 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @param node The node of the new entry
      */
-    public void addAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
-        synchronized (assignedOrdinaryPeerNodesKey) {
-            assignedOrdinaryPeerNodes.add(node);
+    public boolean addAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        assignedOrdinaryPeerNodesLock.writeLock().lock();
+        try {
+            isSuccessful = assignedOrdinaryPeerNodes.add(node);
+            if (isSuccessful) {
+                logger.debug("Added node " + node.toString() + " to assigned ordinary peers.");
+            } else {
+                logger.debug("Failed to add node " + node.toString() + " to assigned ordinary peers.");
+            }
+        } finally {
+            assignedOrdinaryPeerNodesLock.writeLock().unlock();
         }
+        return isSuccessful;
     }
 
     /**
@@ -90,10 +129,20 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @param node The node of the new entry
      */
-    public void removeAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
-        synchronized (assignedOrdinaryPeerNodesKey) {
-            assignedOrdinaryPeerNodes.remove(node);
+    public boolean removeAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        assignedOrdinaryPeerNodesLock.writeLock().lock();
+        try {
+            isSuccessful = assignedOrdinaryPeerNodes.remove(node);
+            if (isSuccessful) {
+                logger.debug("Remove node " + node.toString() + " from assigned ordinary peers.");
+            } else {
+                logger.debug("Failed to remove node " + node.toString() + " from assigned ordinary peers.");
+            }
+        } finally {
+            assignedOrdinaryPeerNodesLock.writeLock().unlock();
         }
+        return isSuccessful;
     }
 
     /**
@@ -102,9 +151,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return The list of nodes in the routing table
      */
     public Set<Node> getAllAssignedOrdinaryNetworkRoutingTableNodes() {
-        synchronized (assignedOrdinaryPeerNodesKey) {
-            return new HashSet<>(assignedOrdinaryPeerNodes);
-        }
+        return new HashSet<>(assignedOrdinaryPeerNodes);
     }
 
     /**
@@ -115,11 +162,16 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return The Node
      */
     public Node getAssignedOrdinaryNetworkRoutingTableNode(String ip, int port) {
-        synchronized (assignedOrdinaryPeerNodesKey) {
-            return assignedOrdinaryPeerNodes.stream().parallel()
+        Node requestedNode;
+        assignedOrdinaryPeerNodesLock.readLock().lock();
+        try {
+            requestedNode = assignedOrdinaryPeerNodes.stream().parallel()
                     .filter(node -> Objects.equals(node.getIp(), ip) && Objects.equals(node.getPort(), port))
                     .findAny()
                     .orElse(null);
+        } finally {
+            assignedOrdinaryPeerNodesLock.readLock().unlock();
         }
+        return requestedNode;
     }
 }

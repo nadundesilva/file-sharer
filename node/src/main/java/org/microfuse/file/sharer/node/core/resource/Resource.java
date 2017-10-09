@@ -17,6 +17,11 @@ public abstract class Resource {
     }
 
     @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
     public boolean equals(Object object) {
         if (object != null && object instanceof Resource) {
             Resource nodeObject = (Resource) object;
