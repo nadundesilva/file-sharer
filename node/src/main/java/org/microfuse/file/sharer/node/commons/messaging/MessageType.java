@@ -21,7 +21,13 @@ public enum MessageType {
 
     // Only used by the bootstrap server
     ECHO("ECHO"),
-    ECHO_OK("ECHOK");
+    ECHO_OK("ECHOK"),
+
+    // Extended message types
+    SER_SUPER_PEER("SERSUPERPEER"),
+    SER_SUPER_PEER_OK("SERSUPERPEEROK"),
+    JOIN_SUPER_PEER("JOINSUPERPEER"),
+    JOIN_SUPER_PEER_OK("JOINSUPERPEEROK");
 
     /**
      * Constructor setting the message identifier.

@@ -10,6 +10,10 @@ public class Node {
     private int port;
     private boolean isAlive;
 
+    public Node() {
+        isAlive = true;
+    }
+
     public String getIp() {
         return ip;
     }

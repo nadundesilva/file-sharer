@@ -120,7 +120,7 @@ public abstract class RoutingTable {
     }
 
     /**
-     * Get all the nodes registered in the routing table
+     * Get all the nodes registered in the routing table.
      *
      * @return The nodes registered
      */

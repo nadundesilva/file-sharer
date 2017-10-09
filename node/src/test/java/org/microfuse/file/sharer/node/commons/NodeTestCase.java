@@ -26,6 +26,11 @@ public class NodeTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testIsAlive() {
+        Assert.assertTrue(node.isAlive());
+    }
+
+    @Test
     public void testEquals() {
         Assert.assertTrue(node.equals(nodeCopy));
     }

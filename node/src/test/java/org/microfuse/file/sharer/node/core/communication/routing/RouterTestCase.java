@@ -33,7 +33,8 @@ public class RouterTestCase extends BaseTestCase {
     private RoutingTable spyRoutingTable;
     private Node fromNode;
     private Node sourceNode;
-    private Message message;
+    private Message serMessage;
+    private Message serSuperPeerMessage;
 
     @BeforeMethod
     public void initializeMethod() {
@@ -41,16 +42,20 @@ public class RouterTestCase extends BaseTestCase {
         routingStrategy = Mockito.mock(RoutingStrategy.class);
         router = Mockito.spy(new Router(networkHandler, routingStrategy));
 
-        fromNode = Mockito.mock(Node.class);
-        Mockito.when(fromNode.getIp()).thenReturn("192.168.1.2");
-        Mockito.when(fromNode.getPort()).thenReturn(4532);
+        fromNode = new Node();
+        fromNode.setIp("192.168.1.2");
+        fromNode.setPort(4532);
 
-        sourceNode = Mockito.mock(Node.class);
-        Mockito.when(sourceNode.getIp()).thenReturn("192.168.1.3");
-        Mockito.when(sourceNode.getPort()).thenReturn(6534);
+        sourceNode = new Node();
+        sourceNode.setIp("192.168.1.3");
+        sourceNode.setPort(6534);
 
-        message = Message.parse("0049 SER " + sourceNode.getIp()
+        serMessage = Message.parse("0049 " + MessageType.SER.getValue() + " " + sourceNode.getIp()
                 + " " + sourceNode.getPort() + " \"Lord of the Rings\" "
+                + Integer.toString(Constants.DEFAULT_TIME_TO_LIVE - 1));
+
+        serSuperPeerMessage = Message.parse("0036 " + MessageType.SER_SUPER_PEER.getValue() + " " + sourceNode.getIp()
+                + " " + sourceNode.getPort() + " "
                 + Integer.toString(Constants.DEFAULT_TIME_TO_LIVE - 1));
 
         RoutingTable routingTable = router.getRoutingTable();
@@ -72,43 +77,29 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.when(toNode.getIp()).thenReturn("192.168.1.2");
         Mockito.when(toNode.getPort()).thenReturn(4532);
 
-        router.sendMessage(toNode, message);
+        router.sendMessage(toNode, serMessage);
 
-        Mockito.verify(networkHandler, Mockito.times(1)).sendMessage(toNode.getIp(), toNode.getPort(), message);
+        Mockito.verify(networkHandler, Mockito.times(1)).sendMessage(toNode.getIp(), toNode.getPort(), serMessage);
     }
 
     @Test
     public void testRoute() {
-        router.route(message);
+        router.route(serMessage);
 
-        Mockito.verify(routingStrategy, Mockito.times(1)).getForwardingNodes(spyRoutingTable, null, message);
-    }
-
-    @Test
-    public void testOnMessageReceived() {
-        Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
-                .thenReturn(fromNode);
-
-        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), message);
-
-        Message usedMessage = Message.parse(message.toString());
-        usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
-                Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT))));
-
-        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
+        Mockito.verify(routingStrategy, Mockito.times(1)).getForwardingNodes(spyRoutingTable, null, serMessage);
     }
 
     @Test
     public void testOnMessageReceivedWithNonSerTypeMessage() {
-        message.setType(MessageType.REG);
+        serMessage.setType(MessageType.REG);
 
-        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), message);
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
         Node usedNode = new Node();
         usedNode.setIp(fromNode.getIp());
         usedNode.setPort(fromNode.getPort());
 
-        Message usedMessage = Message.parse(message.toString());
+        Message usedMessage = Message.parse(serMessage.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT))));
 
@@ -116,54 +107,70 @@ public class RouterTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testOnMessageReceivedWithResourceInOwnedResources() {
-        OwnedResource ownedResource = new OwnedResource(message.getData(MessageIndexes.SER_FILE_NAME));
+    public void testOnSerMessageReceived() {
+        Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
+                .thenReturn(fromNode);
+
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
+
+        Message usedMessage = Message.parse(serMessage.toString());
+        usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
+                Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT))));
+
+        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
+    }
+
+    @Test
+    public void testOnSerMessageReceivedWithResourceInOwnedResources() {
+        OwnedResource ownedResource = new OwnedResource(serMessage.getData(MessageIndexes.SER_FILE_NAME));
         ServiceHolder.getResourceIndex().addResourceToIndex(ownedResource);
 
-        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), message);
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Message message = Message.parse("0049 SEROK 1 " + ServiceHolder.getConfiguration().getIp()
+        Message message = Message.parse("0047 SEROK 1 " + ServiceHolder.getConfiguration().getIp()
                 + " " + Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort())
-                + " " + Integer.toString(Constants.INITIAL_HOP_COUNT) + " \"" + ownedResource.getName() + "\"");
+                + " \"" + ownedResource.getName() + "\"");
 
         Mockito.verify(networkHandler, Mockito.times(1))
                 .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message);
     }
 
     @Test
-    public void testOnMessageReceivedWithResourceNotInOwnedResourcesWithHopCountLessThanTimeToLive() {
+    public void testOnSerMessageReceivedWithResourceNotInOwnedResourcesWithHopCountLessThanTimeToLive() {
         Set<Node> nodes = new HashSet<>();
         Node node = Mockito.mock(Node.class);
         Mockito.when(node.getIp()).thenReturn("192.168.1.5");
         Mockito.when(node.getPort()).thenReturn(7453);
         nodes.add(node);
 
-        message.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(Constants.DEFAULT_TIME_TO_LIVE - 1));
+        serMessage.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(Constants.DEFAULT_TIME_TO_LIVE - 1));
 
-        Mockito.when(routingStrategy.getForwardingNodes(spyRoutingTable, fromNode, message))
+        Mockito.when(routingStrategy.getForwardingNodes(spyRoutingTable, fromNode, serMessage))
                 .thenReturn(nodes);
 
-        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), message);
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Mockito.verify(networkHandler, Mockito.times(0)).sendMessage(node.getIp(), node.getPort(), message);
+        Mockito.verify(routingStrategy, Mockito.times(1)).getForwardingNodes(spyRoutingTable, fromNode, serMessage);
+        Mockito.verify(networkHandler, Mockito.times(1)).sendMessage(node.getIp(), node.getPort(), serMessage);
     }
 
     @Test
-    public void testOnMessageReceivedWithResourceNotInOwnedResourcesWithHopCountHigherThanTimeToLive() {
+    public void testOnSerMessageReceivedWithResourceNotInOwnedResourcesWithHopCountHigherThanTimeToLive() {
         Set<Node> nodes = new HashSet<>();
         Node node = Mockito.mock(Node.class);
         Mockito.when(node.getIp()).thenReturn("192.168.1.5");
         Mockito.when(node.getPort()).thenReturn(7453);
         nodes.add(node);
 
-        message.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(Constants.DEFAULT_TIME_TO_LIVE));
+        serMessage.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(Constants.DEFAULT_TIME_TO_LIVE));
 
-        Mockito.when(routingStrategy.getForwardingNodes(spyRoutingTable, fromNode, message))
+        Mockito.when(routingStrategy.getForwardingNodes(spyRoutingTable, fromNode, serMessage))
                 .thenReturn(nodes);
 
-        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), message);
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Message usedMessage = Message.parse("0049 SEROK " + MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT
+        Message usedMessage = Message.parse("0049 " + MessageType.SER_OK.getValue()
+                + " " + MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT
                 + " " + MessageConstants.SER_OK_NOT_FOUND_IP
                 + " " + MessageConstants.SER_OK_NOT_FOUND_PORT);
 
@@ -173,12 +180,13 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnMessageSendFailedInUnstructuredNetworkOnly() {
+        fromNode = Mockito.spy(fromNode);
         Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(fromNode);
 
-        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message);
+        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Message usedMessage = Message.parse(message.toString());
+        Message usedMessage = Message.parse(serMessage.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
@@ -194,14 +202,15 @@ public class RouterTestCase extends BaseTestCase {
         SuperPeerRoutingTable superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable());
         Whitebox.setInternalState(router, "routingTable", superPeerRoutingTable);
 
+        fromNode = Mockito.spy(fromNode);
         Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(null);
         Mockito.when(superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(fromNode);
 
-        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message);
+        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Message usedMessage = Message.parse(message.toString());
+        Message usedMessage = Message.parse(serMessage.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
@@ -217,6 +226,7 @@ public class RouterTestCase extends BaseTestCase {
         SuperPeerRoutingTable superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable());
         Whitebox.setInternalState(router, "routingTable", superPeerRoutingTable);
 
+        fromNode = Mockito.spy(fromNode);
         Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(null);
         Mockito.when(superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
@@ -225,14 +235,89 @@ public class RouterTestCase extends BaseTestCase {
                 superPeerRoutingTable.getAssignedOrdinaryNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(fromNode);
 
-        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), message);
+        router.onMessageSendFailed(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Message usedMessage = Message.parse(message.toString());
+        Message usedMessage = Message.parse(serMessage.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
         Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
+    }
+
+    @Test
+    public void testOnSerSuperPeerMessageReceived() {
+        serSuperPeerMessage.setType(MessageType.SER_SUPER_PEER);
+
+        Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
+                .thenReturn(fromNode);
+
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serSuperPeerMessage);
+
+        Message usedMessage = Message.parse(serSuperPeerMessage.toString());
+        usedMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
+                Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT))));
+
+        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
+    }
+
+    @Test
+    public void testOnSerSuperPeerMessageReceivedToSuperPeer() {
+        ServiceHolder.promoteToSuperPeer();
+
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serSuperPeerMessage);
+
+        Message message = Message.parse("0034 " + MessageType.SER_SUPER_PEER_OK.getValue()
+                + " " + ServiceHolder.getConfiguration().getIp()
+                + " " + Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+
+        Mockito.verify(networkHandler, Mockito.times(1))
+                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message);
+    }
+
+    @Test
+    public void testOnSerSuperPeerMessageReceivedWithHopCountLessThanTimeToLive() {
+        Set<Node> nodes = new HashSet<>();
+        Node node = Mockito.mock(Node.class);
+        Mockito.when(node.getIp()).thenReturn("192.168.1.5");
+        Mockito.when(node.getPort()).thenReturn(7453);
+        nodes.add(node);
+
+        serSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
+                Integer.toString(Constants.DEFAULT_TIME_TO_LIVE - 1));
+
+        Mockito.when(routingStrategy.getForwardingNodes(spyRoutingTable, fromNode, serSuperPeerMessage))
+                .thenReturn(nodes);
+
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serSuperPeerMessage);
+
+        Mockito.verify(routingStrategy, Mockito.times(1))
+                .getForwardingNodes(spyRoutingTable, fromNode, serSuperPeerMessage);
+        Mockito.verify(networkHandler, Mockito.times(1)).sendMessage(node.getIp(), node.getPort(), serSuperPeerMessage);
+    }
+
+    @Test
+    public void testOnSerSuperPeerMessageReceivedWithHopCountHigherThanTimeToLive() {
+        Set<Node> nodes = new HashSet<>();
+        Node node = Mockito.mock(Node.class);
+        Mockito.when(node.getIp()).thenReturn("192.168.1.5");
+        Mockito.when(node.getPort()).thenReturn(7453);
+        nodes.add(node);
+
+        serSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
+                Integer.toString(Constants.DEFAULT_TIME_TO_LIVE));
+
+        Mockito.when(routingStrategy.getForwardingNodes(spyRoutingTable, fromNode, serSuperPeerMessage))
+                .thenReturn(nodes);
+
+        router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serSuperPeerMessage);
+
+        Message usedMessage = Message.parse("0049 " + MessageType.SER_SUPER_PEER_OK.getValue()
+                + " " + MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_IP
+                + " " + MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT);
+
+        Mockito.verify(networkHandler, Mockito.times(1))
+                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage);
     }
 
     @Test

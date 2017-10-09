@@ -4,6 +4,8 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.RouterListener;
+import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
+import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +47,18 @@ public class OverlayNetworkManager implements RouterListener {
                 break;
             case LEAVE_OK:
                 handleLeaveOkMessage(fromNode, message);
+                break;
+            case SER_SUPER_PEER:
+                handleSerSuperPeerMessage(fromNode, message);
+                break;
+            case SER_SUPER_PEER_OK:
+                handleSerSuperPeerOkMessage(fromNode, message);
+                break;
+            case JOIN_SUPER_PEER:
+                handleJoinSuperPeerMessage(fromNode, message);
+                break;
+            case JOIN_SUPER_PEER_OK:
+                handleJoinSuperPeerOkMessage(fromNode, message);
                 break;
             default:
                 logger.debug("Message " + message.toString() + " of unrecognized type ignored ");
@@ -104,16 +118,29 @@ public class OverlayNetworkManager implements RouterListener {
     }
 
     /**
-     * Connect to a super peer.
-     */
-    public void connectToSuperPeer() {
-
-    }
-
-    /**
      * Search for a super peer in the system.
      */
     public void searchForSuperPeer() {
+        RoutingTable routingTable = router.getRoutingTable();
+        if (routingTable instanceof OrdinaryPeerRoutingTable) {
+            OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
+            if (ordinaryPeerRoutingTable.getAssignedSuperPeer() != null) {
+                Message searchSuperPeerMessage = new Message();
+                searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP,
+                        ServiceHolder.getConfiguration().getIp());
+                searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT,
+                        Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
+                        Integer.toString(Constants.INITIAL_HOP_COUNT));
+                router.route(searchSuperPeerMessage);
+            }
+        }
+    }
+
+    /**
+     * Connect to a super peer.
+     */
+    public void connectToSuperPeer() {
 
     }
 
@@ -236,7 +263,7 @@ public class OverlayNetworkManager implements RouterListener {
     private void handleJoinOkMessage(Node fromNode, Message message) {
         if (Objects.equals(message.getData(MessageIndexes.JOIN_OK_VALUE), MessageConstants.JOIN_OK_VALUE_SUCCESS)) {
             router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(fromNode);
-            connectToSuperPeer();
+            searchForSuperPeer();
         } else if (Objects.equals(message.getData(MessageIndexes.JOIN_OK_VALUE),
                 MessageConstants.JOIN_OK_VALUE_ERROR)) {
             logger.warn("Failed to create unstructured connection with " + fromNode.toString());
@@ -284,5 +311,45 @@ public class OverlayNetworkManager implements RouterListener {
             logger.debug("Unknown value " + message.getData(MessageIndexes.LEAVE_OK_VALUE) + " in message \""
                     + message.toString() + "\"");
         }
+    }
+
+    /**
+     * Handle SER_SUPER_PEER type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleSerSuperPeerMessage(Node fromNode, Message message) {
+
+    }
+
+    /**
+     * Handle SER_SUPER_PEER_OK type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleSerSuperPeerOkMessage(Node fromNode, Message message) {
+
+    }
+
+    /**
+     * Handle JOIN_SUPER_PEER type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleJoinSuperPeerMessage(Node fromNode, Message message) {
+
+    }
+
+    /**
+     * Handle JOIN_SUPER_PEER_OK type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleJoinSuperPeerOkMessage(Node fromNode, Message message) {
+
     }
 }

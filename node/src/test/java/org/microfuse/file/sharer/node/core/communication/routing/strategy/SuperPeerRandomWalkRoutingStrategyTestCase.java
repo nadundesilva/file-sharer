@@ -43,12 +43,19 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         queryResourceName = "Lord of the Rings";
 
         fromNode = Mockito.mock(Node.class);
+        Mockito.when(fromNode.isAlive()).thenReturn(true);
         fromSuperPeerNode = Mockito.mock(Node.class);
+        Mockito.when(fromSuperPeerNode.isAlive()).thenReturn(true);
         node1 = Mockito.mock(Node.class);
+        Mockito.when(node1.isAlive()).thenReturn(true);
         node2 = Mockito.mock(Node.class);
+        Mockito.when(node2.isAlive()).thenReturn(true);
         node3 = Mockito.mock(Node.class);
+        Mockito.when(node3.isAlive()).thenReturn(true);
         node4 = Mockito.mock(Node.class);
+        Mockito.when(node4.isAlive()).thenReturn(true);
         node5 = Mockito.mock(Node.class);
+        Mockito.when(node5.isAlive()).thenReturn(true);
 
         Set<Node> unstructuredNetworkNode = new HashSet<>();
         unstructuredNetworkNode.add(fromSuperPeerNode);
@@ -109,13 +116,30 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testGetForwardingNodesInOrdinaryPeerWithDeadAssignedSuperPeer() {
+        Mockito.when(node1.isAlive()).thenReturn(false);
+        Message message = Mockito.mock(Message.class);
+        Mockito.when(ordinaryPeerRoutingTable.getAssignedSuperPeer()).thenReturn(node1);
+        Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
+                fromNode, message);
+
+        Assert.assertEquals(forwardingNodes.size(), 1);
+        Assert.assertTrue(forwardingNodes.contains(fromSuperPeerNode) || forwardingNodes.contains(node2) ||
+                forwardingNodes.contains(node3) || forwardingNodes.contains(node4) ||
+                forwardingNodes.contains(node5));
+    }
+
+    @Test
     public void testGetForwardingNodesInOrdinaryPeerWithUnassignedSuperPeer() {
         Message message = Mockito.mock(Message.class);
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 fromNode, message);
 
         Assert.assertEquals(forwardingNodes.size(), 1);
-        Assert.assertFalse(forwardingNodes.contains(fromNode));
+        Assert.assertTrue(forwardingNodes.contains(fromSuperPeerNode) || forwardingNodes.contains(node1) ||
+                forwardingNodes.contains(node2) || forwardingNodes.contains(node3) ||
+                forwardingNodes.contains(node4) || forwardingNodes.contains(node5)
+        );
     }
 
     @Test
@@ -125,6 +149,25 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
                 null, message);
 
         Assert.assertEquals(forwardingNodes.size(), 1);
+        Assert.assertTrue(forwardingNodes.contains(fromSuperPeerNode) || forwardingNodes.contains(fromNode) ||
+                forwardingNodes.contains(node1) || forwardingNodes.contains(node2) ||
+                forwardingNodes.contains(node3) || forwardingNodes.contains(node4) ||
+                forwardingNodes.contains(node5)
+        );
+    }
+
+    @Test
+    public void testGetForwardingNodesInOrdinaryPeerWithUnassignedSuperPeerWithDeadNodes() {
+        Mockito.when(node1.isAlive()).thenReturn(false);
+        Message message = Mockito.mock(Message.class);
+        Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
+                fromNode, message);
+
+        Assert.assertEquals(forwardingNodes.size(), 1);
+        Assert.assertTrue(forwardingNodes.contains(fromSuperPeerNode) || forwardingNodes.contains(fromNode) ||
+                forwardingNodes.contains(node2) || forwardingNodes.contains(node3) ||
+                forwardingNodes.contains(node4) || forwardingNodes.contains(node5)
+        );
     }
 
     @Test
@@ -146,7 +189,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
                 fromSuperPeerNode, message);
 
         Assert.assertEquals(forwardingNodes.size(), 1);
-        Assert.assertFalse(forwardingNodes.contains(fromSuperPeerNode));
+        Assert.assertTrue(forwardingNodes.contains(node1) || forwardingNodes.contains(node2));
     }
 
     @Test
@@ -172,6 +215,29 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testGetForwardingNodesInSuperPeerWithResourceInAssignedOrdinaryPeerWithDeadNodes() {
+        Mockito.when(node1.isAlive()).thenReturn(false);
+        Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
+
+        ServiceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        resourceIndex.clear();
+
+        Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
+        SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
+
+        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node1);
+        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node2);
+
+        Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
+                fromSuperPeerNode, message);
+
+        Assert.assertEquals(forwardingNodes.size(), 1);
+        Assert.assertTrue(forwardingNodes.contains(node2));
+    }
+
+    @Test
     public void testGetForwardingNodesInSuperPeerWithResourceNotInAssignedOrdinaryPeer() {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
@@ -184,7 +250,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
                 fromSuperPeerNode, message);
 
         Assert.assertEquals(forwardingNodes.size(), 1);
-        Assert.assertFalse(forwardingNodes.contains(fromSuperPeerNode));
+        Assert.assertTrue(forwardingNodes.contains(node4) || forwardingNodes.contains(node5));
     }
 
     @Test
@@ -200,5 +266,24 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
                 null, message);
 
         Assert.assertEquals(forwardingNodes.size(), 1);
+        Assert.assertTrue(forwardingNodes.contains(fromSuperPeerNode) || forwardingNodes.contains(node4) ||
+                forwardingNodes.contains(node5));
+    }
+
+    @Test
+    public void testGetForwardingNodesInSuperPeerWithResourceNotInAssignedOrdinaryPeerWithDeadNodes() {
+        Mockito.when(node4.isAlive()).thenReturn(false);
+        Message message = Mockito.mock(Message.class);
+        Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
+
+        ServiceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        resourceIndex.clear();
+
+        Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
+                fromSuperPeerNode, message);
+
+        Assert.assertEquals(forwardingNodes.size(), 1);
+        Assert.assertTrue(forwardingNodes.contains(node5));
     }
 }

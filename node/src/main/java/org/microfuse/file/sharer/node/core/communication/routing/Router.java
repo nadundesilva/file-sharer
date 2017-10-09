@@ -1,6 +1,5 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
-import com.google.common.collect.Lists;
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
@@ -11,7 +10,6 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryP
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.OwnedResource;
-import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.microfuse.file.sharer.node.core.utils.MessageConstants;
 import org.microfuse.file.sharer.node.core.utils.MessageIndexes;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
@@ -81,7 +79,7 @@ public class Router implements NetworkHandlerListener {
             fromNode.setAlive(true);
         }
 
-        if (messageType != null && messageType == MessageType.SER) {
+        if (messageType != null && (messageType == MessageType.SER || messageType == MessageType.SER_SUPER_PEER)) {
             route(fromNode, message);
         } else {
             runTasksOnMessageReceived(fromNode, message);
@@ -137,10 +135,21 @@ public class Router implements NetworkHandlerListener {
      * @param message The message to be sent
      */
     public void sendMessage(Node toNode, Message message) {
+        sendMessage(toNode.getIp(), toNode.getPort(), message);
+    }
+
+    /**
+     * Send a message directly to a node.
+     *
+     * @param ip      The ip of the node to which the message needs to be sent
+     * @param port    The port of the node to which the message needs to be sent
+     * @param message The message to be sent
+     */
+    public void sendMessage(String ip, int port, Message message) {
         networkHandlerLock.readLock().lock();
         try {
-            logger.debug("Sending message " + message.toString() + " to node " + toNode.toString());
-            networkHandler.sendMessage(toNode.getIp(), toNode.getPort(), message);
+            logger.debug("Sending message " + message.toString() + " to node " + ip + ":" + port);
+            networkHandler.sendMessage(ip, port, message);
         } finally {
             networkHandlerLock.readLock().unlock();
         }
@@ -154,110 +163,6 @@ public class Router implements NetworkHandlerListener {
     public void route(Message message) {
         logger.debug("Routing new message " + message.toString() + " over the network.");
         route(null, message);
-    }
-
-    /**
-     * Route a message through the P2P network.
-     *
-     * @param fromNode The node from which the message was received by this node
-     * @param message  The message to be sent
-     */
-    private void route(Node fromNode, Message message) {
-        MessageType messageType = message.getType();
-
-        if (messageType != null && messageType == MessageType.SER) {
-            // Checking owned resources
-            Set<OwnedResource> ownedResources = ServiceHolder.getResourceIndex()
-                    .findResources(message.getData(MessageIndexes.SER_FILE_NAME));
-            if (ownedResources.size() > 0) {
-                logger.debug("Resource requested by \"" + message.toString() + "\" found in owned resources");
-                Message serOkMessage = new Message();
-                serOkMessage.setType(MessageType.SER_OK);
-
-                List<String> serOkData = Lists.newArrayList(
-                        Integer.toString(ownedResources.size()),
-                        ServiceHolder.getConfiguration().getIp(),
-                        Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()),
-                        Integer.toString(Constants.INITIAL_HOP_COUNT)
-                );
-                ownedResources.forEach(resource -> serOkData.add(resource.getName()));
-
-                serOkMessage.setData(serOkData);
-                networkHandlerLock.readLock().lock();
-                try {
-                    logger.debug("Sending search request success message \"" + message.toString() + "\" back to "
-                            + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
-                            + message.getData(MessageIndexes.SER_SOURCE_PORT));
-                    networkHandler.sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
-                            Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
-                } finally {
-                    networkHandlerLock.readLock().unlock();
-                }
-            } else {
-                logger.debug("Resource requested by \"" + message.toString() + "\" not found in owned resources");
-
-                // Updating the hop count
-                Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_HOP_COUNT));
-                hopCount++;
-                message.setData(MessageIndexes.SER_HOP_COUNT, hopCount.toString());
-                logger.debug("Increased hop count of message" + message.toString());
-
-                if (hopCount <= ServiceHolder.getConfiguration().getTimeToLive()) {
-                    logger.debug("The hop count of the message " + message.toString() + " is lower than time to live"
-                            + ServiceHolder.getConfiguration().getTimeToLive());
-
-                    Set<Node> forwardingNodes;
-                    routingTableLock.readLock().lock();
-                    try {
-                        routingStrategyLock.readLock().lock();
-                        try {
-                            forwardingNodes = routingStrategy.getForwardingNodes(routingTable, fromNode, message);
-                        } finally {
-                            routingStrategyLock.readLock().unlock();
-                        }
-                    } finally {
-                        routingTableLock.readLock().unlock();
-                    }
-
-                    forwardingNodes.stream().parallel()
-                            .forEach(forwardingNode -> {
-                                Message clonedMessage = message.clone();
-                                networkHandlerLock.readLock().lock();
-                                try {
-                                    logger.debug("Forwarding message " + clonedMessage.toString()
-                                            + " to " + forwardingNode.toString());
-                                    networkHandler.sendMessage(
-                                            forwardingNode.getIp(), forwardingNode.getPort(), clonedMessage
-                                    );
-                                } finally {
-                                    networkHandlerLock.readLock().unlock();
-                                }
-                            });
-                } else {
-                    logger.debug("Sending search failed back to search request source node "
-                            + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
-                            + message.getData(MessageIndexes.SER_SOURCE_PORT)
-                            + " since the hop count of the message " + message.toString()
-                            + " is higher than time to live " + ServiceHolder.getConfiguration().getTimeToLive());
-
-                    // Unable to find resource
-                    Message serOkMessage = new Message();
-                    serOkMessage.setType(MessageType.SER_OK);
-                    serOkMessage.setData(Lists.newArrayList(MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT,
-                            MessageConstants.SER_OK_NOT_FOUND_IP, MessageConstants.SER_OK_NOT_FOUND_PORT));
-                    networkHandlerLock.readLock().lock();
-                    try {
-                        networkHandler.sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
-                                Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
-                    } finally {
-                        networkHandlerLock.readLock().unlock();
-                    }
-                }
-            }
-        } else {
-            logger.warn("Not routing message of type " + messageType + ". The Router will only route messages of type "
-                    + MessageType.SER + ".");
-        }
     }
 
     /**
@@ -431,5 +336,165 @@ public class Router implements NetworkHandlerListener {
         } finally {
             listenersListLock.writeLock().lock();
         }
+    }
+
+    /**
+     * Route a message through the P2P network.
+     *
+     * @param fromNode The node from which the message was received by this node
+     * @param message  The message to be sent
+     */
+    private void route(Node fromNode, Message message) {
+        MessageType messageType = message.getType();
+
+        if (messageType != null && messageType == MessageType.SER) {
+            // Checking owned resources
+            Set<OwnedResource> ownedResources = ServiceHolder.getResourceIndex()
+                    .findResources(message.getData(MessageIndexes.SER_FILE_NAME));
+            if (ownedResources.size() > 0) {
+                logger.debug("Resource requested by \"" + message.toString() + "\" found in owned resources");
+                Message serOkMessage = new Message();
+                serOkMessage.setType(MessageType.SER_OK);
+
+                List<String> serOkData = new ArrayList<>();
+                serOkData.add(MessageIndexes.SER_OK_FILE_COUNT, Integer.toString(ownedResources.size()));
+                serOkData.add(MessageIndexes.SER_OK_SOURCE_IP, ServiceHolder.getConfiguration().getIp());
+                serOkData.add(MessageIndexes.SER_OK_SOURCE_PORT,
+                        Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                ownedResources.forEach(resource -> serOkData.add(resource.getName()));
+                serOkMessage.setData(serOkData);
+
+                logger.debug("Sending search request success message \"" + message.toString() + "\" back to "
+                        + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
+                        + message.getData(MessageIndexes.SER_SOURCE_PORT));
+                sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
+                        Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
+            } else {
+                logger.debug("Resource requested by \"" + message.toString() + "\" not found in owned resources");
+
+                // Updating the hop count
+                Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_HOP_COUNT));
+                hopCount++;
+                message.setData(MessageIndexes.SER_HOP_COUNT, hopCount.toString());
+                logger.debug("Increased hop count of message" + message.toString());
+
+                if (hopCount <= ServiceHolder.getConfiguration().getTimeToLive()) {
+                    forwardNode(fromNode, message);
+                } else {
+                    // Unable to find resource
+                    Message serOkMessage = new Message();
+                    serOkMessage.setType(MessageType.SER_OK);
+                    serOkMessage.setData(MessageIndexes.SER_OK_FILE_COUNT,
+                            MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT);
+                    serOkMessage.setData(MessageIndexes.SER_OK_SOURCE_IP, MessageConstants.SER_OK_NOT_FOUND_IP);
+                    serOkMessage.setData(MessageIndexes.SER_OK_SOURCE_PORT, MessageConstants.SER_OK_NOT_FOUND_PORT);
+
+                    logger.debug("Sending search failed back to search request source node "
+                            + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
+                            + message.getData(MessageIndexes.SER_SOURCE_PORT)
+                            + " since the hop count of the message " + message.toString()
+                            + " is higher than time to live " + ServiceHolder.getConfiguration().getTimeToLive());
+                    sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
+                            Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
+                }
+            }
+        } else if (messageType != null && messageType == MessageType.SER_SUPER_PEER) {
+            if (ServiceHolder.getPeerType() == PeerType.SUPER_PEER) {
+                Message serOkMessage = new Message();
+                serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
+                serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP, ServiceHolder.getConfiguration().getIp());
+                serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_PORT,
+                        Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+
+                sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
+                        Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
+                        serOkMessage);
+            } else if (ServiceHolder.getPeerType() == PeerType.ORDINARY_PEER) {
+                logger.debug("Node is an ordinary peer");
+
+                Node assignedSuperPeer = null;
+                if (routingTable instanceof OrdinaryPeerRoutingTable) {
+                    assignedSuperPeer = ((OrdinaryPeerRoutingTable) routingTable).getAssignedSuperPeer();
+                } else {
+                    logger.debug("Inconsistent ordinary peer with ordinary peer node");
+                }
+
+                if (assignedSuperPeer != null && assignedSuperPeer.isAlive()) {
+                    Message serOkMessage = new Message();
+                    serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
+                    serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP, assignedSuperPeer.getIp());
+                    serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_PORT,
+                            Integer.toString(assignedSuperPeer.getPort()));
+
+                    sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
+                            Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
+                            serOkMessage);
+                } else {
+                    logger.debug("Routing message " + message.toString() + " because no super peer was assigned");
+
+                    // Updating the hop count
+                    Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT));
+                    hopCount++;
+                    message.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT, hopCount.toString());
+                    logger.debug("Increased hop count of message" + message.toString());
+
+                    if (hopCount <= ServiceHolder.getConfiguration().getTimeToLive()) {
+                        forwardNode(fromNode, message);
+                    } else {
+                        // Unable to find a super peer
+                        Message serOkMessage = new Message();
+                        serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
+                        serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP,
+                                MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_IP);
+                        serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_PORT,
+                                MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT);
+
+                        logger.debug("Sending search failed back to search request source node "
+                                + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP) + ":"
+                                + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)
+                                + " since the hop count of the message " + message.toString()
+                                + " is higher than time to live " + ServiceHolder.getConfiguration().getTimeToLive());
+                        sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
+                                Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
+                                serOkMessage);
+                    }
+                }
+            }
+        } else {
+            logger.warn("Not routing message of type " + messageType + ". The Router will only route messages of type "
+                    + MessageType.SER + ".");
+        }
+    }
+
+    /**
+     * Forward messages to nodes based on the routing strategy.
+     *
+     * @param fromNode The node from which the message was received by this node
+     * @param message  The message to be sent
+     */
+    private void forwardNode(Node fromNode, Message message) {
+        logger.debug("The hop count of the message " + message.toString() + " is lower than time to live"
+                + ServiceHolder.getConfiguration().getTimeToLive());
+
+        Set<Node> forwardingNodes;
+        routingTableLock.readLock().lock();
+        try {
+            routingStrategyLock.readLock().lock();
+            try {
+                forwardingNodes = routingStrategy.getForwardingNodes(routingTable, fromNode, message);
+            } finally {
+                routingStrategyLock.readLock().unlock();
+            }
+        } finally {
+            routingTableLock.readLock().unlock();
+        }
+
+        forwardingNodes.stream().parallel()
+                .forEach(forwardingNode -> {
+                    Message clonedMessage = message.clone();
+                    logger.debug("Forwarding message " + clonedMessage.toString()
+                            + " to " + forwardingNode.toString());
+                    sendMessage(forwardingNode.getIp(), forwardingNode.getPort(), clonedMessage);
+                });
     }
 }

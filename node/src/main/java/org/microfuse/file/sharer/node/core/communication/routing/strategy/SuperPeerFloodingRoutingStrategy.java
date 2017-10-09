@@ -12,7 +12,7 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +21,7 @@ import java.util.Set;
  * <p>
  * Floods received messages to all the connected nodes.
  */
-public class SuperPeerFloodingRoutingStrategy implements RoutingStrategy {
+public class SuperPeerFloodingRoutingStrategy extends RoutingStrategy {
     private static final Logger logger = LoggerFactory.getLogger(SuperPeerFloodingRoutingStrategy.class);
 
     @Override
@@ -45,26 +45,28 @@ public class SuperPeerFloodingRoutingStrategy implements RoutingStrategy {
                 }
             }
 
-            if (forwardingNodes == null) {
+            if (forwardingNodes == null || forwardingNodes.size() == 0) {
                 // Random walking the super-peer network
                 forwardingNodes = ((SuperPeerRoutingTable) routingTable).getAllSuperPeerNetworkRoutingTableNodes();
             }
         } else if (routingTable instanceof OrdinaryPeerRoutingTable) {
-            Node superPeer = ((OrdinaryPeerRoutingTable) routingTable).getAssignedSuperPeer();
-            if (superPeer != null && superPeer.isAlive()) {
-                // Passing over to the super peer network
-                forwardingNodes = new HashSet<>(Collections.singletonList(superPeer));
-            } else {
-                // Random walking the unstructured network
-                forwardingNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
+            forwardingNodes = getAssignedSuperPeer((OrdinaryPeerRoutingTable) routingTable);
+        } else {
+            logger.warn("Unknown routing table");
+        }
+
+        if (forwardingNodes != null) {
+            if (fromNode != null) {
+                forwardingNodes.remove(fromNode);
             }
         } else {
-            logger.warn("The node is recognized as a super-peer, " +
-                    "but does not contain a super-peer routing table");
+            forwardingNodes = new HashSet<>();
         }
-        if (forwardingNodes != null) {
-            forwardingNodes.remove(fromNode);
-        }
-        return forwardingNodes;
+
+        new ArrayList<>(forwardingNodes).stream().parallel()
+                .filter(node -> !node.isAlive())
+                .forEach(forwardingNodes::remove);
+
+        return new HashSet<>(forwardingNodes);
     }
 }

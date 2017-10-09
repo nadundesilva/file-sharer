@@ -4,6 +4,8 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -11,7 +13,7 @@ import java.util.Set;
  * <p>
  * Floods received messages to all the connected nodes.
  */
-public class UnstructuredFloodingRoutingStrategy implements RoutingStrategy {
+public class UnstructuredFloodingRoutingStrategy extends RoutingStrategy {
     @Override
     public String getName() {
         return RoutingStrategyType.UNSTRUCTURED_FLOODING.getValue();
@@ -19,10 +21,15 @@ public class UnstructuredFloodingRoutingStrategy implements RoutingStrategy {
 
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
-        Set<Node> routingTableNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
+        Set<Node> forwardingNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
         if (fromNode != null) {
-            routingTableNodes.remove(fromNode);
+            forwardingNodes.remove(fromNode);
         }
-        return routingTableNodes;
+
+        new ArrayList<>(forwardingNodes).stream().parallel()
+                .filter(node -> !node.isAlive())
+                .forEach(forwardingNodes::remove);
+
+        return new HashSet<>(forwardingNodes);
     }
 }
