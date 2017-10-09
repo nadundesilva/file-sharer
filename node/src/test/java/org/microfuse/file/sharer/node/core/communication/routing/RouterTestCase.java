@@ -59,6 +59,14 @@ public class RouterTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testRestart() {
+        router.restart();
+
+        Mockito.verify(networkHandler, Mockito.times(1)).restart();
+        Mockito.verify(spyRoutingTable, Mockito.times(1)).clear();
+    }
+
+    @Test
     public void testSendMessage() {
         Node toNode = Mockito.mock(Node.class);
         Mockito.when(toNode.getIp()).thenReturn("192.168.1.2");
@@ -87,7 +95,7 @@ public class RouterTestCase extends BaseTestCase {
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT))));
 
-        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(usedMessage);
+        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
     }
 
     @Test
@@ -96,11 +104,15 @@ public class RouterTestCase extends BaseTestCase {
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), message);
 
+        Node usedNode = new Node();
+        usedNode.setIp(fromNode.getIp());
+        usedNode.setPort(fromNode.getPort());
+
         Message usedMessage = Message.parse(message.toString());
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT))));
 
-        Mockito.verify(router, Mockito.times(1)).runTasksOnMessageReceived(usedMessage);
+        Mockito.verify(router, Mockito.times(1)).runTasksOnMessageReceived(usedNode, usedMessage);
     }
 
     @Test
@@ -170,7 +182,7 @@ public class RouterTestCase extends BaseTestCase {
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
-        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(usedMessage);
+        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
         Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
     }
 
@@ -193,7 +205,7 @@ public class RouterTestCase extends BaseTestCase {
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
-        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(usedMessage);
+        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
         Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
     }
 
@@ -219,7 +231,7 @@ public class RouterTestCase extends BaseTestCase {
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT,
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
-        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(usedMessage);
+        Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
         Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
     }
 
@@ -233,7 +245,6 @@ public class RouterTestCase extends BaseTestCase {
         RoutingTable finalRoutingTable = router.getRoutingTable();
 
         Assert.assertFalse(initialRoutingTable == finalRoutingTable);
-        Assert.assertTrue(initialRoutingTable.getBootstrapServer() == finalRoutingTable.getBootstrapServer());
         Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 1);
         Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()).get(0),
                 node);
@@ -250,7 +261,6 @@ public class RouterTestCase extends BaseTestCase {
         RoutingTable finalRoutingTable = router.getRoutingTable();
 
         Assert.assertFalse(initialRoutingTable == finalRoutingTable);
-        Assert.assertTrue(initialRoutingTable.getBootstrapServer() == finalRoutingTable.getBootstrapServer());
         Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 1);
         Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()).get(0),
                 node);
@@ -293,8 +303,8 @@ public class RouterTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         router.registerListener(listener);
 
-        router.runTasksOnMessageReceived(message);
+        router.runTasksOnMessageReceived(fromNode, message);
 
-        Mockito.verify(listener, Mockito.times(1)).onMessageReceived(message);
+        Mockito.verify(listener, Mockito.times(1)).onMessageReceived(fromNode, message);
     }
 }

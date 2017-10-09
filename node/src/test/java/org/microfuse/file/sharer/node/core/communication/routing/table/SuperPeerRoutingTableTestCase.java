@@ -116,4 +116,24 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         Object internalState = Whitebox.getInternalState(superPeerRoutingTable, "superPeerNetworkNodes");
         Assert.assertFalse(nodes == internalState);
     }
+
+    @Test
+    public void testClear() {
+        superPeerRoutingTable.clear();
+
+        Object internalStateSuperPeerNetworkNodes =
+                Whitebox.getInternalState(superPeerRoutingTable, "superPeerNetworkNodes");
+        Assert.assertNotNull(internalStateSuperPeerNetworkNodes);
+        Assert.assertTrue(internalStateSuperPeerNetworkNodes instanceof Set<?>);
+        Set<?> superPeerNetworkNodes = (Set<?>) internalStateSuperPeerNetworkNodes;
+        Assert.assertEquals(superPeerNetworkNodes.size(), 0);
+
+
+        Object internalStateAssignedOrdinaryPeerNodes =
+                Whitebox.getInternalState(superPeerRoutingTable, "assignedOrdinaryPeerNodes");
+        Assert.assertNotNull(internalStateAssignedOrdinaryPeerNodes);
+        Assert.assertTrue(internalStateAssignedOrdinaryPeerNodes instanceof Set<?>);
+        Set<?> assignedOrdinaryPeerNodes = (Set<?>) internalStateSuperPeerNetworkNodes;
+        Assert.assertEquals(assignedOrdinaryPeerNodes.size(), 0);
+    }
 }

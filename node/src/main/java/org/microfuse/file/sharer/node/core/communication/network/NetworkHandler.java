@@ -1,11 +1,14 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
 import org.microfuse.file.sharer.node.commons.messaging.Message;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -18,12 +21,19 @@ public abstract class NetworkHandler {
     private static final Logger logger = LoggerFactory.getLogger(NetworkHandler.class);
 
     private List<NetworkHandlerListener> listenersList;
+    private ExecutorService listenerHandlerExecutorService;
+    protected boolean restartRequired;
 
     private final ReadWriteLock listenersListLock;
+    private final ReadWriteLock listenerHandlerExecutorServiceLock;
 
     public NetworkHandler() {
         listenersListLock = new ReentrantReadWriteLock();
+        listenerHandlerExecutorServiceLock = new ReentrantReadWriteLock();
         listenersList = new ArrayList<>();
+        listenerHandlerExecutorService =
+                Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
+        restartRequired = false;
     }
 
     /**
@@ -48,6 +58,19 @@ public abstract class NetworkHandler {
     public abstract void sendMessage(String ip, int port, Message message);
 
     /**
+     * Restart the listening.
+     */
+    public void restart() {
+        restartRequired = true;
+        listenerHandlerExecutorServiceLock.writeLock().lock();
+        listenerHandlerExecutorService.shutdown();
+        listenerHandlerExecutorService =
+                Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
+        logger.debug("Setting the restart required flag");
+        listenerHandlerExecutorServiceLock.writeLock().unlock();
+    }
+
+    /**
      * Runs tasks to be run when an error occurs in sending a message.
      *
      * @param toAddress The address to which the message should be sent
@@ -58,7 +81,11 @@ public abstract class NetworkHandler {
         logger.debug("Failed to send message to " + toAddress + ": " + message);
         listenersListLock.readLock().lock();
         try {
-            listenersList.forEach(listener -> listener.onMessageSendFailed(toAddress, toPort, message));
+            listenerHandlerExecutorServiceLock.readLock().lock();
+            listenersList.forEach(listener -> listenerHandlerExecutorService.execute(() ->
+                    listener.onMessageSendFailed(toAddress, toPort, message)
+            ));
+            listenerHandlerExecutorServiceLock.readLock().unlock();
         } finally {
             listenersListLock.readLock().unlock();
         }
@@ -75,7 +102,11 @@ public abstract class NetworkHandler {
         logger.debug("Message received from " + fromAddress + ": " + message);
         listenersListLock.readLock().lock();
         try {
-            listenersList.forEach(listener -> listener.onMessageReceived(fromAddress, fromPort, message));
+            listenerHandlerExecutorServiceLock.readLock().lock();
+            listenersList.forEach(listener -> listenerHandlerExecutorService.execute(() ->
+                    listener.onMessageReceived(fromAddress, fromPort, message)
+            ));
+            listenerHandlerExecutorServiceLock.readLock().unlock();
         } finally {
             listenersListLock.readLock().unlock();
         }

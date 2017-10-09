@@ -8,18 +8,40 @@ import org.microfuse.file.sharer.node.core.utils.Constants;
  * Configuration of this Node.
  */
 public class Configuration {
+    private String bootstrapServerIP;
+    private int bootstrapServerPort;
     private String ip;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
     private int peerListeningPort;
+    private int listenerHandlingThreadCount;
     private int timeToLive;
 
     public Configuration() {
+        bootstrapServerIP = Constants.DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS;
+        bootstrapServerPort = Constants.DEFAULT_BOOTSTRAP_SERVER_PORT;
         ip = Constants.DEFAULT_IP_ADDRESS;
         networkHandlerType = Constants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = Constants.DEFAULT_ROUTING_STRATEGY;
         peerListeningPort = Constants.DEFAULT_TCP_LISTENER_PORT;
+        listenerHandlingThreadCount = Constants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT;
         timeToLive = Constants.DEFAULT_TIME_TO_LIVE;
+    }
+
+    public String getBootstrapServerIP() {
+        return bootstrapServerIP;
+    }
+
+    public void setBootstrapServerIP(String bootstrapServerIP) {
+        this.bootstrapServerIP = bootstrapServerIP;
+    }
+
+    public int getBootstrapServerPort() {
+        return bootstrapServerPort;
+    }
+
+    public void setBootstrapServerPort(int bootstrapServerPort) {
+        this.bootstrapServerPort = bootstrapServerPort;
     }
 
     public String getIp() {
@@ -52,6 +74,14 @@ public class Configuration {
 
     public void setPeerListeningPort(int peerListeningPort) {
         this.peerListeningPort = peerListeningPort;
+    }
+
+    public int getListenerHandlingThreadCount() {
+        return listenerHandlingThreadCount;
+    }
+
+    public void setListenerHandlingThreadCount(int listenerHandlingThreadCount) {
+        this.listenerHandlingThreadCount = listenerHandlingThreadCount;
     }
 
     public int getTimeToLive() {

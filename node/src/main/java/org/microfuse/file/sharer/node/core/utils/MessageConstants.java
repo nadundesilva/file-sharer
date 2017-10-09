@@ -8,6 +8,20 @@ public class MessageConstants {
     public static final String SER_OK_NOT_FOUND_IP = "0.0.0.0";
     public static final String SER_OK_NOT_FOUND_PORT = "0";
 
+    public static final String JOIN_OK_VALUE_SUCCESS = "0";
+    public static final String JOIN_OK_VALUE_ERROR = "9999";
+
+    public static final String LEAVE_OK_VALUE_SUCCESS = "0";
+    public static final String LEAVE_OK_VALUE_ERROR = "9999";
+
+    public static final String REG_OK_NODE_COUNT_VALUE_ERROR_FULL = "9996";
+    public static final String REG_OK_NODE_COUNT_VALUE_ERROR_ALREADY_OCCUPIED = "9997";
+    public static final String REG_OK_NODE_COUNT_VALUE_ERROR_ALREADY_REGISTERED = "9998";
+    public static final String REG_OK_NODE_COUNT_VALUE_ERROR = "9999";
+
+    public static final String UNREG_OK_VALUE_SUCCESS = "0";
+    public static final String UNREG_OK_VALUE_ERROR = "9999";
+
     private MessageConstants() {   // Preventing from being initiated
     }
 }

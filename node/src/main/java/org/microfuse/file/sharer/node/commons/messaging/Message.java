@@ -38,7 +38,9 @@ public class Message implements Cloneable {
     }
 
     public void setData(int index, String dataItem) {
-        data.remove(index);
+        if (index < data.size()) {
+            data.remove(index);
+        }
         data.add(index, dataItem);
     }
 

@@ -47,6 +47,7 @@ public class ServiceHolder {
             resourceIndex = newResourceIndex;
         }
         getRouter().promoteToSuperPeer();
+        logger.debug("Promoted to super peer");
     }
 
     /**
@@ -60,6 +61,7 @@ public class ServiceHolder {
             resourceIndex = newResourceIndex;
         }
         getRouter().demoteToOrdinaryPeer();
+        logger.debug("Demoted to ordinary peer");
     }
 
     /**
@@ -92,8 +94,10 @@ public class ServiceHolder {
                             Files.write(new Gson().toJson(configuration).getBytes(
                                     Constants.DEFAULT_CHARSET), configFile);
                         } catch (IOException e1) {
-                            logger.warn("Failed to create configuration file: " + configFile.getAbsolutePath(), e1);
+                            logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
                         }
+                    } else {
+                        logger.warn("Failed to create file " + configFile.getAbsolutePath());
                     }
                 } catch (IOException e1) {
                     logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
@@ -118,7 +122,6 @@ public class ServiceHolder {
                 logger.error("Failed to instantiate resource index for " + getPeerType().getValue()
                         + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
                 resourceIndex = new ResourceIndex();
-                demoteToOrdinaryPeer();
             }
         }
         return resourceIndex;

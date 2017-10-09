@@ -29,16 +29,16 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void startListening() {
-        int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
         new Thread(() -> {
             while (true) {
-                try (
-                        ServerSocket serverSocket = new ServerSocket(portNumber);
-                        Socket clientSocket = serverSocket.accept();
-                        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
-                                Constants.DEFAULT_CHARSET))
-                ) {
-                    new Thread(() -> {
+                int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
+                while (!restartRequired) {
+                    try (
+                            ServerSocket serverSocket = new ServerSocket(portNumber);
+                            Socket clientSocket = serverSocket.accept();
+                            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
+                                    Constants.DEFAULT_CHARSET))
+                    ) {
                         try {
                             StringBuilder message = new StringBuilder();
                             String inputLine;
@@ -54,9 +54,9 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
                             logger.debug("Failed to receive message from "
                                     + clientSocket.getRemoteSocketAddress().toString(), e);
                         }
-                    }).start();
-                } catch (IOException e) {
-                    logger.debug("Failed to establish socket connection", e);
+                    } catch (IOException e) {
+                        logger.debug("Failed to establish socket connection", e);
+                    }
                 }
             }
         }).start();

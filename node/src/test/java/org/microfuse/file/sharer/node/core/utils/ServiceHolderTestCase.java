@@ -32,6 +32,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetConfigurationFromFileAtFirstTime() {
         File configFile = new File(Constants.CONFIG_FILE);
         String configString = "{" +
+                "\"bootstrapServerIP\":\"127.0.0.1\"," +
+                "\"bootstrapServerPort\":\"5555\"," +
                 "\"ip\":\"192.168.1.3\"," +
                 "\"peerListeningPort\":4562," +
                 "\"timeToLive\":3," +

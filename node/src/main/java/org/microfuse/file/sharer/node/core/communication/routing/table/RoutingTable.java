@@ -20,36 +20,12 @@ public abstract class RoutingTable {
     private static final Logger logger = LoggerFactory.getLogger(RoutingTable.class);
 
     private Set<Node> unstructuredNetworkNodes;
-    private Node bootstrapServer;
 
     private final ReadWriteLock unstructuredNetworkNodesLock;
 
     public RoutingTable() {
         unstructuredNetworkNodesLock = new ReentrantReadWriteLock();
         unstructuredNetworkNodes = new HashSet<>();
-    }
-
-    /**
-     * Get the bootstrap server node.
-     *
-     * @return The bootstrap server node
-     */
-    public Node getBootstrapServer() {
-        return bootstrapServer;
-    }
-
-    /**
-     * Set the bootstrap server node.
-     *
-     * @param bootstrapServer The boostrap server node
-     */
-    public void setBootstrapServer(Node bootstrapServer) {
-        this.bootstrapServer = bootstrapServer;
-        if (bootstrapServer != null) {
-            logger.debug("Changed bootstrap server to " + bootstrapServer.toString());
-        } else {
-            logger.debug("Removed saved bootstrap server");
-        }
     }
 
     /**
@@ -132,5 +108,17 @@ public abstract class RoutingTable {
             unstructuredNetworkNodesLock.readLock().unlock();
         }
         return requestedNode;
+    }
+
+    /**
+     * Clear the routing table.
+     */
+    public void clear() {
+        unstructuredNetworkNodesLock.writeLock().lock();
+        try {
+            unstructuredNetworkNodes.clear();
+        } finally {
+            unstructuredNetworkNodesLock.writeLock().unlock();
+        }
     }
 }

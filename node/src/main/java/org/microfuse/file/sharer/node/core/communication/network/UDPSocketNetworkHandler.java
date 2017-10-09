@@ -27,33 +27,37 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void startListening() {
-        while (true) {
-            int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
-            DatagramSocket udpSocket;
-            String messageString;
+        new Thread(() -> {
+            while (true) {
+                int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
+                while (!restartRequired) {
+                    DatagramSocket udpSocket;
+                    String messageString;
 
-            try {
-                udpSocket = new DatagramSocket();
-                logger.info("Started listening at " + portNumber + ".");
+                    try {
+                        udpSocket = new DatagramSocket();
+                        logger.info("Started listening at " + portNumber + ".");
 
-                byte[] buffer = new byte[65536];
-                DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
-                udpSocket.receive(incomingPacket);
+                        byte[] buffer = new byte[65536];
+                        DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
+                        udpSocket.receive(incomingPacket);
 
-                byte[] data = incomingPacket.getData();
-                messageString = new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
-                logger.debug("Message received from " + incomingPacket.getAddress().getHostAddress()
-                        + ":" + incomingPacket.getPort() + " : " + messageString);
+                        byte[] data = incomingPacket.getData();
+                        messageString = new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
+                        logger.debug("Message received from " + incomingPacket.getAddress().getHostAddress()
+                                + ":" + incomingPacket.getPort() + " : " + messageString);
 
-                onMessageReceived(
-                        incomingPacket.getAddress().getHostAddress(),
-                        incomingPacket.getPort(),
-                        Message.parse(messageString)
-                );
-            } catch (IOException e) {
-                logger.error("Listener error occurred. Restarting listening." + e);
+                        onMessageReceived(
+                                incomingPacket.getAddress().getHostAddress(),
+                                incomingPacket.getPort(),
+                                Message.parse(messageString)
+                        );
+                    } catch (IOException e) {
+                        logger.error("Listener error occurred. Restarting listening." + e);
+                    }
+                }
             }
-        }
+        }).start();
     }
 
     @Override

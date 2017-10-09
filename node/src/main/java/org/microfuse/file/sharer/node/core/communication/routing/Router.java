@@ -53,7 +53,6 @@ public class Router implements NetworkHandlerListener {
         } catch (InstantiationException | IllegalAccessException e) {
             logger.error("Failed to instantiate routing table for " + ServiceHolder.getPeerType().getValue()
                     + ". Using the routing table for " + PeerType.ORDINARY_PEER.getValue() + " instead", e);
-            ServiceHolder.demoteToOrdinaryPeer();
             routingTable = new OrdinaryPeerRoutingTable();
         }
         this.routingStrategy = routingStrategy;
@@ -67,23 +66,25 @@ public class Router implements NetworkHandlerListener {
         logger.debug("Received message " + message.toString() + " from node " + fromAddress
                 + ":" + fromAddress);
         MessageType messageType = message.getType();
+
+        Node fromNode;
+        routingTableLock.readLock().lock();
+        try {
+            fromNode = routingTable.getUnstructuredNetworkRoutingTableNode(fromAddress, fromPort);
+        } finally {
+            routingTableLock.readLock().unlock();
+        }
+        if (fromNode == null) {
+            fromNode = new Node();
+            fromNode.setIp(fromAddress);
+            fromNode.setPort(fromPort);
+            fromNode.setAlive(true);
+        }
+
         if (messageType != null && messageType == MessageType.SER) {
-            Node node;
-            routingTableLock.readLock().lock();
-            try {
-                node = routingTable.getUnstructuredNetworkRoutingTableNode(fromAddress, fromPort);
-            } finally {
-                routingTableLock.readLock().unlock();
-            }
-            if (node == null) {
-                node = new Node();
-                node.setIp(fromAddress);
-                node.setPort(fromPort);
-                node.setAlive(true);
-            }
-            route(node, message);
+            route(fromNode, message);
         } else {
-            runTasksOnMessageReceived(message);
+            runTasksOnMessageReceived(fromNode, message);
         }
     }
 
@@ -108,6 +109,25 @@ public class Router implements NetworkHandlerListener {
         if (receivingNode != null) {
             receivingNode.setAlive(false);
         }
+    }
+
+    /**
+     * Restart the router with new configuration.
+     */
+    public void restart() {
+        routingTableLock.readLock().lock();
+        try {
+            routingTable.clear();
+        } finally {
+            routingTableLock.readLock().unlock();
+        }
+        networkHandlerLock.readLock().lock();
+        try {
+            networkHandler.restart();
+        } finally {
+            networkHandlerLock.readLock().unlock();
+        }
+
     }
 
     /**
@@ -248,7 +268,6 @@ public class Router implements NetworkHandlerListener {
         try {
             if (routingTable instanceof OrdinaryPeerRoutingTable) {
                 SuperPeerRoutingTable superPeerRoutingTable = new SuperPeerRoutingTable();
-                superPeerRoutingTable.setBootstrapServer(routingTable.getBootstrapServer());
                 superPeerRoutingTable.addAllUnstructuredNetworkRoutingTableEntry(
                         routingTable.getAllUnstructuredNetworkRoutingTableNodes());
                 routingTable = superPeerRoutingTable;
@@ -268,7 +287,6 @@ public class Router implements NetworkHandlerListener {
         try {
             if (routingTable instanceof SuperPeerRoutingTable) {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable();
-                ordinaryPeerRoutingTable.setBootstrapServer(routingTable.getBootstrapServer());
                 ordinaryPeerRoutingTable.addAllUnstructuredNetworkRoutingTableEntry(
                         routingTable.getAllUnstructuredNetworkRoutingTableNodes());
                 routingTable = ordinaryPeerRoutingTable;
@@ -313,13 +331,14 @@ public class Router implements NetworkHandlerListener {
     /**
      * Run tasks to be run when a message intended for this node is received.
      *
-     * @param message The message that was received
+     * @param fromNode The node from which the message was received
+     * @param message  The message that was received
      */
-    public void runTasksOnMessageReceived(Message message) {
+    public void runTasksOnMessageReceived(Node fromNode, Message message) {
         listenersListLock.readLock().lock();
         try {
             listenersList.stream().parallel()
-                    .forEach(routerListener -> routerListener.onMessageReceived(message));
+                    .forEach(routerListener -> routerListener.onMessageReceived(fromNode, message));
         } finally {
             listenersListLock.readLock().unlock();
         }

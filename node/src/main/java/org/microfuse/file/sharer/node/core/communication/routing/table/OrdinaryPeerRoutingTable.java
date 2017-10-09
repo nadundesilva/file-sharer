@@ -32,4 +32,10 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
         this.assignedSuperPeer = assignedSuperPeer;
         logger.debug("Changed assigned super peer to " + assignedSuperPeer.toString());
     }
+
+    @Override
+    public void clear() {
+        super.clear();
+        assignedSuperPeer = null;
+    }
 }

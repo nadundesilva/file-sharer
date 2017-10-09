@@ -174,4 +174,21 @@ public class SuperPeerRoutingTable extends RoutingTable {
         }
         return requestedNode;
     }
+
+    @Override
+    public void clear() {
+        super.clear();
+        superPeerNetworkNodesLock.writeLock().lock();
+        try {
+            superPeerNetworkNodes.clear();
+        } finally {
+            superPeerNetworkNodesLock.writeLock().unlock();
+        }
+        assignedOrdinaryPeerNodesLock.writeLock().lock();
+        try {
+            assignedOrdinaryPeerNodes.clear();
+        } finally {
+            assignedOrdinaryPeerNodesLock.writeLock().unlock();
+        }
+    }
 }
