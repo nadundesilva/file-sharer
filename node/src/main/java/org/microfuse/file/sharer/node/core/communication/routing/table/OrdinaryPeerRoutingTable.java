@@ -26,11 +26,24 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
     /**
      * Set the assigned super peer for this node.
      *
-     * @param assignedSuperPeer The super peer to be assigned to this node
+     * @param node The super peer to be assigned to this node
      */
-    public void setAssignedSuperPeer(Node assignedSuperPeer) {
-        this.assignedSuperPeer = assignedSuperPeer;
-        logger.debug("Changed assigned super peer to " + assignedSuperPeer.toString());
+    public void setAssignedSuperPeer(Node node) {
+        this.assignedSuperPeer = node;
+        if (node != null) {
+            logger.debug("Changed assigned super peer to " + node.toString());
+        } else {
+            logger.debug("Removed assigned super peer");
+        }
+    }
+
+    @Override
+    public boolean removeFromAll(Node node) {
+        boolean isSuccessful = super.removeFromAll(node);
+        if (node.equals(getAssignedSuperPeer())) {
+            setAssignedSuperPeer(null);
+        }
+        return removeUnstructuredNetworkRoutingTableEntry(node) || isSuccessful;
     }
 
     @Override

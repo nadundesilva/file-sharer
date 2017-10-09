@@ -13,14 +13,14 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Bootstrapping Manager.
+ * Overlay Network Manager.
  */
-public class BootstrappingManager implements RouterListener {
-    private static final Logger logger = LoggerFactory.getLogger(BootstrappingManager.class);
+public class OverlayNetworkManager implements RouterListener {
+    private static final Logger logger = LoggerFactory.getLogger(OverlayNetworkManager.class);
 
     private Router router;
 
-    public BootstrappingManager(Router router) {
+    public OverlayNetworkManager(Router router) {
         this.router = router;
         this.router.registerListener(this);
     }
@@ -242,14 +242,13 @@ public class BootstrappingManager implements RouterListener {
         node.setPort(message.getData(MessageIndexes.LEAVE_PORT));
         node.setAlive(false);
 
-        boolean isSuccessful = router.getRoutingTable().removeUnstructuredNetworkRoutingTableEntry(node);
+        boolean isSuccessful = router.getRoutingTable().removeFromAll(node);
 
         Message replyMessage = new Message();
         message.setData(
                 MessageIndexes.LEAVE_OK_VALUE,
                 (isSuccessful ? MessageConstants.LEAVE_OK_VALUE_SUCCESS : MessageConstants.LEAVE_OK_VALUE_ERROR)
         );
-
         router.sendMessage(node, replyMessage);
     }
 
@@ -261,7 +260,7 @@ public class BootstrappingManager implements RouterListener {
      */
     private void handleLeaveOkMessage(Node fromNode, Message message) {
         if (Objects.equals(message.getData(MessageIndexes.LEAVE_OK_VALUE), MessageConstants.LEAVE_OK_VALUE_SUCCESS)) {
-            router.getRoutingTable().removeUnstructuredNetworkRoutingTableEntry(fromNode);
+            router.getRoutingTable().removeFromAll(fromNode);
         } else if (Objects.equals(message.getData(MessageIndexes.LEAVE_OK_VALUE),
                 MessageConstants.LEAVE_OK_VALUE_ERROR)) {
             logger.warn("Failed to disconnect unstructured connection with " + fromNode.toString());

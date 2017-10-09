@@ -61,6 +61,22 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testRemoveFromAll() {
+        Assert.assertTrue(ordinaryPeerRoutingTable.removeFromAll(node1));
+
+        Object internalStateUnstructuredNetwork =
+                Whitebox.getInternalState(ordinaryPeerRoutingTable, "unstructuredNetworkNodes");
+        Assert.assertNotNull(internalStateUnstructuredNetwork);
+        Assert.assertTrue(internalStateUnstructuredNetwork instanceof Set<?>);
+        Set<?> unstructuredNetwork = (Set<?>) internalStateUnstructuredNetwork;
+        Assert.assertFalse(unstructuredNetwork.contains(node1));
+
+        Object internalStateAssignedSuperPeer =
+                Whitebox.getInternalState(ordinaryPeerRoutingTable, "assignedSuperPeer");
+        Assert.assertNull(internalStateAssignedSuperPeer);
+    }
+
+    @Test
     public void testGetAllAssignedOrdinaryNetworkRoutingTableNodesCopying() {
         Set<Node> nodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes();
         Object internalState = Whitebox.getInternalState(ordinaryPeerRoutingTable, "unstructuredNetworkNodes");

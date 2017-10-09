@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 
 /**
- * Test Case for org.microfuse.file.sharer.node.core.NodeManager class.
+ * Test Case for org.microfuse.file.sharer.node.core.utils.NodeManager class.
  */
 public class QueryManagerTestCase extends BaseTestCase {
     private Router router;

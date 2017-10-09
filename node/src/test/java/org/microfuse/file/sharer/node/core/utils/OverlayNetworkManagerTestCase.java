@@ -13,21 +13,21 @@ import org.testng.annotations.Test;
 import java.util.List;
 
 /**
- * Test Case for org.microfuse.file.sharer.node.core.NodeManager class.
+ * Test Case for org.microfuse.file.sharer.node.core.utils.OverlayNetworkManager class.
  */
-public class BootstrappingManagerTestCase extends BaseTestCase {
+public class OverlayNetworkManagerTestCase extends BaseTestCase {
     private Router router;
-    private BootstrappingManager bootstrappingManager;
+    private OverlayNetworkManager overlayNetworkManager;
 
     @BeforeMethod
     public void initializeMethod() {
         router = Mockito.spy(new Router(new UDPSocketNetworkHandler(), new UnstructuredFloodingRoutingStrategy()));
-        bootstrappingManager = new BootstrappingManager(router);
+        overlayNetworkManager = new OverlayNetworkManager(router);
     }
 
     @Test
     public void testConstructor() {
-        Object internalStateRouter = Whitebox.getInternalState(bootstrappingManager, "router");
+        Object internalStateRouter = Whitebox.getInternalState(overlayNetworkManager, "router");
         Assert.assertNotNull(internalStateRouter);
         Assert.assertTrue(internalStateRouter == router);
 
@@ -35,6 +35,6 @@ public class BootstrappingManagerTestCase extends BaseTestCase {
         Assert.assertTrue(internalStateListenersList instanceof List<?>);
         List<?> listenersList = (List<?>) internalStateListenersList;
         Assert.assertEquals(listenersList.size(), 1);
-        Assert.assertTrue(listenersList.get(0) == bootstrappingManager);
+        Assert.assertTrue(listenersList.get(0) == overlayNetworkManager);
     }
 }

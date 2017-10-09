@@ -33,7 +33,7 @@ public class ServiceHolder {
     private static volatile Configuration configuration;
     private static volatile Router router;
     private static volatile ResourceIndex resourceIndex;
-    private static volatile BootstrappingManager bootstrappingManager;
+    private static volatile OverlayNetworkManager overlayNetworkManager;
     private static volatile QueryManager queryManager;
 
     /**
@@ -132,11 +132,11 @@ public class ServiceHolder {
      *
      * @return The Bootstrapping Manager
      */
-    public static synchronized BootstrappingManager getBootstrappingManager() {
-        if (bootstrappingManager == null) {
-            bootstrappingManager = new BootstrappingManager(getRouter());
+    public static synchronized OverlayNetworkManager getOverlayNetworkManager() {
+        if (overlayNetworkManager == null) {
+            overlayNetworkManager = new OverlayNetworkManager(getRouter());
         }
-        return bootstrappingManager;
+        return overlayNetworkManager;
     }
 
     /**

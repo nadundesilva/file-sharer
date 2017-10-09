@@ -81,27 +81,27 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
     @Test
     public void testGetBootstrappingManagerAtFirstTime() {
-        BootstrappingManager bootstrappingManager = ServiceHolder.getBootstrappingManager();
+        OverlayNetworkManager overlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
 
-        Assert.assertNotNull(bootstrappingManager);
+        Assert.assertNotNull(overlayNetworkManager);
 
-        Object routerInternalState = Whitebox.getInternalState(bootstrappingManager, "router");
+        Object routerInternalState = Whitebox.getInternalState(overlayNetworkManager, "router");
         Assert.assertNotNull(routerInternalState);
         Object listenersListInternalState = Whitebox.getInternalState(routerInternalState, "listenersList");
         Assert.assertTrue(listenersListInternalState instanceof List<?>);
         List<?> routerListeners = (List<?>) listenersListInternalState;
         Assert.assertEquals(routerListeners.size(), 1);
-        Assert.assertTrue(routerListeners.get(0) == bootstrappingManager);
+        Assert.assertTrue(routerListeners.get(0) == overlayNetworkManager);
     }
 
     @Test
     public void testGetBootstrappingManager() {
-        BootstrappingManager initialBootstrappingManager = ServiceHolder.getBootstrappingManager();
-        BootstrappingManager finalBootstrappingManager = ServiceHolder.getBootstrappingManager();
+        OverlayNetworkManager initialOverlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
+        OverlayNetworkManager finalOverlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
 
-        Assert.assertNotNull(initialBootstrappingManager);
-        Assert.assertNotNull(finalBootstrappingManager);
-        Assert.assertTrue(initialBootstrappingManager == finalBootstrappingManager);
+        Assert.assertNotNull(initialOverlayNetworkManager);
+        Assert.assertNotNull(finalOverlayNetworkManager);
+        Assert.assertTrue(initialOverlayNetworkManager == finalOverlayNetworkManager);
     }
 
     @Test

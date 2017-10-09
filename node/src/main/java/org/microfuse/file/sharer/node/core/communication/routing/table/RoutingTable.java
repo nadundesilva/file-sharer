@@ -111,6 +111,15 @@ public abstract class RoutingTable {
     }
 
     /**
+     * Remove a node from all tables.
+     *
+     * @param node The node to be removed
+     */
+    public boolean removeFromAll(Node node) {
+        return removeUnstructuredNetworkRoutingTableEntry(node);
+    }
+
+    /**
      * Clear the routing table.
      */
     public void clear() {

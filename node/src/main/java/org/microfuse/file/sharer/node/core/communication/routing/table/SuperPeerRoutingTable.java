@@ -176,6 +176,13 @@ public class SuperPeerRoutingTable extends RoutingTable {
     }
 
     @Override
+    public boolean removeFromAll(Node node) {
+        boolean isSuccessful = super.removeFromAll(node);
+        isSuccessful = removeSuperPeerNetworkRoutingTableEntry(node) || isSuccessful;
+        return removeAssignedOrdinaryNetworkRoutingTableEntry(node) || isSuccessful;
+    }
+
+    @Override
     public void clear() {
         super.clear();
         superPeerNetworkNodesLock.writeLock().lock();

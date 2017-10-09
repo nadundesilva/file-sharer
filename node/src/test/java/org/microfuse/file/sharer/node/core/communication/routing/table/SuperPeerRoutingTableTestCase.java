@@ -118,6 +118,51 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testRemoveFromAllASuperPeer() {
+        Assert.assertTrue(superPeerRoutingTable.removeFromAll(superPeerNode1));
+
+        Object internalStateUnstructuredNetwork =
+                Whitebox.getInternalState(superPeerRoutingTable, "unstructuredNetworkNodes");
+        Assert.assertNotNull(internalStateUnstructuredNetwork);
+        Assert.assertTrue(internalStateUnstructuredNetwork instanceof Set<?>);
+        Set<?> unstructuredNetwork = (Set<?>) internalStateUnstructuredNetwork;
+        Assert.assertFalse(unstructuredNetwork.contains(superPeerNode1));
+
+        Object internalStateSuperPeerNetwork =
+                Whitebox.getInternalState(superPeerRoutingTable, "superPeerNetworkNodes");
+        Assert.assertNotNull(internalStateSuperPeerNetwork);
+        Assert.assertTrue(internalStateSuperPeerNetwork instanceof Set<?>);
+        Set<?> superPeerNetwork = (Set<?>) internalStateSuperPeerNetwork;
+        Assert.assertFalse(superPeerNetwork.contains(superPeerNode1));
+
+        Object internalStateAssignedOrdinaryPeerNodes =
+                Whitebox.getInternalState(superPeerRoutingTable, "assignedOrdinaryPeerNodes");
+        Assert.assertNotNull(internalStateAssignedOrdinaryPeerNodes);
+        Assert.assertTrue(internalStateAssignedOrdinaryPeerNodes instanceof Set<?>);
+        Set<?> assignedOrdinaryPeerNodes = (Set<?>) internalStateAssignedOrdinaryPeerNodes;
+        Assert.assertFalse(assignedOrdinaryPeerNodes.contains(superPeerNode1));
+    }
+
+    @Test
+    public void testRemoveFromAllAOrdinaryPeer() {
+        Assert.assertTrue(superPeerRoutingTable.removeFromAll(ordinaryPeerNode1));
+
+        Object internalStateUnstructuredNetwork =
+                Whitebox.getInternalState(superPeerRoutingTable, "unstructuredNetworkNodes");
+        Assert.assertNotNull(internalStateUnstructuredNetwork);
+        Assert.assertTrue(internalStateUnstructuredNetwork instanceof Set<?>);
+        Set<?> unstructuredNetwork = (Set<?>) internalStateUnstructuredNetwork;
+        Assert.assertFalse(unstructuredNetwork.contains(ordinaryPeerNode1));
+
+        Object internalStateAssignedOrdinaryPeerNodes =
+                Whitebox.getInternalState(superPeerRoutingTable, "assignedOrdinaryPeerNodes");
+        Assert.assertNotNull(internalStateAssignedOrdinaryPeerNodes);
+        Assert.assertTrue(internalStateAssignedOrdinaryPeerNodes instanceof Set<?>);
+        Set<?> assignedOrdinaryPeerNodes = (Set<?>) internalStateAssignedOrdinaryPeerNodes;
+        Assert.assertFalse(assignedOrdinaryPeerNodes.contains(ordinaryPeerNode1));
+    }
+
+    @Test
     public void testClear() {
         superPeerRoutingTable.clear();
 
