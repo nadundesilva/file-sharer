@@ -16,8 +16,7 @@ public class NodeManager {
     public static void start() {
         Thread thread = new Thread(() -> {
             logger.info("Starting Node");
-
-            // TODO : Implement node startup
+            ServiceHolder.getOverlayNetworkManager().register();
         });
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.start();

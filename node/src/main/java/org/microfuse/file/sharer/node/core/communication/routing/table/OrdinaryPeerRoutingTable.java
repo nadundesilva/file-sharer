@@ -4,6 +4,8 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+
 /**
  * The routing table containing the node information for ordinary peers.
  * <p>
@@ -44,6 +46,15 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
             setAssignedSuperPeer(null);
         }
         return removeUnstructuredNetworkRoutingTableEntry(node) || isSuccessful;
+    }
+
+    @Override
+    public Set<Node> getAll() {
+        Set<Node> nodes = super.getAll();
+        if (assignedSuperPeer != null) {
+            nodes.add(assignedSuperPeer);
+        }
+        return nodes;
     }
 
     @Override

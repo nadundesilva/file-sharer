@@ -55,14 +55,24 @@ public class OverlayNetworkManager implements RouterListener {
      * Register the current node in the bootstrap server.
      */
     public void register() {
-
+        Message joinMessage = new Message();
+        joinMessage.setData(MessageIndexes.REG_IP, ServiceHolder.getConfiguration().getIp());
+        joinMessage.setData(MessageIndexes.REG_PORT,
+                Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+        joinMessage.setData(MessageIndexes.REG_USERNAME, ServiceHolder.getConfiguration().getUsername());
+        router.sendMessage(ServiceHolder.getConfiguration().getBootstrapServer(), joinMessage);
     }
 
     /**
      * Unregister the current node from the bootstrap server.
      */
     public void unregister() {
-
+        Message joinMessage = new Message();
+        joinMessage.setData(MessageIndexes.UNREG_IP, ServiceHolder.getConfiguration().getIp());
+        joinMessage.setData(MessageIndexes.UNREG_PORT,
+                Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+        joinMessage.setData(MessageIndexes.UNREG_USERNAME, ServiceHolder.getConfiguration().getUsername());
+        router.sendMessage(ServiceHolder.getConfiguration().getBootstrapServer(), joinMessage);
     }
 
     /**
@@ -84,7 +94,13 @@ public class OverlayNetworkManager implements RouterListener {
      * Leave the system.
      */
     public void leave() {
-
+        router.getRoutingTable().getAll().forEach(node -> {
+            Message joinMessage = new Message();
+            joinMessage.setData(MessageIndexes.LEAVE_IP, ServiceHolder.getConfiguration().getIp());
+            joinMessage.setData(MessageIndexes.LEAVE_PORT,
+                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+            router.sendMessage(node, joinMessage);
+        });
     }
 
     /**

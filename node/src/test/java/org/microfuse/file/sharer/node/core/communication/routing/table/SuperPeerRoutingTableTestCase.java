@@ -17,7 +17,11 @@ import java.util.Set;
 public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     private SuperPeerRoutingTable superPeerRoutingTable;
     private Node ordinaryPeerNode1;
+    private Node ordinaryPeerNode2;
+    private Node ordinaryPeerNode3;
     private Node superPeerNode1;
+    private Node superPeerNode2;
+    private Node superPeerNode3;
 
     @BeforeMethod
     public void initializeMethod() {
@@ -30,14 +34,14 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(ordinaryPeerNode1);
         superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(ordinaryPeerNode1);
 
-        Node ordinaryPeerNode2 = new Node();
+        ordinaryPeerNode2 = new Node();
         ordinaryPeerNode2.setIp("192.168.1.2");
         ordinaryPeerNode2.setPort(6542);
         ordinaryPeerNode2.setAlive(true);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(ordinaryPeerNode2);
         superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(ordinaryPeerNode2);
 
-        Node ordinaryPeerNode3 = new Node();
+        ordinaryPeerNode3 = new Node();
         ordinaryPeerNode3.setIp("192.168.1.3");
         ordinaryPeerNode3.setPort(5643);
         ordinaryPeerNode3.setAlive(false);
@@ -50,14 +54,14 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(superPeerNode1);
         superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(superPeerNode1);
 
-        Node superPeerNode2 = new Node();
+        superPeerNode2 = new Node();
         superPeerNode2.setIp("192.168.1.5");
         superPeerNode2.setPort(7431);
         superPeerNode2.setAlive(true);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(superPeerNode2);
         superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(superPeerNode2);
 
-        Node superPeerNode3 = new Node();
+        superPeerNode3 = new Node();
         superPeerNode3.setIp("192.168.1.6");
         superPeerNode3.setPort(4562);
         superPeerNode3.setAlive(false);
@@ -160,6 +164,19 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertTrue(internalStateAssignedOrdinaryPeerNodes instanceof Set<?>);
         Set<?> assignedOrdinaryPeerNodes = (Set<?>) internalStateAssignedOrdinaryPeerNodes;
         Assert.assertFalse(assignedOrdinaryPeerNodes.contains(ordinaryPeerNode1));
+    }
+
+    @Test
+    public void testGetAll() {
+        Set<Node> nodes = superPeerRoutingTable.getAll();
+
+        Assert.assertEquals(nodes.size(), 6);
+        Assert.assertTrue(nodes.contains(ordinaryPeerNode1));
+        Assert.assertTrue(nodes.contains(ordinaryPeerNode2));
+        Assert.assertTrue(nodes.contains(ordinaryPeerNode3));
+        Assert.assertTrue(nodes.contains(superPeerNode1));
+        Assert.assertTrue(nodes.contains(superPeerNode2));
+        Assert.assertTrue(nodes.contains(superPeerNode3));
     }
 
     @Test

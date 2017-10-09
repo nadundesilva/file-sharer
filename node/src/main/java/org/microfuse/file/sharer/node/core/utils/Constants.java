@@ -15,6 +15,7 @@ public class Constants {
     public static final RoutingStrategyType DEFAULT_ROUTING_STRATEGY = RoutingStrategyType.UNSTRUCTURED_FLOODING;
     public static final PeerType DEFAULT_PEER_TYPE = PeerType.ORDINARY_PEER;
 
+    public static final String DEFAULT_USERNAME = "microfuse.2017";
     public static final String DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS = "127.0.0.1";
     public static final int DEFAULT_BOOTSTRAP_SERVER_PORT = 5555;
     public static final String DEFAULT_IP_ADDRESS = "127.0.0.1";

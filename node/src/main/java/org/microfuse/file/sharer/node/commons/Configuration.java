@@ -8,6 +8,7 @@ import org.microfuse.file.sharer.node.core.utils.Constants;
  * Configuration of this Node.
  */
 public class Configuration {
+    private String username;
     private String bootstrapServerIP;
     private int bootstrapServerPort;
     private String ip;
@@ -18,6 +19,7 @@ public class Configuration {
     private int timeToLive;
 
     public Configuration() {
+        username = Constants.DEFAULT_USERNAME;
         bootstrapServerIP = Constants.DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS;
         bootstrapServerPort = Constants.DEFAULT_BOOTSTRAP_SERVER_PORT;
         ip = Constants.DEFAULT_IP_ADDRESS;
@@ -26,6 +28,14 @@ public class Configuration {
         peerListeningPort = Constants.DEFAULT_TCP_LISTENER_PORT;
         listenerHandlingThreadCount = Constants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT;
         timeToLive = Constants.DEFAULT_TIME_TO_LIVE;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getBootstrapServerIP() {
@@ -38,6 +48,14 @@ public class Configuration {
 
     public int getBootstrapServerPort() {
         return bootstrapServerPort;
+    }
+
+    public Node getBootstrapServer() {
+        Node node = new Node();
+        node.setIp(bootstrapServerIP);
+        node.setPort(bootstrapServerPort);
+        node.setAlive(true);
+        return node;
     }
 
     public void setBootstrapServerPort(int bootstrapServerPort) {

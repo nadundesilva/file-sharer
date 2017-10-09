@@ -17,6 +17,8 @@ import java.util.Set;
 public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     private OrdinaryPeerRoutingTable ordinaryPeerRoutingTable;
     private Node node1;
+    private Node node2;
+    private Node node3;
 
     @BeforeMethod
     public void initializeMethod() {
@@ -28,13 +30,13 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         node1.setAlive(true);
         ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node1);
 
-        Node node2 = new Node();
+        node2 = new Node();
         node2.setIp("192.168.1.2");
         node2.setPort(6542);
         node2.setAlive(true);
         ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node2);
 
-        Node node3 = new Node();
+        node3 = new Node();
         node3.setIp("192.168.1.3");
         node3.setPort(5643);
         node3.setAlive(false);
@@ -61,6 +63,13 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testGetAllAssignedOrdinaryNetworkRoutingTableNodesCopying() {
+        Set<Node> nodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes();
+        Object internalState = Whitebox.getInternalState(ordinaryPeerRoutingTable, "unstructuredNetworkNodes");
+        Assert.assertFalse(nodes == internalState);
+    }
+
+    @Test
     public void testRemoveFromAll() {
         Assert.assertTrue(ordinaryPeerRoutingTable.removeFromAll(node1));
 
@@ -77,10 +86,13 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testGetAllAssignedOrdinaryNetworkRoutingTableNodesCopying() {
-        Set<Node> nodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes();
-        Object internalState = Whitebox.getInternalState(ordinaryPeerRoutingTable, "unstructuredNetworkNodes");
-        Assert.assertFalse(nodes == internalState);
+    public void testGetAll() {
+        Set<Node> nodes = ordinaryPeerRoutingTable.getAll();
+
+        Assert.assertEquals(nodes.size(), 3);
+        Assert.assertTrue(nodes.contains(node1));
+        Assert.assertTrue(nodes.contains(node2));
+        Assert.assertTrue(nodes.contains(node3));
     }
 
     @Test

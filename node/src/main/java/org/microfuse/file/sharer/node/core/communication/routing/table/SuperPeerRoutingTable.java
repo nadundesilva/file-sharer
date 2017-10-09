@@ -40,6 +40,10 @@ public class SuperPeerRoutingTable extends RoutingTable {
         boolean isSuccessul;
         superPeerNetworkNodesLock.writeLock().lock();
         try {
+            Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
+            if (existingNode != null) {
+                node = existingNode;
+            }
             isSuccessul = superPeerNetworkNodes.add(node);
             if (isSuccessul) {
                 logger.debug("Added node " + node.toString() + " to super peer network.");
@@ -112,6 +116,10 @@ public class SuperPeerRoutingTable extends RoutingTable {
         boolean isSuccessful;
         assignedOrdinaryPeerNodesLock.writeLock().lock();
         try {
+            Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
+            if (existingNode != null) {
+                node = existingNode;
+            }
             isSuccessful = assignedOrdinaryPeerNodes.add(node);
             if (isSuccessful) {
                 logger.debug("Added node " + node.toString() + " to assigned ordinary peers.");
@@ -180,6 +188,14 @@ public class SuperPeerRoutingTable extends RoutingTable {
         boolean isSuccessful = super.removeFromAll(node);
         isSuccessful = removeSuperPeerNetworkRoutingTableEntry(node) || isSuccessful;
         return removeAssignedOrdinaryNetworkRoutingTableEntry(node) || isSuccessful;
+    }
+
+    @Override
+    public Set<Node> getAll() {
+        Set<Node> nodes = super.getAll();
+        nodes.addAll(getAllSuperPeerNetworkRoutingTableNodes());
+        nodes.addAll(getAllAssignedOrdinaryNetworkRoutingTableNodes());
+        return nodes;
     }
 
     @Override
