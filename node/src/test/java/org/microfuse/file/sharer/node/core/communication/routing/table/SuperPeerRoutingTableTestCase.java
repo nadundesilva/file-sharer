@@ -11,8 +11,6 @@ import java.util.Set;
 
 /**
  * Test Case for org.microfuse.file.sharer.node.core.communication.routing.SuperPeerRoutingTable class.
- *
- * Cannot mock classes since hashCode() and equals() methods are used in tests.
  */
 public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     private SuperPeerRoutingTable superPeerRoutingTable;

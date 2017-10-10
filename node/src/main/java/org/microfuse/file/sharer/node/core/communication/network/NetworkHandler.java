@@ -23,6 +23,7 @@ public abstract class NetworkHandler {
     private List<NetworkHandlerListener> listenersList;
     private ExecutorService listenerHandlerExecutorService;
     protected boolean restartRequired;
+    protected boolean running;
 
     private final ReadWriteLock listenersListLock;
     private final ReadWriteLock listenerHandlerExecutorServiceLock;
@@ -34,6 +35,7 @@ public abstract class NetworkHandler {
         listenerHandlerExecutorService =
                 Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
         restartRequired = false;
+        running = false;
     }
 
     /**
@@ -46,7 +48,9 @@ public abstract class NetworkHandler {
     /**
      * Start listening to messages from other devices.
      */
-    public abstract void startListening();
+    public void startListening() {
+        running = true;
+    }
 
     /**
      * Send a message to the specified node.
@@ -68,7 +72,13 @@ public abstract class NetworkHandler {
                 Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
         logger.debug("Setting the restart required flag");
         listenerHandlerExecutorServiceLock.writeLock().unlock();
+        restartRequired = false;
     }
+
+    /**
+     * Close the network handler.
+     */
+    public abstract void shutdown();
 
     /**
      * Runs tasks to be run when an error occurs in sending a message.

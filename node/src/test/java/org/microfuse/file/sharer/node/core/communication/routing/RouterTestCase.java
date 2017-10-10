@@ -16,6 +16,7 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -61,6 +62,11 @@ public class RouterTestCase extends BaseTestCase {
         RoutingTable routingTable = router.getRoutingTable();
         spyRoutingTable = Mockito.spy(routingTable);
         Whitebox.setInternalState(router, "routingTable", spyRoutingTable);
+    }
+
+    @AfterMethod
+    public void cleanup() {
+        router.shutdown();
     }
 
     @Test

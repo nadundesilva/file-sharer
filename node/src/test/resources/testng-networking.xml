@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="File-Sharer-Node-Test-Suite">
+    <test name="file-sharer-node-network-handler-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.communication.network.TCPSocketNetworkHandlerTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandlerTestCase"/>
+        </classes>
+    </test>
+</suite>

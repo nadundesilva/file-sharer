@@ -57,6 +57,8 @@ public class Router implements NetworkHandlerListener {
         this.networkHandler = networkHandler;
         this.listenersList = new ArrayList<>();
         this.networkHandler.registerListener(this);
+
+        this.networkHandler.startListening();
     }
 
     @Override
@@ -125,7 +127,18 @@ public class Router implements NetworkHandlerListener {
         } finally {
             networkHandlerLock.readLock().unlock();
         }
+    }
 
+    /**
+     * Shutdown the router.
+     */
+    public void shutdown() {
+        networkHandlerLock.writeLock().lock();
+        try {
+            networkHandler.shutdown();
+        } finally {
+            networkHandlerLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -211,7 +224,9 @@ public class Router implements NetworkHandlerListener {
     public void changeNetworkHandler(NetworkHandler networkHandler) {
         networkHandlerLock.writeLock().lock();
         try {
+            this.networkHandler.shutdown();
             this.networkHandler = networkHandler;
+            this.networkHandler.startListening();
             logger.info("Network handler changed to " + this.networkHandler.getName());
         } finally {
             networkHandlerLock.writeLock().unlock();

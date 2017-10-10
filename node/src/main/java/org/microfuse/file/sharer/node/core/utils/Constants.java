@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
  * Constants used by the Node.
  */
 public class Constants {
-    public static final NetworkHandlerType DEFAULT_NETWORK_HANDLER = NetworkHandlerType.UDP_SOCKET;
+    public static final NetworkHandlerType DEFAULT_NETWORK_HANDLER = NetworkHandlerType.TCP_SOCKET;
     public static final RoutingStrategyType DEFAULT_ROUTING_STRATEGY = RoutingStrategyType.UNSTRUCTURED_FLOODING;
     public static final PeerType DEFAULT_PEER_TYPE = PeerType.ORDINARY_PEER;
 

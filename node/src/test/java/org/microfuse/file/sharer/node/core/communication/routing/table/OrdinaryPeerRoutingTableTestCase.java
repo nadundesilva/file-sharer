@@ -11,8 +11,6 @@ import java.util.Set;
 
 /**
  * Test Case for org.microfuse.file.sharer.node.core.communication.routing.OrdinaryPeerRoutingTable class.
- *
- * Cannot mock classes since hashCode() and equals() methods are used in tests.
  */
 public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     private OrdinaryPeerRoutingTable ordinaryPeerRoutingTable;

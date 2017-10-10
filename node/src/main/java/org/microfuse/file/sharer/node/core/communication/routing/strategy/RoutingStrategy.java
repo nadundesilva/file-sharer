@@ -74,16 +74,16 @@ public abstract class RoutingStrategy {
     /**
      * Get the assigned super peer.
      *
-     * @param routingTable The ordinary peer routing table
+     * @param ordinaryPeerRoutingTable The ordinary peer routing table
      * @return The set containing the assigned super peer
      */
-    protected Set<Node> getAssignedSuperPeer(OrdinaryPeerRoutingTable routingTable) {
+    protected Set<Node> getAssignedSuperPeer(OrdinaryPeerRoutingTable ordinaryPeerRoutingTable) {
         Set<Node> forwardingNodes;
-        Node superPeer = routingTable.getAssignedSuperPeer();
+        Node superPeer = ordinaryPeerRoutingTable.getAssignedSuperPeer();
         if (superPeer != null && superPeer.isAlive()) {
             forwardingNodes = new HashSet<>(Collections.singletonList(superPeer));
         } else {
-            forwardingNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
+            forwardingNodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes();
         }
         return forwardingNodes;
     }
