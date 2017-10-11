@@ -129,6 +129,17 @@ public abstract class RoutingTable {
     }
 
     /**
+     * Get a node searching all the nodes.
+     *
+     * @param ip   The ip of the node to fetch
+     * @param port The port of the node to fetch
+     * @return The node requested
+     */
+    public Node get(String ip, int port) {
+        return getUnstructuredNetworkRoutingTableNode(ip, port);
+    }
+
+    /**
      * Clear the routing table.
      */
     public void clear() {

@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.Node;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,15 +38,15 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @param node   The node of the new entry
      */
     public boolean addSuperPeerNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessul;
+        boolean isSuccessful;
         superPeerNetworkNodesLock.writeLock().lock();
         try {
             Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
             if (existingNode != null) {
                 node = existingNode;
             }
-            isSuccessul = superPeerNetworkNodes.add(node);
-            if (isSuccessul) {
+            isSuccessful = superPeerNetworkNodes.add(node);
+            if (isSuccessful) {
                 logger.debug("Added node " + node.toString() + " to super peer network.");
             } else {
                 logger.debug("Failed to add node " + node.toString() + " to super peer network.");
@@ -53,7 +54,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
         } finally {
             superPeerNetworkNodesLock.writeLock().unlock();
         }
-        return isSuccessul;
+        return isSuccessful;
     }
 
     /**
@@ -116,15 +117,21 @@ public class SuperPeerRoutingTable extends RoutingTable {
         boolean isSuccessful;
         assignedOrdinaryPeerNodesLock.writeLock().lock();
         try {
-            Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
-            if (existingNode != null) {
-                node = existingNode;
-            }
-            isSuccessful = assignedOrdinaryPeerNodes.add(node);
-            if (isSuccessful) {
-                logger.debug("Added node " + node.toString() + " to assigned ordinary peers.");
+            if (assignedOrdinaryPeerNodes.size() < ServiceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
+                Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
+                if (existingNode != null) {
+                    node = existingNode;
+                }
+                isSuccessful = assignedOrdinaryPeerNodes.add(node);
+                if (isSuccessful) {
+                    logger.debug("Added node " + node.toString() + " to assigned ordinary peers.");
+                } else {
+                    logger.debug("Failed to add node " + node.toString() + " to assigned ordinary peers.");
+                }
             } else {
-                logger.debug("Failed to add node " + node.toString() + " to assigned ordinary peers.");
+                isSuccessful = false;
+                logger.debug("Assigned super peer node count already at maximum size "
+                        + assignedOrdinaryPeerNodes.size());
             }
         } finally {
             assignedOrdinaryPeerNodesLock.writeLock().unlock();
@@ -196,6 +203,18 @@ public class SuperPeerRoutingTable extends RoutingTable {
         nodes.addAll(getAllSuperPeerNetworkRoutingTableNodes());
         nodes.addAll(getAllAssignedOrdinaryNetworkRoutingTableNodes());
         return nodes;
+    }
+
+    @Override
+    public Node get(String ip, int port) {
+        Node requestedNode = super.get(ip, port);
+        if (requestedNode == null) {
+            requestedNode = getAssignedOrdinaryNetworkRoutingTableNode(ip, port);
+        }
+        if (requestedNode == null) {
+            requestedNode = getSuperPeerNetworkRoutingTableNode(ip, port);
+        }
+        return requestedNode;
     }
 
     @Override

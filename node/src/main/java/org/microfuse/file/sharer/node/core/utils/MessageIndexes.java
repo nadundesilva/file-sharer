@@ -62,6 +62,8 @@ public class MessageIndexes {
 
     // JOIN_SUPER_PEER_OK message
     public static final int JOIN_SUPER_PEER_OK_VALUE = 0;
+    public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_IP = 1;
+    public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_PORT = 2;
 
     private MessageIndexes() {   // Preventing from being initiated
     }

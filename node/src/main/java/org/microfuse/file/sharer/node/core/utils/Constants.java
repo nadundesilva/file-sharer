@@ -22,6 +22,7 @@ public class Constants {
     public static final int DEFAULT_TCP_LISTENER_PORT = 4444;
     public static final int DEFAULT_LISTENER_HANDLER_THREAD_COUNT = 5;
     public static final int DEFAULT_TIME_TO_LIVE = 5;
+    public static final int DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT = 3;
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     public static final String CONFIG_FILE = "config.json";

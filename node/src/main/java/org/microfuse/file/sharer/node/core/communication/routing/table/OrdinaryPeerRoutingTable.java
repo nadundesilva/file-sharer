@@ -4,6 +4,7 @@ import org.microfuse.file.sharer.node.commons.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -55,6 +56,16 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
             nodes.add(assignedSuperPeer);
         }
         return nodes;
+    }
+
+    @Override
+    public Node get(String ip, int port) {
+        Node requestedNode = super.get(ip, port);
+        if (requestedNode == null && Objects.equals(assignedSuperPeer.getIp(), ip) &&
+                assignedSuperPeer.getPort() == port) {
+            requestedNode = assignedSuperPeer;
+        }
+        return requestedNode;
     }
 
     @Override

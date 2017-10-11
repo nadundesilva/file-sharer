@@ -2,6 +2,8 @@ package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.BaseTestCase;
 import org.microfuse.file.sharer.node.commons.Node;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
+import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -120,7 +122,7 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testRemoveFromAllASuperPeer() {
+    public void testRemoveFromAllASuperPeerNode() {
         Assert.assertTrue(superPeerRoutingTable.removeFromAll(superPeerNode1));
 
         Object internalStateUnstructuredNetwork =
@@ -146,7 +148,7 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testRemoveFromAllAOrdinaryPeer() {
+    public void testRemoveFromAllAOrdinaryPeerNode() {
         Assert.assertTrue(superPeerRoutingTable.removeFromAll(ordinaryPeerNode1));
 
         Object internalStateUnstructuredNetwork =
@@ -178,6 +180,55 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
+    public void getGetUnstructuredNetworkNode() {
+        Node node = new Node();
+        node.setIp("192.168.1.100");
+        node.setPort(5824);
+        node.setAlive(true);
+        superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
+
+        Node foundNode = superPeerRoutingTable.get(node.getIp(), node.getPort());
+
+        Assert.assertNotNull(node);
+        Assert.assertTrue(foundNode == node);
+    }
+
+    @Test
+    public void getGetAssignedOrdinaryPeersNode() {
+        Node node = new Node();
+        node.setIp("192.168.1.100");
+        node.setPort(5824);
+        node.setAlive(true);
+        superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(node);
+
+        Node foundNode = superPeerRoutingTable.get(node.getIp(), node.getPort());
+
+        Assert.assertNotNull(foundNode);
+        Assert.assertTrue(foundNode == node);
+    }
+
+    @Test
+    public void getGetSuperPeerNetworkNode() {
+        Node node = new Node();
+        node.setIp("192.168.1.100");
+        node.setPort(5824);
+        node.setAlive(true);
+        superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(node);
+
+        Node foundNode = superPeerRoutingTable.get(node.getIp(), node.getPort());
+
+        Assert.assertNotNull(foundNode);
+        Assert.assertTrue(foundNode == node);
+    }
+
+    @Test
+    public void getNonExistentNode() {
+        Node node = superPeerRoutingTable.get("192.168.1.243", 7846);
+
+        Assert.assertNull(node);
+    }
+
+    @Test
     public void testClear() {
         superPeerRoutingTable.clear();
 
@@ -195,5 +246,22 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertTrue(internalStateAssignedOrdinaryPeerNodes instanceof Set<?>);
         Set<?> assignedOrdinaryPeerNodes = (Set<?>) internalStateSuperPeerNetworkNodes;
         Assert.assertEquals(assignedOrdinaryPeerNodes.size(), 0);
+    }
+
+    @Test
+    public void testAddAssignedSuperPeerNetworkRoutingTableNodeAfterMaxThreshold() {
+        ServiceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
+
+        Node newNode1 = Mockito.mock(Node.class);
+        Node newNode2 = Mockito.mock(Node.class);
+        superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(newNode1);
+        boolean isSuccessful = superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(newNode2);
+        Set<Node> assignedSuperPeer = superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes();
+
+        Assert.assertFalse(isSuccessful);
+        Assert.assertEquals(assignedSuperPeer.size(), 3);
+        Assert.assertTrue(assignedSuperPeer.contains(ordinaryPeerNode1));
+        Assert.assertTrue(assignedSuperPeer.contains(ordinaryPeerNode2));
+        Assert.assertTrue(assignedSuperPeer.contains(newNode1));
     }
 }

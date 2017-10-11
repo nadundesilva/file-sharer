@@ -17,6 +17,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     private Node node1;
     private Node node2;
     private Node node3;
+    private Node assignedSuperPeer;
 
     @BeforeMethod
     public void initializeMethod() {
@@ -39,6 +40,13 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         node3.setPort(5643);
         node3.setAlive(false);
         ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node3);
+
+        assignedSuperPeer = new Node();
+        assignedSuperPeer.setIp("192.168.1.3");
+        assignedSuperPeer.setPort(5643);
+        assignedSuperPeer.setAlive(false);
+        ordinaryPeerRoutingTable.setAssignedSuperPeer(assignedSuperPeer);
+        ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(assignedSuperPeer);
     }
 
     @Test
@@ -68,7 +76,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testRemoveFromAll() {
+    public void testRemoveFromAllUnstructuredNetworkNode() {
         Assert.assertTrue(ordinaryPeerRoutingTable.removeFromAll(node1));
 
         Object internalStateUnstructuredNetwork =
@@ -77,6 +85,18 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertTrue(internalStateUnstructuredNetwork instanceof Set<?>);
         Set<?> unstructuredNetwork = (Set<?>) internalStateUnstructuredNetwork;
         Assert.assertFalse(unstructuredNetwork.contains(node1));
+    }
+
+    @Test
+    public void testRemoveFromAllAssignedSuperPeerNode() {
+        Assert.assertTrue(ordinaryPeerRoutingTable.removeFromAll(assignedSuperPeer));
+
+        Object internalStateUnstructuredNetwork =
+                Whitebox.getInternalState(ordinaryPeerRoutingTable, "unstructuredNetworkNodes");
+        Assert.assertNotNull(internalStateUnstructuredNetwork);
+        Assert.assertTrue(internalStateUnstructuredNetwork instanceof Set<?>);
+        Set<?> unstructuredNetwork = (Set<?>) internalStateUnstructuredNetwork;
+        Assert.assertFalse(unstructuredNetwork.contains(assignedSuperPeer));
 
         Object internalStateAssignedSuperPeer =
                 Whitebox.getInternalState(ordinaryPeerRoutingTable, "assignedSuperPeer");
@@ -91,6 +111,41 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertTrue(nodes.contains(node1));
         Assert.assertTrue(nodes.contains(node2));
         Assert.assertTrue(nodes.contains(node3));
+    }
+
+    @Test
+    public void getGetUnstructuredNetworkNode() {
+        Node node = new Node();
+        node.setIp("192.168.1.100");
+        node.setPort(5824);
+        node.setAlive(true);
+        ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
+
+        Node foundNode = ordinaryPeerRoutingTable.get(node.getIp(), node.getPort());
+
+        Assert.assertNotNull(foundNode);
+        Assert.assertTrue(foundNode == node);
+    }
+
+    @Test
+    public void getGetAssignedSuperPeerNode() {
+        Node node = new Node();
+        node.setIp("192.168.1.100");
+        node.setPort(5824);
+        node.setAlive(true);
+        ordinaryPeerRoutingTable.setAssignedSuperPeer(node);
+
+        Node foundNode = ordinaryPeerRoutingTable.get(node.getIp(), node.getPort());
+
+        Assert.assertNotNull(foundNode);
+        Assert.assertTrue(foundNode == node);
+    }
+
+    @Test
+    public void getNonExistentNode() {
+        Node node = ordinaryPeerRoutingTable.get("192.168.1.243", 7846);
+
+        Assert.assertNull(node);
     }
 
     @Test

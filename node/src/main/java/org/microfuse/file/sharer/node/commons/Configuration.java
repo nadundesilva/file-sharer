@@ -17,6 +17,7 @@ public class Configuration {
     private int peerListeningPort;
     private int listenerHandlingThreadCount;
     private int timeToLive;
+    private int maxAssignedOrdinaryPeerCount;
 
     public Configuration() {
         username = Constants.DEFAULT_USERNAME;
@@ -28,6 +29,7 @@ public class Configuration {
         peerListeningPort = Constants.DEFAULT_TCP_LISTENER_PORT;
         listenerHandlingThreadCount = Constants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT;
         timeToLive = Constants.DEFAULT_TIME_TO_LIVE;
+        maxAssignedOrdinaryPeerCount = Constants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT;
     }
 
     public String getUsername() {
@@ -108,5 +110,13 @@ public class Configuration {
 
     public void setTimeToLive(int timeToLive) {
         this.timeToLive = timeToLive;
+    }
+
+    public int getMaxAssignedOrdinaryPeerCount() {
+        return maxAssignedOrdinaryPeerCount;
+    }
+
+    public void setMaxAssignedOrdinaryPeerCount(int maxAssignedOrdinaryPeerCount) {
+        this.maxAssignedOrdinaryPeerCount = maxAssignedOrdinaryPeerCount;
     }
 }
