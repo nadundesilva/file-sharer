@@ -40,6 +40,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
                 "\"timeToLive\":3," +
                 "\"listenerHandlingThreadCount\":14," +
                 "\"maxAssignedOrdinaryPeerCount\":13," +
+                "\"heartBeatInterval\":56," +
+                "\"networkHandlerTimeout\":23," +
                 "\"networkHandlerType\":\"TCP_SOCKET\"," +
                 "\"routingStrategyType\":\"SUPER_PEER_RANDOM_WALK\"" +
                 "}";
@@ -60,6 +62,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertEquals(configuration.getTimeToLive(), 3);
         Assert.assertEquals(configuration.getListenerHandlingThreadCount(), 14);
         Assert.assertEquals(configuration.getMaxAssignedOrdinaryPeerCount(), 13);
+        Assert.assertEquals(configuration.getHeartBeatInterval(), 56);
+        Assert.assertEquals(configuration.getNetworkHandlerTimeout(), 23);
         Assert.assertEquals(configuration.getNetworkHandlerType(), NetworkHandlerType.TCP_SOCKET);
         Assert.assertEquals(configuration.getRoutingStrategyType(), RoutingStrategyType.SUPER_PEER_RANDOM_WALK);
     }
@@ -79,6 +83,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
                 Constants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT);
         Assert.assertEquals(configuration.getMaxAssignedOrdinaryPeerCount(),
                 Constants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT);
+        Assert.assertEquals(configuration.getHeartBeatInterval(), Constants.DEFAULT_HEART_BEAT_INTERVAL);
+        Assert.assertEquals(configuration.getNetworkHandlerTimeout(), Constants.DEFAULT_NETWORK_HANDLER_TIMEOUT);
         Assert.assertEquals(configuration.getNetworkHandlerType(), Constants.DEFAULT_NETWORK_HANDLER);
         Assert.assertEquals(configuration.getRoutingStrategyType(), Constants.DEFAULT_ROUTING_STRATEGY);
     }

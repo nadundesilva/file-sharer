@@ -27,7 +27,9 @@ public enum MessageType {
     SER_SUPER_PEER("SERSUPERPEER"),
     SER_SUPER_PEER_OK("SERSUPERPEEROK"),
     JOIN_SUPER_PEER("JOINSUPERPEER"),
-    JOIN_SUPER_PEER_OK("JOINSUPERPEEROK");
+    JOIN_SUPER_PEER_OK("JOINSUPERPEEROK"),
+    HEARTBEAT("HEARTBEAT"),
+    HEARTBEAT_OK("HEARTBEATOK");
 
     /**
      * Constructor setting the message identifier.

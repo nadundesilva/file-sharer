@@ -18,6 +18,8 @@ public class Configuration {
     private int listenerHandlingThreadCount;
     private int timeToLive;
     private int maxAssignedOrdinaryPeerCount;
+    private int heartBeatInterval;
+    private int networkHandlerTimeout;
 
     public Configuration() {
         username = Constants.DEFAULT_USERNAME;
@@ -30,6 +32,8 @@ public class Configuration {
         listenerHandlingThreadCount = Constants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT;
         timeToLive = Constants.DEFAULT_TIME_TO_LIVE;
         maxAssignedOrdinaryPeerCount = Constants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT;
+        heartBeatInterval = Constants.DEFAULT_HEART_BEAT_INTERVAL;
+        networkHandlerTimeout = Constants.DEFAULT_NETWORK_HANDLER_TIMEOUT;
     }
 
     public String getUsername() {
@@ -118,5 +122,21 @@ public class Configuration {
 
     public void setMaxAssignedOrdinaryPeerCount(int maxAssignedOrdinaryPeerCount) {
         this.maxAssignedOrdinaryPeerCount = maxAssignedOrdinaryPeerCount;
+    }
+
+    public int getHeartBeatInterval() {
+        return heartBeatInterval;
+    }
+
+    public void setHeartBeatInterval(int heartBeatInterval) {
+        this.heartBeatInterval = heartBeatInterval;
+    }
+
+    public int getNetworkHandlerTimeout() {
+        return networkHandlerTimeout;
+    }
+
+    public void setNetworkHandlerTimeout(int networkHandlerTimeout) {
+        this.networkHandlerTimeout = networkHandlerTimeout;
     }
 }

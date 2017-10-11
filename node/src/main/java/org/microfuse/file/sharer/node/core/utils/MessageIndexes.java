@@ -27,6 +27,8 @@ public class MessageIndexes {
 
     // JOIN_OK message
     public static final int JOIN_OK_VALUE = 0;
+    public static final int JOIN_OK_IP = 1;
+    public static final int JOIN_OK_PORT = 2;
 
     // LEAVE message
     public static final int LEAVE_IP = 0;
@@ -64,6 +66,12 @@ public class MessageIndexes {
     public static final int JOIN_SUPER_PEER_OK_VALUE = 0;
     public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_IP = 1;
     public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_PORT = 2;
+
+    public static final int HEARTBEAT_SOURCE_IP = 0;
+    public static final int HEARTBEAT_SOURCE_PORT = 1;
+
+    public static final int HEARTBEAT_OK_IP = 0;
+    public static final int HEARTBEAT_OK_PORT = 1;
 
     private MessageIndexes() {   // Preventing from being initiated
     }

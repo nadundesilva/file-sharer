@@ -121,6 +121,20 @@ public class OverlayNetworkManager implements RouterListener {
     }
 
     /**
+     * Heartbeat to all nodes.
+     */
+    public void heartBeat() {
+        router.enableHeartBeat();
+    }
+
+    /**
+     * Enable heart beating.
+     */
+    public void enableHeartBeat() {
+        router.disableHeartBeat();
+    }
+
+    /**
      * Search for a super peer in the system.
      */
     private void searchForSuperPeer() {
@@ -253,6 +267,9 @@ public class OverlayNetworkManager implements RouterListener {
                 MessageIndexes.JOIN_OK_VALUE,
                 (isSuccessful ? MessageConstants.JOIN_OK_VALUE_SUCCESS : MessageConstants.JOIN_OK_VALUE_ERROR)
         );
+        replyMessage.setData(MessageIndexes.JOIN_OK_IP, ServiceHolder.getConfiguration().getIp());
+        replyMessage.setData(MessageIndexes.JOIN_OK_PORT,
+                Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
         router.sendMessage(node, replyMessage);
     }
 
@@ -264,7 +281,11 @@ public class OverlayNetworkManager implements RouterListener {
      */
     private void handleJoinOkMessage(Node fromNode, Message message) {
         if (Objects.equals(message.getData(MessageIndexes.JOIN_OK_VALUE), MessageConstants.JOIN_OK_VALUE_SUCCESS)) {
-            router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(fromNode);
+            Node node = new Node();
+            node.setIp(message.getData(MessageIndexes.JOIN_OK_IP));
+            node.setPort(message.getData(MessageIndexes.JOIN_OK_PORT));
+
+            router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node);
             searchForSuperPeer();
         } else if (Objects.equals(message.getData(MessageIndexes.JOIN_OK_VALUE),
                 MessageConstants.JOIN_OK_VALUE_ERROR)) {
@@ -327,6 +348,8 @@ public class OverlayNetworkManager implements RouterListener {
                 MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_IP) ||
                 Objects.equals(message.getData(MessageIndexes.SER_SUPER_PEER_OK_PORT),
                         MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT)) {
+            selfAssignSuperPeer();
+        } else {
             Message joinMessage = new Message();
             joinMessage.setType(MessageType.JOIN_SUPER_PEER);
             joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_IP, ServiceHolder.getConfiguration().getIp());

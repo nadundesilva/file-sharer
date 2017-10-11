@@ -19,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -36,16 +38,21 @@ public class Router implements NetworkHandlerListener {
     private RoutingStrategy routingStrategy;
     private NetworkHandler networkHandler;
 
+    private Thread heartBeatThread;
+    private boolean heartBeatingEnabled;
+
     private final ReadWriteLock listenersListLock;
     private final ReadWriteLock routingTableLock;
     private final ReadWriteLock routingStrategyLock;
     private final ReadWriteLock networkHandlerLock;
+    private final Lock heartBeatLock;
 
     public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy) {
         listenersListLock = new ReentrantReadWriteLock();
         routingTableLock = new ReentrantReadWriteLock();
         routingStrategyLock = new ReentrantReadWriteLock();
         networkHandlerLock = new ReentrantReadWriteLock();
+        heartBeatLock = new ReentrantLock();
         try {
             routingTable = PeerType.getRoutingTableClass(ServiceHolder.getPeerType()).newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
@@ -53,6 +60,7 @@ public class Router implements NetworkHandlerListener {
                     + ". Using the routing table for " + PeerType.ORDINARY_PEER.getValue() + " instead", e);
             routingTable = new OrdinaryPeerRoutingTable();
         }
+        heartBeatingEnabled = false;
         this.routingStrategy = routingStrategy;
         this.networkHandler = networkHandler;
         this.listenersList = new ArrayList<>();
@@ -81,7 +89,8 @@ public class Router implements NetworkHandlerListener {
             fromNode.setAlive(true);
         }
 
-        if (messageType != null && (messageType == MessageType.SER || messageType == MessageType.SER_SUPER_PEER)) {
+        if (messageType != null && (messageType == MessageType.SER || messageType == MessageType.SER_SUPER_PEER ||
+                messageType == MessageType.HEARTBEAT)) {
             route(fromNode, message);
         } else {
             runTasksOnMessageReceived(fromNode, message);
@@ -138,6 +147,69 @@ public class Router implements NetworkHandlerListener {
             networkHandler.shutdown();
         } finally {
             networkHandlerLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Heartbeat to all nodes.
+     */
+    public void heartBeat() {
+        Set<Node> nodes = routingTable.getAll();
+        nodes.forEach(node -> {
+            Message heartBeatMessage = new Message();
+            heartBeatMessage.setType(MessageType.HEARTBEAT);
+            heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_IP,
+                    ServiceHolder.getConfiguration().getIp());
+            heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_PORT,
+                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+            sendMessage(node, heartBeatMessage);
+            logger.debug("Heart beat sent to node " + node.toString());
+        });
+    }
+
+    /**
+     * Enable heart beating.
+     */
+    public void enableHeartBeat() {
+        heartBeatLock.lock();
+        try {
+            if (!heartBeatingEnabled) {
+                heartBeatingEnabled = true;
+                heartBeatThread = new Thread(() -> {
+                    while (heartBeatingEnabled) {
+                        heartBeat();
+                        try {
+                            Thread.sleep(ServiceHolder.getConfiguration().getHeartBeatInterval() * 1000);
+                        } catch (InterruptedException e) {
+                            logger.debug("Failed to sleep heartbeat thread", e);
+                        }
+                    }
+                    logger.debug("Stopped Heart beating");
+                });
+                heartBeatThread.setPriority(Thread.MIN_PRIORITY);
+                heartBeatThread.setDaemon(true);
+                heartBeatThread.start();
+                logger.debug("Started Heart beating");
+            }
+        } finally {
+            heartBeatLock.unlock();
+        }
+    }
+
+    /**
+     * Disable heart beating.
+     */
+    public void disableHeartBeat() {
+        heartBeatLock.lock();
+        try {
+            if (heartBeatingEnabled) {
+                heartBeatingEnabled = false;
+                if (heartBeatThread != null) {
+                    heartBeatThread.interrupt();
+                }
+            }
+        } finally {
+            heartBeatLock.unlock();
         }
     }
 
@@ -475,6 +547,21 @@ public class Router implements NetworkHandlerListener {
                     }
                 }
             }
+        } else if (messageType == MessageType.HEARTBEAT) {
+            Message heartBeatOkMessage = new Message();
+            heartBeatOkMessage.setType(MessageType.HEARTBEAT_OK);
+            heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_IP, ServiceHolder.getConfiguration().getIp());
+            heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_PORT,
+                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+
+            logger.debug("Sending heartbeat ok message back to "
+                    + message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP) + ":"
+                    + message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT));
+            sendMessage(
+                    message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP),
+                    Integer.parseInt(message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT)),
+                    heartBeatOkMessage
+            );
         } else {
             logger.warn("Not routing message of type " + messageType + ". The Router will only route messages of type "
                     + MessageType.SER + ".");

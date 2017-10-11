@@ -41,7 +41,8 @@ public class MessageTestCase extends BaseTestCase {
 
     @Test
     public void testMessageParsingWithQuotesAtEnd() {
-        Message message = Message.parse("0047 SER 129.82.62.142 5070 \"Lord of the Rings\"");
+        Message message = Message.parse("0047 " + MessageType.SER.getValue()
+                + " 129.82.62.142 5070 \"Lord of the Rings\"");
         List<String> data = message.getData();
 
         Assert.assertEquals(message.getType(), MessageType.SER);
@@ -52,7 +53,8 @@ public class MessageTestCase extends BaseTestCase {
 
     @Test
     public void testMessageParsingWithQuotesAtMiddle() {
-        Message message = Message.parse("0072 SEROK 3 129.82.128.1 2301 \"Lord of the Rings\" Cars Thor");
+        Message message = Message.parse("0072 " + MessageType.SER_OK.getValue()
+                + " 3 129.82.128.1 2301 \"Lord of the Rings\" Cars Thor");
         List<String> data = message.getData();
 
         Assert.assertEquals(message.getType(), MessageType.SER_OK);

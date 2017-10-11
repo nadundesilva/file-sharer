@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
 import org.microfuse.file.sharer.node.BaseTestCase;
+import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.Node;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
@@ -397,5 +398,68 @@ public class RouterTestCase extends BaseTestCase {
         router.runTasksOnMessageReceived(fromNode, message);
 
         Mockito.verify(listener, Mockito.times(1)).onMessageReceived(fromNode, message);
+    }
+
+    @Test
+    public void testHeartBeat() {
+        Node node1 = Mockito.mock(Node.class);
+        Mockito.when(node1.getIp()).thenReturn("127.0.0.1");
+        Mockito.when(node1.getPort()).thenReturn(5642);
+        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
+
+        Configuration configuration = ServiceHolder.getConfiguration();
+        configuration.setHeartBeatInterval(1);
+
+        Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + configuration.getIp() + " "
+                + configuration.getPeerListeningPort());
+
+        router.enableHeartBeat();
+        waitFor(1100);
+
+        Mockito.verify(networkHandler, Mockito.times(2))
+                .sendMessage(node1.getIp(), node1.getPort(), message);
+    }
+
+    @Test
+    public void testOnHeartBeatOkMessageReceived() {
+        Node node1 = new Node();
+        node1.setIp("127.0.0.1");
+        node1.setPort(5642);
+
+        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
+        Configuration configuration = ServiceHolder.getConfiguration();
+
+        Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + node1.getIp() + " "
+                + node1.getPort());
+
+        router.onMessageReceived(node1.getIp(), node1.getPort(), message);
+
+        Message replyMessage = Message.parse("0031 " + MessageType.HEARTBEAT_OK.getValue() + " "
+                + configuration.getIp() + " " + configuration.getPeerListeningPort());
+
+        Mockito.verify(networkHandler, Mockito.times(1))
+                .sendMessage(node1.getIp(), node1.getPort(), replyMessage);
+    }
+
+    @Test
+    public void testHeartBeatDisable() {
+        Node node1 = Mockito.mock(Node.class);
+        Mockito.when(node1.getIp()).thenReturn("127.0.0.1");
+        Mockito.when(node1.getPort()).thenReturn(5642);
+        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
+
+        Configuration configuration = ServiceHolder.getConfiguration();
+        configuration.setHeartBeatInterval(1);
+
+        Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + configuration.getIp() + " "
+                + configuration.getPeerListeningPort());
+
+        router.enableHeartBeat();
+        waitFor(1100);
+        router.disableHeartBeat();
+        waitFor(1100);
+
+        Mockito.verify(networkHandler, Mockito.times(2))
+                .sendMessage(node1.getIp(), node1.getPort(), message);
     }
 }
