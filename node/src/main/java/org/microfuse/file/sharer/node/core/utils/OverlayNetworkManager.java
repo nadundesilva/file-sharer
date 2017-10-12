@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Overlay Network Manager.
@@ -25,7 +27,15 @@ public class OverlayNetworkManager implements RouterListener {
 
     private Router router;
 
+    private Thread gossipingThread;
+    private boolean gossipingEnabled;
+
+    private final Lock gossipingLock;
+
     public OverlayNetworkManager(Router router) {
+        gossipingLock = new ReentrantLock();
+        gossipingEnabled = false;
+
         this.router = router;
         this.router.registerListener(this);
     }
@@ -62,6 +72,64 @@ public class OverlayNetworkManager implements RouterListener {
                 break;
             default:
                 logger.debug("Message " + message.toString() + " of unrecognized type ignored ");
+        }
+    }
+
+    /**
+     * Enable gossiping.
+     */
+    public void enableGossiping() {
+        gossipingLock.lock();
+        try {
+            if (!gossipingEnabled) {
+                gossipingEnabled = true;
+                gossipingThread = new Thread(() -> {
+                    while (gossipingEnabled) {
+                        gossip();
+                        try {
+                            Thread.sleep(ServiceHolder.getConfiguration().getHeartBeatInterval() * 1000);
+                        } catch (InterruptedException e) {
+                            logger.debug("Failed to sleep heartbeat thread", e);
+                        }
+                    }
+                    logger.debug("Stopped Heart beating");
+                });
+                gossipingThread.setPriority(Thread.MIN_PRIORITY);
+                gossipingThread.setDaemon(true);
+                gossipingThread.start();
+                logger.debug("Started Heart beating");
+            }
+        } finally {
+            gossipingLock.unlock();
+        }
+    }
+
+    /**
+     * Disable gossiping.
+     */
+    public void disableGossiping() {
+        gossipingLock.lock();
+        try {
+            if (gossipingEnabled) {
+                gossipingEnabled = false;
+                if (gossipingThread != null) {
+                    gossipingThread.interrupt();
+                }
+            }
+        } finally {
+            gossipingLock.unlock();
+        }
+    }
+
+    /**
+     * Gossip and grow the network.
+     * This will only happen if the unstructured network peer count is less than the threshold.
+     */
+    public void gossip() {
+        if (router.getRoutingTable().getAllUnstructuredNetworkRoutingTableNodes().size() <=
+                ServiceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
+            logger.debug("Gossiping to grow the network");
+            // TODO : Implement gossiping.
         }
     }
 
@@ -160,7 +228,7 @@ public class OverlayNetworkManager implements RouterListener {
      * Self assign current node as super peer.
      */
     private void selfAssignSuperPeer() {
-
+        // TODO : Implement self assigning super peer. (Announce to others ?)
     }
 
     /**

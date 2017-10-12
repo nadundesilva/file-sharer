@@ -18,7 +18,9 @@ public class Configuration {
     private int listenerHandlingThreadCount;
     private int timeToLive;
     private int maxAssignedOrdinaryPeerCount;
+    private int maxUnstructuredPeerCount;
     private int heartBeatInterval;
+    private int gossipingInterval;
     private int networkHandlerTimeout;
 
     public Configuration() {
@@ -32,7 +34,9 @@ public class Configuration {
         listenerHandlingThreadCount = Constants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT;
         timeToLive = Constants.DEFAULT_TIME_TO_LIVE;
         maxAssignedOrdinaryPeerCount = Constants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT;
+        maxUnstructuredPeerCount = Constants.DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT;
         heartBeatInterval = Constants.DEFAULT_HEART_BEAT_INTERVAL;
+        gossipingInterval = Constants.DEFAULT_GOSSIPING_INTERVAL;
         networkHandlerTimeout = Constants.DEFAULT_NETWORK_HANDLER_TIMEOUT;
     }
 
@@ -124,12 +128,28 @@ public class Configuration {
         this.maxAssignedOrdinaryPeerCount = maxAssignedOrdinaryPeerCount;
     }
 
+    public int getMaxUnstructuredPeerCount() {
+        return maxUnstructuredPeerCount;
+    }
+
+    public void setMaxUnstructuredPeerCount(int maxUnstructuredPeerCount) {
+        this.maxUnstructuredPeerCount = maxUnstructuredPeerCount;
+    }
+
     public int getHeartBeatInterval() {
         return heartBeatInterval;
     }
 
     public void setHeartBeatInterval(int heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
+    }
+
+    public int getGossipingInterval() {
+        return gossipingInterval;
+    }
+
+    public void setGossipingInterval(int gossipingInterval) {
+        this.gossipingInterval = gossipingInterval;
     }
 
     public int getNetworkHandlerTimeout() {

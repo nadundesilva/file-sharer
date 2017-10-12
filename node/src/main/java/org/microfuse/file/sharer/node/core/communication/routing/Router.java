@@ -151,23 +151,6 @@ public class Router implements NetworkHandlerListener {
     }
 
     /**
-     * Heartbeat to all nodes.
-     */
-    public void heartBeat() {
-        Set<Node> nodes = routingTable.getAll();
-        nodes.forEach(node -> {
-            Message heartBeatMessage = new Message();
-            heartBeatMessage.setType(MessageType.HEARTBEAT);
-            heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_IP,
-                    ServiceHolder.getConfiguration().getIp());
-            heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_PORT,
-                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
-            sendMessage(node, heartBeatMessage);
-            logger.debug("Heart beat sent to node " + node.toString());
-        });
-    }
-
-    /**
      * Enable heart beating.
      */
     public void enableHeartBeat() {
@@ -211,6 +194,24 @@ public class Router implements NetworkHandlerListener {
         } finally {
             heartBeatLock.unlock();
         }
+    }
+
+    /**
+     * Heartbeat to all nodes and verify if they are alive.
+     */
+    public void heartBeat() {
+        logger.debug("Heart beating to check nodes");
+        Set<Node> nodes = routingTable.getAll();
+        nodes.forEach(node -> {
+            Message heartBeatMessage = new Message();
+            heartBeatMessage.setType(MessageType.HEARTBEAT);
+            heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_IP,
+                    ServiceHolder.getConfiguration().getIp());
+            heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_PORT,
+                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+            sendMessage(node, heartBeatMessage);
+            logger.debug("Heart beat sent to node " + node.toString());
+        });
     }
 
     /**
