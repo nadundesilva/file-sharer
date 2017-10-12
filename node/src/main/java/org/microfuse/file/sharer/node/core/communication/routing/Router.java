@@ -445,8 +445,8 @@ public class Router implements NetworkHandlerListener {
 
                 List<String> serOkData = new ArrayList<>();
                 serOkData.add(MessageIndexes.SER_OK_FILE_COUNT, Integer.toString(ownedResources.size()));
-                serOkData.add(MessageIndexes.SER_OK_SOURCE_IP, ServiceHolder.getConfiguration().getIp());
-                serOkData.add(MessageIndexes.SER_OK_SOURCE_PORT,
+                serOkData.add(MessageIndexes.SER_OK_IP, ServiceHolder.getConfiguration().getIp());
+                serOkData.add(MessageIndexes.SER_OK_PORT,
                         Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
                 ownedResources.forEach(resource -> serOkData.add(resource.getName()));
                 serOkMessage.setData(serOkData);
@@ -473,8 +473,8 @@ public class Router implements NetworkHandlerListener {
                     serOkMessage.setType(MessageType.SER_OK);
                     serOkMessage.setData(MessageIndexes.SER_OK_FILE_COUNT,
                             MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT);
-                    serOkMessage.setData(MessageIndexes.SER_OK_SOURCE_IP, MessageConstants.SER_OK_NOT_FOUND_IP);
-                    serOkMessage.setData(MessageIndexes.SER_OK_SOURCE_PORT, MessageConstants.SER_OK_NOT_FOUND_PORT);
+                    serOkMessage.setData(MessageIndexes.SER_OK_IP, MessageConstants.SER_OK_NOT_FOUND_IP);
+                    serOkMessage.setData(MessageIndexes.SER_OK_PORT, MessageConstants.SER_OK_NOT_FOUND_PORT);
 
                     logger.debug("Sending search failed back to search request source node "
                             + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"

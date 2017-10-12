@@ -41,7 +41,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
         boolean isSuccessful;
         superPeerNetworkNodesLock.writeLock().lock();
         try {
-            Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
+            Node existingNode = get(node.getIp(), node.getPort());
             if (existingNode != null) {
                 node = existingNode;
             }
