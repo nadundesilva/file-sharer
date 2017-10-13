@@ -12,14 +12,14 @@
 
     <artifactId>bootstrap-server</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>File Sharer - Bootstrap Server</name>
-    <description>Bootstrap Server for the P2P File Sharing System</description>
+    <name>File Sharer - Bootstrap server</name>
+    <description>Bootstrap Server of the P2P File Sharing System</description>
 
     <dependencies>
         <!-- Own dependencies -->
         <dependency>
             <groupId>org.microfuse.node</groupId>
-            <artifactId>node</artifactId>
+            <artifactId>commons</artifactId>
         </dependency>
 
         <!-- Logging dependencies -->

@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="File-Sharer-Node-Test-Suite">
+    <test name="file-sharer-node-commons-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.commons.messaging.MessageTestCase"/>
+        </classes>
+    </test>
+</suite>

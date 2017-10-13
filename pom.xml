@@ -13,8 +13,8 @@
 
     <modules>
         <module>bootstrap-server</module>
+        <module>commons</module>
         <module>node</module>
-        <module>node-server</module>
     </modules>
 
     <dependencyManagement>
@@ -33,7 +33,12 @@
             <!-- Own dependencies -->
             <dependency>
                 <groupId>org.microfuse.node</groupId>
-                <artifactId>node</artifactId>
+                <artifactId>commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.microfuse.node</groupId>
+                <artifactId>node-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

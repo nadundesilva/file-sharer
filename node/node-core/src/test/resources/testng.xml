@@ -1,0 +1,42 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="File-Sharer-Node-Test-Suite">
+    <test name="file-sharer-node-commons-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.commons.NodeTestCase"/>
+        </classes>
+    </test>
+    <test name="file-sharer-node-resource-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.core.resource.OwnedResourceTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.resource.AggregatedResourceTestCase"/>
+        </classes>
+    </test>
+    <test name="file-sharer-node-resource-index-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.core.resource.index.ResourceIndexTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndexTestCase"/>
+        </classes>
+    </test>
+    <test name="file-sharer-node-routing-table-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTableTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTableTestCase"/>
+        </classes>
+    </test>
+    <test name="file-sharer-node-routing-strategy-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategyTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredRandomWalkRoutingStrategyTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.communication.routing.strategy.SuperPeerFloodingRoutingStrategyTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.communication.routing.strategy.SuperPeerRandomWalkRoutingStrategyTestCase"/>
+        </classes>
+    </test>
+    <test name="file-sharer-node-routing-core-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.core.communication.routing.RouterTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.utils.OverlayNetworkManagerTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.utils.QueryManagerTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.utils.ServiceHolderTestCase"/>
+        </classes>
+    </test>
+</suite>

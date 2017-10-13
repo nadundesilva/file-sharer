@@ -1,7 +1,7 @@
 package org.microfuse.file.sharer.bootstrap;
 
+import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
-import org.microfuse.file.sharer.node.core.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,15 +21,15 @@ import java.util.StringTokenizer;
 public class BootstrapServer {
     private static final Logger logger = LoggerFactory.getLogger(BootstrapServer.class);
 
-    public static void main(String args[]) {
+    public void start() {
         DatagramSocket sock;
         String s;
         List<Neighbour> nodes = new ArrayList<>();
 
         try {
-            sock = new DatagramSocket(Constants.BOOTSTRAP_SERVER_LISTENER_PORT);
+            sock = new DatagramSocket(Constants.BOOTSTRAP_SERVER_PORT);
 
-            echo("Bootstrap Server created at " + Constants.BOOTSTRAP_SERVER_LISTENER_PORT
+            echo("Bootstrap Server created at " + Constants.BOOTSTRAP_SERVER_PORT
                     + ". Waiting for incoming data...");
 
             while (true) {
