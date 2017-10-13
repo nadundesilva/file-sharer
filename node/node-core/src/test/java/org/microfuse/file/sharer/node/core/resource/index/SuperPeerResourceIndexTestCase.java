@@ -1,7 +1,7 @@
 package org.microfuse.file.sharer.node.core.resource.index;
 
-import org.microfuse.file.sharer.node.BaseTestCase;
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * Test Case for org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex class.
- *
+ * <p>
  * Cannot mock classes since hashCode() and equals() methods are used in tests.
  */
 public class SuperPeerResourceIndexTestCase extends BaseTestCase {

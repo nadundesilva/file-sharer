@@ -1,19 +1,18 @@
-package org.microfuse.file.sharer.node.commons.peer;
+package org.microfuse.file.sharer.node.commons;
 
-import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
+import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 
 /**
  * Configuration of this Node.
  */
 public class Configuration {
-    private String username;
     private String bootstrapServerIP;
     private int bootstrapServerPort;
+    private String username;
     private String ip;
-    private NetworkHandlerType networkHandlerType;
-    private RoutingStrategyType routingStrategyType;
     private int peerListeningPort;
     private int listenerHandlingThreadCount;
     private int timeToLive;
@@ -22,14 +21,14 @@ public class Configuration {
     private int heartBeatInterval;
     private int gossipingInterval;
     private int networkHandlerTimeout;
+    private NetworkHandlerType networkHandlerType;
+    private RoutingStrategyType routingStrategyType;
 
     public Configuration() {
-        username = NodeConstants.DEFAULT_USERNAME;
         bootstrapServerIP = NodeConstants.DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS;
         bootstrapServerPort = Constants.BOOTSTRAP_SERVER_PORT;
+        username = NodeConstants.DEFAULT_USERNAME;
         ip = NodeConstants.DEFAULT_IP_ADDRESS;
-        networkHandlerType = NodeConstants.DEFAULT_NETWORK_HANDLER;
-        routingStrategyType = NodeConstants.DEFAULT_ROUTING_STRATEGY;
         peerListeningPort = NodeConstants.DEFAULT_TCP_LISTENER_PORT;
         listenerHandlingThreadCount = NodeConstants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT;
         timeToLive = NodeConstants.DEFAULT_TIME_TO_LIVE;
@@ -38,14 +37,16 @@ public class Configuration {
         heartBeatInterval = NodeConstants.DEFAULT_HEART_BEAT_INTERVAL;
         gossipingInterval = NodeConstants.DEFAULT_GOSSIPING_INTERVAL;
         networkHandlerTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_TIMEOUT;
+        networkHandlerType = NodeConstants.DEFAULT_NETWORK_HANDLER;
+        routingStrategyType = NodeConstants.DEFAULT_ROUTING_STRATEGY;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    public Node getBootstrapServer() {
+        Node node = new Node();
+        node.setIp(bootstrapServerIP);
+        node.setPort(bootstrapServerPort);
+        node.setAlive(true);
+        return node;
     }
 
     public String getBootstrapServerIP() {
@@ -60,16 +61,16 @@ public class Configuration {
         return bootstrapServerPort;
     }
 
-    public Node getBootstrapServer() {
-        Node node = new Node();
-        node.setIp(bootstrapServerIP);
-        node.setPort(bootstrapServerPort);
-        node.setAlive(true);
-        return node;
-    }
-
     public void setBootstrapServerPort(int bootstrapServerPort) {
         this.bootstrapServerPort = bootstrapServerPort;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getIp() {
@@ -78,22 +79,6 @@ public class Configuration {
 
     public void setIp(String ip) {
         this.ip = ip;
-    }
-
-    public NetworkHandlerType getNetworkHandlerType() {
-        return networkHandlerType;
-    }
-
-    public void setNetworkHandlerType(NetworkHandlerType networkHandlerType) {
-        this.networkHandlerType = networkHandlerType;
-    }
-
-    public RoutingStrategyType getRoutingStrategyType() {
-        return routingStrategyType;
-    }
-
-    public void setRoutingStrategyType(RoutingStrategyType routingStrategyType) {
-        this.routingStrategyType = routingStrategyType;
     }
 
     public int getPeerListeningPort() {
@@ -158,5 +143,21 @@ public class Configuration {
 
     public void setNetworkHandlerTimeout(int networkHandlerTimeout) {
         this.networkHandlerTimeout = networkHandlerTimeout;
+    }
+
+    public NetworkHandlerType getNetworkHandlerType() {
+        return networkHandlerType;
+    }
+
+    public void setNetworkHandlerType(NetworkHandlerType networkHandlerType) {
+        this.networkHandlerType = networkHandlerType;
+    }
+
+    public RoutingStrategyType getRoutingStrategyType() {
+        return routingStrategyType;
+    }
+
+    public void setRoutingStrategyType(RoutingStrategyType routingStrategyType) {
+        this.routingStrategyType = routingStrategyType;
     }
 }

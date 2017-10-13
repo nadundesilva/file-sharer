@@ -34,48 +34,64 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void startListening() {
-        super.startListening();
-        new Thread(() -> {
-            while (running) {
-                int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
-                BufferedReader in = null;
-                try {
-                    serverSocket = new ServerSocket(portNumber);
-                    serverSocket.setReuseAddress(false);
-                    logger.debug("Started listening at " + portNumber + ".");
-                    while (running && !restartRequired) {
-                        Socket clientSocket = serverSocket.accept();
-                        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
-                                Constants.DEFAULT_CHARSET));
+        if (!running) {
+            super.startListening();
+            new Thread(() -> {
+                while (running) {
+                    int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
+                    Socket clientSocket = null;
+                    BufferedReader in = null;
+                    try {
+                        serverSocket = new ServerSocket(portNumber);
+                        serverSocket.setReuseAddress(false);
 
-                        StringBuilder message = new StringBuilder();
-                        String inputLine;
-                        while ((inputLine = in.readLine()) != null) {
-                            message.append(inputLine);
+                        logger.debug("Started listening at " + portNumber + ".");
+                        while (running && !restartRequired) {
+                            clientSocket = serverSocket.accept();
+                            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
+                                    Constants.DEFAULT_CHARSET));
+
+                            StringBuilder message = new StringBuilder();
+                            String inputLine;
+                            while ((inputLine = in.readLine()) != null) {
+                                message.append(inputLine);
+                            }
+                            onMessageReceived(
+                                    clientSocket.getInetAddress().getHostAddress(),
+                                    clientSocket.getPort(),
+                                    Message.parse(message.toString())
+                            );
                         }
-                        onMessageReceived(
-                                clientSocket.getInetAddress().getHostAddress(),
-                                clientSocket.getPort(),
-                                Message.parse(message.toString())
-                        );
+                    } catch (IOException e) {
+                        logger.debug("Listening stopped", e);
+                    } finally {
+                        Closeables.closeQuietly(in);
+                        try {
+                            Closeables.close(clientSocket, true);
+                        } catch (IOException ignored) {
+                        }
+                        closeSocket();
                     }
-                    logger.debug("Restarted socket");
-                } catch (IOException e) {
-                    logger.debug("Failed to establish socket connection", e);
-                } finally {
-                    Closeables.closeQuietly(in);
-                    closeSocket();
                 }
-            }
-        }).start();
+            }).start();
+        } else {
+            logger.warn("The TCP network handler is already listening. Ignored request to start again.");
+        }
     }
 
     @Override
     public void restart() {
-        super.restart();
-        restartRequired = true;
-        closeSocket();
-        restartRequired = false;
+        if (running) {
+            super.restart();
+            restartRequired = true;
+            try {
+                closeSocket();
+            } finally {
+                restartRequired = false;
+            }
+        } else {
+            logger.warn("The TCP network handler is not listening. Ignored request to restart.");
+        }
     }
 
     @Override
@@ -85,15 +101,39 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
     }
 
     @Override
-    public void sendMessage(String ip, int port, Message message) {
+    public void sendMessage(String ip, int port, Message message, boolean waitForReply) {
         try (
-                Socket echoSocket = new Socket(ip, port);
-                PrintWriter out = new PrintWriter(new OutputStreamWriter(echoSocket.getOutputStream(),
+                Socket sendSocket = new Socket(ip, port);
+                PrintWriter out = new PrintWriter(new OutputStreamWriter(sendSocket.getOutputStream(),
                         Constants.DEFAULT_CHARSET), true)
         ) {
             out.write(message.toString());
+            int localPort = sendSocket.getLocalPort();
+
+            if (waitForReply) {
+                Socket clientSocket = null;
+                BufferedReader in = null;
+                try (
+                        ServerSocket replyServerSocket = new ServerSocket(localPort)
+                ) {
+                    clientSocket = replyServerSocket.accept();
+                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
+                            Constants.DEFAULT_CHARSET));
+
+                    StringBuilder replyMessage = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        replyMessage.append(inputLine);
+                    }
+
+                    onMessageReceived(ip, port, Message.parse(replyMessage.toString()));
+                } finally {
+                    Closeables.closeQuietly(in);
+                    Closeables.close(clientSocket, true);
+                }
+            }
         } catch (IOException e) {
-            logger.debug("Message sent to " + ip + ":" + port + " : " + message, e);
+            logger.debug("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
             onMessageSendFailed(ip, port, message);
         }
     }
@@ -113,8 +153,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
         try {
             Closeables.close(serverSocket, true);
-        } catch (IOException e) {
-            logger.warn("Failed to shutdown socket", e);
+        } catch (IOException ignored) {
         }
     }
 }

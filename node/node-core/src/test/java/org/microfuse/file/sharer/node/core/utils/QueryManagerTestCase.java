@@ -1,11 +1,11 @@
 package org.microfuse.file.sharer.node.core.utils;
 
-import org.microfuse.file.sharer.node.BaseTestCase;
+import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
-import org.microfuse.file.sharer.node.commons.peer.Configuration;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
+import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;

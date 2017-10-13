@@ -1,10 +1,5 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="File-Sharer-Node-Test-Suite">
-    <test name="file-sharer-node-commons-tests" enabled="true">
-        <classes>
-            <class name="org.microfuse.file.sharer.node.commons.NodeTestCase"/>
-        </classes>
-    </test>
     <test name="file-sharer-node-resource-tests" enabled="true">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.resource.OwnedResourceTestCase"/>

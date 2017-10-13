@@ -1,6 +1,6 @@
 package org.microfuse.file.sharer.node.core.utils;
 
-import org.microfuse.file.sharer.node.BaseTestCase;
+import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;

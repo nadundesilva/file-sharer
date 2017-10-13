@@ -1,7 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
-import org.microfuse.file.sharer.node.BaseTestCase;
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;

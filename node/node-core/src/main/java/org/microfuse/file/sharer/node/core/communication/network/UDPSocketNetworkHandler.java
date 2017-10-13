@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 
 /**
  * A Socket based network handler.
@@ -22,7 +21,7 @@ import java.net.SocketException;
 public class UDPSocketNetworkHandler extends NetworkHandler {
     private static final Logger logger = LoggerFactory.getLogger(UDPSocketNetworkHandler.class);
 
-    private DatagramSocket udpSocket;
+    private DatagramSocket serverSocket;
 
     @Override
     public String getName() {
@@ -31,46 +30,56 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void startListening() {
-        super.startListening();
-        new Thread(() -> {
-            while (running) {
-                int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
-                try {
-                    udpSocket = new DatagramSocket(portNumber);
-                    logger.debug("Started listening at " + portNumber + ".");
-                    while (running && !restartRequired) {
-                        byte[] buffer = new byte[65536];
-                        DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
-                        udpSocket.receive(incomingPacket);
+        if (!running) {
+            super.startListening();
+            new Thread(() -> {
+                while (running) {
+                    int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
+                    try {
+                        serverSocket = new DatagramSocket(portNumber);
+                        logger.debug("Started listening at " + portNumber + ".");
+                        while (running && !restartRequired) {
+                            byte[] buffer = new byte[65536];
+                            DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
+                            serverSocket.receive(incomingPacket);
 
-                        byte[] data = incomingPacket.getData();
-                        String messageString =
-                                new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
-                        logger.debug("Message received from " + incomingPacket.getAddress().getHostAddress()
-                                + ":" + incomingPacket.getPort() + " : " + messageString);
+                            byte[] data = incomingPacket.getData();
+                            String messageString =
+                                    new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
+                            logger.debug("Message received from " + incomingPacket.getAddress().getHostAddress()
+                                    + ":" + incomingPacket.getPort() + " : " + messageString);
 
-                        onMessageReceived(
-                                incomingPacket.getAddress().getHostAddress(),
-                                incomingPacket.getPort(),
-                                Message.parse(messageString)
-                        );
+                            onMessageReceived(
+                                    incomingPacket.getAddress().getHostAddress(),
+                                    incomingPacket.getPort(),
+                                    Message.parse(messageString)
+                            );
+                        }
+                    } catch (IOException e) {
+                        logger.debug("Listening stopped", e);
+                    } finally {
+                        closeSocket();
                     }
-                    logger.debug("Restarted socket");
-                } catch (IOException e) {
-                    logger.error("Failed to establish socket connection", e);
-                } finally {
-                    closeSocket();
                 }
-            }
-        }).start();
+            }).start();
+        } else {
+            logger.warn("The UDP network handler is already listening. Ignored request to start again.");
+        }
     }
 
     @Override
     public void restart() {
-        super.restart();
-        restartRequired = true;
-        closeSocket();
-        restartRequired = false;
+        if (running) {
+            super.restart();
+            restartRequired = true;
+            try {
+                closeSocket();
+            } finally {
+                restartRequired = false;
+            }
+        } else {
+            logger.warn("The TCP network handler is not listening. Ignored request to restart.");
+        }
     }
 
     @Override
@@ -80,22 +89,31 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
     }
 
     @Override
-    public void sendMessage(String ip, int port, Message message) {
-        try {
+    public void sendMessage(String ip, int port, Message message, boolean waitForReply) {
+        try (
+                DatagramSocket replyServerSocket = new DatagramSocket()
+        ) {
             String messageString = message.toString();
-            DatagramSocket udpSendSocket = new DatagramSocket();
 
-            try {
-                DatagramPacket datagramPacket = new DatagramPacket(
-                        messageString.getBytes(Constants.DEFAULT_CHARSET),
-                        messageString.getBytes(Constants.DEFAULT_CHARSET).length,
-                        InetAddress.getByName(ip), port);
-                udpSendSocket.send(datagramPacket);
-            } catch (IOException e) {
-                logger.debug("Message sent to " + ip + ":" + port + " : " + message, e);
+            DatagramPacket datagramPacket = new DatagramPacket(
+                    messageString.getBytes(Constants.DEFAULT_CHARSET),
+                    messageString.getBytes(Constants.DEFAULT_CHARSET).length,
+                    InetAddress.getByName(ip), port);
+            replyServerSocket.send(datagramPacket);
+
+            if (waitForReply) {
+                byte[] buffer = new byte[65536];
+                DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
+                replyServerSocket.receive(incomingPacket);
+
+                byte[] data = incomingPacket.getData();
+                String replyMessageString =
+                        new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
+
+                onMessageReceived(ip, port, Message.parse(replyMessageString));
             }
-        } catch (SocketException e) {
-            logger.error("Failed to send message to " + ip + ":" + port, e);
+        } catch (IOException e) {
+            logger.error("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
             onMessageSendFailed(ip, port, message);
         }
     }
@@ -105,9 +123,8 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
      */
     private void closeSocket() {
         try {
-            Closeables.close(udpSocket, true);
-        } catch (IOException e) {
-            logger.warn("Failed to shutdown socket", e);
+            Closeables.close(serverSocket, true);
+        } catch (IOException ignored) {
         }
     }
 }

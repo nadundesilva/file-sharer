@@ -1,10 +1,10 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
-import org.microfuse.file.sharer.node.BaseTestCase;
+import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
-import org.microfuse.file.sharer.node.commons.peer.Configuration;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
+import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -83,7 +83,7 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testCommunication() {
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
@@ -92,10 +92,10 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testRepeatedCommunication() {
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
-        tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3);
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2);
-        tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message4);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2, false);
+        tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3, false);
+        tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message4, false);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
@@ -110,7 +110,7 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testRestart() {
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
@@ -118,12 +118,15 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
         ServiceHolder.getConfiguration().setPeerListeningPort(8756);
         tcpSocketNetworkHandler2.restart();
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, 8756, message2);
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message3);
+        waitFor(delay);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, 8756, message2, false);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message3, false);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
                 .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message2));
+        Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(0))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
         Mockito.verify(tcpSocketNetworkHandler1Listener, Mockito.times(1))
                 .onMessageSendFailed(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
     }
@@ -131,9 +134,11 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
     @Test
     public void testShutdown() {
         tcpSocketNetworkHandler2.shutdown();
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);
 
+        Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(0))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
         Mockito.verify(tcpSocketNetworkHandler1Listener, Mockito.times(1))
                 .onMessageSendFailed(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
     }

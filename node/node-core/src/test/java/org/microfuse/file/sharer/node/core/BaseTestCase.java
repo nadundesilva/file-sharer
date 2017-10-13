@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node;
+package org.microfuse.file.sharer.node.core;
 
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;

@@ -2,10 +2,10 @@ package org.microfuse.file.sharer.node.core.utils;
 
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
-import org.microfuse.file.sharer.node.commons.peer.Configuration;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;

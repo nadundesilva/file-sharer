@@ -76,11 +76,12 @@ public abstract class NetworkHandler {
     /**
      * Send a message to the specified node.
      *
-     * @param ip      The ip address to which the message should be sent
-     * @param port    The port to which the message should be sent
-     * @param message The message to be sent
+     * @param ip           The ip address to which the message should be sent
+     * @param port         The port to which the message should be sent
+     * @param message      The message to be sent
+     * @param waitForReply Send message and wait for a reply from the other end
      */
-    public abstract void sendMessage(String ip, int port, Message message);
+    public abstract void sendMessage(String ip, int port, Message message, boolean waitForReply);
 
     /**
      * Restart the listening.
@@ -88,12 +89,14 @@ public abstract class NetworkHandler {
     public void restart() {
         restartRequired = true;
         listenerHandlerExecutorServiceLock.writeLock().lock();
-        listenerHandlerExecutorService.shutdown();
-        listenerHandlerExecutorService =
-                Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
-        logger.debug("Setting the restart required flag");
-        listenerHandlerExecutorServiceLock.writeLock().unlock();
-        restartRequired = false;
+        try {
+            listenerHandlerExecutorService.shutdown();
+            listenerHandlerExecutorService =
+                    Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
+        } finally {
+            listenerHandlerExecutorServiceLock.writeLock().unlock();
+            restartRequired = false;
+        }
     }
 
     /**

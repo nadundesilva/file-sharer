@@ -213,26 +213,51 @@ public class Router implements NetworkHandlerListener {
 
     /**
      * Send a message directly to a node.
+     * Does not wait for reply
      *
      * @param toNode  The node to which the message needs to be sent
      * @param message The message to be sent
      */
     public void sendMessage(Node toNode, Message message) {
-        sendMessage(toNode.getIp(), toNode.getPort(), message);
+        sendMessage(toNode, message, false);
     }
 
     /**
      * Send a message directly to a node.
      *
-     * @param ip      The ip of the node to which the message needs to be sent
-     * @param port    The port of the node to which the message needs to be sent
-     * @param message The message to be sent
+     * @param toNode       The node to which the message needs to be sent
+     * @param message      The message to be sent
+     * @param waitForReply Send message and wait for a reply from the other end
+     */
+    public void sendMessage(Node toNode, Message message, boolean waitForReply) {
+        sendMessage(toNode.getIp(), toNode.getPort(), message, waitForReply);
+    }
+
+    /**
+     * Send a message directly to a node.
+     * Does not wait for reply
+     *
+     * @param ip           The ip of the node to which the message needs to be sent
+     * @param port         The port of the node to which the message needs to be sent
+     * @param message      The message to be sent
      */
     public void sendMessage(String ip, int port, Message message) {
+        sendMessage(ip, port, message, false);
+    }
+
+    /**
+     * Send a message directly to a node.
+     *
+     * @param ip           The ip of the node to which the message needs to be sent
+     * @param port         The port of the node to which the message needs to be sent
+     * @param message      The message to be sent
+     * @param waitForReply Send message and wait for a reply from the other end
+     */
+    public void sendMessage(String ip, int port, Message message, boolean waitForReply) {
         networkHandlerLock.readLock().lock();
         try {
             logger.debug("Sending message " + message.toString() + " to node " + ip + ":" + port);
-            networkHandler.sendMessage(ip, port, message);
+            networkHandler.sendMessage(ip, port, message, waitForReply);
         } finally {
             networkHandlerLock.readLock().unlock();
         }

@@ -1,12 +1,12 @@
 package org.microfuse.file.sharer.node.core.utils;
 
 import com.google.common.io.Files;
-import org.microfuse.file.sharer.node.BaseTestCase;
+import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
-import org.microfuse.file.sharer.node.commons.peer.Configuration;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
+import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.TCPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;

@@ -1,7 +1,5 @@
-package org.microfuse.file.sharer.node.commons;
+package org.microfuse.file.sharer.node.commons.peer;
 
-import org.microfuse.file.sharer.node.BaseTestCase;
-import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -9,7 +7,7 @@ import org.testng.annotations.Test;
 /**
  * Test Case for org.microfuse.file.sharer.node.commons.Node class.
  */
-public class NodeTestCase extends BaseTestCase {
+public class NodeTestCase {
     private Node node;
     private Node nodeCopy;
 

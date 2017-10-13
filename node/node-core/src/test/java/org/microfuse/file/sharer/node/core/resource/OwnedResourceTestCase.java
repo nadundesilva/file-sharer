@@ -1,6 +1,6 @@
 package org.microfuse.file.sharer.node.core.resource;
 
-import org.microfuse.file.sharer.node.BaseTestCase;
+import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

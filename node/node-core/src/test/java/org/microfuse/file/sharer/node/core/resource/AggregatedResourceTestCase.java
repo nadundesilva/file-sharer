@@ -1,7 +1,7 @@
 package org.microfuse.file.sharer.node.core.resource;
 
-import org.microfuse.file.sharer.node.BaseTestCase;
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.testng.Assert;
