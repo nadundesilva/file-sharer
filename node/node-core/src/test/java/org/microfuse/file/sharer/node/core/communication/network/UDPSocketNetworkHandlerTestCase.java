@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
  * Test Case for org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler class.
  */
 public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
-    private static final Logger logger = LoggerFactory.getLogger(TCPSocketNetworkHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(UDPSocketNetworkHandlerTestCase.class);
 
     private UDPSocketNetworkHandler udpSocketNetworkHandler1;
     private UDPSocketNetworkHandler udpSocketNetworkHandler2;
@@ -35,6 +35,8 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing UDP Network Handler Test");
+
         delay = 1000;
         localhostIP = "127.0.0.1";
         peerListeningPort1 = 6756;
@@ -71,6 +73,8 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @AfterMethod
     public void cleanUp() {
+        logger.info("Cleaning Up UDP Network Handler Test");
+
         udpSocketNetworkHandler1.shutdown();
         udpSocketNetworkHandler2.shutdown();
         waitFor(delay);
@@ -78,11 +82,15 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testName() {
+        logger.info("Running UDP Network Handler Test 01 - Get name");
+
         Assert.assertNotNull(udpSocketNetworkHandler1.getName());
     }
 
     @Test
     public void testCommunication() {
+        logger.info("Running UDP Network Handler Test 02 - Communication");
+
         udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);
 
@@ -92,6 +100,8 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testRepeatedCommunication() {
+        logger.info("Running UDP Network Handler Test 03 - Repeated communication");
+
         udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         udpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3, false);
         udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2, false);
@@ -110,6 +120,8 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testCommunicationWithWaiting() {
+        logger.info("Running UDP Network Handler Test 04 - Communication with waiting");
+
         Mockito.doAnswer(invocationOnMock -> {
             Object[] arguments = invocationOnMock.getArguments();
 
@@ -134,6 +146,8 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testRestart() {
+        logger.info("Running UDP Network Handler Test 05 - Restart");
+
         udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);
 
@@ -158,6 +172,8 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testShutdown() {
+        logger.info("Running UDP Network Handler Test 06 - Shutdown");
+
         udpSocketNetworkHandler2.shutdown();
         udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);

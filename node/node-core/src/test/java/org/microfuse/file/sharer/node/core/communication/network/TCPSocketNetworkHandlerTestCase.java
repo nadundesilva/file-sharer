@@ -35,6 +35,8 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing TCP Network Handler Test");
+
         delay = 1000;
         localhostIP = "127.0.0.1";
         peerListeningPort1 = 6756;
@@ -71,6 +73,8 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @AfterMethod
     public void cleanUp() {
+        logger.info("Cleaning Up TCP Network Handler Test");
+
         tcpSocketNetworkHandler1.shutdown();
         tcpSocketNetworkHandler2.shutdown();
         waitFor(delay);
@@ -78,11 +82,15 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testName() {
+        logger.info("Running TCP Network Handler Test 01 - Get name");
+
         Assert.assertNotNull(tcpSocketNetworkHandler1.getName());
     }
 
     @Test
     public void testCommunication() {
+        logger.info("Running TCP Network Handler Test 02 - Communication");
+
         tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);
 
@@ -92,6 +100,8 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testRepeatedCommunication() {
+        logger.info("Running TCP Network Handler Test 03 - Repeated communication");
+
         tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2, false);
         tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3, false);
@@ -110,6 +120,8 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testCommunicationWithWaiting() {
+        logger.info("Running TCP Network Handler Test 04 - Communication with waiting");
+
         Mockito.doAnswer(invocationOnMock -> {
             Object[] arguments = invocationOnMock.getArguments();
 
@@ -134,6 +146,8 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testRestart() {
+        logger.info("Running TCP Network Handler Test 05 - Restart");
+
         tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);
 
@@ -157,6 +171,8 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testShutdown() {
+        logger.info("Running TCP Network Handler Test 06 - Shutdown");
+
         tcpSocketNetworkHandler2.shutdown();
         tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);

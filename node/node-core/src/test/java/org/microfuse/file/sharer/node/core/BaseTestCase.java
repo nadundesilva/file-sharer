@@ -21,11 +21,15 @@ public class BaseTestCase {
 
     @BeforeMethod
     public void baseInitializeMethod() {
+        logger.info("Initializing Basic Test");
+
         baseCleanUpMethod();
     }
 
     @AfterMethod
     public void baseCleanUpMethod() {
+        logger.info("Cleaning Up Basic Test");
+
         // Shutting down the router
         try {
             Field field = ServiceHolder.class.getDeclaredField("router");

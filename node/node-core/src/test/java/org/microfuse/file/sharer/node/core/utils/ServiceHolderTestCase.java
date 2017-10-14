@@ -32,6 +32,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
     @Test
     public void testGetConfigurationFromFileAtFirstTime() {
+        logger.info("Running Service Holder Test 01 - Get configuration from file at first time");
+
         File configFile = new File(NodeConstants.CONFIG_FILE);
         String configString = "{" +
                 "\"username\":\"microfuse.tester\"," +
@@ -76,6 +78,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
     @Test
     public void testGetDefaultConfigurationAtFirstTime() {
+        logger.info("Running Service Holder Test 02 - Get default configuration at first time");
+
         Configuration configuration = ServiceHolder.getConfiguration();
 
         Assert.assertNotNull(configuration);
@@ -99,7 +103,9 @@ public class ServiceHolderTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testGetConfiguration() {
+    public void testGetConfigurationAtSecondTime() {
+        logger.info("Running Service Holder Test 03 - Get configuration at second time");
+
         Configuration initialConfiguration = ServiceHolder.getConfiguration();
         Configuration finalConfiguration = ServiceHolder.getConfiguration();
 
@@ -110,13 +116,17 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
     @Test
     public void testGetResourceIndexAtFirstTime() {
+        logger.info("Running Service Holder Test 04 - Get resource index at first time");
+
         ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
 
         Assert.assertNotNull(resourceIndex);
     }
 
     @Test
-    public void testGetResourceIndex() {
+    public void testGetResourceIndexAtSecondTime() {
+        logger.info("Running Service Holder Test 05 - Get resource index at second time");
+
         ResourceIndex initialResourceIndex = ServiceHolder.getResourceIndex();
         ResourceIndex finalResourceIndex = ServiceHolder.getResourceIndex();
 
@@ -127,6 +137,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
     @Test
     public void testGetOverlayNetworkManagerAtFirstTime() {
+        logger.info("Running Service Holder Test 06 - Get overlay network manager at first time");
+
         OverlayNetworkManager overlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
 
         Assert.assertNotNull(overlayNetworkManager);
@@ -141,7 +153,9 @@ public class ServiceHolderTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testGetOverlayNetworkManager() {
+    public void testGetOverlayNetworkManagerAtSecondTime() {
+        logger.info("Running Service Holder Test 07 - Get overlay network manager at second time");
+
         OverlayNetworkManager initialOverlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
         OverlayNetworkManager finalOverlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
 
@@ -152,6 +166,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
     @Test
     public void testGetQueryManagerAtFirstTime() {
+        logger.info("Running Service Holder Test 08 - Get query manager at first time");
+
         QueryManager queryManager = ServiceHolder.getQueryManager();
 
         Assert.assertNotNull(queryManager);
@@ -166,7 +182,9 @@ public class ServiceHolderTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testGetQueryManager() {
+    public void testGetQueryManagerAtSecondTime() {
+        logger.info("Running Service Holder Test 09 - Get query manager at second time");
+
         QueryManager initialQueryManager = ServiceHolder.getQueryManager();
         QueryManager finalQueryManager = ServiceHolder.getQueryManager();
 
@@ -177,6 +195,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
     @Test
     public void testChangeNetworkHandler() {
+        logger.info("Running Service Holder Test 10 - Change network handler");
+
         ServiceHolder.getQueryManager();
 
         Router router = null;
@@ -209,6 +229,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
     @Test
     public void testChangeRoutingStrategy() {
+        logger.info("Running Service Holder Test 11 - Change routing strategy");
+
         ServiceHolder.getQueryManager();
 
         Router router = null;

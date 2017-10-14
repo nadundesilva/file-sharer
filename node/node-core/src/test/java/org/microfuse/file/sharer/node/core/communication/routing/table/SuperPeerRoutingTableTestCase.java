@@ -5,6 +5,8 @@ import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -15,6 +17,8 @@ import java.util.Set;
  * Test Case for org.microfuse.file.sharer.node.core.communication.routing.SuperPeerRoutingTable class.
  */
 public class SuperPeerRoutingTableTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(SuperPeerRoutingTableTestCase.class);
+
     private SuperPeerRoutingTable superPeerRoutingTable;
     private Node ordinaryPeerNode1;
     private Node ordinaryPeerNode2;
@@ -25,6 +29,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Super Peer Routing Table Test");
+
         superPeerRoutingTable = new SuperPeerRoutingTable();
 
         ordinaryPeerNode1 = new Node();
@@ -71,6 +77,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testGetSuperPeerNetworkRoutingTableNode() {
+        logger.info("Running Super Peer Routing Table Test 01 - Get name");
+
         Node superPeerNetworkRoutingTableNode =
                 superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode("192.168.1.5", 7431);
 
@@ -82,6 +90,9 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testGetSuperPeerNetworkRoutingTableNonExistentNode() {
+        logger.info("Running Super Peer Routing Table Test 02 - Get super peer network routing table " +
+                "non existent node");
+
         Node unstructuredNetworkRoutingTableNode =
                 superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode("192.168.1.2", 6542);
 
@@ -90,6 +101,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testGetAssignedOrdinaryNetworkRoutingTableNode() {
+        logger.info("Running Super Peer Routing Table Test 03 - Get assigned ordinary network routing table node");
+
         Node superPeerNetworkRoutingTableNode =
                 superPeerRoutingTable.getAssignedOrdinaryNetworkRoutingTableNode("192.168.1.2", 6542);
 
@@ -101,6 +114,9 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testGetAssignedOrdinaryNetworkRoutingTableNonExistentNode() {
+        logger.info("Running Super Peer Routing Table Test 04 - Get assigned ordinary network routing table " +
+                "non existent node");
+
         Node unstructuredNetworkRoutingTableNode =
                 superPeerRoutingTable.getAssignedOrdinaryNetworkRoutingTableNode("192.168.1.5", 7431);
 
@@ -109,6 +125,9 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testGetAllAssignedOrdinaryNetworkRoutingTableNodesCopying() {
+        logger.info("Running Super Peer Routing Table Test 05 - Get all assigned ordinary network routing table " +
+                "nodes copying");
+
         Set<Node> nodes = superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes();
         Object internalState = Whitebox.getInternalState(superPeerRoutingTable, "assignedOrdinaryPeerNodes");
         Assert.assertFalse(nodes == internalState);
@@ -116,6 +135,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testGetAllSuperPeerNetworkRoutingTableNodes() {
+        logger.info("Running Super Peer Routing Table Test 06 - Get all super peer network routing table nodes");
+
         Set<Node> nodes = superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes();
         Object internalState = Whitebox.getInternalState(superPeerRoutingTable, "superPeerNetworkNodes");
         Assert.assertFalse(nodes == internalState);
@@ -123,6 +144,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testRemoveFromAllASuperPeerNode() {
+        logger.info("Running Super Peer Routing Table Test 07 - Remove from all super peer node");
+
         Assert.assertTrue(superPeerRoutingTable.removeFromAll(superPeerNode1));
 
         Object internalStateUnstructuredNetwork =
@@ -148,7 +171,9 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testRemoveFromAllAOrdinaryPeerNode() {
+    public void testRemoveFromAllAssignedAOrdinaryPeerNode() {
+        logger.info("Running Super Peer Routing Table Test 08 - Remove from all assigned ordinary peer peer node");
+
         Assert.assertTrue(superPeerRoutingTable.removeFromAll(ordinaryPeerNode1));
 
         Object internalStateUnstructuredNetwork =
@@ -168,6 +193,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testGetAll() {
+        logger.info("Running Super Peer Routing Table Test 09 - Get all");
+
         Set<Node> nodes = superPeerRoutingTable.getAll();
 
         Assert.assertEquals(nodes.size(), 6);
@@ -181,6 +208,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void getGetUnstructuredNetworkNode() {
+        logger.info("Running Super Peer Routing Table Test 10 - Get unstructured network node");
+
         Node node = new Node();
         node.setIp("192.168.1.100");
         node.setPort(5824);
@@ -195,6 +224,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void getGetAssignedOrdinaryPeersNode() {
+        logger.info("Running Super Peer Routing Table Test 11 - Get assigned ordinary peer node");
+
         Node node = new Node();
         node.setIp("192.168.1.100");
         node.setPort(5824);
@@ -209,6 +240,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void getGetSuperPeerNetworkNode() {
+        logger.info("Running Super Peer Routing Table Test 12 - Get super peer network node");
+
         Node node = new Node();
         node.setIp("192.168.1.100");
         node.setPort(5824);
@@ -223,6 +256,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void getNonExistentNode() {
+        logger.info("Running Super Peer Routing Table Test 13 - Get non existent node");
+
         Node node = superPeerRoutingTable.get("192.168.1.243", 7846);
 
         Assert.assertNull(node);
@@ -230,6 +265,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testClear() {
+        logger.info("Running Super Peer Routing Table Test 14 - Clear");
+
         superPeerRoutingTable.clear();
 
         Object internalStateSuperPeerNetworkNodes =
@@ -250,6 +287,9 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
     @Test
     public void testAddAssignedSuperPeerNetworkRoutingTableNodeAfterMaxThreshold() {
+        logger.info("Running Super Peer Routing Table Test 15 - Add assigned super peer network routing table " +
+                "node after max threshold");
+
         ServiceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
 
         Node newNode1 = Mockito.mock(Node.class);

@@ -5,6 +5,8 @@ import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -17,6 +19,8 @@ import java.util.Set;
  * class.
  */
 public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(UnstructuredFloodingRoutingStrategyTestCase.class);
+
     private OrdinaryPeerRoutingTable routingTable;
     private UnstructuredFloodingRoutingStrategy unstructuredFloodingRoutingStrategy;
     private Node fromNode;
@@ -26,6 +30,8 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Unstructured Flooding Routing Strategy Test");
+
         unstructuredFloodingRoutingStrategy = new UnstructuredFloodingRoutingStrategy();
 
         routingTable = Mockito.spy(new OrdinaryPeerRoutingTable());
@@ -50,11 +56,15 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
 
     @Test
     public void testName() {
+        logger.info("Running Unstructured Flooding Routing Strategy Test 01 - Get name");
+
         Assert.assertNotNull(unstructuredFloodingRoutingStrategy.getName());
     }
 
     @Test
     public void testGetForwardingNodes() {
+        logger.info("Running Unstructured Flooding Routing Strategy Test 02 - Get forwarding nodes");
+
         Set<Node> forwardingNodes = unstructuredFloodingRoutingStrategy.getForwardingNodes(routingTable,
                 fromNode, Mockito.mock(Message.class));
 
@@ -66,6 +76,9 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
 
     @Test
     public void testGetForwardingNodesInStartingNode() {
+        logger.info("Running Unstructured Flooding Routing Strategy Test 03 - Get forwarding nodes " +
+                "in the starting node");
+
         Set<Node> forwardingNodes = unstructuredFloodingRoutingStrategy.getForwardingNodes(routingTable,
                 null, Mockito.mock(Message.class));
 
@@ -78,6 +91,9 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
 
     @Test
     public void testGetForwardingNodesWithDeadNodes() {
+        logger.info("Running Unstructured Flooding Routing Strategy Test 04 - Get forwarding nodes " +
+                "with dead nodes");
+
         Mockito.when(node1.isAlive()).thenReturn(false);
 
         Set<Node> forwardingNodes = unstructuredFloodingRoutingStrategy.getForwardingNodes(routingTable,

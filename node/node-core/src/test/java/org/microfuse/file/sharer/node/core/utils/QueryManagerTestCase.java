@@ -11,6 +11,8 @@ import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -22,22 +24,30 @@ import java.util.List;
  * Test Case for org.microfuse.file.sharer.node.core.utils.NodeManager class.
  */
 public class QueryManagerTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(QueryManagerTestCase.class);
+
     private Router router;
     private QueryManager queryManager;
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Query Manager Test");
+
         router = Mockito.spy(new Router(new UDPSocketNetworkHandler(), new UnstructuredFloodingRoutingStrategy()));
         queryManager = new QueryManager(router);
     }
 
     @AfterMethod
     public void cleanUp() {
+        logger.info("Cleaning Up Query Manager Test");
+
         router.shutdown();
     }
 
     @Test
     public void testConstructor() {
+        logger.info("Running Query Manager Test 01 - Constructor");
+
         Object internalStateRouter = Whitebox.getInternalState(queryManager, "router");
         Assert.assertNotNull(internalStateRouter);
         Assert.assertTrue(internalStateRouter == router);
@@ -51,6 +61,8 @@ public class QueryManagerTestCase extends BaseTestCase {
 
     @Test
     public void testQuery() {
+        logger.info("Running Query Manager Test 02 - Query");
+
         queryManager.query("Cars");
 
         Configuration configuration = ServiceHolder.getConfiguration();

@@ -16,6 +16,8 @@ import org.microfuse.file.sharer.node.core.resource.OwnedResource;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -29,6 +31,8 @@ import java.util.Set;
  * Test Case for org.microfuse.file.sharer.fromNode.core.communication.routing.Router class.
  */
 public class RouterTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(RouterTestCase.class);
+
     private NetworkHandler networkHandler;
     private RoutingStrategy routingStrategy;
     private Router router;
@@ -40,6 +44,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Router Test");
+
         networkHandler = Mockito.mock(NetworkHandler.class);
         routingStrategy = Mockito.mock(RoutingStrategy.class);
         router = Mockito.spy(new Router(networkHandler, routingStrategy));
@@ -67,11 +73,15 @@ public class RouterTestCase extends BaseTestCase {
 
     @AfterMethod
     public void cleanup() {
+        logger.info("Cleaning Up Router Test");
+
         router.shutdown();
     }
 
     @Test
     public void testRestart() {
+        logger.info("Running Router Test 01 - Restart");
+
         router.restart();
 
         Mockito.verify(networkHandler, Mockito.times(1)).restart();
@@ -80,6 +90,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testSendMessage() {
+        logger.info("Running Router Test 02 - Send message");
+
         Node toNode = Mockito.mock(Node.class);
         Mockito.when(toNode.getIp()).thenReturn("192.168.1.2");
         Mockito.when(toNode.getPort()).thenReturn(4532);
@@ -92,6 +104,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testRoute() {
+        logger.info("Running Router Test 03 - Route");
+
         router.route(serMessage);
 
         Mockito.verify(routingStrategy, Mockito.times(1))
@@ -100,6 +114,9 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnMessageReceivedWithNonSerTypeMessage() {
+        logger.info("Running Router Test 04 - On message received with non " + MessageType.SER.getValue()
+                + " type message");
+
         serMessage.setType(MessageType.REG);
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
@@ -118,6 +135,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnSerMessageReceived() {
+        logger.info("Running Router Test 05 - On " + MessageType.SER.getValue() + " message received");
+
         Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(fromNode);
 
@@ -132,6 +151,9 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnSerMessageReceivedWithResourceInOwnedResources() {
+        logger.info("Running Router Test 06 - On " + MessageType.SER.getValue()
+                + " message received with resource in owned resources");
+
         OwnedResource ownedResource = new OwnedResource(serMessage.getData(MessageIndexes.SER_FILE_NAME));
         ServiceHolder.getResourceIndex().addResourceToIndex(ownedResource);
 
@@ -147,6 +169,9 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnSerMessageReceivedWithResourceNotInOwnedResourcesWithHopCountLessThanTimeToLive() {
+        logger.info("Running Router Test 07 - On " + MessageType.SER.getValue()
+                + " message received with resource not in owned resources with hop count less than time to live");
+
         Set<Node> nodes = new HashSet<>();
         Node node = Mockito.mock(Node.class);
         Mockito.when(node.getIp()).thenReturn("192.168.1.5");
@@ -168,6 +193,9 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnSerMessageReceivedWithResourceNotInOwnedResourcesWithHopCountHigherThanTimeToLive() {
+        logger.info("Running Router Test 08 - On " + MessageType.SER.getValue()
+                + " message received with resource not in owned resources with hop count higher than time to live");
+
         Set<Node> nodes = new HashSet<>();
         Node node = Mockito.mock(Node.class);
         Mockito.when(node.getIp()).thenReturn("192.168.1.5");
@@ -192,6 +220,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnMessageSendFailedInUnstructuredNetworkOnly() {
+        logger.info("Running Router Test 09 - On message send failed in unstructured network only");
+
         fromNode = Mockito.spy(fromNode);
         Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
                 .thenReturn(fromNode);
@@ -208,6 +238,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnMessageSendFailedInSuperPeerNetworkOnly() {
+        logger.info("Running Router Test 10 - On message send failed in super peer network only");
+
         ServiceHolder.promoteToSuperPeer();
         router.promoteToSuperPeer();
 
@@ -232,6 +264,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnMessageSendFailedInAssignedOrdinaryPeersNetworkOnly() {
+        logger.info("Running Router Test 11 - On message send failed in assigned ordinary peers network only");
+
         ServiceHolder.promoteToSuperPeer();
         router.promoteToSuperPeer();
 
@@ -259,6 +293,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnSerSuperPeerMessageReceived() {
+        logger.info("Running Router Test 12 - On " + MessageType.SER_SUPER_PEER.getValue() + " message received");
+
         serSuperPeerMessage.setType(MessageType.SER_SUPER_PEER);
 
         Mockito.when(spyRoutingTable.getUnstructuredNetworkRoutingTableNode(fromNode.getIp(), fromNode.getPort()))
@@ -275,6 +311,9 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnSerSuperPeerMessageReceivedToSuperPeer() {
+        logger.info("Running Router Test 13 - On " + MessageType.SER_SUPER_PEER.getValue()
+                + " message received to super peer");
+
         ServiceHolder.promoteToSuperPeer();
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serSuperPeerMessage);
@@ -289,6 +328,9 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnSerSuperPeerMessageReceivedWithHopCountLessThanTimeToLive() {
+        logger.info("Running Router Test 14 - On " + MessageType.SER_SUPER_PEER.getValue()
+                + " message received with hop count less than time to live");
+
         Set<Node> nodes = new HashSet<>();
         Node node = Mockito.mock(Node.class);
         Mockito.when(node.getIp()).thenReturn("192.168.1.5");
@@ -311,6 +353,9 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testOnSerSuperPeerMessageReceivedWithHopCountHigherThanTimeToLive() {
+        logger.info("Running Router Test 15 - On " + MessageType.SER_SUPER_PEER.getValue()
+                + " message received with hop count higher than time to live");
+
         Set<Node> nodes = new HashSet<>();
         Node node = Mockito.mock(Node.class);
         Mockito.when(node.getIp()).thenReturn("192.168.1.5");
@@ -335,6 +380,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testPromoteToSuperPeerInOrdinaryPeer() {
+        logger.info("Running Router Test 16 - Promote to super peer in ordinary peer");
+
         Node node = Mockito.mock(Node.class);
         RoutingTable initialRoutingTable = router.getRoutingTable();
         initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
@@ -350,6 +397,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testDemoteToSuperPeerInSuperPeer() {
+        logger.info("Running Router Test 17 - Demote to super peer in super peer");
+
         Node node = Mockito.mock(Node.class);
         router.promoteToSuperPeer();
         RoutingTable initialRoutingTable = router.getRoutingTable();
@@ -366,6 +415,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testPromoteToSuperPeerInSuperPeer() {
+        logger.info("Running Router Test 18 - Promote to super peer in super peer");
+
         Node node = Mockito.mock(Node.class);
         router.promoteToSuperPeer();
         RoutingTable initialRoutingTable = router.getRoutingTable();
@@ -382,6 +433,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testDemoteToSuperPeerInOrdinaryPeer() {
+        logger.info("Running Router Test 19 - Promote to super peer in ordinary peer");
+
         Node node = Mockito.mock(Node.class);
         RoutingTable initialRoutingTable = router.getRoutingTable();
         initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
@@ -397,6 +450,8 @@ public class RouterTestCase extends BaseTestCase {
 
     @Test
     public void testRunTasksOnMessageReceived() {
+        logger.info("Running Router Test 20 - Run tasks on message received");
+
         RouterListener listener = Mockito.mock(RouterListener.class);
         Message message = Mockito.mock(Message.class);
         router.registerListener(listener);
@@ -407,7 +462,9 @@ public class RouterTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testHeartBeat() {
+    public void testHeartbeat() {
+        logger.info("Running Router Test 21 - Heartbeat");
+
         Node node1 = Mockito.mock(Node.class);
         Mockito.when(node1.getIp()).thenReturn("127.0.0.1");
         Mockito.when(node1.getPort()).thenReturn(5642);
@@ -427,7 +484,9 @@ public class RouterTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testOnHeartBeatOkMessageReceived() {
+    public void testOnHeartbeatOkMessageReceived() {
+        logger.info("Running Router Test 22 - On " + MessageType.HEARTBEAT_OK.getValue() + " message received");
+
         Node node1 = new Node();
         node1.setIp("127.0.0.1");
         node1.setPort(5642);
@@ -448,7 +507,9 @@ public class RouterTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testHeartBeatDisable() {
+    public void testHeartbeatDisable() {
+        logger.info("Running Router Test 23 - Heartbeat disable");
+
         Node node1 = Mockito.mock(Node.class);
         Mockito.when(node1.getIp()).thenReturn("127.0.0.1");
         Mockito.when(node1.getPort()).thenReturn(5642);

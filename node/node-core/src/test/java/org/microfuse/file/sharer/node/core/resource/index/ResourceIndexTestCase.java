@@ -3,6 +3,8 @@ package org.microfuse.file.sharer.node.core.resource.index;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.resource.OwnedResource;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -16,6 +18,8 @@ import java.util.Set;
  * Cannot mock classes since hashCode() and equals() methods are used in tests.
  */
 public class ResourceIndexTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(ResourceIndexTestCase.class);
+
     private OwnedResource ownedResource1;
     private OwnedResource ownedResource2;
     private OwnedResource ownedResource3;
@@ -24,6 +28,8 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Resource Index Test");
+
         resourceIndex = new ResourceIndex();
 
         ownedResource1 = new OwnedResource("Lord of the Rings");
@@ -45,6 +51,8 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
     @Test
     public void testAddResource() {
+        logger.info("Running Resource Index Test 01 - Add resource");
+
         OwnedResource newOwnedResource = new OwnedResource("Spider Man");
         newOwnedResource.setFile(new File("movies" + File.separator + "spider_man.mp4"));
         resourceIndex.addResourceToIndex(newOwnedResource);
@@ -58,6 +66,8 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
     @Test
     public void testFindResources() {
+        logger.info("Running Resource Index Test 02 - Find resources");
+
         Set<OwnedResource> ironManResources = resourceIndex.findResources(ownedResource3.getName());
 
         Assert.assertEquals(ironManResources.size(), 2);
@@ -68,14 +78,18 @@ public class ResourceIndexTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testFindResourceWithNoMatches() {
+    public void testFindResourcesWithNoMatches() {
+        logger.info("Running Resource Index Test 03 - Find resources with no matches");
+
         Set<OwnedResource> spiderManResources = resourceIndex.findResources("Spider Man");
 
         Assert.assertEquals(spiderManResources.size(), 0);
     }
 
     @Test
-    public void testFindResourceWithDuplicates() {
+    public void testFindResourcesWithDuplicates() {
+        logger.info("Running Resource Index Test 04 - Find resources with duplicates");
+
         OwnedResource carsOwnedResource = new OwnedResource("Cars");
         carsOwnedResource.setFile(new File("downloaded" + File.separator + "cars.mp4"));
         resourceIndex.addResourceToIndex(carsOwnedResource);
@@ -90,6 +104,8 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
     @Test
     public void testRemoveLastNodeFromAggregatedResources() {
+        logger.info("Running Resource Index Test 05 - Remove last node from aggregated resources");
+
         OwnedResource newOwnedResource = new OwnedResource("Wonder Woman");
         newOwnedResource.setFile(new File("movies" + File.separator + "wonder_woman.mp4"));
         resourceIndex.addResourceToIndex(newOwnedResource);
@@ -112,6 +128,8 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
     @Test
     public void testGetAllResourcesCopying() {
+        logger.info("Running Resource Index Test 06 - Get all resources copying");
+
         Set<OwnedResource> resources = resourceIndex.getAllResourcesInIndex();
         Object internalState = Whitebox.getInternalState(resourceIndex, "ownedResources");
         Assert.assertFalse(resources == internalState);

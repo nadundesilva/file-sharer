@@ -1,5 +1,7 @@
 package org.microfuse.file.sharer.node.commons.peer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -8,11 +10,15 @@ import org.testng.annotations.Test;
  * Test Case for org.microfuse.file.sharer.node.commons.Node class.
  */
 public class NodeTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(NodeTestCase.class);
+
     private Node node;
     private Node nodeCopy;
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Node Test");
+
         node = new Node();
         node.setIp("192.168.1.1");
         node.setPort(4067);
@@ -26,16 +32,22 @@ public class NodeTestCase {
 
     @Test
     public void testIsAlive() {
+        logger.info("Running Node Test 01 - Is alive");
+
         Assert.assertTrue(node.isAlive());
     }
 
     @Test
     public void testEquals() {
+        logger.info("Running Node Test 02 - Equals");
+
         Assert.assertTrue(node.equals(nodeCopy));
     }
 
     @Test
     public void testHashCode() {
+        logger.info("Running Node Test 03 - Hash code");
+
         Assert.assertEquals(node.hashCode(), (node.getIp() + ":" + node.getPort()).hashCode());
     }
 }

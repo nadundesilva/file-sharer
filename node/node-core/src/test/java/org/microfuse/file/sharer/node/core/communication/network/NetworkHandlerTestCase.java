@@ -4,6 +4,8 @@ import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -17,11 +19,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Test Case for org.microfuse.file.sharer.node.core.communication.network.NetworkHandler class.
  */
 public class NetworkHandlerTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(NetworkHandlerTestCase.class);
+
     private NetworkHandler networkHandler;
     private ExecutorService listenerHandlerExecutorService;
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Network Handler Test");
+
         // Mocking network handler
         networkHandler = Mockito.mock(NetworkHandler.class, Mockito.CALLS_REAL_METHODS);
         listenerHandlerExecutorService =
@@ -37,6 +43,8 @@ public class NetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testStartListening() {
+        logger.info("Running Network Handler Test 01 - Start listening");
+
         networkHandler.startListening();
 
         Object internalState = Whitebox.getInternalState(networkHandler, "running");
@@ -47,6 +55,8 @@ public class NetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testRestart() {
+        logger.info("Running Network Handler Test 02 - Restart");
+
         networkHandler.restart();
 
         Object internalStateRestartRequired = Whitebox.getInternalState(networkHandler, "restartRequired");

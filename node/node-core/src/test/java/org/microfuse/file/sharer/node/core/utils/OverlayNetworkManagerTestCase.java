@@ -6,6 +6,8 @@ import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -17,22 +19,30 @@ import java.util.List;
  * Test Case for org.microfuse.file.sharer.node.core.utils.OverlayNetworkManager class.
  */
 public class OverlayNetworkManagerTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(OverlayNetworkManagerTestCase.class);
+
     private Router router;
     private OverlayNetworkManager overlayNetworkManager;
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Overlay Network Manager Test");
+
         router = Mockito.spy(new Router(new UDPSocketNetworkHandler(), new UnstructuredFloodingRoutingStrategy()));
         overlayNetworkManager = new OverlayNetworkManager(router);
     }
 
     @AfterMethod
     public void cleanUp() {
+        logger.info("Cleaning Up Overlay Network Manager Test");
+
         router.shutdown();
     }
 
     @Test
     public void testConstructor() {
+        logger.info("Running Overlay Network Manager Test 01 - Constructor");
+
         Object internalStateRouter = Whitebox.getInternalState(overlayNetworkManager, "router");
         Assert.assertNotNull(internalStateRouter);
         Assert.assertTrue(internalStateRouter == router);

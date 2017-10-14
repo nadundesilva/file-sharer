@@ -5,6 +5,8 @@ import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -17,6 +19,8 @@ import java.util.Set;
  * Cannot mock classes since hashCode() and equals() methods are used in tests.
  */
 public class SuperPeerResourceIndexTestCase extends BaseTestCase {
+    private static final Logger logger = LoggerFactory.getLogger(SuperPeerResourceIndexTestCase.class);
+
     private String resourceName1;
     private String resourceName2;
     private String resourceName3;
@@ -25,6 +29,8 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
 
     @BeforeMethod
     public void initializeMethod() {
+        logger.info("Initializing Super Peer Resource Index Test");
+
         Node node1 = Mockito.mock(Node.class);
         Node node2 = Mockito.mock(Node.class);
         Node node3 = Mockito.mock(Node.class);
@@ -56,6 +62,8 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
 
     @Test
     public void testAddResource() {
+        logger.info("Running Super Peer Resource Index Test 01 - Add resource");
+
         String newAggreResourceResourceName = "Spider Man";
         Node newNode = Mockito.mock(Node.class);
         superPeerResourceIndex.addResourceToAggregatedIndex(newAggreResourceResourceName, newNode);
@@ -69,6 +77,8 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
 
     @Test
     public void testFindAggregatedResources() {
+        logger.info("Running Super Peer Resource Index Test 02 - Find aggregated resources");
+
         Set<AggregatedResource> ironManResources =
                 superPeerResourceIndex.findAggregatedResources(resourceName3);
 
@@ -80,7 +90,9 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testFindAggregatedResourceWithNoMatches() {
+    public void testFindAggregatedResourcesWithNoMatches() {
+        logger.info("Running Super Peer Resource Index Test 03 - Find aggregated resources with no matches");
+
         Set<AggregatedResource> spiderManResources =
                 superPeerResourceIndex.findAggregatedResources("Spider Man");
 
@@ -88,7 +100,9 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testFindAggregatedResourceWithDuplicates() {
+    public void testFindAggregatedResourcesWithDuplicates() {
+        logger.info("Running Super Peer Resource Index Test 04 - Find aggregated resources with duplicates");
+
         Node newNode = new Node();
         newNode.setIp("192.168.1.1");
         newNode.setPort(4067);
@@ -105,7 +119,9 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testRemoveAggregatedResource() {
+    public void testRemoveAggregatedResources() {
+        logger.info("Running Super Peer Resource Index Test 05 - Remove aggregated resources");
+
         Node newNode = new Node();
         newNode.setIp("192.168.1.1");
         newNode.setPort(4067);
