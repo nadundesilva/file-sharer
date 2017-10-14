@@ -27,6 +27,10 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
     private ServerSocket serverSocket;
 
+    public TCPSocketNetworkHandler(ServiceHolder serviceHolder) {
+        super(serviceHolder);
+    }
+
     @Override
     public String getName() {
         return NetworkHandlerType.TCP_SOCKET.getValue();
@@ -38,7 +42,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
             super.startListening();
             new Thread(() -> {
                 while (running) {
-                    int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
+                    int portNumber = serviceHolder.getConfiguration().getPeerListeningPort();
                     Socket clientSocket = null;
                     BufferedReader in = null;
                     try {

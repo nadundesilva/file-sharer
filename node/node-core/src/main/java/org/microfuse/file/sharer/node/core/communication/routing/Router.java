@@ -17,6 +17,7 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class Router implements NetworkHandlerListener {
     private static final Logger logger = LoggerFactory.getLogger(Router.class);
+
+    private ServiceHolder serviceHolder;
+
     private final ReadWriteLock listenersListLock;
     private final ReadWriteLock routingTableLock;
     private final ReadWriteLock routingStrategyLock;
@@ -44,20 +48,23 @@ public class Router implements NetworkHandlerListener {
     private Thread heartBeatThread;
     private boolean heartBeatingEnabled;
 
-    public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy) {
+    public Router(NetworkHandler networkHandler, RoutingStrategy routingStrategy, ServiceHolder serviceHolder) {
         listenersListLock = new ReentrantReadWriteLock();
         routingTableLock = new ReentrantReadWriteLock();
         routingStrategyLock = new ReentrantReadWriteLock();
         networkHandlerLock = new ReentrantReadWriteLock();
         heartBeatLock = new ReentrantLock();
         try {
-            routingTable = RoutingTable.getRoutingTableClass(ServiceHolder.getPeerType()).newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            logger.error("Failed to instantiate routing table for " + ServiceHolder.getPeerType().getValue()
+            routingTable = RoutingTable.getRoutingTableClass(serviceHolder.getPeerType())
+                    .getConstructor(ServiceHolder.class).newInstance(serviceHolder);
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                InvocationTargetException e) {
+            logger.error("Failed to instantiate routing table for " + serviceHolder.getPeerType().getValue()
                     + ". Using the routing table for " + PeerType.ORDINARY_PEER.getValue() + " instead", e);
-            routingTable = new OrdinaryPeerRoutingTable();
+            routingTable = new OrdinaryPeerRoutingTable(serviceHolder);
         }
         heartBeatingEnabled = false;
+        this.serviceHolder = serviceHolder;
         this.routingStrategy = routingStrategy;
         this.networkHandler = networkHandler;
         this.listenersList = new ArrayList<>();
@@ -102,7 +109,7 @@ public class Router implements NetworkHandlerListener {
         routingTableLock.readLock().lock();
         try {
             receivingNode = routingTable.getUnstructuredNetworkRoutingTableNode(toAddress, toPort);
-            if (receivingNode == null && ServiceHolder.getPeerType() == PeerType.SUPER_PEER) {
+            if (receivingNode == null && serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
                 SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
                 receivingNode = superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode(toAddress, toPort);
                 if (receivingNode == null) {
@@ -159,7 +166,7 @@ public class Router implements NetworkHandlerListener {
                     while (heartBeatingEnabled) {
                         heartBeat();
                         try {
-                            Thread.sleep(ServiceHolder.getConfiguration().getHeartBeatInterval() * 1000);
+                            Thread.sleep(serviceHolder.getConfiguration().getHeartBeatInterval() * 1000);
                         } catch (InterruptedException e) {
                             logger.debug("Failed to sleep heartbeat thread", e);
                         }
@@ -203,9 +210,9 @@ public class Router implements NetworkHandlerListener {
             Message heartBeatMessage = new Message();
             heartBeatMessage.setType(MessageType.HEARTBEAT);
             heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_IP,
-                    ServiceHolder.getConfiguration().getIp());
+                    serviceHolder.getConfiguration().getIp());
             heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_PORT,
-                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
             sendMessage(node, heartBeatMessage);
             logger.debug("Heart beat sent to node " + node.toString());
         });
@@ -280,7 +287,7 @@ public class Router implements NetworkHandlerListener {
         routingTableLock.writeLock().lock();
         try {
             if (routingTable instanceof OrdinaryPeerRoutingTable) {
-                SuperPeerRoutingTable superPeerRoutingTable = new SuperPeerRoutingTable();
+                SuperPeerRoutingTable superPeerRoutingTable = new SuperPeerRoutingTable(serviceHolder);
                 superPeerRoutingTable.addAllUnstructuredNetworkRoutingTableEntry(
                         routingTable.getAllUnstructuredNetworkRoutingTableNodes());
                 routingTable = superPeerRoutingTable;
@@ -299,7 +306,7 @@ public class Router implements NetworkHandlerListener {
         routingTableLock.writeLock().lock();
         try {
             if (routingTable instanceof SuperPeerRoutingTable) {
-                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable();
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable(serviceHolder);
                 ordinaryPeerRoutingTable.addAllUnstructuredNetworkRoutingTableEntry(
                         routingTable.getAllUnstructuredNetworkRoutingTableNodes());
                 routingTable = ordinaryPeerRoutingTable;
@@ -459,7 +466,7 @@ public class Router implements NetworkHandlerListener {
 
         if (messageType != null && messageType == MessageType.SER) {
             // Checking owned resources
-            Set<OwnedResource> ownedResources = ServiceHolder.getResourceIndex()
+            Set<OwnedResource> ownedResources = serviceHolder.getResourceIndex()
                     .findResources(message.getData(MessageIndexes.SER_FILE_NAME));
             if (ownedResources.size() > 0) {
                 logger.debug("Resource requested by \"" + message.toString() + "\" found in owned resources");
@@ -468,9 +475,9 @@ public class Router implements NetworkHandlerListener {
 
                 List<String> serOkData = new ArrayList<>();
                 serOkData.add(MessageIndexes.SER_OK_FILE_COUNT, Integer.toString(ownedResources.size()));
-                serOkData.add(MessageIndexes.SER_OK_IP, ServiceHolder.getConfiguration().getIp());
+                serOkData.add(MessageIndexes.SER_OK_IP, serviceHolder.getConfiguration().getIp());
                 serOkData.add(MessageIndexes.SER_OK_PORT,
-                        Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                        Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
                 ownedResources.forEach(resource -> serOkData.add(resource.getName()));
                 serOkMessage.setData(serOkData);
 
@@ -488,7 +495,7 @@ public class Router implements NetworkHandlerListener {
                 message.setData(MessageIndexes.SER_HOP_COUNT, hopCount.toString());
                 logger.debug("Increased hop count of message" + message.toString());
 
-                if (hopCount <= ServiceHolder.getConfiguration().getTimeToLive()) {
+                if (hopCount <= serviceHolder.getConfiguration().getTimeToLive()) {
                     forwardNode(fromNode, message);
                 } else {
                     // Unable to find resource
@@ -503,23 +510,23 @@ public class Router implements NetworkHandlerListener {
                             + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
                             + message.getData(MessageIndexes.SER_SOURCE_PORT)
                             + " since the hop count of the message " + message.toString()
-                            + " is higher than time to live " + ServiceHolder.getConfiguration().getTimeToLive());
+                            + " is higher than time to live " + serviceHolder.getConfiguration().getTimeToLive());
                     sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
                             Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
                 }
             }
         } else if (messageType != null && messageType == MessageType.SER_SUPER_PEER) {
-            if (ServiceHolder.getPeerType() == PeerType.SUPER_PEER) {
+            if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
                 Message serOkMessage = new Message();
                 serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
-                serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP, ServiceHolder.getConfiguration().getIp());
+                serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP, serviceHolder.getConfiguration().getIp());
                 serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_PORT,
-                        Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                        Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
                 sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
                         Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
                         serOkMessage);
-            } else if (ServiceHolder.getPeerType() == PeerType.ORDINARY_PEER) {
+            } else if (serviceHolder.getPeerType() == PeerType.ORDINARY_PEER) {
                 logger.debug("Node is an ordinary peer");
 
                 Node assignedSuperPeer = null;
@@ -548,7 +555,7 @@ public class Router implements NetworkHandlerListener {
                     message.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT, hopCount.toString());
                     logger.debug("Increased hop count of message" + message.toString());
 
-                    if (hopCount <= ServiceHolder.getConfiguration().getTimeToLive()) {
+                    if (hopCount <= serviceHolder.getConfiguration().getTimeToLive()) {
                         forwardNode(fromNode, message);
                     } else {
                         // Unable to find a super peer
@@ -563,7 +570,7 @@ public class Router implements NetworkHandlerListener {
                                 + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP) + ":"
                                 + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)
                                 + " since the hop count of the message " + message.toString()
-                                + " is higher than time to live " + ServiceHolder.getConfiguration().getTimeToLive());
+                                + " is higher than time to live " + serviceHolder.getConfiguration().getTimeToLive());
                         sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
                                 Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
                                 serOkMessage);
@@ -573,9 +580,9 @@ public class Router implements NetworkHandlerListener {
         } else if (messageType == MessageType.HEARTBEAT) {
             Message heartBeatOkMessage = new Message();
             heartBeatOkMessage.setType(MessageType.HEARTBEAT_OK);
-            heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_IP, ServiceHolder.getConfiguration().getIp());
+            heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_IP, serviceHolder.getConfiguration().getIp());
             heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_PORT,
-                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
             logger.debug("Sending heartbeat ok message back to "
                     + message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP) + ":"
@@ -599,7 +606,7 @@ public class Router implements NetworkHandlerListener {
      */
     private void forwardNode(Node fromNode, Message message) {
         logger.debug("The hop count of the message " + message.toString() + " is lower than time to live"
-                + ServiceHolder.getConfiguration().getTimeToLive());
+                + serviceHolder.getConfiguration().getTimeToLive());
 
         Set<Node> forwardingNodes;
         routingTableLock.readLock().lock();

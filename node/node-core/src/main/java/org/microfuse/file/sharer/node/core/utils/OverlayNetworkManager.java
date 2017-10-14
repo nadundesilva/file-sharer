@@ -27,15 +27,19 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class OverlayNetworkManager implements RouterListener {
     private static final Logger logger = LoggerFactory.getLogger(OverlayNetworkManager.class);
+
+    private ServiceHolder serviceHolder;
+
     private final Lock gossipingLock;
     private Router router;
     private Thread gossipingThread;
     private boolean gossipingEnabled;
 
-    public OverlayNetworkManager(Router router) {
+    public OverlayNetworkManager(Router router, ServiceHolder serviceHolder) {
         gossipingLock = new ReentrantLock();
         gossipingEnabled = false;
 
+        this.serviceHolder = serviceHolder;
         this.router = router;
         this.router.registerListener(this);
     }
@@ -87,7 +91,7 @@ public class OverlayNetworkManager implements RouterListener {
                     while (gossipingEnabled) {
                         gossip();
                         try {
-                            Thread.sleep(ServiceHolder.getConfiguration().getHeartBeatInterval() * 1000);
+                            Thread.sleep(serviceHolder.getConfiguration().getHeartBeatInterval() * 1000);
                         } catch (InterruptedException e) {
                             logger.debug("Failed to sleep heartbeat thread", e);
                         }
@@ -127,7 +131,7 @@ public class OverlayNetworkManager implements RouterListener {
      */
     public void gossip() {
         if (router.getRoutingTable().getAllUnstructuredNetworkRoutingTableNodes().size() <=
-                ServiceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
+                serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
             logger.debug("Gossiping to grow the network");
             // TODO : Implement gossiping.
         }
@@ -139,11 +143,11 @@ public class OverlayNetworkManager implements RouterListener {
     public void register() {
         Message regMessage = new Message();
         regMessage.setType(MessageType.REG);
-        regMessage.setData(MessageIndexes.REG_IP, ServiceHolder.getConfiguration().getIp());
+        regMessage.setData(MessageIndexes.REG_IP, serviceHolder.getConfiguration().getIp());
         regMessage.setData(MessageIndexes.REG_PORT,
-                Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
-        regMessage.setData(MessageIndexes.REG_USERNAME, ServiceHolder.getConfiguration().getUsername());
-        router.sendMessage(ServiceHolder.getConfiguration().getBootstrapServer(), regMessage);
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+        regMessage.setData(MessageIndexes.REG_USERNAME, serviceHolder.getConfiguration().getUsername());
+        router.sendMessage(serviceHolder.getConfiguration().getBootstrapServer(), regMessage, true);
     }
 
     /**
@@ -152,11 +156,11 @@ public class OverlayNetworkManager implements RouterListener {
     public void unregister() {
         Message unregMessage = new Message();
         unregMessage.setType(MessageType.UNREG);
-        unregMessage.setData(MessageIndexes.UNREG_IP, ServiceHolder.getConfiguration().getIp());
+        unregMessage.setData(MessageIndexes.UNREG_IP, serviceHolder.getConfiguration().getIp());
         unregMessage.setData(MessageIndexes.UNREG_PORT,
-                Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
-        unregMessage.setData(MessageIndexes.UNREG_USERNAME, ServiceHolder.getConfiguration().getUsername());
-        router.sendMessage(ServiceHolder.getConfiguration().getBootstrapServer(), unregMessage);
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+        unregMessage.setData(MessageIndexes.UNREG_USERNAME, serviceHolder.getConfiguration().getUsername());
+        router.sendMessage(serviceHolder.getConfiguration().getBootstrapServer(), unregMessage, true);
     }
 
     /**
@@ -168,9 +172,9 @@ public class OverlayNetworkManager implements RouterListener {
         nodes.forEach(node -> {
             Message joinMessage = new Message();
             joinMessage.setType(MessageType.JOIN);
-            joinMessage.setData(MessageIndexes.JOIN_IP, ServiceHolder.getConfiguration().getIp());
+            joinMessage.setData(MessageIndexes.JOIN_IP, serviceHolder.getConfiguration().getIp());
             joinMessage.setData(MessageIndexes.JOIN_PORT,
-                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
             router.sendMessage(node, joinMessage);
         });
     }
@@ -182,9 +186,9 @@ public class OverlayNetworkManager implements RouterListener {
         router.getRoutingTable().getAll().forEach(node -> {
             Message leaveMessage = new Message();
             leaveMessage.setType(MessageType.LEAVE);
-            leaveMessage.setData(MessageIndexes.LEAVE_IP, ServiceHolder.getConfiguration().getIp());
+            leaveMessage.setData(MessageIndexes.LEAVE_IP, serviceHolder.getConfiguration().getIp());
             leaveMessage.setData(MessageIndexes.LEAVE_PORT,
-                    Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
             router.sendMessage(node, leaveMessage);
         });
     }
@@ -214,9 +218,9 @@ public class OverlayNetworkManager implements RouterListener {
                 Message searchSuperPeerMessage = new Message();
                 searchSuperPeerMessage.setType(MessageType.SER_SUPER_PEER);
                 searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP,
-                        ServiceHolder.getConfiguration().getIp());
+                        serviceHolder.getConfiguration().getIp());
                 searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT,
-                        Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                        Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
                 searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
                         Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
                 router.route(searchSuperPeerMessage);
@@ -237,9 +241,9 @@ public class OverlayNetworkManager implements RouterListener {
     private void connectToSuperPeer(String ip, int port) {
         Message joinMessage = new Message();
         joinMessage.setType(MessageType.JOIN_SUPER_PEER);
-        joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_IP, ServiceHolder.getConfiguration().getIp());
+        joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_IP, serviceHolder.getConfiguration().getIp());
         joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_PORT,
-                Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
         router.sendMessage(ip, port, joinMessage);
     }
 
@@ -253,30 +257,30 @@ public class OverlayNetworkManager implements RouterListener {
         switch (message.getData(MessageIndexes.REG_OK_NODES_COUNT)) {
             case MessageConstants.REG_OK_NODE_COUNT_VALUE_ERROR:
                 logger.error("Unknown error in registering with bootstrap server "
-                        + ServiceHolder.getConfiguration().getBootstrapServerIP() + ":"
-                        + ServiceHolder.getConfiguration().getPeerListeningPort());
+                        + serviceHolder.getConfiguration().getBootstrapServerIP() + ":"
+                        + serviceHolder.getConfiguration().getPeerListeningPort());
                 break;
             case MessageConstants.REG_OK_NODE_COUNT_VALUE_ERROR_ALREADY_REGISTERED:
                 logger.warn("Current node already registered to bootstrap server "
-                        + ServiceHolder.getConfiguration().getBootstrapServerIP() + ":"
-                        + ServiceHolder.getConfiguration().getPeerListeningPort());
+                        + serviceHolder.getConfiguration().getBootstrapServerIP() + ":"
+                        + serviceHolder.getConfiguration().getPeerListeningPort());
                 break;
             case MessageConstants.REG_OK_NODE_COUNT_VALUE_ERROR_ALREADY_OCCUPIED:
                 logger.warn("Already registered to bootstrap server "
-                        + ServiceHolder.getConfiguration().getBootstrapServerIP() + ":"
-                        + ServiceHolder.getConfiguration().getPeerListeningPort());
+                        + serviceHolder.getConfiguration().getBootstrapServerIP() + ":"
+                        + serviceHolder.getConfiguration().getPeerListeningPort());
 
                 // Retrying
-                ServiceHolder.getConfiguration()
-                        .setPeerListeningPort(ServiceHolder.getConfiguration().getPeerListeningPort() + 1);
+                serviceHolder.getConfiguration()
+                        .setPeerListeningPort(serviceHolder.getConfiguration().getPeerListeningPort() + 1);
                 logger.debug("Changing peer listening port to "
-                        + ServiceHolder.getConfiguration().getPeerListeningPort() + " and retrying");
+                        + serviceHolder.getConfiguration().getPeerListeningPort() + " and retrying");
                 register();
                 break;
             case MessageConstants.REG_OK_NODE_COUNT_VALUE_ERROR_FULL:
                 logger.warn("Bootstrap server "
-                        + ServiceHolder.getConfiguration().getBootstrapServerIP() + ":"
-                        + ServiceHolder.getConfiguration().getPeerListeningPort() + " full");
+                        + serviceHolder.getConfiguration().getBootstrapServerIP() + ":"
+                        + serviceHolder.getConfiguration().getPeerListeningPort() + " full");
                 break;
             default:
                 int nodesCount = Integer.parseInt(message.getData(MessageIndexes.REG_OK_NODES_COUNT));
@@ -350,9 +354,9 @@ public class OverlayNetworkManager implements RouterListener {
         String superPeerNodeIP = null;
         int superPeerNodePort = -1;
 
-        if (ServiceHolder.getPeerType() == PeerType.SUPER_PEER) {
-            superPeerNodeIP = ServiceHolder.getConfiguration().getIp();
-            superPeerNodePort = ServiceHolder.getConfiguration().getPeerListeningPort();
+        if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
+            superPeerNodeIP = serviceHolder.getConfiguration().getIp();
+            superPeerNodePort = serviceHolder.getConfiguration().getPeerListeningPort();
         } else {
             if (router.getRoutingTable() instanceof OrdinaryPeerRoutingTable) {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) router.getRoutingTable();
@@ -374,9 +378,9 @@ public class OverlayNetworkManager implements RouterListener {
                 MessageIndexes.JOIN_OK_VALUE,
                 (isSuccessful ? MessageConstants.JOIN_OK_VALUE_SUCCESS : MessageConstants.JOIN_OK_VALUE_ERROR)
         );
-        replyMessage.setData(MessageIndexes.JOIN_OK_IP, ServiceHolder.getConfiguration().getIp());
+        replyMessage.setData(MessageIndexes.JOIN_OK_IP, serviceHolder.getConfiguration().getIp());
         replyMessage.setData(MessageIndexes.JOIN_OK_PORT,
-                Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
         if (superPeerNodeIP != null && superPeerNodePort >= 1) {
             replyMessage.setData(MessageIndexes.JOIN_OK_SUPER_PEER_IP, superPeerNodeIP);
             replyMessage.setData(MessageIndexes.JOIN_OK_SUPER_PEER_PORT, Integer.toString(superPeerNodePort));
@@ -498,11 +502,11 @@ public class OverlayNetworkManager implements RouterListener {
     private void handleJoinSuperPeerMessage(Node fromNode, Message message) {
         Message replyMessage = new Message();
         replyMessage.setType(MessageType.JOIN_SUPER_PEER_OK);
-        if (ServiceHolder.getPeerType() == PeerType.SUPER_PEER) {
+        if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
             if (router.getRoutingTable() instanceof SuperPeerRoutingTable) {
                 SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) router.getRoutingTable();
                 if (superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes().size() <=
-                        ServiceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
+                        serviceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
                     replyMessage = new Message();
                     replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE,
                             MessageConstants.JOIN_SUPER_PEER_OK_VALUE_SUCCESS);
@@ -553,7 +557,7 @@ public class OverlayNetworkManager implements RouterListener {
                 );
                 break;
             case MessageConstants.JOIN_SUPER_PEER_OK_VALUE_SUCCESS:
-                if (ServiceHolder.getPeerType() == PeerType.ORDINARY_PEER) {
+                if (serviceHolder.getPeerType() == PeerType.ORDINARY_PEER) {
                     if (router.getRoutingTable() instanceof OrdinaryPeerRoutingTable) {
                         OrdinaryPeerRoutingTable ordinaryPeerRoutingTable =
                                 (OrdinaryPeerRoutingTable) router.getRoutingTable();

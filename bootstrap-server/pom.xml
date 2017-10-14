@@ -16,6 +16,11 @@
     <description>Bootstrap Server of the P2P File Sharing System</description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!-- Own dependencies -->
         <dependency>
             <groupId>org.microfuse.node</groupId>

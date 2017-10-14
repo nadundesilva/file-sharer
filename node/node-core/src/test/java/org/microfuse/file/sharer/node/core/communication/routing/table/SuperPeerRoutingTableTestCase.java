@@ -2,7 +2,6 @@ package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
-import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Super Peer Routing Table Test");
 
-        superPeerRoutingTable = new SuperPeerRoutingTable();
+        superPeerRoutingTable = new SuperPeerRoutingTable(serviceHolder);
 
         ordinaryPeerNode1 = new Node();
         ordinaryPeerNode1.setIp("192.168.1.1");
@@ -290,7 +289,7 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         logger.info("Running Super Peer Routing Table Test 15 - Add assigned super peer network routing table " +
                 "node after max threshold");
 
-        ServiceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
+        serviceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
 
         Node newNode1 = Mockito.mock(Node.class);
         Node newNode2 = Mockito.mock(Node.class);

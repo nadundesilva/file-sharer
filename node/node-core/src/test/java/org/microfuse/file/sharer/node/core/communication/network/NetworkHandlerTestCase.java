@@ -1,7 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
 import org.microfuse.file.sharer.node.core.BaseTestCase;
-import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.Logger;
@@ -30,8 +29,10 @@ public class NetworkHandlerTestCase extends BaseTestCase {
 
         // Mocking network handler
         networkHandler = Mockito.mock(NetworkHandler.class, Mockito.CALLS_REAL_METHODS);
+        Whitebox.setInternalState(networkHandler, "serviceHolder", serviceHolder);
+
         listenerHandlerExecutorService =
-                Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
+                Executors.newFixedThreadPool(serviceHolder.getConfiguration().getListenerHandlingThreadCount());
         Whitebox.setInternalState(networkHandler, "listenerHandlerExecutorService",
                 listenerHandlerExecutorService);
         Whitebox.setInternalState(networkHandler, "listenersListLock", new ReentrantReadWriteLock());

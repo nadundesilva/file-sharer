@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -31,20 +32,17 @@ import java.util.List;
 public class ServiceHolder {
     private static final Logger logger = LoggerFactory.getLogger(ServiceHolder.class);
 
-    private static volatile PeerType peerType;
-    private static volatile Configuration configuration;
-    private static volatile Router router;
-    private static volatile ResourceIndex resourceIndex;
-    private static volatile OverlayNetworkManager overlayNetworkManager;
-    private static volatile QueryManager queryManager;
-
-    private ServiceHolder() {   // Preventing from being initiated
-    }
+    private volatile PeerType peerType;
+    private volatile Configuration configuration;
+    private volatile Router router;
+    private volatile ResourceIndex resourceIndex;
+    private volatile OverlayNetworkManager overlayNetworkManager;
+    private volatile QueryManager queryManager;
 
     /**
      * Promote the current node to an ordinary peer.
      */
-    public static synchronized void promoteToSuperPeer() {
+    public synchronized void promoteToSuperPeer() {
         peerType = PeerType.SUPER_PEER;
         if (!(getResourceIndex() instanceof SuperPeerResourceIndex)) {
             ResourceIndex newResourceIndex = new SuperPeerResourceIndex();
@@ -58,7 +56,7 @@ public class ServiceHolder {
     /**
      * Demote the current node to a super peer.
      */
-    public static synchronized void demoteToOrdinaryPeer() {
+    public synchronized void demoteToOrdinaryPeer() {
         peerType = PeerType.ORDINARY_PEER;
         if (getResourceIndex() instanceof SuperPeerResourceIndex) {
             ResourceIndex newResourceIndex = new ResourceIndex();
@@ -70,11 +68,47 @@ public class ServiceHolder {
     }
 
     /**
+     * Change the network handler used by the system.
+     *
+     * @param networkHandlerType The network handler type to be used
+     */
+    public synchronized void changeNetworkHandler(NetworkHandlerType networkHandlerType) {
+        getConfiguration().setNetworkHandlerType(networkHandlerType);
+        getRouter().changeNetworkHandler(instantiateNetworkHandler());
+    }
+
+    /**
+     * Change the network handler used by the system.
+     *
+     * @param routingStrategyType The network handler type to be used
+     */
+    public synchronized void changeRoutingStrategy(RoutingStrategyType routingStrategyType) {
+        getConfiguration().setRoutingStrategyType(routingStrategyType);
+        getRouter().changeRoutingStrategy(instantiateRoutingStrategy());
+    }
+
+    /**
+     * Clear all the stored services.
+     */
+    public synchronized void clear() {
+        if (router != null) {
+            router.shutdown();
+        }
+
+        peerType = null;
+        configuration = null;
+        router = null;
+        resourceIndex = null;
+        overlayNetworkManager = null;
+        queryManager = null;
+    }
+
+    /**
      * Get a singleton instance of this nodes configuration.
      *
      * @return The configuration of this node
      */
-    public static synchronized Configuration getConfiguration() {
+    public synchronized Configuration getConfiguration() {
         if (configuration == null) {
             File configFile = new File(NodeConstants.CONFIG_FILE);
             boolean configFileExists = false;
@@ -118,7 +152,7 @@ public class ServiceHolder {
      *
      * @return The resource index instance
      */
-    public static synchronized ResourceIndex getResourceIndex() {
+    public synchronized ResourceIndex getResourceIndex() {
         if (resourceIndex == null) {
             try {
                 resourceIndex = ResourceIndex.getResourceIndexClass(getPeerType())
@@ -137,9 +171,9 @@ public class ServiceHolder {
      *
      * @return The Bootstrapping Manager
      */
-    public static synchronized OverlayNetworkManager getOverlayNetworkManager() {
+    public synchronized OverlayNetworkManager getOverlayNetworkManager() {
         if (overlayNetworkManager == null) {
-            overlayNetworkManager = new OverlayNetworkManager(getRouter());
+            overlayNetworkManager = new OverlayNetworkManager(getRouter(), this);
         }
         return overlayNetworkManager;
     }
@@ -149,9 +183,9 @@ public class ServiceHolder {
      *
      * @return The Query Manager
      */
-    public static synchronized QueryManager getQueryManager() {
+    public synchronized QueryManager getQueryManager() {
         if (queryManager == null) {
-            queryManager = new QueryManager(getRouter());
+            queryManager = new QueryManager(getRouter(), this);
         }
         return queryManager;
     }
@@ -161,7 +195,7 @@ public class ServiceHolder {
      *
      * @return The peer type of the node
      */
-    public static synchronized PeerType getPeerType() {
+    public synchronized PeerType getPeerType() {
         if (peerType == null) {
             peerType = PeerType.ORDINARY_PEER;
         }
@@ -169,33 +203,13 @@ public class ServiceHolder {
     }
 
     /**
-     * Change the network handler used by the system.
-     *
-     * @param networkHandlerType The network handler type to be used
-     */
-    public static synchronized void changeNetworkHandler(NetworkHandlerType networkHandlerType) {
-        getConfiguration().setNetworkHandlerType(networkHandlerType);
-        getRouter().changeNetworkHandler(instantiateNetworkHandler());
-    }
-
-    /**
-     * Change the network handler used by the system.
-     *
-     * @param routingStrategyType The network handler type to be used
-     */
-    public static synchronized void changeRoutingStrategy(RoutingStrategyType routingStrategyType) {
-        getConfiguration().setRoutingStrategyType(routingStrategyType);
-        getRouter().changeRoutingStrategy(instantiateRoutingStrategy());
-    }
-
-    /**
      * Get a singleton instance of the router used by this node.
      *
      * @return The router used by this node
      */
-    private static synchronized Router getRouter() {
+    private synchronized Router getRouter() {
         if (router == null) {
-            router = new Router(instantiateNetworkHandler(), instantiateRoutingStrategy());
+            router = new Router(instantiateNetworkHandler(), instantiateRoutingStrategy(), this);
         }
         return router;
     }
@@ -205,16 +219,17 @@ public class ServiceHolder {
      *
      * @return The network handler
      */
-    private static synchronized NetworkHandler instantiateNetworkHandler() {
+    private synchronized NetworkHandler instantiateNetworkHandler() {
         NetworkHandler networkHandler;
         try {
             networkHandler = NetworkHandler.getNetworkHandlerClass(getConfiguration().getNetworkHandlerType())
-                    .newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+                    .getConstructor(ServiceHolder.class).newInstance(this);
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                InvocationTargetException e) {
             logger.error("Failed to instantiate " + getConfiguration().getNetworkHandlerType().getValue()
                     + ". Using " + NetworkHandlerType.TCP_SOCKET.getValue() + " instead.", e);
             getConfiguration().setNetworkHandlerType(NetworkHandlerType.TCP_SOCKET);
-            networkHandler = new TCPSocketNetworkHandler();
+            networkHandler = new TCPSocketNetworkHandler(this);
         }
         return networkHandler;
     }
@@ -224,16 +239,17 @@ public class ServiceHolder {
      *
      * @return The routing strategy
      */
-    private static synchronized RoutingStrategy instantiateRoutingStrategy() {
+    private synchronized RoutingStrategy instantiateRoutingStrategy() {
         RoutingStrategy routingStrategy;
         try {
             routingStrategy = RoutingStrategy.getRoutingStrategyClass(getConfiguration().getRoutingStrategyType())
-                    .newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+                    .getConstructor(ServiceHolder.class).newInstance(this);
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                InvocationTargetException e) {
             logger.error("Failed to instantiate " + getConfiguration().getRoutingStrategyType().getValue()
                     + ". Using " + RoutingStrategyType.UNSTRUCTURED_FLOODING.getValue() + " instead.", e);
             getConfiguration().setRoutingStrategyType(RoutingStrategyType.UNSTRUCTURED_FLOODING);
-            routingStrategy = new UnstructuredFloodingRoutingStrategy();
+            routingStrategy = new UnstructuredFloodingRoutingStrategy(this);
         }
         return routingStrategy;
     }

@@ -23,6 +23,10 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
 
     private DatagramSocket serverSocket;
 
+    public UDPSocketNetworkHandler(ServiceHolder serviceHolder) {
+        super(serviceHolder);
+    }
+
     @Override
     public String getName() {
         return NetworkHandlerType.TCP_SOCKET.getValue();
@@ -34,7 +38,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
             super.startListening();
             new Thread(() -> {
                 while (running) {
-                    int portNumber = ServiceHolder.getConfiguration().getPeerListeningPort();
+                    int portNumber = serviceHolder.getConfiguration().getPeerListeningPort();
                     try {
                         serverSocket = new DatagramSocket(portNumber);
                         logger.debug("Started listening at " + portNumber + ".");

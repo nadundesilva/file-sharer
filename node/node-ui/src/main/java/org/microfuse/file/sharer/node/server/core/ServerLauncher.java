@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.server;
+package org.microfuse.file.sharer.node.server.core;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
@@ -7,10 +7,10 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.microfuse.file.sharer.node.core.NodeManager;
-import org.microfuse.file.sharer.node.server.api.QueryEndPoint;
-import org.microfuse.file.sharer.node.server.filter.CORSFilter;
-import org.microfuse.file.sharer.node.server.utils.Constants;
+import org.microfuse.file.sharer.node.core.FileSharer;
+import org.microfuse.file.sharer.node.server.commons.ServerConstants;
+import org.microfuse.file.sharer.node.server.core.api.QueryEndPoint;
+import org.microfuse.file.sharer.node.server.core.filter.CORSFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,8 @@ public class ServerLauncher {
     };
 
     public static void main(String[] args) {
-        NodeManager.start();
+        FileSharer fileSharer = new FileSharer();
+        fileSharer.start();
         startTomcatServer();
     }
 
@@ -42,13 +43,13 @@ public class ServerLauncher {
         Thread thread = new Thread(() -> {
             try {
                 Tomcat tomcat = new Tomcat();
-                tomcat.setPort(Constants.WEB_APP_PORT);
+                tomcat.setPort(ServerConstants.WEB_APP_PORT);
 
                 // Adding the main servlet
-                Context context = tomcat.addWebapp("", new File(Constants.WEB_APP_DIRECTORY).getAbsolutePath());
+                Context context = tomcat.addWebapp("", new File(ServerConstants.WEB_APP_DIRECTORY).getAbsolutePath());
                 ServletContainer servletContainer = new ServletContainer(new ResourceConfig(endpointClassList));
                 Tomcat.addServlet(context, MAIN_SERVLET_NAME, servletContainer);
-                context.addServletMapping(Constants.WEB_APP_API_URL + "/*", MAIN_SERVLET_NAME);
+                context.addServletMapping(ServerConstants.WEB_APP_API_URL + "/*", MAIN_SERVLET_NAME);
 
                 // Creating CORS filter definition
                 FilterDef corsFilterDef = new FilterDef();
@@ -59,12 +60,12 @@ public class ServerLauncher {
                 // Creating CORS filter mapping for main servlet
                 FilterMap mainServletFilter1mapping = new FilterMap();
                 mainServletFilter1mapping.setFilterName(CORS_FILTER_NAME);
-                mainServletFilter1mapping.addURLPattern(Constants.WEB_APP_API_URL + "/*");
+                mainServletFilter1mapping.addURLPattern(ServerConstants.WEB_APP_API_URL + "/*");
                 context.addFilterMap(mainServletFilter1mapping);
 
                 tomcat.start();
 
-                String appURI = "http://localhost:" + Constants.WEB_APP_PORT + "/";
+                String appURI = "http://localhost:" + ServerConstants.WEB_APP_PORT + "/";
                 logger.info("File Sharer running at " + appURI);
                 try {
                     Desktop.getDesktop().browse(new URI(appURI));

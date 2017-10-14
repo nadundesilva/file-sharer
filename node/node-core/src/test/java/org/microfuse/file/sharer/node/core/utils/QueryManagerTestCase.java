@@ -33,8 +33,12 @@ public class QueryManagerTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Query Manager Test");
 
-        router = Mockito.spy(new Router(new UDPSocketNetworkHandler(), new UnstructuredFloodingRoutingStrategy()));
-        queryManager = new QueryManager(router);
+        router = Mockito.spy(new Router(
+                new UDPSocketNetworkHandler(serviceHolder),
+                new UnstructuredFloodingRoutingStrategy(serviceHolder),
+                serviceHolder
+        ));
+        queryManager = new QueryManager(router, serviceHolder);
     }
 
     @AfterMethod
@@ -65,7 +69,7 @@ public class QueryManagerTestCase extends BaseTestCase {
 
         queryManager.query("Cars");
 
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
         Message usedMessage = new Message();
         usedMessage.setType(MessageType.SER);
         usedMessage.setData(MessageIndexes.SER_SOURCE_IP, configuration.getIp());

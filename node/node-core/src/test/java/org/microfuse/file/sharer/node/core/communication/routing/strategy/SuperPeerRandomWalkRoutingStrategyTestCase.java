@@ -8,7 +8,6 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryP
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
-import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +41,10 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Super Peer Random Walk Routing Strategy Test");
 
-        superPeerRandomWalkRoutingStrategy = new SuperPeerRandomWalkRoutingStrategy();
+        superPeerRandomWalkRoutingStrategy = new SuperPeerRandomWalkRoutingStrategy(serviceHolder);
 
-        ordinaryPeerRoutingTable = Mockito.spy(new OrdinaryPeerRoutingTable());
-        superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable());
+        ordinaryPeerRoutingTable = Mockito.spy(new OrdinaryPeerRoutingTable(serviceHolder));
+        superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable(serviceHolder));
         queryResourceName = "Lord of the Rings";
 
         fromNode = Mockito.mock(Node.class);
@@ -204,8 +203,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        ServiceHolder.promoteToSuperPeer();
-        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        serviceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
@@ -229,8 +228,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        ServiceHolder.promoteToSuperPeer();
-        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        serviceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
@@ -255,8 +254,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        ServiceHolder.promoteToSuperPeer();
-        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        serviceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
@@ -280,8 +279,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        ServiceHolder.promoteToSuperPeer();
-        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        serviceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
@@ -299,8 +298,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        ServiceHolder.promoteToSuperPeer();
-        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        serviceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
@@ -320,8 +319,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
-        ServiceHolder.promoteToSuperPeer();
-        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        serviceHolder.promoteToSuperPeer();
+        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         resourceIndex.clear();
 
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,

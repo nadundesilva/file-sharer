@@ -23,6 +23,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public abstract class NetworkHandler {
     private static final Logger logger = LoggerFactory.getLogger(NetworkHandler.class);
 
+    protected ServiceHolder serviceHolder;
+
     private static Map<NetworkHandlerType, Class<? extends NetworkHandler>> networkHandlerClassMap;
 
     private final ReadWriteLock listenersListLock;
@@ -39,12 +41,13 @@ public abstract class NetworkHandler {
         networkHandlerClassMap.put(NetworkHandlerType.UDP_SOCKET, UDPSocketNetworkHandler.class);
     }
 
-    public NetworkHandler() {
+    public NetworkHandler(ServiceHolder serviceHolder) {
+        this.serviceHolder = serviceHolder;
         listenersListLock = new ReentrantReadWriteLock();
         listenerHandlerExecutorServiceLock = new ReentrantReadWriteLock();
         listenersList = new ArrayList<>();
         listenerHandlerExecutorService =
-                Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
+                Executors.newFixedThreadPool(this.serviceHolder.getConfiguration().getListenerHandlingThreadCount());
         restartRequired = false;
         running = false;
     }
@@ -92,7 +95,7 @@ public abstract class NetworkHandler {
         try {
             listenerHandlerExecutorService.shutdown();
             listenerHandlerExecutorService =
-                    Executors.newFixedThreadPool(ServiceHolder.getConfiguration().getListenerHandlingThreadCount());
+                    Executors.newFixedThreadPool(serviceHolder.getConfiguration().getListenerHandlingThreadCount());
         } finally {
             listenerHandlerExecutorServiceLock.writeLock().unlock();
             restartRequired = false;

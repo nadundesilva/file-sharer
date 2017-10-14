@@ -28,8 +28,12 @@ public class OverlayNetworkManagerTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Overlay Network Manager Test");
 
-        router = Mockito.spy(new Router(new UDPSocketNetworkHandler(), new UnstructuredFloodingRoutingStrategy()));
-        overlayNetworkManager = new OverlayNetworkManager(router);
+        router = Mockito.spy(new Router(
+                new UDPSocketNetworkHandler(serviceHolder),
+                new UnstructuredFloodingRoutingStrategy(serviceHolder),
+                serviceHolder
+        ));
+        overlayNetworkManager = new OverlayNetworkManager(router, serviceHolder);
     }
 
     @AfterMethod

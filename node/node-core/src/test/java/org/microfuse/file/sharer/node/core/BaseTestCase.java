@@ -10,8 +10,6 @@ import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * The base test case class which needs to be extended by all test cases.
@@ -19,11 +17,14 @@ import java.util.List;
 public class BaseTestCase {
     private static final Logger logger = LoggerFactory.getLogger(BaseTestCase.class);
 
+    protected ServiceHolder serviceHolder;
+
     @BeforeMethod
     public void baseInitializeMethod() {
         logger.info("Initializing Basic Test");
 
-        baseCleanUpMethod();
+        serviceHolder = new ServiceHolder();
+        clean();
     }
 
     @AfterMethod
@@ -34,7 +35,7 @@ public class BaseTestCase {
         try {
             Field field = ServiceHolder.class.getDeclaredField("router");
             field.setAccessible(true);
-            Object internalState = field.get(ServiceHolder.class);
+            Object internalState = field.get(serviceHolder);
             field.setAccessible(false);
 
             if (internalState instanceof Router) {
@@ -44,23 +45,14 @@ public class BaseTestCase {
             logger.warn("Test Case Cleanup: Failed to reset field router in "
                     + ServiceHolder.class.getName(), e);
         }
+        serviceHolder.clear();
+        clean();
+    }
 
-        // Resetting ServiceHolder singleton fields
-        List<String> managerFields = Arrays.asList("peerType", "configuration", "router", "resourceIndex",
-                "overlayNetworkManager", "queryManager");
-        managerFields.forEach(managerField -> {
-            try {
-                Field field = ServiceHolder.class.getDeclaredField(managerField);
-                field.setAccessible(true);
-                field.set(ServiceHolder.class, null);
-                field.setAccessible(false);
-            } catch (IllegalAccessException | NoSuchFieldException e) {
-                logger.warn("Test Case Cleanup: Failed to reset field " + managerField
-                        + " in " + ServiceHolder.class.getName(), e);
-            }
-        });
-
-        // Deleting configuration file
+    /**
+     * Clean the project.
+     */
+    private void clean() {
         new File(NodeConstants.CONFIG_FILE).delete();
     }
 

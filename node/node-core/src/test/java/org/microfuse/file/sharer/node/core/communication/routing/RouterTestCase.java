@@ -13,7 +13,6 @@ import org.microfuse.file.sharer.node.core.communication.routing.strategy.Routin
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.OwnedResource;
-import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.Logger;
@@ -48,7 +47,7 @@ public class RouterTestCase extends BaseTestCase {
 
         networkHandler = Mockito.mock(NetworkHandler.class);
         routingStrategy = Mockito.mock(RoutingStrategy.class);
-        router = Mockito.spy(new Router(networkHandler, routingStrategy));
+        router = Mockito.spy(new Router(networkHandler, routingStrategy, serviceHolder));
 
         fromNode = new Node();
         fromNode.setIp("192.168.1.2");
@@ -155,12 +154,12 @@ public class RouterTestCase extends BaseTestCase {
                 + " message received with resource in owned resources");
 
         OwnedResource ownedResource = new OwnedResource(serMessage.getData(MessageIndexes.SER_FILE_NAME));
-        ServiceHolder.getResourceIndex().addResourceToIndex(ownedResource);
+        serviceHolder.getResourceIndex().addResourceToIndex(ownedResource);
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Message message = Message.parse("0047 SEROK 1 " + ServiceHolder.getConfiguration().getIp()
-                + " " + Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort())
+        Message message = Message.parse("0047 SEROK 1 " + serviceHolder.getConfiguration().getIp()
+                + " " + Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort())
                 + " \"" + ownedResource.getName() + "\"");
 
         Mockito.verify(networkHandler, Mockito.times(1))
@@ -240,10 +239,10 @@ public class RouterTestCase extends BaseTestCase {
     public void testOnMessageSendFailedInSuperPeerNetworkOnly() {
         logger.info("Running Router Test 10 - On message send failed in super peer network only");
 
-        ServiceHolder.promoteToSuperPeer();
+        serviceHolder.promoteToSuperPeer();
         router.promoteToSuperPeer();
 
-        SuperPeerRoutingTable superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable());
+        SuperPeerRoutingTable superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable(serviceHolder));
         Whitebox.setInternalState(router, "routingTable", superPeerRoutingTable);
 
         fromNode = Mockito.spy(fromNode);
@@ -266,10 +265,10 @@ public class RouterTestCase extends BaseTestCase {
     public void testOnMessageSendFailedInAssignedOrdinaryPeersNetworkOnly() {
         logger.info("Running Router Test 11 - On message send failed in assigned ordinary peers network only");
 
-        ServiceHolder.promoteToSuperPeer();
+        serviceHolder.promoteToSuperPeer();
         router.promoteToSuperPeer();
 
-        SuperPeerRoutingTable superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable());
+        SuperPeerRoutingTable superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable(serviceHolder));
         Whitebox.setInternalState(router, "routingTable", superPeerRoutingTable);
 
         fromNode = Mockito.spy(fromNode);
@@ -314,13 +313,13 @@ public class RouterTestCase extends BaseTestCase {
         logger.info("Running Router Test 13 - On " + MessageType.SER_SUPER_PEER.getValue()
                 + " message received to super peer");
 
-        ServiceHolder.promoteToSuperPeer();
+        serviceHolder.promoteToSuperPeer();
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serSuperPeerMessage);
 
         Message message = Message.parse("0034 " + MessageType.SER_SUPER_PEER_OK.getValue()
-                + " " + ServiceHolder.getConfiguration().getIp()
-                + " " + Integer.toString(ServiceHolder.getConfiguration().getPeerListeningPort()));
+                + " " + serviceHolder.getConfiguration().getIp()
+                + " " + Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
         Mockito.verify(networkHandler, Mockito.times(1))
                 .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message, false);
@@ -470,7 +469,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.when(node1.getPort()).thenReturn(5642);
         router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
 
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
         configuration.setHeartBeatInterval(1);
 
         Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + configuration.getIp() + " "
@@ -492,7 +491,7 @@ public class RouterTestCase extends BaseTestCase {
         node1.setPort(5642);
 
         router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
 
         Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + node1.getIp() + " "
                 + node1.getPort());
@@ -515,7 +514,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.when(node1.getPort()).thenReturn(5642);
         router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
 
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
         configuration.setHeartBeatInterval(1);
 
         Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + configuration.getIp() + " "

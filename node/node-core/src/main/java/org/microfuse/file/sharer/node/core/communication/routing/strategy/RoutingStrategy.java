@@ -5,6 +5,7 @@ import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +20,12 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public abstract class RoutingStrategy {
     private static Map<RoutingStrategyType, Class<? extends RoutingStrategy>> routingStrategyClassMap;
+
+    protected ServiceHolder serviceHolder;
+
+    public RoutingStrategy(ServiceHolder serviceHolder) {
+        this.serviceHolder = serviceHolder;
+    }
 
     static {
         // Populating the routing strategy class map

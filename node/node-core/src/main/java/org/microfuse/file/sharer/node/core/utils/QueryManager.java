@@ -17,9 +17,12 @@ import org.slf4j.LoggerFactory;
 public class QueryManager implements RouterListener {
     private static final Logger logger = LoggerFactory.getLogger(QueryManager.class);
 
+    private ServiceHolder serviceHolder;
+
     private Router router;
 
-    public QueryManager(Router router) {
+    public QueryManager(Router router, ServiceHolder serviceHolder) {
+        this.serviceHolder = serviceHolder;
         this.router = router;
         this.router.registerListener(this);
     }
@@ -39,7 +42,7 @@ public class QueryManager implements RouterListener {
      * @param fileName The name of the file to be queried for
      */
     public void query(String fileName) {
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
         Message message = new Message();
         message.setType(MessageType.SER);
         message.setData(MessageIndexes.SER_SOURCE_IP, configuration.getIp());

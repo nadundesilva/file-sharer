@@ -32,9 +32,9 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Unstructured Flooding Routing Strategy Test");
 
-        unstructuredFloodingRoutingStrategy = new UnstructuredFloodingRoutingStrategy();
+        unstructuredFloodingRoutingStrategy = new UnstructuredFloodingRoutingStrategy(serviceHolder);
 
-        routingTable = Mockito.spy(new OrdinaryPeerRoutingTable());
+        routingTable = Mockito.spy(new OrdinaryPeerRoutingTable(serviceHolder));
 
         fromNode = Mockito.mock(Node.class);
         node1 = Mockito.mock(Node.class);

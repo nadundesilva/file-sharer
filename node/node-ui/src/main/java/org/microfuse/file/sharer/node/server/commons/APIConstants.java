@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.server.utils;
+package org.microfuse.file.sharer.node.server.commons;
 
 /**
  * Constants related to the request sent and responses sent by the API.

@@ -7,4 +7,9 @@
             <class name="org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandlerTestCase"/>
         </classes>
     </test>
+    <test name="file-sharer-node-core-bootstrapping-tests" enabled="true">
+        <classes>
+            <class name="org.microfuse.file.sharer.node.core.BootstrappingTestCase"/>
+        </classes>
+    </test>
 </suite>

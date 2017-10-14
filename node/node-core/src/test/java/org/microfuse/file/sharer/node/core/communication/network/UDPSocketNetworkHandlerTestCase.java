@@ -5,7 +5,6 @@ import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
-import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,17 +40,17 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         localhostIP = "127.0.0.1";
         peerListeningPort1 = 6756;
         peerListeningPort2 = 7642;
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
 
         configuration.setPeerListeningPort(peerListeningPort1);
-        udpSocketNetworkHandler1 = Mockito.spy(new UDPSocketNetworkHandler());
+        udpSocketNetworkHandler1 = Mockito.spy(new UDPSocketNetworkHandler(serviceHolder));
         udpSocketNetworkHandler1Listener = Mockito.mock(NetworkHandlerListener.class);
         udpSocketNetworkHandler1.registerListener(udpSocketNetworkHandler1Listener);
         udpSocketNetworkHandler1.startListening();
         waitFor(delay);
 
         configuration.setPeerListeningPort(peerListeningPort2);
-        udpSocketNetworkHandler2 = Mockito.spy(new UDPSocketNetworkHandler());
+        udpSocketNetworkHandler2 = Mockito.spy(new UDPSocketNetworkHandler(serviceHolder));
         udpSocketNetworkHandler2Listener = Mockito.mock(NetworkHandlerListener.class);
         udpSocketNetworkHandler2.registerListener(udpSocketNetworkHandler2Listener);
         udpSocketNetworkHandler2.startListening();
@@ -154,7 +153,7 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1))
                 .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
 
-        ServiceHolder.getConfiguration().setPeerListeningPort(8756);
+        serviceHolder.getConfiguration().setPeerListeningPort(8756);
         udpSocketNetworkHandler2.restart();
         waitFor(delay);
         udpSocketNetworkHandler1.sendMessage(localhostIP, 8756, message2, false);

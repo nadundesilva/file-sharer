@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,10 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
     private static final Logger logger = LoggerFactory.getLogger(OrdinaryPeerRoutingTable.class);
 
     private Node assignedSuperPeer;
+
+    public OrdinaryPeerRoutingTable(ServiceHolder serviceHolder) {
+        super(serviceHolder);
+    }
 
     /**
      * Get the super peer assigned to this node.

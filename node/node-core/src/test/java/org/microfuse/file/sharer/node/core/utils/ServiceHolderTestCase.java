@@ -57,7 +57,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
             logger.warn("Failed to create config file. Failed to test get configuration from file.");
         }
 
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
 
         Assert.assertNotNull(configuration);
         Assert.assertEquals(configuration.getUsername(), "microfuse.tester");
@@ -80,7 +80,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetDefaultConfigurationAtFirstTime() {
         logger.info("Running Service Holder Test 02 - Get default configuration at first time");
 
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
 
         Assert.assertNotNull(configuration);
         Assert.assertEquals(configuration.getUsername(), NodeConstants.DEFAULT_USERNAME);
@@ -106,8 +106,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetConfigurationAtSecondTime() {
         logger.info("Running Service Holder Test 03 - Get configuration at second time");
 
-        Configuration initialConfiguration = ServiceHolder.getConfiguration();
-        Configuration finalConfiguration = ServiceHolder.getConfiguration();
+        Configuration initialConfiguration = serviceHolder.getConfiguration();
+        Configuration finalConfiguration = serviceHolder.getConfiguration();
 
         Assert.assertNotNull(initialConfiguration);
         Assert.assertNotNull(finalConfiguration);
@@ -118,7 +118,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetResourceIndexAtFirstTime() {
         logger.info("Running Service Holder Test 04 - Get resource index at first time");
 
-        ResourceIndex resourceIndex = ServiceHolder.getResourceIndex();
+        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
 
         Assert.assertNotNull(resourceIndex);
     }
@@ -127,8 +127,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetResourceIndexAtSecondTime() {
         logger.info("Running Service Holder Test 05 - Get resource index at second time");
 
-        ResourceIndex initialResourceIndex = ServiceHolder.getResourceIndex();
-        ResourceIndex finalResourceIndex = ServiceHolder.getResourceIndex();
+        ResourceIndex initialResourceIndex = serviceHolder.getResourceIndex();
+        ResourceIndex finalResourceIndex = serviceHolder.getResourceIndex();
 
         Assert.assertNotNull(initialResourceIndex);
         Assert.assertNotNull(finalResourceIndex);
@@ -139,7 +139,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetOverlayNetworkManagerAtFirstTime() {
         logger.info("Running Service Holder Test 06 - Get overlay network manager at first time");
 
-        OverlayNetworkManager overlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
+        OverlayNetworkManager overlayNetworkManager = serviceHolder.getOverlayNetworkManager();
 
         Assert.assertNotNull(overlayNetworkManager);
 
@@ -156,8 +156,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetOverlayNetworkManagerAtSecondTime() {
         logger.info("Running Service Holder Test 07 - Get overlay network manager at second time");
 
-        OverlayNetworkManager initialOverlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
-        OverlayNetworkManager finalOverlayNetworkManager = ServiceHolder.getOverlayNetworkManager();
+        OverlayNetworkManager initialOverlayNetworkManager = serviceHolder.getOverlayNetworkManager();
+        OverlayNetworkManager finalOverlayNetworkManager = serviceHolder.getOverlayNetworkManager();
 
         Assert.assertNotNull(initialOverlayNetworkManager);
         Assert.assertNotNull(finalOverlayNetworkManager);
@@ -168,7 +168,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetQueryManagerAtFirstTime() {
         logger.info("Running Service Holder Test 08 - Get query manager at first time");
 
-        QueryManager queryManager = ServiceHolder.getQueryManager();
+        QueryManager queryManager = serviceHolder.getQueryManager();
 
         Assert.assertNotNull(queryManager);
 
@@ -185,8 +185,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testGetQueryManagerAtSecondTime() {
         logger.info("Running Service Holder Test 09 - Get query manager at second time");
 
-        QueryManager initialQueryManager = ServiceHolder.getQueryManager();
-        QueryManager finalQueryManager = ServiceHolder.getQueryManager();
+        QueryManager initialQueryManager = serviceHolder.getQueryManager();
+        QueryManager finalQueryManager = serviceHolder.getQueryManager();
 
         Assert.assertNotNull(initialQueryManager);
         Assert.assertNotNull(finalQueryManager);
@@ -197,13 +197,13 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testChangeNetworkHandler() {
         logger.info("Running Service Holder Test 10 - Change network handler");
 
-        ServiceHolder.getQueryManager();
+        serviceHolder.getQueryManager();
 
         Router router = null;
         try {
             Field field = ServiceHolder.class.getDeclaredField("router");
             field.setAccessible(true);
-            Object internalState = field.get(ServiceHolder.class);
+            Object internalState = field.get(serviceHolder);
             Assert.assertTrue(internalState instanceof Router);
             router = (Router) internalState;
             field.setAccessible(false);
@@ -214,7 +214,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertNotNull(router);
 
         NetworkHandler initialNetworkHandler = router.getNetworkHandler();
-        ServiceHolder.changeNetworkHandler(NetworkHandlerType.TCP_SOCKET);
+        serviceHolder.changeNetworkHandler(NetworkHandlerType.TCP_SOCKET);
         NetworkHandler finalNetworkHandler = router.getNetworkHandler();
 
         Assert.assertNotNull(initialNetworkHandler);
@@ -231,13 +231,13 @@ public class ServiceHolderTestCase extends BaseTestCase {
     public void testChangeRoutingStrategy() {
         logger.info("Running Service Holder Test 11 - Change routing strategy");
 
-        ServiceHolder.getQueryManager();
+        serviceHolder.getQueryManager();
 
         Router router = null;
         try {
             Field field = ServiceHolder.class.getDeclaredField("router");
             field.setAccessible(true);
-            Object internalState = field.get(ServiceHolder.class);
+            Object internalState = field.get(serviceHolder);
             Assert.assertTrue(internalState instanceof Router);
             router = (Router) internalState;
             field.setAccessible(false);
@@ -248,7 +248,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertNotNull(router);
 
         RoutingStrategy initialRoutingStrategy = router.getRoutingStrategy();
-        ServiceHolder.changeRoutingStrategy(RoutingStrategyType.UNSTRUCTURED_RANDOM_WALK);
+        serviceHolder.changeRoutingStrategy(RoutingStrategyType.UNSTRUCTURED_RANDOM_WALK);
         RoutingStrategy finalRoutingStrategy = router.getRoutingStrategy();
 
         Assert.assertNotNull(initialRoutingStrategy);

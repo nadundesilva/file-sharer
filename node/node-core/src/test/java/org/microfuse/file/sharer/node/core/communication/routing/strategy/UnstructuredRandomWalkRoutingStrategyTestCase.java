@@ -33,9 +33,9 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
     public void initializeMethod() {
         logger.info("Initializing Unstructured Random Walk Routing Strategy Test");
 
-        unstructuredRandomWalkRoutingStrategy = new UnstructuredRandomWalkRoutingStrategy();
+        unstructuredRandomWalkRoutingStrategy = new UnstructuredRandomWalkRoutingStrategy(serviceHolder);
 
-        routingTable = Mockito.spy(new OrdinaryPeerRoutingTable());
+        routingTable = Mockito.spy(new OrdinaryPeerRoutingTable(serviceHolder));
 
         fromNode = Mockito.mock(Node.class);
         node1 = Mockito.mock(Node.class);

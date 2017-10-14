@@ -5,7 +5,6 @@ import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
-import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,17 +40,17 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
         localhostIP = "127.0.0.1";
         peerListeningPort1 = 6756;
         peerListeningPort2 = 7642;
-        Configuration configuration = ServiceHolder.getConfiguration();
+        Configuration configuration = serviceHolder.getConfiguration();
 
         configuration.setPeerListeningPort(peerListeningPort1);
-        tcpSocketNetworkHandler1 = Mockito.spy(new TCPSocketNetworkHandler());
+        tcpSocketNetworkHandler1 = Mockito.spy(new TCPSocketNetworkHandler(serviceHolder));
         tcpSocketNetworkHandler1Listener = Mockito.mock(NetworkHandlerListener.class);
         tcpSocketNetworkHandler1.registerListener(tcpSocketNetworkHandler1Listener);
         tcpSocketNetworkHandler1.startListening();
         waitFor(delay);
 
         configuration.setPeerListeningPort(peerListeningPort2);
-        tcpSocketNetworkHandler2 = Mockito.spy(new TCPSocketNetworkHandler());
+        tcpSocketNetworkHandler2 = Mockito.spy(new TCPSocketNetworkHandler(serviceHolder));
         tcpSocketNetworkHandler2Listener = Mockito.mock(NetworkHandlerListener.class);
         tcpSocketNetworkHandler2.registerListener(tcpSocketNetworkHandler2Listener);
         tcpSocketNetworkHandler2.startListening();
@@ -154,7 +153,7 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
                 .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
 
-        ServiceHolder.getConfiguration().setPeerListeningPort(8756);
+        serviceHolder.getConfiguration().setPeerListeningPort(8756);
         tcpSocketNetworkHandler2.restart();
         waitFor(delay);
         tcpSocketNetworkHandler1.sendMessage(localhostIP, 8756, message2, false);

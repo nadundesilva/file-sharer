@@ -8,6 +8,7 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryP
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
+import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
@@ -24,6 +25,10 @@ import java.util.Set;
 public class SuperPeerRandomWalkRoutingStrategy extends RoutingStrategy {
     private static final Logger logger = LoggerFactory.getLogger(SuperPeerRandomWalkRoutingStrategy.class);
 
+    public SuperPeerRandomWalkRoutingStrategy(ServiceHolder serviceHolder) {
+        super(serviceHolder);
+    }
+
     @Override
     public String getName() {
         return RoutingStrategyType.SUPER_PEER_RANDOM_WALK.getValue();
@@ -31,10 +36,11 @@ public class SuperPeerRandomWalkRoutingStrategy extends RoutingStrategy {
 
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
+        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         Set<Node> forwardingNodes = null;
-        if (routingTable instanceof SuperPeerRoutingTable) {
+        if (routingTable instanceof SuperPeerRoutingTable && resourceIndex instanceof SuperPeerResourceIndex) {
             // Searching the aggregate index
-            Set<AggregatedResource> resources = ((SuperPeerResourceIndex) ServiceHolder.getResourceIndex())
+            Set<AggregatedResource> resources = ((SuperPeerResourceIndex) resourceIndex)
                     .findAggregatedResources(message.getData(MessageIndexes.SER_FILE_NAME));
 
             // Picking a node with a matching resource

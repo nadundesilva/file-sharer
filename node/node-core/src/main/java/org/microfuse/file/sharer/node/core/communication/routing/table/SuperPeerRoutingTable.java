@@ -25,7 +25,8 @@ public class SuperPeerRoutingTable extends RoutingTable {
     private final ReadWriteLock superPeerNetworkNodesLock;
     private final ReadWriteLock assignedOrdinaryPeerNodesLock;
 
-    public SuperPeerRoutingTable() {
+    public SuperPeerRoutingTable(ServiceHolder serviceHolder) {
+        super(serviceHolder);
         superPeerNetworkNodesLock = new ReentrantReadWriteLock();
         assignedOrdinaryPeerNodesLock = new ReentrantReadWriteLock();
         superPeerNetworkNodes = new HashSet<>();
@@ -117,7 +118,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
         boolean isSuccessful;
         assignedOrdinaryPeerNodesLock.writeLock().lock();
         try {
-            if (assignedOrdinaryPeerNodes.size() < ServiceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
+            if (assignedOrdinaryPeerNodes.size() < serviceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
                 Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
                 if (existingNode != null) {
                     node = existingNode;

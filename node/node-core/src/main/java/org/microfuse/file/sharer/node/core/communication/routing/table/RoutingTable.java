@@ -2,6 +2,7 @@ package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public abstract class RoutingTable {
     private static final Logger logger = LoggerFactory.getLogger(RoutingTable.class);
 
+    protected ServiceHolder serviceHolder;
+
     private static Map<PeerType, Class<? extends RoutingTable>> routingTableClassMap;
 
     private Set<Node> unstructuredNetworkNodes;
@@ -35,7 +38,8 @@ public abstract class RoutingTable {
         routingTableClassMap.put(PeerType.SUPER_PEER, SuperPeerRoutingTable.class);
     }
 
-    public RoutingTable() {
+    public RoutingTable(ServiceHolder serviceHolder) {
+        this.serviceHolder = serviceHolder;
         unstructuredNetworkNodesLock = new ReentrantReadWriteLock();
         unstructuredNetworkNodes = new HashSet<>();
     }

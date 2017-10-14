@@ -4,6 +4,7 @@ import org.microfuse.file.sharer.node.commons.communication.routing.strategy.Rou
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,6 +16,10 @@ import java.util.Set;
  * Floods received messages to all the connected nodes.
  */
 public class UnstructuredFloodingRoutingStrategy extends RoutingStrategy {
+    public UnstructuredFloodingRoutingStrategy(ServiceHolder serviceHolder) {
+        super(serviceHolder);
+    }
+
     @Override
     public String getName() {
         return RoutingStrategyType.UNSTRUCTURED_FLOODING.getValue();

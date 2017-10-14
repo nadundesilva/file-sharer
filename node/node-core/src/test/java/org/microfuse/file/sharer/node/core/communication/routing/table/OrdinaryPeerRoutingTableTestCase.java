@@ -27,7 +27,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Ordinary Peer Routing Table Test");
 
-        ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable();
+        ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable(serviceHolder);
 
         node1 = new Node();
         node1.setIp("192.168.1.1");
