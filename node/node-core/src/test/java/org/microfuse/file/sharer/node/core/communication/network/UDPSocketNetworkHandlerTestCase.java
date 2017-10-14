@@ -109,6 +109,30 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
     }
 
     @Test
+    public void testCommunicationWithWaiting() {
+        Mockito.doAnswer(invocationOnMock -> {
+            Object[] arguments = invocationOnMock.getArguments();
+
+            Assert.assertTrue(arguments[0] instanceof String);
+            String ip = (String) arguments[0];
+            Assert.assertTrue(arguments[1] instanceof Integer);
+            int port = (int) arguments[1];
+
+            udpSocketNetworkHandler2.sendMessage(ip, port, message2, false);
+            return null;
+        }).when(udpSocketNetworkHandler2Listener)
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
+
+        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, true);
+        waitFor(delay * 2);
+
+        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
+        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message2));
+    }
+
+    @Test
     public void testRestart() {
         udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
         waitFor(delay);

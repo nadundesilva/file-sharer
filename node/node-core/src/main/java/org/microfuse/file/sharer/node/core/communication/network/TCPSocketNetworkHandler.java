@@ -102,39 +102,37 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void sendMessage(String ip, int port, Message message, boolean waitForReply) {
+        int localPort = -1;
         try (
                 Socket sendSocket = new Socket(ip, port);
                 PrintWriter out = new PrintWriter(new OutputStreamWriter(sendSocket.getOutputStream(),
                         Constants.DEFAULT_CHARSET), true)
         ) {
             out.write(message.toString());
-            int localPort = sendSocket.getLocalPort();
-
-            if (waitForReply) {
-                Socket clientSocket = null;
-                BufferedReader in = null;
-                try (
-                        ServerSocket replyServerSocket = new ServerSocket(localPort)
-                ) {
-                    clientSocket = replyServerSocket.accept();
-                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
-                            Constants.DEFAULT_CHARSET));
-
-                    StringBuilder replyMessage = new StringBuilder();
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null) {
-                        replyMessage.append(inputLine);
-                    }
-
-                    onMessageReceived(ip, port, Message.parse(replyMessage.toString()));
-                } finally {
-                    Closeables.closeQuietly(in);
-                    Closeables.close(clientSocket, true);
-                }
-            }
+            localPort = sendSocket.getLocalPort();
         } catch (IOException e) {
             logger.debug("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
             onMessageSendFailed(ip, port, message);
+        }
+
+        if (waitForReply && localPort > 0) {
+            try (
+                    ServerSocket replyServerSocket = new ServerSocket(localPort);
+                    Socket clientSocket = replyServerSocket.accept();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
+                            Constants.DEFAULT_CHARSET));
+            ) {
+                StringBuilder replyMessage = new StringBuilder();
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    replyMessage.append(inputLine);
+                }
+
+                onMessageReceived(ip, port, Message.parse(replyMessage.toString()));
+            } catch (IOException e) {
+                logger.debug("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
+                onMessageSendFailed(ip, port, message);
+            }
         }
     }
 
