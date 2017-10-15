@@ -53,7 +53,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                             logger.debug("Message received from " + incomingPacket.getAddress().getHostAddress()
                                     + ":" + incomingPacket.getPort() + " : " + messageString);
 
-                            onMessageReceived(
+                            runTasksOnMessageReceived(
                                     incomingPacket.getAddress().getHostAddress(),
                                     incomingPacket.getPort(),
                                     Message.parse(messageString)
@@ -94,31 +94,52 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void sendMessage(String ip, int port, Message message, boolean waitForReply) {
-        try (
-                DatagramSocket replyServerSocket = new DatagramSocket()
-        ) {
+        DatagramSocket socket = null;
+        try {
+            socket = new DatagramSocket();
             String messageString = message.toString();
 
             DatagramPacket datagramPacket = new DatagramPacket(
                     messageString.getBytes(Constants.DEFAULT_CHARSET),
                     messageString.getBytes(Constants.DEFAULT_CHARSET).length,
                     InetAddress.getByName(ip), port);
-            replyServerSocket.send(datagramPacket);
+            socket.send(datagramPacket);
+            logger.debug("Message " + messageString + " sent to node " + ip + ":" + port);
 
             if (waitForReply) {
+                // Starting a timeout to mark as failed
+                DatagramSocket finalSocket = socket;
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout());
+                    } catch (InterruptedException ignored) {
+                    }
+                    try {
+                        Closeables.close(finalSocket, true);
+                    } catch (IOException ignored) {
+                    }
+                }).start();
+
+                logger.debug("Waiting for reply from node " + ip + ":" + port);
                 byte[] buffer = new byte[65536];
                 DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
-                replyServerSocket.receive(incomingPacket);
+                socket.receive(incomingPacket);
 
                 byte[] data = incomingPacket.getData();
                 String replyMessageString =
                         new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
 
-                onMessageReceived(ip, port, Message.parse(replyMessageString));
+                logger.debug("Reply to message " + messageString + " received from node " + ip + ":" + port);
+                runTasksOnMessageReceived(ip, port, Message.parse(replyMessageString));
             }
         } catch (IOException e) {
             logger.error("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
-            onMessageSendFailed(ip, port, message);
+            runTasksOnMessageSendFailed(ip, port, message);
+        } finally {
+            try {
+                Closeables.close(socket, true);
+            } catch (IOException ignored) {
+            }
         }
     }
 

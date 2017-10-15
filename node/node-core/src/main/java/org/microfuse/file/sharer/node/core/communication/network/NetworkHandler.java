@@ -29,10 +29,11 @@ public abstract class NetworkHandler {
 
     private final ReadWriteLock listenersListLock;
     private final ReadWriteLock listenerHandlerExecutorServiceLock;
-    protected boolean restartRequired;
-    protected boolean running;
     private List<NetworkHandlerListener> listenersList;
     private ExecutorService listenerHandlerExecutorService;
+
+    protected boolean restartRequired;
+    protected boolean running;
 
     static {
         // Populating the network handler class map
@@ -108,19 +109,19 @@ public abstract class NetworkHandler {
     public abstract void shutdown();
 
     /**
-     * Runs tasks to be run when an error occurs in sending a message.
+     * Run tasks to be run when a message is received.
      *
-     * @param toAddress The address to which the message should be sent
-     * @param toPort    The port to which the message should be sent
-     * @param message   The message
+     * @param fromAddress The address from which the message was received
+     * @param fromPort    The port from which the message was received
+     * @param message     The message received
      */
-    protected void onMessageSendFailed(String toAddress, int toPort, Message message) {
-        logger.debug("Failed to send message to " + toAddress + ": " + message);
+    protected void runTasksOnMessageReceived(String fromAddress, int fromPort, Message message) {
+        logger.debug("Message " + message.toString() + " received from node " + fromAddress + ":" + fromPort);
         listenersListLock.readLock().lock();
         try {
             listenerHandlerExecutorServiceLock.readLock().lock();
             listenersList.forEach(listener -> listenerHandlerExecutorService.execute(() ->
-                    listener.onMessageSendFailed(toAddress, toPort, message)
+                    listener.onMessageReceived(fromAddress, fromPort, message)
             ));
             listenerHandlerExecutorServiceLock.readLock().unlock();
         } finally {
@@ -129,19 +130,19 @@ public abstract class NetworkHandler {
     }
 
     /**
-     * Run tasks to be run when a message is received.
+     * Runs tasks to be run when an error occurs in sending a message.
      *
-     * @param fromAddress The address from which the message was received
-     * @param fromPort    The port from which the message was received
-     * @param message     The message received
+     * @param toAddress The address to which the message should be sent
+     * @param toPort    The port to which the message should be sent
+     * @param message   The message
      */
-    protected void onMessageReceived(String fromAddress, int fromPort, Message message) {
-        logger.debug("Message received from " + fromAddress + ": " + message);
+    protected void runTasksOnMessageSendFailed(String toAddress, int toPort, Message message) {
+        logger.debug("Failed to send message " + message + " to " + toAddress + ":" + toPort);
         listenersListLock.readLock().lock();
         try {
             listenerHandlerExecutorServiceLock.readLock().lock();
             listenersList.forEach(listener -> listenerHandlerExecutorService.execute(() ->
-                    listener.onMessageReceived(fromAddress, fromPort, message)
+                    listener.onMessageSendFailed(toAddress, toPort, message)
             ));
             listenerHandlerExecutorServiceLock.readLock().unlock();
         } finally {

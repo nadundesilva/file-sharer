@@ -1,11 +1,17 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
+import org.microfuse.file.sharer.bootstrap.BootstrapServer;
 import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
+import org.microfuse.file.sharer.node.commons.messaging.MessageConstants;
+import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
+import org.microfuse.file.sharer.node.core.communication.routing.Router;
+import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -165,7 +171,7 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(0)).onMessageReceived(
                 Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
         // TODO : uncomment after implementing reliability in UDP
-//        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).onMessageSendFailed(
+//        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).runTasksOnMessageSendFailed(
 //                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
     }
 
@@ -180,7 +186,44 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(0)).onMessageReceived(
                 Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
         // TODO : uncomment after implementing reliability in UDP
-//        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).onMessageSendFailed(
+//        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).runTasksOnMessageSendFailed(
 //                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
+    }
+
+    @Test
+    public void testEcho() {
+        logger.info("Running UDP Network Handler Test 07 - Echo to bootstrap server");
+
+        BootstrapServer bootstrapServer = new BootstrapServer();
+        bootstrapServer.start();
+        waitFor(delay);
+
+        Message echoMessage = new Message();
+        echoMessage.setType(MessageType.ECHO);
+
+        Message echoOkMessage = new Message();
+        echoOkMessage.setType(MessageType.ECHO_OK);
+        echoOkMessage.setData(MessageIndexes.ECHO_OK_VALUE, MessageConstants.ECHO_OK_VALUE_SUCCESS);
+
+        NetworkHandler networkHandler = Mockito.mock(NetworkHandler.class);
+        RoutingStrategy routingStrategy = Mockito.mock(RoutingStrategy.class);
+        Router router = Mockito.spy(new Router(networkHandler, routingStrategy, serviceHolder));
+
+        Object routerInternalState = Whitebox.getInternalState(router, "bootstrapServerNetworkHandler");
+        Assert.assertTrue(routerInternalState instanceof UDPSocketNetworkHandler);
+        UDPSocketNetworkHandler bootstrapServerNetworkHandler = (UDPSocketNetworkHandler) routerInternalState;
+        bootstrapServerNetworkHandler.clearListeners();
+        bootstrapServerNetworkHandler.registerListener(router);
+
+        router.sendMessageToBootstrapServer(echoMessage);
+        waitFor(delay);
+
+        Mockito.verify(router, Mockito.times(1)).onMessageReceived(
+                serviceHolder.getConfiguration().getBootstrapServerIP(),
+                serviceHolder.getConfiguration().getBootstrapServerPort(),
+                echoOkMessage
+        );
+
+        bootstrapServer.shutdown();
     }
 }

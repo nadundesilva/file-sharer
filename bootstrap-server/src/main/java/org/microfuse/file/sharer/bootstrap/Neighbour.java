@@ -1,6 +1,9 @@
 package org.microfuse.file.sharer.bootstrap;
 
-class Neighbour {
+/**
+ * Neighbours in the network.
+ */
+public class Neighbour {
     private String ip;
     private int port;
     private String username;

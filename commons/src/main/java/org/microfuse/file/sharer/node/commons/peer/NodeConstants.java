@@ -16,11 +16,12 @@ public class NodeConstants {
     public static final int DEFAULT_TIME_TO_LIVE = 5;
     public static final int DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT = 5;
     public static final int DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT = 3;
-    public static final int DEFAULT_HEART_BEAT_INTERVAL = 60;
+    public static final int DEFAULT_HEARTBEAT_INTERVAL = 60000;
     public static final int DEFAULT_GOSSIPING_INTERVAL = 120;
-    public static final int DEFAULT_NETWORK_HANDLER_TIMEOUT = 3;
+    public static final int DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT = 3000;
+    public static final int DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT = 6000;
     public static final NetworkHandlerType DEFAULT_NETWORK_HANDLER = NetworkHandlerType.TCP_SOCKET;
-    public static final RoutingStrategyType DEFAULT_ROUTING_STRATEGY = RoutingStrategyType.UNSTRUCTURED_FLOODING;
+    public static final RoutingStrategyType DEFAULT_ROUTING_STRATEGY = RoutingStrategyType.SUPER_PEER_RANDOM_WALK;
 
     public static final String CONFIG_FILE = "config.json";
     public static final int INITIAL_HOP_COUNT = 0;

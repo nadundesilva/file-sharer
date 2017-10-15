@@ -14,4 +14,12 @@ public interface RouterListener {
      * @param message  The message that was received
      */
     void onMessageReceived(Node fromNode, Message message);
+
+    /**
+     * Invoked when sending a message failed.
+     *
+     * @param toNode   The node to which the message was sent
+     * @param message  The message that was failed to send
+     */
+    void onMessageSendFailed(Node toNode, Message message);
 }

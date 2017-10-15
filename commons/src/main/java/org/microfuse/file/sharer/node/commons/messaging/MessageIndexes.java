@@ -4,6 +4,9 @@ package org.microfuse.file.sharer.node.commons.messaging;
  * Message data indexes.
  */
 public class MessageIndexes {
+    // ECHO_OK message
+    public static final int ECHO_OK_VALUE = 0;
+
     // REG message
     public static final int REG_IP = 0;
     public static final int REG_PORT = 1;
@@ -71,9 +74,11 @@ public class MessageIndexes {
     public static final int JOIN_SUPER_PEER_OK_VALUE_SUCCESS_NEW_IP = 1;
     public static final int JOIN_SUPER_PEER_OK_VALUE_SUCCESS_NEW_PORT = 2;
 
+    // HEARTBEAT message
     public static final int HEARTBEAT_SOURCE_IP = 0;
     public static final int HEARTBEAT_SOURCE_PORT = 1;
 
+    //HEARTBEAT_OK message
     public static final int HEARTBEAT_OK_IP = 0;
     public static final int HEARTBEAT_OK_PORT = 1;
 

@@ -8,6 +8,7 @@ import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerListener;
+import org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
@@ -40,11 +41,14 @@ public class Router implements NetworkHandlerListener {
     private final ReadWriteLock routingTableLock;
     private final ReadWriteLock routingStrategyLock;
     private final ReadWriteLock networkHandlerLock;
+    private final ReadWriteLock bootstrapServerNetworkHandlerLock;
     private final Lock heartBeatLock;
+
     private List<RouterListener> listenersList;
     private RoutingTable routingTable;
     private RoutingStrategy routingStrategy;
     private NetworkHandler networkHandler;
+    private UDPSocketNetworkHandler bootstrapServerNetworkHandler;
     private Thread heartBeatThread;
     private boolean heartBeatingEnabled;
 
@@ -53,6 +57,7 @@ public class Router implements NetworkHandlerListener {
         routingTableLock = new ReentrantReadWriteLock();
         routingStrategyLock = new ReentrantReadWriteLock();
         networkHandlerLock = new ReentrantReadWriteLock();
+        bootstrapServerNetworkHandlerLock = new ReentrantReadWriteLock();
         heartBeatLock = new ReentrantLock();
         try {
             routingTable = RoutingTable.getRoutingTableClass(serviceHolder.getPeerType())
@@ -66,17 +71,20 @@ public class Router implements NetworkHandlerListener {
         heartBeatingEnabled = false;
         this.serviceHolder = serviceHolder;
         this.routingStrategy = routingStrategy;
-        this.networkHandler = networkHandler;
         this.listenersList = new ArrayList<>();
-        this.networkHandler.registerListener(this);
 
+        this.bootstrapServerNetworkHandler = new UDPSocketNetworkHandler(serviceHolder);
+        this.bootstrapServerNetworkHandler.registerListener(this);
+
+        this.networkHandler = networkHandler;
+        this.networkHandler.registerListener(this);
         this.networkHandler.startListening();
     }
 
     @Override
     public void onMessageReceived(String fromAddress, int fromPort, Message message) {
         logger.debug("Received message " + message.toString() + " from node " + fromAddress
-                + ":" + fromAddress);
+                + ":" + fromPort);
         MessageType messageType = message.getType();
 
         Node fromNode;
@@ -122,6 +130,20 @@ public class Router implements NetworkHandlerListener {
         if (receivingNode != null) {
             receivingNode.setAlive(false);
         }
+
+        if (receivingNode == null) {
+            receivingNode = new Node();
+            receivingNode.setIp(toAddress);
+            receivingNode.setPort(toPort);
+        }
+        MessageType messageType = message.getType();
+        if (messageType != null && (messageType == MessageType.SER || messageType == MessageType.SER_OK ||
+                messageType == MessageType.SER_SUPER_PEER || messageType == MessageType.SER_SUPER_PEER_OK ||
+                messageType == MessageType.HEARTBEAT || messageType == MessageType.HEARTBEAT_OK)) {
+            logger.warn("Message " + message.toString() + " send failed to node " + receivingNode.toString());
+        } else {
+            runTasksOnMessageSendFailed(receivingNode, message);
+        }
     }
 
     /**
@@ -140,6 +162,12 @@ public class Router implements NetworkHandlerListener {
         } finally {
             networkHandlerLock.readLock().unlock();
         }
+        bootstrapServerNetworkHandlerLock.readLock().lock();
+        try {
+            bootstrapServerNetworkHandler.restart();
+        } finally {
+            bootstrapServerNetworkHandlerLock.readLock().unlock();
+        }
     }
 
     /**
@@ -151,6 +179,12 @@ public class Router implements NetworkHandlerListener {
             networkHandler.shutdown();
         } finally {
             networkHandlerLock.writeLock().unlock();
+        }
+        bootstrapServerNetworkHandlerLock.readLock().lock();
+        try {
+            bootstrapServerNetworkHandler.shutdown();
+        } finally {
+            bootstrapServerNetworkHandlerLock.readLock().unlock();
         }
     }
 
@@ -166,7 +200,7 @@ public class Router implements NetworkHandlerListener {
                     while (heartBeatingEnabled) {
                         heartBeat();
                         try {
-                            Thread.sleep(serviceHolder.getConfiguration().getHeartBeatInterval() * 1000);
+                            Thread.sleep(serviceHolder.getConfiguration().getHeartbeatInterval());
                         } catch (InterruptedException e) {
                             logger.debug("Failed to sleep heartbeat thread", e);
                         }
@@ -226,18 +260,7 @@ public class Router implements NetworkHandlerListener {
      * @param message The message to be sent
      */
     public void sendMessage(Node toNode, Message message) {
-        sendMessage(toNode, message, false);
-    }
-
-    /**
-     * Send a message directly to a node.
-     *
-     * @param toNode       The node to which the message needs to be sent
-     * @param message      The message to be sent
-     * @param waitForReply Send message and wait for a reply from the other end
-     */
-    public void sendMessage(Node toNode, Message message, boolean waitForReply) {
-        sendMessage(toNode.getIp(), toNode.getPort(), message, waitForReply);
+        sendMessage(toNode.getIp(), toNode.getPort(), message);
     }
 
     /**
@@ -249,24 +272,25 @@ public class Router implements NetworkHandlerListener {
      * @param message      The message to be sent
      */
     public void sendMessage(String ip, int port, Message message) {
-        sendMessage(ip, port, message, false);
-    }
-
-    /**
-     * Send a message directly to a node.
-     *
-     * @param ip           The ip of the node to which the message needs to be sent
-     * @param port         The port of the node to which the message needs to be sent
-     * @param message      The message to be sent
-     * @param waitForReply Send message and wait for a reply from the other end
-     */
-    public void sendMessage(String ip, int port, Message message, boolean waitForReply) {
         networkHandlerLock.readLock().lock();
         try {
             logger.debug("Sending message " + message.toString() + " to node " + ip + ":" + port);
-            networkHandler.sendMessage(ip, port, message, waitForReply);
+            networkHandler.sendMessage(ip, port, message, false);
         } finally {
             networkHandlerLock.readLock().unlock();
+        }
+    }
+
+    public void sendMessageToBootstrapServer(Message message) {
+        String ip = serviceHolder.getConfiguration().getBootstrapServerIP();
+        int port = serviceHolder.getConfiguration().getBootstrapServerPort();
+
+        bootstrapServerNetworkHandlerLock.readLock().lock();
+        try {
+            logger.debug("Sending message to bootstrap server " + message.toString() + " to node " + ip + ":" + port);
+            bootstrapServerNetworkHandler.sendMessage(ip, port, message, true);
+        } finally {
+            bootstrapServerNetworkHandlerLock.readLock().unlock();
         }
     }
 
@@ -361,6 +385,22 @@ public class Router implements NetworkHandlerListener {
         try {
             listenersList.stream().parallel()
                     .forEach(routerListener -> routerListener.onMessageReceived(fromNode, message));
+        } finally {
+            listenersListLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Runs tasks to be run when an error occurs in sending a message.
+     *
+     * @param toNode  The node to which the message should be sent
+     * @param message The message
+     */
+    public void runTasksOnMessageSendFailed(Node toNode, Message message) {
+        listenersListLock.readLock().lock();
+        try {
+            listenersList.stream().parallel()
+                    .forEach(routerListener -> routerListener.onMessageSendFailed(toNode, message));
         } finally {
             listenersListLock.readLock().unlock();
         }

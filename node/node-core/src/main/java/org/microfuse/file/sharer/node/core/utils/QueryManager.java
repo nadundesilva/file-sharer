@@ -36,6 +36,11 @@ public class QueryManager implements RouterListener {
         }
     }
 
+    @Override
+    public void onMessageSendFailed(Node toNode, Message message) {
+
+    }
+
     /**
      * Query the file sharer system for a file.
      *

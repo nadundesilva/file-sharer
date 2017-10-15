@@ -470,7 +470,7 @@ public class RouterTestCase extends BaseTestCase {
         router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
 
         Configuration configuration = serviceHolder.getConfiguration();
-        configuration.setHeartBeatInterval(1);
+        configuration.setHeartbeatInterval(1000);
 
         Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + configuration.getIp() + " "
                 + configuration.getPeerListeningPort());
@@ -515,7 +515,7 @@ public class RouterTestCase extends BaseTestCase {
         router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
 
         Configuration configuration = serviceHolder.getConfiguration();
-        configuration.setHeartBeatInterval(1);
+        configuration.setHeartbeatInterval(1000);
 
         Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + configuration.getIp() + " "
                 + configuration.getPeerListeningPort());

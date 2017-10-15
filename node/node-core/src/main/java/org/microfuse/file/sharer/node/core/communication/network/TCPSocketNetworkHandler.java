@@ -60,7 +60,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
                             while ((inputLine = in.readLine()) != null) {
                                 message.append(inputLine);
                             }
-                            onMessageReceived(
+                            runTasksOnMessageReceived(
                                     clientSocket.getInetAddress().getHostAddress(),
                                     clientSocket.getPort(),
                                     Message.parse(message.toString())
@@ -116,26 +116,48 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
             localPort = sendSocket.getLocalPort();
         } catch (IOException e) {
             logger.debug("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
-            onMessageSendFailed(ip, port, message);
+            runTasksOnMessageSendFailed(ip, port, message);
         }
 
         if (waitForReply && localPort > 0) {
+            Socket clientSocket = null;
+            BufferedReader in = null;
             try (
                     ServerSocket replyServerSocket = new ServerSocket(localPort);
-                    Socket clientSocket = replyServerSocket.accept();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
-                            Constants.DEFAULT_CHARSET));
             ) {
+                clientSocket = replyServerSocket.accept();
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
+                        Constants.DEFAULT_CHARSET));
+
+                // Starting a timeout to mark as failed
+                Socket finalClientSocket = clientSocket;
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout());
+                    } catch (InterruptedException ignored) {
+                    }
+                    try {
+                        Closeables.close(finalClientSocket, true);
+                    } catch (IOException ignored) {
+                    }
+                }).start();
+
                 StringBuilder replyMessage = new StringBuilder();
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
                     replyMessage.append(inputLine);
                 }
 
-                onMessageReceived(ip, port, Message.parse(replyMessage.toString()));
+                runTasksOnMessageReceived(ip, port, Message.parse(replyMessage.toString()));
             } catch (IOException e) {
                 logger.debug("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
-                onMessageSendFailed(ip, port, message);
+                runTasksOnMessageSendFailed(ip, port, message);
+            } finally {
+                Closeables.closeQuietly(in);
+                try {
+                    Closeables.close(clientSocket, true);
+                } catch (IOException ignored) {
+                }
             }
         }
     }

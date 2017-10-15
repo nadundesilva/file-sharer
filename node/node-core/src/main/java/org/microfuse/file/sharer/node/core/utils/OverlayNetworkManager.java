@@ -46,6 +46,7 @@ public class OverlayNetworkManager implements RouterListener {
 
     @Override
     public void onMessageReceived(Node fromNode, Message message) {
+        logger.debug("Received message " + message.toString() + " from node " + fromNode.toString());
         switch (message.getType()) {
             case REG_OK:
                 handleRegOkMessage(fromNode, message);
@@ -79,6 +80,11 @@ public class OverlayNetworkManager implements RouterListener {
         }
     }
 
+    @Override
+    public void onMessageSendFailed(Node toNode, Message message) {
+
+    }
+
     /**
      * Enable gossiping.
      */
@@ -91,17 +97,17 @@ public class OverlayNetworkManager implements RouterListener {
                     while (gossipingEnabled) {
                         gossip();
                         try {
-                            Thread.sleep(serviceHolder.getConfiguration().getHeartBeatInterval() * 1000);
+                            Thread.sleep(serviceHolder.getConfiguration().getHeartbeatInterval());
                         } catch (InterruptedException e) {
-                            logger.debug("Failed to sleep heartbeat thread", e);
+                            logger.debug("Failed to sleep gossiping thread", e);
                         }
                     }
-                    logger.debug("Stopped Heart beating");
+                    logger.debug("Stopped gossiping");
                 });
                 gossipingThread.setPriority(Thread.MIN_PRIORITY);
                 gossipingThread.setDaemon(true);
                 gossipingThread.start();
-                logger.debug("Started Heart beating");
+                logger.debug("Started gossiping");
             }
         } finally {
             gossipingLock.unlock();
@@ -147,7 +153,7 @@ public class OverlayNetworkManager implements RouterListener {
         regMessage.setData(MessageIndexes.REG_PORT,
                 Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
         regMessage.setData(MessageIndexes.REG_USERNAME, serviceHolder.getConfiguration().getUsername());
-        router.sendMessage(serviceHolder.getConfiguration().getBootstrapServer(), regMessage, true);
+        router.sendMessageToBootstrapServer(regMessage);
     }
 
     /**
@@ -160,7 +166,7 @@ public class OverlayNetworkManager implements RouterListener {
         unregMessage.setData(MessageIndexes.UNREG_PORT,
                 Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
         unregMessage.setData(MessageIndexes.UNREG_USERNAME, serviceHolder.getConfiguration().getUsername());
-        router.sendMessage(serviceHolder.getConfiguration().getBootstrapServer(), unregMessage, true);
+        router.sendMessageToBootstrapServer(unregMessage);
     }
 
     /**
@@ -204,6 +210,13 @@ public class OverlayNetworkManager implements RouterListener {
      * Enable heart beating.
      */
     public void enableHeartBeat() {
+        router.enableHeartBeat();
+    }
+
+    /**
+     * Enable heart beating.
+     */
+    public void disableHeartBeat() {
         router.disableHeartBeat();
     }
 
@@ -229,9 +242,11 @@ public class OverlayNetworkManager implements RouterListener {
     }
 
     /**
+     *
      * Self assign current node as super peer.
      */
     private void selfAssignSuperPeer() {
+        serviceHolder.promoteToSuperPeer();
         // TODO : Implement self assigning super peer. (Announce to others ?)
     }
 

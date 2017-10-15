@@ -95,6 +95,22 @@ public class ServiceHolder {
             router.shutdown();
         }
 
+        File configFile = new File(NodeConstants.CONFIG_FILE);
+        try {
+            if (!configFile.createNewFile()) {
+                try {
+                    Files.write(new Gson().toJson(configuration).getBytes(
+                            Constants.DEFAULT_CHARSET), configFile);
+                } catch (IOException e1) {
+                    logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
+                }
+            } else {
+                logger.warn("Failed to create file " + configFile.getAbsolutePath());
+            }
+        } catch (IOException e1) {
+            logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
+        }
+
         peerType = null;
         configuration = null;
         router = null;

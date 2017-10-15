@@ -18,9 +18,10 @@ public class Configuration {
     private int timeToLive;
     private int maxAssignedOrdinaryPeerCount;
     private int maxUnstructuredPeerCount;
-    private int heartBeatInterval;
+    private int heartbeatInterval;
     private int gossipingInterval;
-    private int networkHandlerTimeout;
+    private int networkHandlerSendTimeout;
+    private int networkHandlerReplyTimeout;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
 
@@ -34,9 +35,10 @@ public class Configuration {
         timeToLive = NodeConstants.DEFAULT_TIME_TO_LIVE;
         maxAssignedOrdinaryPeerCount = NodeConstants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT;
         maxUnstructuredPeerCount = NodeConstants.DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT;
-        heartBeatInterval = NodeConstants.DEFAULT_HEART_BEAT_INTERVAL;
+        heartbeatInterval = NodeConstants.DEFAULT_HEARTBEAT_INTERVAL;
         gossipingInterval = NodeConstants.DEFAULT_GOSSIPING_INTERVAL;
-        networkHandlerTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_TIMEOUT;
+        networkHandlerSendTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT;
+        networkHandlerReplyTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT;
         networkHandlerType = NodeConstants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = NodeConstants.DEFAULT_ROUTING_STRATEGY;
     }
@@ -121,12 +123,12 @@ public class Configuration {
         this.maxUnstructuredPeerCount = maxUnstructuredPeerCount;
     }
 
-    public int getHeartBeatInterval() {
-        return heartBeatInterval;
+    public int getHeartbeatInterval() {
+        return heartbeatInterval;
     }
 
-    public void setHeartBeatInterval(int heartBeatInterval) {
-        this.heartBeatInterval = heartBeatInterval;
+    public void setHeartbeatInterval(int heartbeatInterval) {
+        this.heartbeatInterval = heartbeatInterval;
     }
 
     public int getGossipingInterval() {
@@ -137,12 +139,20 @@ public class Configuration {
         this.gossipingInterval = gossipingInterval;
     }
 
-    public int getNetworkHandlerTimeout() {
-        return networkHandlerTimeout;
+    public int getNetworkHandlerSendTimeout() {
+        return networkHandlerSendTimeout;
     }
 
-    public void setNetworkHandlerTimeout(int networkHandlerTimeout) {
-        this.networkHandlerTimeout = networkHandlerTimeout;
+    public void setNetworkHandlerSendTimeout(int networkHandlerSendTimeout) {
+        this.networkHandlerSendTimeout = networkHandlerSendTimeout;
+    }
+
+    public int getNetworkHandlerReplyTimeout() {
+        return networkHandlerReplyTimeout;
+    }
+
+    public void setNetworkHandlerReplyTimeout(int networkHandlerReplyTimeout) {
+        this.networkHandlerReplyTimeout = networkHandlerReplyTimeout;
     }
 
     public NetworkHandlerType getNetworkHandlerType() {

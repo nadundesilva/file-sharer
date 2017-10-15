@@ -36,18 +36,19 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
         File configFile = new File(NodeConstants.CONFIG_FILE);
         String configString = "{" +
-                "\"username\":\"microfuse.tester\"," +
                 "\"bootstrapServerIP\":\"192.168.1.15\"," +
-                "\"bootstrapServerPort\":5555," +
+                "\"bootstrapServerPort\":4765," +
+                "\"username\":\"microfuse.tester\"," +
                 "\"ip\":\"192.168.1.3\"," +
                 "\"peerListeningPort\":4562," +
-                "\"timeToLive\":3," +
                 "\"listenerHandlingThreadCount\":14," +
+                "\"timeToLive\":3," +
                 "\"maxAssignedOrdinaryPeerCount\":13," +
                 "\"maxUnstructuredPeerCount\":24," +
-                "\"heartBeatInterval\":56," +
-                "\"gossipingInterval\":72," +
-                "\"networkHandlerTimeout\":23," +
+                "\"heartbeatInterval\":56000," +
+                "\"gossipingInterval\":72000," +
+                "\"networkHandlerSendTimeout\":23000," +
+                "\"networkHandlerReplyTimeout\":46000," +
                 "\"networkHandlerType\":\"TCP_SOCKET\"," +
                 "\"routingStrategyType\":\"SUPER_PEER_RANDOM_WALK\"" +
                 "}";
@@ -60,18 +61,19 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Configuration configuration = serviceHolder.getConfiguration();
 
         Assert.assertNotNull(configuration);
-        Assert.assertEquals(configuration.getUsername(), "microfuse.tester");
         Assert.assertEquals(configuration.getBootstrapServerIP(), "192.168.1.15");
-        Assert.assertEquals(configuration.getBootstrapServerPort(), 5555);
+        Assert.assertEquals(configuration.getBootstrapServerPort(), 4765);
+        Assert.assertEquals(configuration.getUsername(), "microfuse.tester");
         Assert.assertEquals(configuration.getIp(), "192.168.1.3");
         Assert.assertEquals(configuration.getPeerListeningPort(), 4562);
-        Assert.assertEquals(configuration.getTimeToLive(), 3);
         Assert.assertEquals(configuration.getListenerHandlingThreadCount(), 14);
+        Assert.assertEquals(configuration.getTimeToLive(), 3);
         Assert.assertEquals(configuration.getMaxAssignedOrdinaryPeerCount(), 13);
         Assert.assertEquals(configuration.getMaxUnstructuredPeerCount(), 24);
-        Assert.assertEquals(configuration.getHeartBeatInterval(), 56);
-        Assert.assertEquals(configuration.getGossipingInterval(), 72);
-        Assert.assertEquals(configuration.getNetworkHandlerTimeout(), 23);
+        Assert.assertEquals(configuration.getHeartbeatInterval(), 56000);
+        Assert.assertEquals(configuration.getGossipingInterval(), 72000);
+        Assert.assertEquals(configuration.getNetworkHandlerSendTimeout(), 23000);
+        Assert.assertEquals(configuration.getNetworkHandlerReplyTimeout(), 46000);
         Assert.assertEquals(configuration.getNetworkHandlerType(), NetworkHandlerType.TCP_SOCKET);
         Assert.assertEquals(configuration.getRoutingStrategyType(), RoutingStrategyType.SUPER_PEER_RANDOM_WALK);
     }
@@ -95,9 +97,10 @@ public class ServiceHolderTestCase extends BaseTestCase {
                 NodeConstants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT);
         Assert.assertEquals(configuration.getMaxUnstructuredPeerCount(),
                 NodeConstants.DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT);
-        Assert.assertEquals(configuration.getHeartBeatInterval(), NodeConstants.DEFAULT_HEART_BEAT_INTERVAL);
+        Assert.assertEquals(configuration.getHeartbeatInterval(), NodeConstants.DEFAULT_HEARTBEAT_INTERVAL);
         Assert.assertEquals(configuration.getGossipingInterval(), NodeConstants.DEFAULT_GOSSIPING_INTERVAL);
-        Assert.assertEquals(configuration.getNetworkHandlerTimeout(), NodeConstants.DEFAULT_NETWORK_HANDLER_TIMEOUT);
+        Assert.assertEquals(configuration.getNetworkHandlerSendTimeout(),
+                NodeConstants.DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT);
         Assert.assertEquals(configuration.getNetworkHandlerType(), NodeConstants.DEFAULT_NETWORK_HANDLER);
         Assert.assertEquals(configuration.getRoutingStrategyType(), NodeConstants.DEFAULT_ROUTING_STRATEGY);
     }
