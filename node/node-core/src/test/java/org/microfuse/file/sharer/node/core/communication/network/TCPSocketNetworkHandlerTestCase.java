@@ -90,7 +90,7 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
     public void testCommunication() {
         logger.info("Running TCP Network Handler Test 02 - Communication");
 
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
@@ -101,10 +101,10 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
     public void testRepeatedCommunication() {
         logger.info("Running TCP Network Handler Test 03 - Repeated communication");
 
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2, false);
-        tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3, false);
-        tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message4, false);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2);
+        tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3);
+        tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message4);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
@@ -118,36 +118,10 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testCommunicationWithWaiting() {
-        logger.info("Running TCP Network Handler Test 04 - Communication with waiting");
-
-        Mockito.doAnswer(invocationOnMock -> {
-            Object[] arguments = invocationOnMock.getArguments();
-
-            Assert.assertTrue(arguments[0] instanceof String);
-            String ip = (String) arguments[0];
-            Assert.assertTrue(arguments[1] instanceof Integer);
-            int port = (int) arguments[1];
-
-            tcpSocketNetworkHandler2.sendMessage(ip, port, message2, false);
-            return null;
-        }).when(tcpSocketNetworkHandler2Listener)
-                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
-
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, true);
-        waitFor(delay * 2);
-
-        Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
-                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
-        Mockito.verify(tcpSocketNetworkHandler1Listener, Mockito.times(1))
-                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message2));
-    }
-
-    @Test
     public void testRestart() {
-        logger.info("Running TCP Network Handler Test 05 - Restart");
+        logger.info("Running TCP Network Handler Test 04 - Restart");
 
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
@@ -156,8 +130,8 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
         serviceHolder.getConfiguration().setPeerListeningPort(8756);
         tcpSocketNetworkHandler2.restart();
         waitFor(delay);
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, 8756, message2, false);
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message3, false);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, 8756, message2);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message3);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
@@ -170,10 +144,11 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testShutdown() {
-        logger.info("Running TCP Network Handler Test 06 - Shutdown");
+        logger.info("Running TCP Network Handler Test 05 - Shutdown");
 
         tcpSocketNetworkHandler2.shutdown();
-        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
+        waitFor(delay);
+        tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
         waitFor(delay);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(0))

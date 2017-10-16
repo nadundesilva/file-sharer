@@ -14,7 +14,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 /**
- * A Socket based network handler.
+ * A UDP Socket based network handler.
  * <p>
  * Uses TCP sockets to communicate with other nodes.
  */
@@ -88,12 +88,13 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void shutdown() {
+        logger.debug("Shutting down UDP network handler");
         running = false;
         closeSocket();
     }
 
     @Override
-    public void sendMessage(String ip, int port, Message message, boolean waitForReply) {
+    public void sendMessage(String ip, int port, Message message) {
         DatagramSocket socket = null;
         try {
             socket = new DatagramSocket();
@@ -104,34 +105,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                     messageString.getBytes(Constants.DEFAULT_CHARSET).length,
                     InetAddress.getByName(ip), port);
             socket.send(datagramPacket);
-            logger.debug("Message " + messageString + " sent to node " + ip + ":" + port);
-
-            if (waitForReply) {
-                // Starting a timeout to mark as failed
-                DatagramSocket finalSocket = socket;
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout());
-                    } catch (InterruptedException ignored) {
-                    }
-                    try {
-                        Closeables.close(finalSocket, true);
-                    } catch (IOException ignored) {
-                    }
-                }).start();
-
-                logger.debug("Waiting for reply from node " + ip + ":" + port);
-                byte[] buffer = new byte[65536];
-                DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
-                socket.receive(incomingPacket);
-
-                byte[] data = incomingPacket.getData();
-                String replyMessageString =
-                        new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
-
-                logger.debug("Reply to message " + messageString + " received from node " + ip + ":" + port);
-                runTasksOnMessageReceived(ip, port, Message.parse(replyMessageString));
-            }
+            logger.debug("Message " + message.toString() + " sent to node " + ip + ":" + port);
         } catch (IOException e) {
             logger.error("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
             runTasksOnMessageSendFailed(ip, port, message);

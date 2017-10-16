@@ -98,7 +98,7 @@ public class RouterTestCase extends BaseTestCase {
         router.sendMessage(toNode, serMessage);
 
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(toNode.getIp(), toNode.getPort(), serMessage, false);
+                .sendMessage(toNode.getIp(), toNode.getPort(), serMessage);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class RouterTestCase extends BaseTestCase {
                 + " \"" + ownedResource.getName() + "\"");
 
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message, false);
+                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message);
     }
 
     @Test
@@ -187,7 +187,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(routingStrategy, Mockito.times(1))
                 .getForwardingNodes(spyRoutingTable, fromNode, serMessage);
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(node.getIp(), node.getPort(), serMessage, false);
+                .sendMessage(node.getIp(), node.getPort(), serMessage);
     }
 
     @Test
@@ -214,7 +214,7 @@ public class RouterTestCase extends BaseTestCase {
                 + " " + MessageConstants.SER_OK_NOT_FOUND_PORT);
 
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage, false);
+                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage);
     }
 
     @Test
@@ -322,7 +322,7 @@ public class RouterTestCase extends BaseTestCase {
                 + " " + Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message, false);
+                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message);
     }
 
     @Test
@@ -347,7 +347,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(routingStrategy, Mockito.times(1))
                 .getForwardingNodes(spyRoutingTable, fromNode, serSuperPeerMessage);
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(node.getIp(), node.getPort(), serSuperPeerMessage, false);
+                .sendMessage(node.getIp(), node.getPort(), serSuperPeerMessage);
     }
 
     @Test
@@ -374,7 +374,7 @@ public class RouterTestCase extends BaseTestCase {
                 + " " + MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT);
 
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage, false);
+                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage);
     }
 
     @Test
@@ -479,7 +479,7 @@ public class RouterTestCase extends BaseTestCase {
         waitFor(1200);
 
         Mockito.verify(networkHandler, Mockito.times(2))
-                .sendMessage(node1.getIp(), node1.getPort(), message, false);
+                .sendMessage(node1.getIp(), node1.getPort(), message);
     }
 
     @Test
@@ -502,7 +502,7 @@ public class RouterTestCase extends BaseTestCase {
                 + configuration.getIp() + " " + configuration.getPeerListeningPort());
 
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(node1.getIp(), node1.getPort(), replyMessage, false);
+                .sendMessage(node1.getIp(), node1.getPort(), replyMessage);
     }
 
     @Test
@@ -525,7 +525,6 @@ public class RouterTestCase extends BaseTestCase {
         router.disableHeartBeat();
         waitFor(1200);
 
-        Mockito.verify(networkHandler, Mockito.times(2))
-                .sendMessage(node1.getIp(), node1.getPort(), message, false);
+        Mockito.verify(networkHandler, Mockito.times(2)).sendMessage(node1.getIp(), node1.getPort(), message);
     }
 }

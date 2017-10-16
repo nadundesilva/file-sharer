@@ -6,9 +6,9 @@ import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
+import org.microfuse.file.sharer.node.core.communication.network.BootstrapServerNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerListener;
-import org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
@@ -48,7 +48,7 @@ public class Router implements NetworkHandlerListener {
     private RoutingTable routingTable;
     private RoutingStrategy routingStrategy;
     private NetworkHandler networkHandler;
-    private UDPSocketNetworkHandler bootstrapServerNetworkHandler;
+    private BootstrapServerNetworkHandler bootstrapServerNetworkHandler;
     private Thread heartBeatThread;
     private boolean heartBeatingEnabled;
 
@@ -73,7 +73,7 @@ public class Router implements NetworkHandlerListener {
         this.routingStrategy = routingStrategy;
         this.listenersList = new ArrayList<>();
 
-        this.bootstrapServerNetworkHandler = new UDPSocketNetworkHandler(serviceHolder);
+        this.bootstrapServerNetworkHandler = new BootstrapServerNetworkHandler(serviceHolder);
         this.bootstrapServerNetworkHandler.registerListener(this);
 
         this.networkHandler = networkHandler;
@@ -275,7 +275,7 @@ public class Router implements NetworkHandlerListener {
         networkHandlerLock.readLock().lock();
         try {
             logger.debug("Sending message " + message.toString() + " to node " + ip + ":" + port);
-            networkHandler.sendMessage(ip, port, message, false);
+            networkHandler.sendMessage(ip, port, message);
         } finally {
             networkHandlerLock.readLock().unlock();
         }
@@ -288,7 +288,7 @@ public class Router implements NetworkHandlerListener {
         bootstrapServerNetworkHandlerLock.readLock().lock();
         try {
             logger.debug("Sending message to bootstrap server " + message.toString() + " to node " + ip + ":" + port);
-            bootstrapServerNetworkHandler.sendMessage(ip, port, message, true);
+            bootstrapServerNetworkHandler.sendMessage(ip, port, message);
         } finally {
             bootstrapServerNetworkHandlerLock.readLock().unlock();
         }

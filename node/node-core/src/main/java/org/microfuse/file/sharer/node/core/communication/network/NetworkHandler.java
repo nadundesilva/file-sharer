@@ -83,9 +83,8 @@ public abstract class NetworkHandler {
      * @param ip           The ip address to which the message should be sent
      * @param port         The port to which the message should be sent
      * @param message      The message to be sent
-     * @param waitForReply Send message and wait for a reply from the other end
      */
-    public abstract void sendMessage(String ip, int port, Message message, boolean waitForReply);
+    public abstract void sendMessage(String ip, int port, Message message);
 
     /**
      * Restart the listening.

@@ -18,7 +18,7 @@ import java.net.Socket;
 import java.net.SocketException;
 
 /**
- * A Socket based network handler.
+ * A TCP Socket based network handler.
  * <p>
  * Uses TCP sockets to communicate with other nodes.
  */
@@ -100,65 +100,24 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void shutdown() {
+        logger.debug("Shutting down TCP network handler");
         running = false;
         closeSocket();
     }
 
     @Override
-    public void sendMessage(String ip, int port, Message message, boolean waitForReply) {
-        int localPort = -1;
+    public void sendMessage(String ip, int port, Message message) {
         try (
                 Socket sendSocket = new Socket(ip, port);
                 PrintWriter out = new PrintWriter(new OutputStreamWriter(sendSocket.getOutputStream(),
                         Constants.DEFAULT_CHARSET), true)
+
         ) {
             out.write(message.toString());
-            localPort = sendSocket.getLocalPort();
+            logger.debug("Message " + message.toString() + " sent to node " + ip + ":" + port);
         } catch (IOException e) {
             logger.debug("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
             runTasksOnMessageSendFailed(ip, port, message);
-        }
-
-        if (waitForReply && localPort > 0) {
-            Socket clientSocket = null;
-            BufferedReader in = null;
-            try (
-                    ServerSocket replyServerSocket = new ServerSocket(localPort);
-            ) {
-                clientSocket = replyServerSocket.accept();
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
-                        Constants.DEFAULT_CHARSET));
-
-                // Starting a timeout to mark as failed
-                Socket finalClientSocket = clientSocket;
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout());
-                    } catch (InterruptedException ignored) {
-                    }
-                    try {
-                        Closeables.close(finalClientSocket, true);
-                    } catch (IOException ignored) {
-                    }
-                }).start();
-
-                StringBuilder replyMessage = new StringBuilder();
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    replyMessage.append(inputLine);
-                }
-
-                runTasksOnMessageReceived(ip, port, Message.parse(replyMessage.toString()));
-            } catch (IOException e) {
-                logger.debug("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
-                runTasksOnMessageSendFailed(ip, port, message);
-            } finally {
-                Closeables.closeQuietly(in);
-                try {
-                    Closeables.close(clientSocket, true);
-                } catch (IOException ignored) {
-                }
-            }
         }
     }
 

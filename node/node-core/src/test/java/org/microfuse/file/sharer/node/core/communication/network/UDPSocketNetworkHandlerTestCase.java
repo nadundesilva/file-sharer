@@ -1,17 +1,11 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
-import org.microfuse.file.sharer.bootstrap.BootstrapServer;
 import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.commons.messaging.MessageConstants;
-import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
-import org.microfuse.file.sharer.node.core.communication.routing.Router;
-import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -96,7 +90,7 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
     public void testCommunication() {
         logger.info("Running UDP Network Handler Test 02 - Communication");
 
-        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
+        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
         waitFor(delay);
 
         Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1)).onMessageReceived(
@@ -107,10 +101,10 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
     public void testRepeatedCommunication() {
         logger.info("Running UDP Network Handler Test 03 - Repeated communication");
 
-        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
-        udpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3, false);
-        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2, false);
-        udpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message4, false);
+        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
+        udpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3);
+        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2);
+        udpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message4);
         waitFor(delay);
 
         Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1)).onMessageReceived(
@@ -124,36 +118,10 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
     }
 
     @Test
-    public void testCommunicationWithWaiting() {
-        logger.info("Running UDP Network Handler Test 04 - Communication with waiting");
-
-        Mockito.doAnswer(invocationOnMock -> {
-            Object[] arguments = invocationOnMock.getArguments();
-
-            Assert.assertTrue(arguments[0] instanceof String);
-            String ip = (String) arguments[0];
-            Assert.assertTrue(arguments[1] instanceof Integer);
-            int port = (int) arguments[1];
-
-            udpSocketNetworkHandler2.sendMessage(ip, port, message2, false);
-            return null;
-        }).when(udpSocketNetworkHandler2Listener)
-                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
-
-        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, true);
-        waitFor(delay * 2);
-
-        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1))
-                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
-        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1))
-                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message2));
-    }
-
-    @Test
     public void testRestart() {
-        logger.info("Running UDP Network Handler Test 05 - Restart");
+        logger.info("Running UDP Network Handler Test 04 - Restart");
 
-        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
+        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
         waitFor(delay);
 
         Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1))
@@ -162,8 +130,8 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         serviceHolder.getConfiguration().setPeerListeningPort(8756);
         udpSocketNetworkHandler2.restart();
         waitFor(delay);
-        udpSocketNetworkHandler1.sendMessage(localhostIP, 8756, message2, false);
-        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message3, false);
+        udpSocketNetworkHandler1.sendMessage(localhostIP, 8756, message2);
+        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message3);
         waitFor(delay);
 
         Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1)).onMessageReceived(
@@ -177,10 +145,11 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
     @Test
     public void testShutdown() {
-        logger.info("Running UDP Network Handler Test 06 - Shutdown");
+        logger.info("Running UDP Network Handler Test 05 - Shutdown");
 
         udpSocketNetworkHandler2.shutdown();
-        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1, false);
+        waitFor(delay);
+        udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
         waitFor(delay);
 
         Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(0)).onMessageReceived(
@@ -188,42 +157,5 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         // TODO : uncomment after implementing reliability in UDP
 //        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).runTasksOnMessageSendFailed(
 //                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
-    }
-
-    @Test
-    public void testEcho() {
-        logger.info("Running UDP Network Handler Test 07 - Echo to bootstrap server");
-
-        BootstrapServer bootstrapServer = new BootstrapServer();
-        bootstrapServer.start();
-        waitFor(delay);
-
-        Message echoMessage = new Message();
-        echoMessage.setType(MessageType.ECHO);
-
-        Message echoOkMessage = new Message();
-        echoOkMessage.setType(MessageType.ECHO_OK);
-        echoOkMessage.setData(MessageIndexes.ECHO_OK_VALUE, MessageConstants.ECHO_OK_VALUE_SUCCESS);
-
-        NetworkHandler networkHandler = Mockito.mock(NetworkHandler.class);
-        RoutingStrategy routingStrategy = Mockito.mock(RoutingStrategy.class);
-        Router router = Mockito.spy(new Router(networkHandler, routingStrategy, serviceHolder));
-
-        Object routerInternalState = Whitebox.getInternalState(router, "bootstrapServerNetworkHandler");
-        Assert.assertTrue(routerInternalState instanceof UDPSocketNetworkHandler);
-        UDPSocketNetworkHandler bootstrapServerNetworkHandler = (UDPSocketNetworkHandler) routerInternalState;
-        bootstrapServerNetworkHandler.clearListeners();
-        bootstrapServerNetworkHandler.registerListener(router);
-
-        router.sendMessageToBootstrapServer(echoMessage);
-        waitFor(delay);
-
-        Mockito.verify(router, Mockito.times(1)).onMessageReceived(
-                serviceHolder.getConfiguration().getBootstrapServerIP(),
-                serviceHolder.getConfiguration().getBootstrapServerPort(),
-                echoOkMessage
-        );
-
-        bootstrapServer.shutdown();
     }
 }
