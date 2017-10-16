@@ -29,14 +29,14 @@ public class OwnedResourceTestCase extends BaseTestCase {
         ownedResourceCopy.setFile(new File("movies" + File.separator + "lord_of_the_rings.mp4"));
     }
 
-    @Test
+    @Test(priority = 1)
     public void testEquals() {
         logger.info("Running Owned Resource Test 01 - Equals");
 
         Assert.assertTrue(ownedResource.equals(ownedResourceCopy));
     }
 
-    @Test
+    @Test(priority = 1)
     public void testHashCode() {
         logger.info("Running Owned Resource Test 02 - Hash code");
 

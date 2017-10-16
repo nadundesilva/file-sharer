@@ -48,7 +48,7 @@ public class QueryManagerTestCase extends BaseTestCase {
         router.shutdown();
     }
 
-    @Test
+    @Test(priority = 1)
     public void testConstructor() {
         logger.info("Running Query Manager Test 01 - Constructor");
 
@@ -63,7 +63,7 @@ public class QueryManagerTestCase extends BaseTestCase {
         Assert.assertTrue(listenersList.get(0) == queryManager);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testQuery() {
         logger.info("Running Query Manager Test 02 - Query");
 

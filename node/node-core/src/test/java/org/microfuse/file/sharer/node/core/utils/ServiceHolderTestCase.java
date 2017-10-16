@@ -30,7 +30,7 @@ import java.util.List;
 public class ServiceHolderTestCase extends BaseTestCase {
     private static final Logger logger = LoggerFactory.getLogger(ServiceHolderTestCase.class);
 
-    @Test
+    @Test(priority = 1)
     public void testGetConfigurationFromFileAtFirstTime() {
         logger.info("Running Service Holder Test 01 - Get configuration from file at first time");
 
@@ -49,6 +49,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
                 "\"gossipingInterval\":72000," +
                 "\"networkHandlerSendTimeout\":23000," +
                 "\"networkHandlerReplyTimeout\":46000," +
+                "\"serSuperPeerTimeout\":74562," +
                 "\"networkHandlerType\":\"TCP_SOCKET\"," +
                 "\"routingStrategyType\":\"SUPER_PEER_RANDOM_WALK\"" +
                 "}";
@@ -74,11 +75,12 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertEquals(configuration.getGossipingInterval(), 72000);
         Assert.assertEquals(configuration.getNetworkHandlerSendTimeout(), 23000);
         Assert.assertEquals(configuration.getNetworkHandlerReplyTimeout(), 46000);
+        Assert.assertEquals(configuration.getSerSuperPeerTimeout(), 74562);
         Assert.assertEquals(configuration.getNetworkHandlerType(), NetworkHandlerType.TCP_SOCKET);
         Assert.assertEquals(configuration.getRoutingStrategyType(), RoutingStrategyType.SUPER_PEER_RANDOM_WALK);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testGetDefaultConfigurationAtFirstTime() {
         logger.info("Running Service Holder Test 02 - Get default configuration at first time");
 
@@ -101,11 +103,12 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertEquals(configuration.getGossipingInterval(), NodeConstants.DEFAULT_GOSSIPING_INTERVAL);
         Assert.assertEquals(configuration.getNetworkHandlerSendTimeout(),
                 NodeConstants.DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT);
+        Assert.assertEquals(configuration.getSerSuperPeerTimeout(), NodeConstants.DEFAULT_SER_SUPER_PEER_TIMEOUT);
         Assert.assertEquals(configuration.getNetworkHandlerType(), NodeConstants.DEFAULT_NETWORK_HANDLER);
         Assert.assertEquals(configuration.getRoutingStrategyType(), NodeConstants.DEFAULT_ROUTING_STRATEGY);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetConfigurationAtSecondTime() {
         logger.info("Running Service Holder Test 03 - Get configuration at second time");
 
@@ -117,7 +120,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertTrue(initialConfiguration == finalConfiguration);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testGetResourceIndexAtFirstTime() {
         logger.info("Running Service Holder Test 04 - Get resource index at first time");
 
@@ -126,7 +129,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertNotNull(resourceIndex);
     }
 
-    @Test
+    @Test(priority = 4)
     public void testGetResourceIndexAtSecondTime() {
         logger.info("Running Service Holder Test 05 - Get resource index at second time");
 
@@ -138,7 +141,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertTrue(initialResourceIndex == finalResourceIndex);
     }
 
-    @Test
+    @Test(priority = 5)
     public void testGetOverlayNetworkManagerAtFirstTime() {
         logger.info("Running Service Holder Test 06 - Get overlay network manager at first time");
 
@@ -155,7 +158,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertTrue(routerListeners.get(0) == overlayNetworkManager);
     }
 
-    @Test
+    @Test(priority = 6)
     public void testGetOverlayNetworkManagerAtSecondTime() {
         logger.info("Running Service Holder Test 07 - Get overlay network manager at second time");
 
@@ -167,7 +170,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertTrue(initialOverlayNetworkManager == finalOverlayNetworkManager);
     }
 
-    @Test
+    @Test(priority = 7)
     public void testGetQueryManagerAtFirstTime() {
         logger.info("Running Service Holder Test 08 - Get query manager at first time");
 
@@ -184,7 +187,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertTrue(routerListeners.get(0) == queryManager);
     }
 
-    @Test
+    @Test(priority = 8)
     public void testGetQueryManagerAtSecondTime() {
         logger.info("Running Service Holder Test 09 - Get query manager at second time");
 
@@ -196,7 +199,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertTrue(initialQueryManager == finalQueryManager);
     }
 
-    @Test
+    @Test(priority = 9)
     public void testChangeNetworkHandler() {
         logger.info("Running Service Holder Test 10 - Change network handler");
 
@@ -230,7 +233,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         waitFor(1000);
     }
 
-    @Test
+    @Test(priority = 9)
     public void testChangeRoutingStrategy() {
         logger.info("Running Service Holder Test 11 - Change routing strategy");
 

@@ -63,16 +63,17 @@ public class MessageIndexes {
     public static final int SER_SUPER_PEER_OK_IP = 0;
     public static final int SER_SUPER_PEER_OK_PORT = 1;
 
-    // JOIN_SUPER_PEER message
-    public static final int JOIN_SUPER_PEER_SOURCE_IP = 0;
-    public static final int JOIN_SUPER_PEER_SOURCE_PORT = 1;
+    // JOIN_SUPER_PEER
+    public static final int JOIN_SUPER_PEER_SOURCE_TYPE = 0;
+    public static final int JOIN_SUPER_PEER_SOURCE_IP = 1;
+    public static final int JOIN_SUPER_PEER_SOURCE_PORT = 2;
 
     // JOIN_SUPER_PEER_OK message
     public static final int JOIN_SUPER_PEER_OK_VALUE = 0;
     public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_IP = 1;
     public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_PORT = 2;
-    public static final int JOIN_SUPER_PEER_OK_VALUE_SUCCESS_NEW_IP = 1;
-    public static final int JOIN_SUPER_PEER_OK_VALUE_SUCCESS_NEW_PORT = 2;
+    public static final int JOIN_SUPER_PEER_OK_VALUE_SUCCESS_IP = 1;
+    public static final int JOIN_SUPER_PEER_OK_VALUE_SUCCESS_PORT = 2;
 
     // HEARTBEAT message
     public static final int HEARTBEAT_SOURCE_IP = 0;

@@ -82,7 +82,11 @@ public abstract class RoutingTable {
      */
     public void addAllUnstructuredNetworkRoutingTableEntry(Collection<Node> nodes) {
         unstructuredNetworkNodesLock.writeLock().lock();
-        nodes.forEach(this::addUnstructuredNetworkRoutingTableEntry);
+        try {
+            nodes.forEach(this::addUnstructuredNetworkRoutingTableEntry);
+        } finally {
+            unstructuredNetworkNodesLock.writeLock().unlock();
+        }
     }
 
     /**

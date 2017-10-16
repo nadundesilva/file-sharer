@@ -43,7 +43,7 @@ public class OverlayNetworkManagerTestCase extends BaseTestCase {
         router.shutdown();
     }
 
-    @Test
+    @Test(priority = 1)
     public void testConstructor() {
         logger.info("Running Overlay Network Manager Test 01 - Constructor");
 

@@ -162,12 +162,6 @@ public class Router implements NetworkHandlerListener {
         } finally {
             networkHandlerLock.readLock().unlock();
         }
-        bootstrapServerNetworkHandlerLock.readLock().lock();
-        try {
-            bootstrapServerNetworkHandler.restart();
-        } finally {
-            bootstrapServerNetworkHandlerLock.readLock().unlock();
-        }
     }
 
     /**
@@ -179,12 +173,6 @@ public class Router implements NetworkHandlerListener {
             networkHandler.shutdown();
         } finally {
             networkHandlerLock.writeLock().unlock();
-        }
-        bootstrapServerNetworkHandlerLock.readLock().lock();
-        try {
-            bootstrapServerNetworkHandler.shutdown();
-        } finally {
-            bootstrapServerNetworkHandlerLock.readLock().unlock();
         }
     }
 

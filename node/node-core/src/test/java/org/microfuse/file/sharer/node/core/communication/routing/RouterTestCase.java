@@ -77,7 +77,7 @@ public class RouterTestCase extends BaseTestCase {
         router.shutdown();
     }
 
-    @Test
+    @Test(priority = 1)
     public void testRestart() {
         logger.info("Running Router Test 01 - Restart");
 
@@ -87,7 +87,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(spyRoutingTable, Mockito.times(1)).clear();
     }
 
-    @Test
+    @Test(priority = 1)
     public void testSendMessage() {
         logger.info("Running Router Test 02 - Send message");
 
@@ -101,7 +101,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(toNode.getIp(), toNode.getPort(), serMessage);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testRoute() {
         logger.info("Running Router Test 03 - Route");
 
@@ -111,7 +111,7 @@ public class RouterTestCase extends BaseTestCase {
                 .getForwardingNodes(spyRoutingTable, null, serMessage);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testOnMessageReceivedWithNonSerTypeMessage() {
         logger.info("Running Router Test 04 - On message received with non " + MessageType.SER.getValue()
                 + " type message");
@@ -132,7 +132,7 @@ public class RouterTestCase extends BaseTestCase {
                 .runTasksOnMessageReceived(usedNode, usedMessage);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testOnSerMessageReceived() {
         logger.info("Running Router Test 05 - On " + MessageType.SER.getValue() + " message received");
 
@@ -148,7 +148,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testOnSerMessageReceivedWithResourceInOwnedResources() {
         logger.info("Running Router Test 06 - On " + MessageType.SER.getValue()
                 + " message received with resource in owned resources");
@@ -166,7 +166,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testOnSerMessageReceivedWithResourceNotInOwnedResourcesWithHopCountLessThanTimeToLive() {
         logger.info("Running Router Test 07 - On " + MessageType.SER.getValue()
                 + " message received with resource not in owned resources with hop count less than time to live");
@@ -190,7 +190,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(node.getIp(), node.getPort(), serMessage);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testOnSerMessageReceivedWithResourceNotInOwnedResourcesWithHopCountHigherThanTimeToLive() {
         logger.info("Running Router Test 08 - On " + MessageType.SER.getValue()
                 + " message received with resource not in owned resources with hop count higher than time to live");
@@ -217,7 +217,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testOnMessageSendFailedInUnstructuredNetworkOnly() {
         logger.info("Running Router Test 09 - On message send failed in unstructured network only");
 
@@ -235,7 +235,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testOnMessageSendFailedInSuperPeerNetworkOnly() {
         logger.info("Running Router Test 10 - On message send failed in super peer network only");
 
@@ -261,7 +261,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testOnMessageSendFailedInAssignedOrdinaryPeersNetworkOnly() {
         logger.info("Running Router Test 11 - On message send failed in assigned ordinary peers network only");
 
@@ -290,7 +290,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testOnSerSuperPeerMessageReceived() {
         logger.info("Running Router Test 12 - On " + MessageType.SER_SUPER_PEER.getValue() + " message received");
 
@@ -308,7 +308,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testOnSerSuperPeerMessageReceivedToSuperPeer() {
         logger.info("Running Router Test 13 - On " + MessageType.SER_SUPER_PEER.getValue()
                 + " message received to super peer");
@@ -325,7 +325,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testOnSerSuperPeerMessageReceivedWithHopCountLessThanTimeToLive() {
         logger.info("Running Router Test 14 - On " + MessageType.SER_SUPER_PEER.getValue()
                 + " message received with hop count less than time to live");
@@ -350,7 +350,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(node.getIp(), node.getPort(), serSuperPeerMessage);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testOnSerSuperPeerMessageReceivedWithHopCountHigherThanTimeToLive() {
         logger.info("Running Router Test 15 - On " + MessageType.SER_SUPER_PEER.getValue()
                 + " message received with hop count higher than time to live");
@@ -377,7 +377,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testPromoteToSuperPeerInOrdinaryPeer() {
         logger.info("Running Router Test 16 - Promote to super peer in ordinary peer");
 
@@ -394,7 +394,7 @@ public class RouterTestCase extends BaseTestCase {
                 node);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testDemoteToSuperPeerInSuperPeer() {
         logger.info("Running Router Test 17 - Demote to super peer in super peer");
 
@@ -412,7 +412,7 @@ public class RouterTestCase extends BaseTestCase {
                 node);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testPromoteToSuperPeerInSuperPeer() {
         logger.info("Running Router Test 18 - Promote to super peer in super peer");
 
@@ -430,7 +430,7 @@ public class RouterTestCase extends BaseTestCase {
                 node);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testDemoteToSuperPeerInOrdinaryPeer() {
         logger.info("Running Router Test 19 - Promote to super peer in ordinary peer");
 
@@ -447,7 +447,7 @@ public class RouterTestCase extends BaseTestCase {
                 node);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testRunTasksOnMessageReceived() {
         logger.info("Running Router Test 20 - Run tasks on message received");
 
@@ -460,7 +460,7 @@ public class RouterTestCase extends BaseTestCase {
         Mockito.verify(listener, Mockito.times(1)).onMessageReceived(fromNode, message);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testHeartbeat() {
         logger.info("Running Router Test 21 - Heartbeat");
 
@@ -482,7 +482,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(node1.getIp(), node1.getPort(), message);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testOnHeartbeatOkMessageReceived() {
         logger.info("Running Router Test 22 - On " + MessageType.HEARTBEAT_OK.getValue() + " message received");
 
@@ -505,7 +505,7 @@ public class RouterTestCase extends BaseTestCase {
                 .sendMessage(node1.getIp(), node1.getPort(), replyMessage);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testHeartbeatDisable() {
         logger.info("Running Router Test 23 - Heartbeat disable");
 

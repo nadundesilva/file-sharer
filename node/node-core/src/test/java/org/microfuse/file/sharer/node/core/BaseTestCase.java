@@ -54,6 +54,8 @@ public class BaseTestCase {
      */
     private void clean() {
         new File(NodeConstants.CONFIG_FILE).delete();
+
+        System.gc();
     }
 
     /**

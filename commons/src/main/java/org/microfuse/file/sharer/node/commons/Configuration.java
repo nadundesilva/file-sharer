@@ -22,6 +22,7 @@ public class Configuration {
     private int gossipingInterval;
     private int networkHandlerSendTimeout;
     private int networkHandlerReplyTimeout;
+    private int serSuperPeerTimeout;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
 
@@ -39,6 +40,7 @@ public class Configuration {
         gossipingInterval = NodeConstants.DEFAULT_GOSSIPING_INTERVAL;
         networkHandlerSendTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT;
         networkHandlerReplyTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT;
+        serSuperPeerTimeout = NodeConstants.DEFAULT_SER_SUPER_PEER_TIMEOUT;
         networkHandlerType = NodeConstants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = NodeConstants.DEFAULT_ROUTING_STRATEGY;
     }
@@ -153,6 +155,14 @@ public class Configuration {
 
     public void setNetworkHandlerReplyTimeout(int networkHandlerReplyTimeout) {
         this.networkHandlerReplyTimeout = networkHandlerReplyTimeout;
+    }
+
+    public int getSerSuperPeerTimeout() {
+        return serSuperPeerTimeout;
+    }
+
+    public void setSerSuperPeerTimeout(int serSuperPeerTimeout) {
+        this.serSuperPeerTimeout = serSuperPeerTimeout;
     }
 
     public NetworkHandlerType getNetworkHandlerType() {

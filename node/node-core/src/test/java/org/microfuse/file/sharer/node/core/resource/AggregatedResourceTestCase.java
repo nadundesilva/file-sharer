@@ -38,21 +38,21 @@ public class AggregatedResourceTestCase extends BaseTestCase {
         aggregatedResource2.addNode(node3);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testEquals() {
         logger.info("Running Aggregated Resource Test 01 - Equals");
 
         Assert.assertTrue(aggregatedResource1.equals(aggregatedResource2));
     }
 
-    @Test
+    @Test(priority = 1)
     public void testHashCode() {
         logger.info("Running Aggregated Resource Test 02 - Hash code");
 
         Assert.assertEquals(aggregatedResource1.hashCode(), "Lord of the Rings".hashCode());
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetAllNodesCopying() {
         logger.info("Running Aggregated Resource Test 03 - Get all nodes copying");
 

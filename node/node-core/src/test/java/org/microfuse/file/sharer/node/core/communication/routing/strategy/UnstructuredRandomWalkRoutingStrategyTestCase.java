@@ -54,14 +54,14 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
                 .thenReturn(unstructuredNetworkNodes);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testName() {
         logger.info("Running Unstructured Random Walk Routing Strategy Test 01 - Get name");
 
         Assert.assertNotNull(unstructuredRandomWalkRoutingStrategy.getName());
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetForwardingNodes() {
         logger.info("Running Unstructured Random Walk Routing Strategy Test 02 - Get forwarding nodes");
 
@@ -73,7 +73,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
                 forwardingNodes.contains(node3));
     }
 
-    @Test
+    @Test(priority = 3)
     public void testGetForwardingNodesInStartingNode() {
         logger.info("Running Unstructured Random Walk Routing Strategy Test 03 - Get forwarding nodes " +
                 "in the starting node");
@@ -86,7 +86,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
                 forwardingNodes.contains(node2) || forwardingNodes.contains(node3));
     }
 
-    @Test
+    @Test(priority = 4)
     public void testGetForwardingNodesWithDeadNodes() {
         logger.info("Running Unstructured Random Walk Routing Strategy Test 04 - Get forwarding nodes " +
                 "with dead nodes");

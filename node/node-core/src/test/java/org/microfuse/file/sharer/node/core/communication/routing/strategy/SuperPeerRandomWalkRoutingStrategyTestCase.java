@@ -91,14 +91,14 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
                 .thenReturn(superPeerNetworkNodes);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testName() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 01 - Get name");
 
         Assert.assertNotNull(superPeerRandomWalkRoutingStrategy.getName());
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetForwardingNodesInOrdinaryPeerWithAssignedSuperPeer() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 02 - Get forwarding nodes in ordinary peer " +
                 "with assigned super peer");
@@ -113,7 +113,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(forwardingNodes.contains(node1));
     }
 
-    @Test
+    @Test(priority = 3)
     public void testGetForwardingNodesInOrdinaryPeerWithAssignedSuperPeerInStartingNode() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 03 - Get forwarding nodes in ordinary peer " +
                 "with assigned super peer in the starting node");
@@ -128,7 +128,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(forwardingNodes.contains(node1));
     }
 
-    @Test
+    @Test(priority = 4)
     public void testGetForwardingNodesInOrdinaryPeerWithDeadAssignedSuperPeer() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 04 - Get forwarding nodes in ordinary peer " +
                 "with dead assigned super peer");
@@ -145,7 +145,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
                 forwardingNodes.contains(node5));
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetForwardingNodesInOrdinaryPeerWithUnassignedSuperPeer() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 05 - Get forwarding nodes in ordinary peer " +
                 "with unassigned super peer");
@@ -161,7 +161,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         );
     }
 
-    @Test
+    @Test(priority = 3)
     public void testGetForwardingNodesInOrdinaryPeerWithUnassignedSuperPeerInStartingNode() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 06 - Get forwarding nodes in ordinary peer " +
                 "with unassigned super peer in the starting node");
@@ -178,7 +178,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         );
     }
 
-    @Test
+    @Test(priority = 4)
     public void testGetForwardingNodesInOrdinaryPeerWithUnassignedSuperPeerWithDeadNodes() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 07 - Get forwarding nodes in ordinary peer " +
                 "with unassigned super peer with dead nodes");
@@ -195,7 +195,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         );
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetForwardingNodesInSuperPeerWithResourceInAssignedOrdinaryPeer() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 08 - Get forwarding nodes in super peer " +
                 "with resource in assigned ordinary peer");
@@ -220,7 +220,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(forwardingNodes.contains(node1) || forwardingNodes.contains(node2));
     }
 
-    @Test
+    @Test(priority = 3)
     public void testGetForwardingNodesInSuperPeerWithResourceInAssignedOrdinaryPeerInStartingNode() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 09 - Get forwarding nodes in super peer " +
                 "with resource in assigned ordinary peer in the starting node");
@@ -245,7 +245,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(forwardingNodes.contains(node1) || forwardingNodes.contains(node2));
     }
 
-    @Test
+    @Test(priority = 4)
     public void testGetForwardingNodesInSuperPeerWithResourceInAssignedOrdinaryPeerWithDeadNodes() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 10 - Get forwarding nodes in super peer " +
                 "with resource in assigned ordinary peer with dead nodes");
@@ -271,7 +271,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(forwardingNodes.contains(node2));
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetForwardingNodesInSuperPeerWithResourceNotInAssignedOrdinaryPeer() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 11 - Get forwarding nodes in super peer " +
                 "with resource not in assigned ordinary peer");
@@ -290,7 +290,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(forwardingNodes.contains(node4) || forwardingNodes.contains(node5));
     }
 
-    @Test
+    @Test(priority = 3)
     public void testGetForwardingNodesInSuperPeerWithResourceNotInAssignedOrdinaryPeerInStartingNode() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 12 - Get forwarding nodes in super peer " +
                 "with resource not in assigned ordinary peer in the starting node");
@@ -310,7 +310,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
                 forwardingNodes.contains(node5));
     }
 
-    @Test
+    @Test(priority = 4)
     public void testGetForwardingNodesInSuperPeerWithResourceNotInAssignedOrdinaryPeerWithDeadNodes() {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 13 - Get forwarding nodes in super peer " +
                 "with resource not in assigned ordinary peer with dead nodes");

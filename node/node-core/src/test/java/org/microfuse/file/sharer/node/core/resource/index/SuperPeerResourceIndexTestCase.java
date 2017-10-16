@@ -60,7 +60,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         superPeerResourceIndex.addResourceToAggregatedIndex(resourceName4, node6);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testAddResource() {
         logger.info("Running Super Peer Resource Index Test 01 - Add resource");
 
@@ -75,7 +75,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndexOwnedResources.contains(new AggregatedResource(newAggreResourceResourceName)));
     }
 
-    @Test
+    @Test(priority = 2)
     public void testFindAggregatedResources() {
         logger.info("Running Super Peer Resource Index Test 02 - Find aggregated resources");
 
@@ -89,7 +89,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         Assert.assertTrue(ironManResources.contains(new AggregatedResource(resourceName4)));
     }
 
-    @Test
+    @Test(priority = 3)
     public void testFindAggregatedResourcesWithNoMatches() {
         logger.info("Running Super Peer Resource Index Test 03 - Find aggregated resources with no matches");
 
@@ -99,7 +99,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         Assert.assertEquals(spiderManResources.size(), 0);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testFindAggregatedResourcesWithDuplicates() {
         logger.info("Running Super Peer Resource Index Test 04 - Find aggregated resources with duplicates");
 
@@ -118,7 +118,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         Assert.assertTrue(carsResource.getAllNodes().contains(newNode));
     }
 
-    @Test
+    @Test(priority = 1)
     public void testRemoveAggregatedResources() {
         logger.info("Running Super Peer Resource Index Test 05 - Remove aggregated resources");
 

@@ -55,7 +55,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(assignedSuperPeer);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testGetUnstructuredNetworkRoutingTableNode() {
         logger.info("Running Ordinary Peer Routing Table Test 01 - Get unstructured network routing table node");
 
@@ -68,7 +68,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertEquals(unstructuredNetworkRoutingTableNode.isAlive(), true);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetUnstructuredNetworkRoutingTableNonExistentNode() {
         logger.info("Running Ordinary Peer Routing Table Test 02 - Get unstructured network routing table " +
                 "non existent node");
@@ -79,7 +79,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertNull(unstructuredNetworkRoutingTableNode);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetAllAssignedOrdinaryNetworkRoutingTableNodesCopying() {
         logger.info("Running Ordinary Peer Routing Table Test 03 - Get all assigned ordinary network routing table " +
                 "nodes copying");
@@ -89,7 +89,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertFalse(nodes == internalState);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testRemoveFromAllUnstructuredNetworkNode() {
         logger.info("Running Ordinary Peer Routing Table Test 04 - Remove from all unstructured network node");
 
@@ -103,7 +103,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertFalse(unstructuredNetwork.contains(node1));
     }
 
-    @Test
+    @Test(priority = 1)
     public void testRemoveFromAllAssignedSuperPeerNode() {
         logger.info("Running Ordinary Peer Routing Table Test 05 - Remove from all assigned super peer node");
 
@@ -121,7 +121,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertNull(internalStateAssignedSuperPeer);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testGetAll() {
         logger.info("Running Ordinary Peer Routing Table Test 06 - Get all");
 
@@ -133,8 +133,8 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertTrue(nodes.contains(node3));
     }
 
-    @Test
-    public void getGetUnstructuredNetworkNode() {
+    @Test(priority = 1)
+    public void testGetUnstructuredNetworkNode() {
         logger.info("Running Ordinary Peer Routing Table Test 07 - Get unstructured network node");
 
         Node node = new Node();
@@ -149,8 +149,8 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertTrue(foundNode == node);
     }
 
-    @Test
-    public void getGetAssignedSuperPeerNode() {
+    @Test(priority = 2)
+    public void testGetAssignedSuperPeerNode() {
         logger.info("Running Ordinary Peer Routing Table Test 08 - Get assigned super peer node");
 
         Node node = new Node();
@@ -165,8 +165,8 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertTrue(foundNode == node);
     }
 
-    @Test
-    public void getNonExistentNode() {
+    @Test(priority = 3)
+    public void testGetNonExistentNode() {
         logger.info("Running Ordinary Peer Routing Table Test 09 - Get non existent node");
 
         Node node = ordinaryPeerRoutingTable.get("192.168.1.243", 7846);
@@ -174,7 +174,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertNull(node);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testClear() {
         logger.info("Running Ordinary Peer Routing Table Test 10 - Clear");
 

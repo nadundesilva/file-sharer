@@ -18,6 +18,12 @@ public class FileSharer {
         serviceHolder = new ServiceHolder();
     }
 
+    public FileSharer(String ip, int peerListeningPort) {
+        this();
+        serviceHolder.getConfiguration().setIp(ip);
+        serviceHolder.getConfiguration().setPeerListeningPort(peerListeningPort);
+    }
+
     /**
      * Start the current node.
      */
@@ -33,12 +39,19 @@ public class FileSharer {
     }
 
     /**
+     * Leave the bootstrap server and the network.
+     */
+    public void leaveNetwork() {
+        serviceHolder.getOverlayNetworkManager().unregister();
+        serviceHolder.getOverlayNetworkManager().leave();
+    }
+
+    /**
      * Shutdown the file sharer.
      */
     public void shutdown() {
         serviceHolder.getOverlayNetworkManager().disableGossiping();
         serviceHolder.getOverlayNetworkManager().disableHeartBeat();
-        serviceHolder.getOverlayNetworkManager().unregister();
         serviceHolder.clear();
     }
 

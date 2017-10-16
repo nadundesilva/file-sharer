@@ -42,7 +42,7 @@ public class NetworkHandlerTestCase extends BaseTestCase {
         Whitebox.setInternalState(networkHandler, "running", false);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testStartListening() {
         logger.info("Running Network Handler Test 01 - Start listening");
 
@@ -54,7 +54,7 @@ public class NetworkHandlerTestCase extends BaseTestCase {
         Assert.assertTrue((Boolean) internalState);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testRestart() {
         logger.info("Running Network Handler Test 02 - Restart");
 

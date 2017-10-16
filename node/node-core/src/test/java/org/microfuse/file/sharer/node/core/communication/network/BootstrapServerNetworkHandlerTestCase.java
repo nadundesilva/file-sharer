@@ -58,16 +58,16 @@ public class BootstrapServerNetworkHandlerTestCase extends BaseTestCase {
         waitFor(delay);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testName() {
         logger.info("Running UDP Network Handler Test 01 - Get name");
 
         Assert.assertNotNull(bootstrapServerNetworkHandler.getName());
     }
 
-    @Test
+    @Test(priority = 2)
     public void testEcho() {
-        logger.info("Running UDP Network Handler Test 07 - Echo to bootstrap server");
+        logger.info("Running UDP Network Handler Test 02 - Echo to bootstrap server");
 
         Message echoMessage = new Message();
         echoMessage.setType(MessageType.ECHO);

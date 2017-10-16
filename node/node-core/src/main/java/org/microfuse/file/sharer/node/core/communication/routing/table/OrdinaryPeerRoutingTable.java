@@ -66,7 +66,7 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
     @Override
     public Node get(String ip, int port) {
         Node requestedNode = super.get(ip, port);
-        if (requestedNode == null && Objects.equals(assignedSuperPeer.getIp(), ip) &&
+        if (requestedNode == null && assignedSuperPeer != null && Objects.equals(assignedSuperPeer.getIp(), ip) &&
                 assignedSuperPeer.getPort() == port) {
             requestedNode = assignedSuperPeer;
         }

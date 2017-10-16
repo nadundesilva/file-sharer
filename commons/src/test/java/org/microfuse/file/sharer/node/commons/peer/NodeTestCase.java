@@ -30,24 +30,24 @@ public class NodeTestCase {
         nodeCopy.setAlive(false);
     }
 
-    @Test
-    public void testIsAlive() {
-        logger.info("Running Node Test 01 - Is alive");
-
-        Assert.assertTrue(node.isAlive());
-    }
-
-    @Test
+    @Test(priority = 1)
     public void testEquals() {
-        logger.info("Running Node Test 02 - Equals");
+        logger.info("Running Node Test 01 - Equals");
 
         Assert.assertTrue(node.equals(nodeCopy));
     }
 
-    @Test
+    @Test(priority = 1)
     public void testHashCode() {
-        logger.info("Running Node Test 03 - Hash code");
+        logger.info("Running Node Test 02 - Hash code");
 
         Assert.assertEquals(node.hashCode(), (node.getIp() + ":" + node.getPort()).hashCode());
+    }
+
+    @Test(priority = 2)
+    public void testIsAlive() {
+        logger.info("Running Node Test 03 - Is alive");
+
+        Assert.assertTrue(node.isAlive());
     }
 }

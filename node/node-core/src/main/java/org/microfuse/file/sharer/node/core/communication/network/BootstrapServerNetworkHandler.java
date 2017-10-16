@@ -7,10 +7,13 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A UDP Socket based network handler used for communicating with the bootstrap server
@@ -20,8 +23,11 @@ import java.net.InetAddress;
 public class BootstrapServerNetworkHandler extends NetworkHandler {
     private static final Logger logger = LoggerFactory.getLogger(BootstrapServerNetworkHandler.class);
 
+    private Timer networkHandlerSendTimeoutTimer;
+
     public BootstrapServerNetworkHandler(ServiceHolder serviceHolder) {
         super(serviceHolder);
+        networkHandlerSendTimeoutTimer = new Timer(true);
     }
 
     @Override
@@ -44,17 +50,10 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
             logger.debug("Message " + message.toString() + " sent to node " + ip + ":" + port);
 
             // Starting a timeout to mark as failed
-            DatagramSocket finalSocket = socket;
-            new Thread(() -> {
-                try {
-                    Thread.sleep(serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout());
-                } catch (InterruptedException ignored) {
-                }
-                try {
-                    Closeables.close(finalSocket, true);
-                } catch (IOException ignored) {
-                }
-            }).start();
+            networkHandlerSendTimeoutTimer.schedule(
+                    new DelayedCloseTimerTask(socket),
+                    serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout()
+            );
 
             logger.debug("Waiting for reply from node " + ip + ":" + port);
             byte[] buffer = new byte[65536];
@@ -85,11 +84,35 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
 
     @Override
     public void restart() {
+        super.restart();
         logger.debug("Ignoring request to restart listening since no ports will be used by this network handler");
     }
 
     @Override
     public void shutdown() {
-        logger.debug("Ignoring request to shutdown since no ports will be used by this network handler");
+        logger.debug("Cancelling waits for replies");
+        networkHandlerSendTimeoutTimer.cancel();
+        networkHandlerSendTimeoutTimer.purge();
+    }
+
+    /**
+     * Closeable timeout timer task.
+     *
+     * Closes the closeable when the timer event is called.
+     */
+    private static class DelayedCloseTimerTask extends TimerTask {
+        private Closeable closeable;
+
+        private DelayedCloseTimerTask(Closeable closeable) {
+            this.closeable = closeable;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Closeables.close(closeable, true);
+            } catch (IOException ignored) {
+            }
+        }
     }
 }

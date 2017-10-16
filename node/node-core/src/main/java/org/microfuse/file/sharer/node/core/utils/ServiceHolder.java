@@ -94,22 +94,10 @@ public class ServiceHolder {
         if (router != null) {
             router.shutdown();
         }
-
-        File configFile = new File(NodeConstants.CONFIG_FILE);
-        try {
-            if (!configFile.createNewFile()) {
-                try {
-                    Files.write(new Gson().toJson(configuration).getBytes(
-                            Constants.DEFAULT_CHARSET), configFile);
-                } catch (IOException e1) {
-                    logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
-                }
-            } else {
-                logger.warn("Failed to create file " + configFile.getAbsolutePath());
-            }
-        } catch (IOException e1) {
-            logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
+        if (overlayNetworkManager != null) {
+            overlayNetworkManager.cancelSearchForSuperPeer();
         }
+        saveConfiguration();
 
         peerType = null;
         configuration = null;
@@ -143,20 +131,7 @@ public class ServiceHolder {
             if (!configFileExists) {
                 // Creating a new configuration file based on default values
                 configuration = new Configuration();
-                try {
-                    if (!configFile.createNewFile()) {
-                        try {
-                            Files.write(new Gson().toJson(configuration).getBytes(
-                                    Constants.DEFAULT_CHARSET), configFile);
-                        } catch (IOException e1) {
-                            logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
-                        }
-                    } else {
-                        logger.warn("Failed to create file " + configFile.getAbsolutePath());
-                    }
-                } catch (IOException e1) {
-                    logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
-                }
+                saveConfiguration();
             }
         }
         return configuration;
@@ -268,5 +243,23 @@ public class ServiceHolder {
             routingStrategy = new UnstructuredFloodingRoutingStrategy(this);
         }
         return routingStrategy;
+    }
+
+    private synchronized void saveConfiguration() {
+        File configFile = new File(NodeConstants.CONFIG_FILE);
+        try {
+            if (!configFile.createNewFile()) {
+                try {
+                    Files.write(new Gson().toJson(configuration).getBytes(
+                            Constants.DEFAULT_CHARSET), configFile);
+                } catch (IOException e1) {
+                    logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
+                }
+            } else {
+                logger.warn("Failed to create file " + configFile.getAbsolutePath());
+            }
+        } catch (IOException e1) {
+            logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
+        }
     }
 }

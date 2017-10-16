@@ -49,7 +49,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
         resourceIndex.addResourceToIndex(ownedResource4);
     }
 
-    @Test
+    @Test(priority = 1)
     public void testAddResource() {
         logger.info("Running Resource Index Test 01 - Add resource");
 
@@ -64,7 +64,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndexOwnedResources.contains(newOwnedResource));
     }
 
-    @Test
+    @Test(priority = 2)
     public void testFindResources() {
         logger.info("Running Resource Index Test 02 - Find resources");
 
@@ -77,7 +77,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
         Assert.assertTrue(ironManResources.contains(ownedResource4));
     }
 
-    @Test
+    @Test(priority = 3)
     public void testFindResourcesWithNoMatches() {
         logger.info("Running Resource Index Test 03 - Find resources with no matches");
 
@@ -86,7 +86,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
         Assert.assertEquals(spiderManResources.size(), 0);
     }
 
-    @Test
+    @Test(priority = 3)
     public void testFindResourcesWithDuplicates() {
         logger.info("Running Resource Index Test 04 - Find resources with duplicates");
 
@@ -102,7 +102,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
         Assert.assertEquals(carsResource.getFile(), new File("downloaded" + File.separator + "cars.mp4"));
     }
 
-    @Test
+    @Test(priority = 2)
     public void testRemoveLastNodeFromAggregatedResources() {
         logger.info("Running Resource Index Test 05 - Remove last node from aggregated resources");
 
@@ -126,7 +126,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
         Assert.assertEquals(updatedWonderWomanResources.size(), 0);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testGetAllResourcesCopying() {
         logger.info("Running Resource Index Test 06 - Get all resources copying");
 
