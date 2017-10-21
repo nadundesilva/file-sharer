@@ -8,7 +8,7 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>../app/</directory>
+            <directory>../node-gui-frontend/dist/</directory>
             <outputDirectory>app/</outputDirectory>
         </fileSet>
         <fileSet>

@@ -12,48 +12,15 @@ target/
 # Virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# IDE - Idea
+# Idea files
 .idea/
 *.iml
 *.ipr
 *.iws
 
-# IDEs and editors
+# Eclipse files
 .project
-.classpath
-.c9/
-*.launch
 .settings/
-*.sublime-workspace
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# System Files
+# Mac OS temp files
 .DS_Store
-Thumbs.db
-
-# Angular - misc
-/frontend-app/.sass-cache
-/frontend-app/connect.lock
-/frontend-app/coverage
-/frontend-app/libpeerconnection.log
-npm-debug.log
-testem.log
-/frontend-app/typings
-
-# Angular - e2e
-/frontend-app/e2e/*.js
-/frontend-app/e2e/*.map
-
-# Angular - compiled output
-/frontend-app/dist
-/frontend-app/tmp
-/frontend-app/out-tsc
-
-# Angular - dependencies
-/frontend-app/node_modules

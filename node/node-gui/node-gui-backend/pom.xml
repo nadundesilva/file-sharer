@@ -10,7 +10,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>node-backend</artifactId>
+    <artifactId>node-gui-backend</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>File Sharer - Node GUI Backend</name>
     <description>Backend of the GUI for the node of the P2P File Sharing System</description>
@@ -20,6 +20,10 @@
         <dependency>
             <groupId>org.microfuse.node</groupId>
             <artifactId>node-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.microfuse.node</groupId>
+            <artifactId>bootstrap-server</artifactId>
         </dependency>
 
         <!-- Logging dependencies -->
@@ -92,7 +96,7 @@
                     <assembleDirectory>target/tomcat</assembleDirectory>
                     <programs>
                         <program>
-                            <mainClass>org.microfuse.file.sharer.node.ui.ServerLauncher</mainClass>
+                            <mainClass>org.microfuse.file.sharer.node.ui.backend.core.ServerLauncher</mainClass>
                             <name>file-sharer</name>
                         </program>
                     </programs>
