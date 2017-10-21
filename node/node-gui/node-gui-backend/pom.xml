@@ -6,22 +6,16 @@
 
     <parent>
         <groupId>org.microfuse.node</groupId>
-        <artifactId>node</artifactId>
+        <artifactId>node-gui</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>node-ui</artifactId>
+    <artifactId>node-backend</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>File Sharer - Node UI</name>
-    <description>UI for the node of the P2P File Sharing System</description>
+    <name>File Sharer - Node GUI Backend</name>
+    <description>Backend of the GUI for the node of the P2P File Sharing System</description>
 
     <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-        </dependency>
-
         <!-- Own dependencies -->
         <dependency>
             <groupId>org.microfuse.node</groupId>
@@ -118,7 +112,7 @@
                 <configuration>
                     <finalName>file-sharer-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <outputDirectory>${project.parent.build.directory}</outputDirectory>
+                    <outputDirectory>${project.parent.parent.build.directory}</outputDirectory>
                     <descriptors>
                         <descriptor>src/assembly/bin.xml</descriptor>
                     </descriptors>

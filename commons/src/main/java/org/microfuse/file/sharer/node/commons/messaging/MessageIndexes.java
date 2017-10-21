@@ -49,9 +49,10 @@ public class MessageIndexes {
     public static final int SER_HOP_COUNT = 3;
 
     // SER_OK message
-    public static final int SER_OK_FILE_COUNT = 0;
-    public static final int SER_OK_IP = 1;
-    public static final int SER_OK_PORT = 2;
+    public static final int SER_OK_QUERY_STRING = 0;
+    public static final int SER_OK_FILE_COUNT = 1;
+    public static final int SER_OK_IP = 2;
+    public static final int SER_OK_PORT = 3;
     public static final int SER_OK_FILE_NAME_START = 3;
 
     // SER_SUPER_PEER message

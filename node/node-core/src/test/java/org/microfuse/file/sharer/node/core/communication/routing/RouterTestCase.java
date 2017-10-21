@@ -158,7 +158,10 @@ public class RouterTestCase extends BaseTestCase {
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Message message = Message.parse("0047 SEROK 1 " + serviceHolder.getConfiguration().getIp()
+        Message message = Message.parse("0047 " + MessageType.SER_OK.getValue()
+                + " \"" + serMessage.getData(MessageIndexes.SER_FILE_NAME) + "\""
+                + " 1"
+                + " " + serviceHolder.getConfiguration().getIp()
                 + " " + Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort())
                 + " \"" + ownedResource.getName() + "\"");
 
@@ -209,6 +212,7 @@ public class RouterTestCase extends BaseTestCase {
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
         Message usedMessage = Message.parse("0049 " + MessageType.SER_OK.getValue()
+                + " \"" + serMessage.getData(MessageIndexes.SER_FILE_NAME) + "\""
                 + " " + MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT
                 + " " + MessageConstants.SER_OK_NOT_FOUND_IP
                 + " " + MessageConstants.SER_OK_NOT_FOUND_PORT);

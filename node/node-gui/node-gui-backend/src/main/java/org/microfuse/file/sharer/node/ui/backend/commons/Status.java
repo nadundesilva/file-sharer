@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.server.commons;
+package org.microfuse.file.sharer.node.ui.backend.commons;
 
 /**
  * Created by nadun on 21-May-17.

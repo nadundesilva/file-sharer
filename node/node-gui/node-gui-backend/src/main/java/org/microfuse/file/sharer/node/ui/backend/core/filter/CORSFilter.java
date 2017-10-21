@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.server.core.filter;
+package org.microfuse.file.sharer.node.ui.backend.core.filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

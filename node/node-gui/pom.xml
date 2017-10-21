@@ -6,19 +6,18 @@
 
     <parent>
         <groupId>org.microfuse.node</groupId>
-        <artifactId>file-sharer</artifactId>
+        <artifactId>node</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>node</artifactId>
+    <artifactId>node-gui</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>File Sharer - Node</name>
-    <description>Node of the P2P File Sharing System</description>
+    <name>File Sharer - Node GUI</name>
+    <description>GUI for the node of the P2P File Sharing System</description>
     <packaging>pom</packaging>
 
     <modules>
-        <module>node-core</module>
-        <module>node-gui</module>
-        <module>node-cli</module>
+        <module>node-gui-backend</module>
+        <module>node-gui-frontend</module>
     </modules>
 </project>

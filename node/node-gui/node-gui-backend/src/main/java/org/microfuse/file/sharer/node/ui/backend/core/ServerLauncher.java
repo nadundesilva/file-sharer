@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.server.core;
+package org.microfuse.file.sharer.node.ui.backend.core;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
@@ -8,9 +8,9 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.microfuse.file.sharer.node.core.FileSharer;
-import org.microfuse.file.sharer.node.server.commons.ServerConstants;
-import org.microfuse.file.sharer.node.server.core.api.QueryEndPoint;
-import org.microfuse.file.sharer.node.server.core.filter.CORSFilter;
+import org.microfuse.file.sharer.node.ui.backend.commons.ServerConstants;
+import org.microfuse.file.sharer.node.ui.backend.core.api.QueryEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.filter.CORSFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

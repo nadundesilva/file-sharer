@@ -75,10 +75,8 @@ public class FileSharer {
 
     /**
      * Query the file sharer system for a file.
-     *
-     * @param fileName The name of the file to be queried for
      */
-    public void query(String fileName) {
-        serviceHolder.getQueryManager().query(fileName);
+    public ServiceHolder getServiceHolder() {
+        return serviceHolder;
     }
 }

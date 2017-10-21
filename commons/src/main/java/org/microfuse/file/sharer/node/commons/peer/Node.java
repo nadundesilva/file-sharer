@@ -14,6 +14,12 @@ public class Node {
         isAlive = true;
     }
 
+    public Node(String ip, int port) {
+        this();
+        this.ip = ip;
+        this.port = port;
+    }
+
     public String getIp() {
         return ip;
     }

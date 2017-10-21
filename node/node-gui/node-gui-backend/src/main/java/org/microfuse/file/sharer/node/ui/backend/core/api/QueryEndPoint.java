@@ -1,8 +1,8 @@
-package org.microfuse.file.sharer.node.server.core.api;
+package org.microfuse.file.sharer.node.ui.backend.core.api;
 
 import com.google.gson.Gson;
-import org.microfuse.file.sharer.node.server.commons.Status;
-import org.microfuse.file.sharer.node.server.core.utils.ResponseUtils;
+import org.microfuse.file.sharer.node.ui.backend.commons.Status;
+import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
 
 import java.util.Map;
 import javax.ws.rs.GET;

@@ -501,6 +501,7 @@ public class Router implements NetworkHandlerListener {
                 serOkMessage.setType(MessageType.SER_OK);
 
                 List<String> serOkData = new ArrayList<>();
+                serOkData.add(MessageIndexes.SER_OK_QUERY_STRING, message.getData(MessageIndexes.SER_FILE_NAME));
                 serOkData.add(MessageIndexes.SER_OK_FILE_COUNT, Integer.toString(ownedResources.size()));
                 serOkData.add(MessageIndexes.SER_OK_IP, serviceHolder.getConfiguration().getIp());
                 serOkData.add(MessageIndexes.SER_OK_PORT,
@@ -528,6 +529,8 @@ public class Router implements NetworkHandlerListener {
                     // Unable to find resource
                     Message serOkMessage = new Message();
                     serOkMessage.setType(MessageType.SER_OK);
+                    serOkMessage.setData(MessageIndexes.SER_OK_QUERY_STRING,
+                            message.getData(MessageIndexes.SER_FILE_NAME));
                     serOkMessage.setData(MessageIndexes.SER_OK_FILE_COUNT,
                             MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT);
                     serOkMessage.setData(MessageIndexes.SER_OK_IP, MessageConstants.SER_OK_NOT_FOUND_IP);

@@ -1,7 +1,7 @@
-package org.microfuse.file.sharer.node.server.core.utils;
+package org.microfuse.file.sharer.node.ui.backend.core.utils;
 
-import org.microfuse.file.sharer.node.server.commons.APIConstants;
-import org.microfuse.file.sharer.node.server.commons.Status;
+import org.microfuse.file.sharer.node.ui.backend.commons.APIConstants;
+import org.microfuse.file.sharer.node.ui.backend.commons.Status;
 
 import java.util.HashMap;
 import java.util.Map;
