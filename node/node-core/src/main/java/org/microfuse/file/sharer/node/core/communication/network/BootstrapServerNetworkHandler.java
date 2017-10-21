@@ -7,13 +7,10 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * A UDP Socket based network handler used for communicating with the bootstrap server
@@ -23,11 +20,10 @@ import java.util.TimerTask;
 public class BootstrapServerNetworkHandler extends NetworkHandler {
     private static final Logger logger = LoggerFactory.getLogger(BootstrapServerNetworkHandler.class);
 
-    private Timer networkHandlerSendTimeoutTimer;
+    private Thread networkHandlerSendTimeoutThread;
 
     public BootstrapServerNetworkHandler(ServiceHolder serviceHolder) {
         super(serviceHolder);
-        networkHandlerSendTimeoutTimer = new Timer(true);
     }
 
     @Override
@@ -50,10 +46,21 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
             logger.debug("Message " + message.toString() + " sent to node " + ip + ":" + port);
 
             // Starting a timeout to mark as failed
-            networkHandlerSendTimeoutTimer.schedule(
-                    new DelayedCloseTimerTask(socket),
-                    serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout()
-            );
+            DatagramSocket finalSocket = socket;
+            networkHandlerSendTimeoutThread = new Thread(() -> {
+                try {
+                    Thread.sleep(serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout());
+                } catch (InterruptedException ignored) {
+                }
+                if (networkHandlerSendTimeoutThread != null) {
+                    try {
+                        Closeables.close(finalSocket, true);
+                    } catch (IOException ignored) {
+                    }
+                    networkHandlerSendTimeoutThread = null;
+                }
+            });
+            networkHandlerSendTimeoutThread.start();
 
             logger.debug("Waiting for reply from node " + ip + ":" + port);
             byte[] buffer = new byte[65536];
@@ -91,28 +98,10 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
     @Override
     public void shutdown() {
         logger.debug("Cancelling waits for replies");
-        networkHandlerSendTimeoutTimer.cancel();
-        networkHandlerSendTimeoutTimer.purge();
-    }
-
-    /**
-     * Closeable timeout timer task.
-     *
-     * Closes the closeable when the timer event is called.
-     */
-    private static class DelayedCloseTimerTask extends TimerTask {
-        private Closeable closeable;
-
-        private DelayedCloseTimerTask(Closeable closeable) {
-            this.closeable = closeable;
-        }
-
-        @Override
-        public void run() {
-            try {
-                Closeables.close(closeable, true);
-            } catch (IOException ignored) {
-            }
+        if (networkHandlerSendTimeoutThread != null) {
+            Thread thread = networkHandlerSendTimeoutThread;
+            networkHandlerSendTimeoutThread = null;
+            thread.start();
         }
     }
 }

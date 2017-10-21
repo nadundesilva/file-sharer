@@ -77,7 +77,7 @@ public class ServerLauncher {
                 logger.error("Failed to start server : " + e.getMessage());
             }
         });
-        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.setPriority(Thread.NORM_PRIORITY);
         thread.start();
     }
 }

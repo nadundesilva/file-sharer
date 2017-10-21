@@ -189,8 +189,7 @@ public class Router implements NetworkHandlerListener {
                         heartBeat();
                         try {
                             Thread.sleep(serviceHolder.getConfiguration().getHeartbeatInterval());
-                        } catch (InterruptedException e) {
-                            logger.debug("Failed to sleep heartbeat thread", e);
+                        } catch (InterruptedException ignored) {
                         }
                     }
                     logger.debug("Stopped Heart beating");

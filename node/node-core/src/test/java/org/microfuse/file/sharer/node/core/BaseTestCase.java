@@ -65,7 +65,7 @@ public class BaseTestCase {
      */
     protected void waitFor(int milliseconds) {
         try {
-            logger.debug("Waiting for " + (milliseconds / 1000.0) + " seconds");
+            logger.debug("Waiting for " + (milliseconds / 1000.0) + (milliseconds == 1000 ? " second" : " seconds"));
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             logger.warn("Failed to wait for " + milliseconds, e);

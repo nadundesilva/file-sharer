@@ -72,6 +72,8 @@ public class MessageIndexes {
     public static final int JOIN_SUPER_PEER_OK_VALUE = 0;
     public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_IP = 1;
     public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_PORT = 2;
+    public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE_SOURCE_IP = 1;
+    public static final int JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE_SOURCE_PORT = 2;
     public static final int JOIN_SUPER_PEER_OK_VALUE_SUCCESS_IP = 1;
     public static final int JOIN_SUPER_PEER_OK_VALUE_SUCCESS_PORT = 2;
 
