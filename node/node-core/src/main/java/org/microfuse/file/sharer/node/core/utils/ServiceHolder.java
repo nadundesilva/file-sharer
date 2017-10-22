@@ -198,7 +198,7 @@ public class ServiceHolder {
      *
      * @return The router used by this node
      */
-    private synchronized Router getRouter() {
+    public synchronized Router getRouter() {
         if (router == null) {
             router = new Router(instantiateNetworkHandler(), instantiateRoutingStrategy(), this);
         }

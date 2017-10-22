@@ -7,6 +7,8 @@ import {Injectable} from "@angular/core";
 export class Constants {
   public static API_ENDPOINT = 'api/';
   public static API_QUERY_ENDPOINT = 'query/';
+  public static API_NETWORK_ENDPOINT = 'network/';
+  public static REFRESH_FREQUENCY = 5000;
 }
 
 @Injectable()
@@ -24,48 +26,59 @@ export enum ServerResponseStatus {
   ERROR = <any>"ERROR"
 }
 
-export interface Node {
-  ip: string;
-  port: number;
-  isAlive: boolean;
-}
-
-export interface AggregatedResource extends TableDataSourceItem {
-  name: string;
-  nodes: Node[];
-}
-
-export interface ServerResponse<T> {
-  status: ServerResponseStatus;
-  data: T;
-}
-
-export abstract class TableDataSourceItem {
-  abstract get toString();
-}
-
 export class TableDataSource<T extends TableDataSourceItem> extends DataSource<T> {
   _filterChange = new BehaviorSubject('');
-  get filter(): string { return this._filterChange.value; }
-  set filter(filter: string) { this._filterChange.next(filter); }
+
+  get filter(): string {
+    return this._filterChange.value;
+  }
+
+  set filter(filter: string) {
+    this._filterChange.next(filter);
+  }
 
   constructor(private data: T[]) {
     super();
   }
 
   connect(): Observable<T[]> {
-    return Observable.of(this._filterChange).map(() => {
-      return this.data.slice().filter((item: T) => {
-        let searchStr = item.toString().toLowerCase();
-        return searchStr.indexOf(this.filter.toLowerCase()) != -1;
-      });
-    });
+    // return Observable.of(this._filterChange).map(() => {
+    //   return this.data.slice().filter((item: T) => {
+    //     let searchStr = item.filterString().toLowerCase();
+    //     return searchStr.indexOf(this.filter.toLowerCase()) != -1;
+    //   });
+    // });
+    return Observable.of(this.data);
   }
 
   disconnect() {
   }
 
-  size() {
-    return this.data.length;
+  isEmpty() {
+    return !this.data || this.data.length == 0;
   }
+}
+
+export abstract class TableDataSourceItem {
+  abstract get filterString();
+}
+
+export enum PeerType {
+  SUPER_PEER = <any>"Super Peer",
+  ORDINARY_PEER = <any>"Ordinary Peer"
+}
+
+export class Node extends TableDataSourceItem {
+  ip: string;
+  port: number;
+  isAlive: boolean;
+
+  get filterString(): string {
+    return this.ip + ":" + this.port;
+  }
+}
+
+export interface ServerResponse<T> {
+  status: ServerResponseStatus;
+  data: T;
 }

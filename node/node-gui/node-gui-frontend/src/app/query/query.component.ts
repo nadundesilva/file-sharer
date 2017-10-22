@@ -1,5 +1,7 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {AggregatedResource, Constants, ServerResponse, ServerResponseStatus, TableDataSource, Utils} from "../commons";
+import {
+  Constants, ServerResponse, ServerResponseStatus, TableDataSource, TableDataSourceItem, Utils
+} from "../commons";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs/Rx";
 
@@ -16,8 +18,6 @@ export class QueryComponent implements OnInit {
 
   queryResults: TableDataSource<AggregatedResource>;
   displayedColumns = ['name', 'node-ip', 'node-port'];
-
-  refreshFrequency: number = 1000;
 
   @ViewChild('filter') filterElement: ElementRef;
 
@@ -47,7 +47,7 @@ export class QueryComponent implements OnInit {
   }
 
   private startFetchingRunningQueries(): void {
-    let timer = Observable.timer(0, this.refreshFrequency);
+    let timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
     timer.subscribe(t => {
       this.http.get<ServerResponse<string[]>>(Constants.API_ENDPOINT + Constants.API_QUERY_ENDPOINT)
         .subscribe(response => {
@@ -61,7 +61,7 @@ export class QueryComponent implements OnInit {
   }
 
   private startFetchingQueryResults(): void {
-    let timer = Observable.timer(0, this.refreshFrequency);
+    let timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
     timer.subscribe(t => {
       if (this.selectedRunningQuery) {
         this.http.get<ServerResponse<AggregatedResource[]>>(
@@ -77,5 +77,14 @@ export class QueryComponent implements OnInit {
         this.queryResults = new TableDataSource<AggregatedResource>([]);
       }
     });
+  }
+}
+
+class AggregatedResource extends TableDataSourceItem {
+  name: string;
+  nodes: Node[];
+
+  get filterString(): string {
+    return this.name;
   }
 }

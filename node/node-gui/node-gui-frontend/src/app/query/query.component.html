@@ -1,3 +1,4 @@
+<h2 class="mat-h2">Query Information</h2>
 <div>
   <mat-form-field>
     <input matInput placeholder="Query" [(ngModel)]="queryString">
@@ -13,7 +14,7 @@
   </mat-form-field>
 </div>
 
-<div class="mat-elevation-z8">
+<div class="mat-elevation-z8" *ngIf="queryResults && !queryResults.isEmpty()">
   <mat-table #table [dataSource]="queryResults">
     <ng-container matColumnDef="name">
       <mat-header-cell *matHeaderCellDef>Resource Name</mat-header-cell>
