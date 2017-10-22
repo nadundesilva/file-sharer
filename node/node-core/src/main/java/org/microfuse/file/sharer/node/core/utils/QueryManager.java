@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -62,6 +63,7 @@ public class QueryManager implements RouterListener {
      */
     public void query(String queryString) {
         Configuration configuration = serviceHolder.getConfiguration();
+        queryResults.put(queryString, new ArrayList<>());
         Message message = new Message();
         message.setType(MessageType.SER);
         message.setData(MessageIndexes.SER_SOURCE_IP, configuration.getIp());
@@ -69,6 +71,15 @@ public class QueryManager implements RouterListener {
         message.setData(MessageIndexes.SER_FILE_NAME, queryString);
         message.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
         router.route(message);
+    }
+
+    public Set<String> getRunningQueryStrings() {
+        queryResultsLock.readLock().lock();
+        try {
+            return queryResults.keySet();
+        } finally {
+            queryResultsLock.readLock().unlock();
+        }
     }
 
     /**
@@ -111,30 +122,29 @@ public class QueryManager implements RouterListener {
     private void handleSerOkMessages(Node fromNode, Message message) {
         queryResultsLock.writeLock().lock();
         try {
-            List<AggregatedResource> results = queryResults.computeIfAbsent(
-                    message.getData(MessageIndexes.SER_OK_QUERY_STRING),
-                    k -> new ArrayList<>()
-            );
+            List<AggregatedResource> results = queryResults.get(message.getData(MessageIndexes.SER_OK_QUERY_STRING));
 
-            for (int i = 0; i < Integer.parseInt(message.getData(MessageIndexes.SER_OK_FILE_COUNT)); i++) {
-                String fileName = message.getData(MessageIndexes.SER_OK_FILE_NAME_START + i);
+            if (results != null) {
+                for (int i = 0; i < Integer.parseInt(message.getData(MessageIndexes.SER_OK_FILE_COUNT)); i++) {
+                    String fileName = message.getData(MessageIndexes.SER_OK_FILE_NAME_START + i);
 
-                AggregatedResource aggregatedResource = null;
-                for (AggregatedResource result : results) {
-                    if (Objects.equals(result.getName(), fileName)) {
-                        aggregatedResource = result;
+                    AggregatedResource aggregatedResource = null;
+                    for (AggregatedResource result : results) {
+                        if (Objects.equals(result.getName(), fileName)) {
+                            aggregatedResource = result;
+                        }
                     }
-                }
-                if (aggregatedResource == null) {
-                    aggregatedResource = new AggregatedResource(fileName);
-                    results.add(i, aggregatedResource);
-                    i--;
-                }
+                    if (aggregatedResource == null) {
+                        aggregatedResource = new AggregatedResource(fileName);
+                        results.add(i, aggregatedResource);
+                        i--;
+                    }
 
-                aggregatedResource.addNode(new Node(
-                        message.getData(MessageIndexes.SER_OK_IP),
-                        Integer.parseInt(message.getData(MessageIndexes.SER_OK_PORT))
-                ));
+                    aggregatedResource.addNode(new Node(
+                            message.getData(MessageIndexes.SER_OK_IP),
+                            Integer.parseInt(message.getData(MessageIndexes.SER_OK_PORT))
+                    ));
+                }
             }
         } finally {
             queryResultsLock.writeLock().unlock();

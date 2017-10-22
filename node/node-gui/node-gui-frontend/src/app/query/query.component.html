@@ -1,0 +1,42 @@
+<div>
+  <mat-form-field>
+    <input matInput placeholder="Query" [(ngModel)]="queryString">
+  </mat-form-field>
+  <button mat-button #queryButton (click)="query();">Search</button>
+</div>
+<div>
+  <mat-form-field>
+    <mat-select placeholder="Query to view result for" [(ngModel)]="selectedRunningQuery">
+      <mat-option aria-selected="true">None</mat-option>
+      <mat-option *ngFor="let runningQuery of runningQueries" [value]="runningQuery">{{ runningQuery }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="mat-elevation-z8">
+  <mat-table #table [dataSource]="queryResults">
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef>Resource Name</mat-header-cell>
+      <mat-cell *matCellDef="let queryResult">{{queryResult.name}}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="node-ip">
+      <mat-header-cell *matHeaderCellDef>Node IP</mat-header-cell>
+      <mat-cell *matCellDef="let queryResult">
+        <mat-list *ngFor="let node of queryResult.nodes">
+          <mat-list-item>{{ node.ip }}</mat-list-item>
+        </mat-list>
+      </mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="node-port">
+      <mat-header-cell *matHeaderCellDef>Node Port</mat-header-cell>
+      <mat-cell *matCellDef="let queryResult">
+        <mat-list *ngFor="let node of queryResult.nodes">
+          <mat-list-item>{{ node.port }}</mat-list-item>
+        </mat-list>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>

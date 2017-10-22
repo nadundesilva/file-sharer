@@ -11,6 +11,7 @@ import org.microfuse.file.sharer.node.core.FileSharer;
 import org.microfuse.file.sharer.node.ui.backend.commons.ServerConstants;
 import org.microfuse.file.sharer.node.ui.backend.core.api.QueryEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.filter.CORSFilter;
+import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +35,7 @@ public class ServerLauncher {
     };
 
     public static void main(String[] args) {
-        FileSharer fileSharer = new FileSharer();
-        fileSharer.start();
+        FileSharerHolder.getFileSharer();       // Instantiating the file sharer
         startTomcatServer();
     }
 
@@ -65,7 +65,7 @@ public class ServerLauncher {
 
                 tomcat.start();
 
-                String appURI = "http://localhost:" + ServerConstants.WEB_APP_PORT + "/";
+                String appURI = "http://localhost:" + ServerConstants.UI_PORT + "/";
                 logger.info("File Sharer running at " + appURI);
                 try {
                     Desktop.getDesktop().browse(new URI(appURI));

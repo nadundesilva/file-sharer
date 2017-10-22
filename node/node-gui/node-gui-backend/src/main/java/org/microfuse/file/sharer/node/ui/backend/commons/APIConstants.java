@@ -5,6 +5,7 @@ package org.microfuse.file.sharer.node.ui.backend.commons;
  */
 public class APIConstants {
     public static final String STATUS = "status";
+    public static final String DATA = "data";
 
     private APIConstants() {   // Preventing from being initiated
     }
