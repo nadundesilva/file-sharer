@@ -21,7 +21,7 @@
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
     </mat-table>
-    <div *ngIf="!nodeInfo.unstructuredNetwork || nodeInfo.unstructuredNetwork.isEmpty()">No nodes</div>
+    <div *ngIf="!nodeInfo.unstructuredNetwork || nodeInfo.unstructuredNetwork.isEmpty()">None</div>
   </mat-card>
 
   <mat-card *ngIf="nodeInfo.peerType && nodeInfo.peerType==peerType.SUPER_PEER">
@@ -39,7 +39,7 @@
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
     </mat-table>
-    <div *ngIf="!nodeInfo.superPeerNetwork || nodeInfo.superPeerNetwork.isEmpty()">No nodes</div>
+    <div *ngIf="!nodeInfo.superPeerNetwork || nodeInfo.superPeerNetwork.isEmpty()">None</div>
   </mat-card>
 
   <mat-card *ngIf="nodeInfo.peerType && nodeInfo.peerType==peerType.SUPER_PEER">
@@ -57,6 +57,6 @@
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
     </mat-table>
-    <div *ngIf="!nodeInfo.assignedOrdinaryPeers || nodeInfo.assignedOrdinaryPeers.isEmpty()">No nodes</div>
+    <div *ngIf="!nodeInfo.assignedOrdinaryPeers || nodeInfo.assignedOrdinaryPeers.isEmpty()">None</div>
   </mat-card>
 </div>

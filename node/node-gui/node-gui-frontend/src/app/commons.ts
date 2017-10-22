@@ -1,13 +1,14 @@
-import {DataSource} from "@angular/cdk/collections";
-import {Observable} from "rxjs/Observable";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {MatSnackBar} from "@angular/material";
-import {Injectable} from "@angular/core";
+import {DataSource} from '@angular/cdk/collections';
+import {Observable} from 'rxjs/Observable';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {MatSnackBar} from '@angular/material';
+import {Injectable} from '@angular/core';
 
 export class Constants {
   public static API_ENDPOINT = 'api/';
   public static API_QUERY_ENDPOINT = 'query/';
   public static API_NETWORK_ENDPOINT = 'network/';
+  public static API_RESOURCES_ENDPOINT = 'resources/';
   public static REFRESH_FREQUENCY = 5000;
 }
 
@@ -17,13 +18,13 @@ export class Utils {
   }
 
   public showNotification(message: string) {
-    this.snackBar.open(message, "Close", {duration: 3000});
+    this.snackBar.open(message, 'Close', {duration: 3000});
   }
 }
 
 export enum ServerResponseStatus {
-  SUCCESS = <any>"SUCCESS",
-  ERROR = <any>"ERROR"
+  SUCCESS = <any>'SUCCESS',
+  ERROR = <any>'ERROR'
 }
 
 export class TableDataSource<T extends TableDataSourceItem> extends DataSource<T> {
@@ -55,7 +56,7 @@ export class TableDataSource<T extends TableDataSourceItem> extends DataSource<T
   }
 
   isEmpty() {
-    return !this.data || this.data.length == 0;
+    return !this.data || this.data.length === 0;
   }
 }
 
@@ -64,8 +65,8 @@ export abstract class TableDataSourceItem {
 }
 
 export enum PeerType {
-  SUPER_PEER = <any>"Super Peer",
-  ORDINARY_PEER = <any>"Ordinary Peer"
+  SUPER_PEER = <any>'Super Peer',
+  ORDINARY_PEER = <any>'Ordinary Peer'
 }
 
 export class Node extends TableDataSourceItem {
@@ -74,7 +75,7 @@ export class Node extends TableDataSourceItem {
   isAlive: boolean;
 
   get filterString(): string {
-    return this.ip + ":" + this.port;
+    return this.ip + ':' + this.port;
   }
 }
 

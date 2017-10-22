@@ -3,17 +3,16 @@
   <mat-form-field>
     <input matInput placeholder="Query" [(ngModel)]="queryString">
   </mat-form-field>
-  <button mat-button #queryButton (click)="query();">Search</button>
+  <button mat-button #queryButton (click)="query()">Search</button>
 </div>
 <div>
   <mat-form-field>
-    <mat-select placeholder="Query to view result for" [(ngModel)]="selectedRunningQuery">
-      <mat-option aria-selected="true">None</mat-option>
+    <mat-select placeholder="Query to view result for" [(ngModel)]="selectedRunningQuery" (change)="fetchQueryResults()">
+      <mat-option *ngIf="runningQueries && runningQueries.length > 0" aria-selected="true">None</mat-option>
       <mat-option *ngFor="let runningQuery of runningQueries" [value]="runningQuery">{{ runningQuery }}</mat-option>
     </mat-select>
   </mat-form-field>
 </div>
-
 <div class="mat-elevation-z8" *ngIf="queryResults && !queryResults.isEmpty()">
   <mat-table #table [dataSource]="queryResults">
     <ng-container matColumnDef="name">

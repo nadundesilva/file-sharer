@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>Create New Resource</h2>
+<mat-dialog-content>
+  <mat-form-field>
+    <input matInput placeholder="Resource Name" [(ngModel)]="resourceName">
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="resourceName">Add</button>
+</mat-dialog-actions>

@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.ui.backend.core.api;
+package org.microfuse.file.sharer.node.ui.backend.core.api.endpoint;
 
 import com.google.gson.Gson;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;

@@ -8,8 +8,9 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.microfuse.file.sharer.node.ui.backend.commons.ServerConstants;
-import org.microfuse.file.sharer.node.ui.backend.core.api.OverlayNetworkEndPoint;
-import org.microfuse.file.sharer.node.ui.backend.core.api.QueryEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.OverlayNetworkEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.QueryEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ResourcesEndpoint;
 import org.microfuse.file.sharer.node.ui.backend.core.filter.CORSFilter;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class ServerLauncher {
     private static final String MAIN_SERVLET_NAME = "main-servlet";
     private static final String CORS_FILTER_NAME = "cors-filter";
     private static final Class<?>[] endpointClassList = new Class<?>[]{
-            QueryEndPoint.class, OverlayNetworkEndPoint.class
+            QueryEndPoint.class, OverlayNetworkEndPoint.class, ResourcesEndpoint.class
     };
 
     public static void main(String[] args) {
@@ -65,7 +66,7 @@ public class ServerLauncher {
 
                 tomcat.start();
 
-                String appURI = "http://localhost:" + ServerConstants.UI_PORT + "/";
+                String appURI = "http://localhost:" + ServerConstants.WEB_APP_PORT + "/";
                 logger.info("File Sharer running at " + appURI);
                 try {
                     Desktop.getDesktop().browse(new URI(appURI));

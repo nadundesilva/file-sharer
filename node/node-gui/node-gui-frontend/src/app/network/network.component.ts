@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {Observable} from "rxjs/Observable";
-import {Constants, PeerType, ServerResponse, ServerResponseStatus, TableDataSource, Node} from "../commons";
-import {HttpClient} from "@angular/common/http";
+import {Constants, PeerType, ServerResponse, ServerResponseStatus, TableDataSource, Node} from '../commons';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs/Observable';
 
 @Component({
   selector: 'network',
@@ -22,15 +22,15 @@ export class NetworkComponent implements OnInit {
   }
 
   startFetchingNodeInfo() {
-    let timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
+    const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
     timer.subscribe(t => {
       this.http.get<ServerResponse<any>>(Constants.API_ENDPOINT + Constants.API_NETWORK_ENDPOINT)
         .subscribe(response => {
-          if (response.status == ServerResponseStatus.SUCCESS) {
+          if (response.status === ServerResponseStatus.SUCCESS) {
             this.nodeInfo = new NodeInfo();
             this.nodeInfo.peerType = response.data.peerType;
             this.nodeInfo.unstructuredNetwork = new TableDataSource<Node>(response.data.unstructuredNetwork);
-            if (this.nodeInfo.peerType == PeerType.SUPER_PEER) {
+            if (this.nodeInfo.peerType === PeerType.SUPER_PEER) {
               this.nodeInfo.superPeerNetwork = new TableDataSource<Node>(response.data.superPeerNetwork);
               this.nodeInfo.assignedOrdinaryPeers = new TableDataSource<Node>(response.data.assignedOrdinaryPeers);
             } else {
