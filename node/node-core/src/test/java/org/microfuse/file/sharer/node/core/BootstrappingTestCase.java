@@ -55,23 +55,23 @@ public class BootstrappingTestCase extends BaseTestCase {
 
         node1 = new Node();
         node1.setIp(localhostIP);
-        node1.setPort(9765);
+        node1.setPort(9761);
 
         node2 = new Node();
         node2.setIp(localhostIP);
-        node2.setPort(9453);
+        node2.setPort(9452);
 
         node3 = new Node();
         node3.setIp(localhostIP);
-        node3.setPort(9354);
+        node3.setPort(9353);
 
         node4 = new Node();
         node4.setIp(localhostIP);
-        node4.setPort(9642);
+        node4.setPort(9644);
 
         node5 = new Node();
         node5.setIp(localhostIP);
-        node5.setPort(9414);
+        node5.setPort(9415);
 
         bootstrapServer.start();
         waitFor(delay);

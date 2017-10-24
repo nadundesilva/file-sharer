@@ -20,4 +20,15 @@
         <module>node-gui-backend</module>
         <module>node-gui-frontend</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Own dependencies -->
+            <dependency>
+                <groupId>org.microfuse.node</groupId>
+                <artifactId>node-gui-frontend</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

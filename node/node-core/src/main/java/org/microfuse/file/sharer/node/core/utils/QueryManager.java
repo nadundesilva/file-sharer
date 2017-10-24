@@ -63,7 +63,14 @@ public class QueryManager implements RouterListener {
      */
     public void query(String queryString) {
         Configuration configuration = serviceHolder.getConfiguration();
-        queryResults.put(queryString, new ArrayList<>());
+
+        queryResultsLock.readLock().lock();
+        try {
+            queryResults.put(queryString, new ArrayList<>());
+        } finally {
+            queryResultsLock.readLock().unlock();
+        }
+
         Message message = new Message();
         message.setType(MessageType.SER);
         message.setData(MessageIndexes.SER_SOURCE_IP, configuration.getIp());
@@ -126,7 +133,7 @@ public class QueryManager implements RouterListener {
 
             if (results != null) {
                 for (int i = 0; i < Integer.parseInt(message.getData(MessageIndexes.SER_OK_FILE_COUNT)); i++) {
-                    String fileName = message.getData(MessageIndexes.SER_OK_FILE_NAME_START + i);
+                    String fileName = message.getData(MessageIndexes.SER_OK_FILE_NAME_START + (i + 1));
 
                     AggregatedResource aggregatedResource = null;
                     for (AggregatedResource result : results) {

@@ -38,11 +38,6 @@
             </dependency>
             <dependency>
                 <groupId>org.microfuse.node</groupId>
-                <artifactId>node-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.microfuse.node</groupId>
                 <artifactId>bootstrap-server</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
