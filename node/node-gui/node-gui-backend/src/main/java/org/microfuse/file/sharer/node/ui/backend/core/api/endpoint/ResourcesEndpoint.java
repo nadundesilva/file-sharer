@@ -45,7 +45,7 @@ public class ResourcesEndpoint {
 
         ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
         resourceIndex.clear();
-        resourceIndex.addAllResourceToIndex(
+        resourceIndex.addAllResourcesToIndex(
                 request.getResourceNames().stream().map(OwnedResource::new).collect(Collectors.toList())
         );
 

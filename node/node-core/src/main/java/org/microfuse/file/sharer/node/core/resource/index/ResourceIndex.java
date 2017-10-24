@@ -86,7 +86,7 @@ public class ResourceIndex {
      *
      * @param resources The resources to be added
      */
-    public void addAllResourceToIndex(Collection<OwnedResource> resources) {
+    public void addAllResourcesToIndex(Collection<OwnedResource> resources) {
         resources.forEach(this::addResourceToIndex);
     }
 

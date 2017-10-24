@@ -37,6 +37,7 @@ public class SuperPeerFloodingRoutingStrategy extends RoutingStrategy {
 
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
+        // TODO : Keep track of messages already routed through this node ?
         ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         Set<Node> forwardingNodes = null;
         if (routingTable instanceof SuperPeerRoutingTable && resourceIndex instanceof SuperPeerResourceIndex) {

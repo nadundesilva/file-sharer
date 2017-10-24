@@ -39,15 +39,15 @@ public class OverlayNetworkManager implements RouterListener {
     private Thread serSuperPeerStartThread;
     private Thread serSuperPeerTimeoutThread;
 
-    private final Lock superPeerCacheLock;
-    private Set<Node> superPeerCache;
+    private final Lock fullSuperPeerCacheLock;
+    private Set<Node> fullSuperPeerCache;
 
     public OverlayNetworkManager(Router router, ServiceHolder serviceHolder) {
         gossipingLock = new ReentrantLock();
         gossipingEnabled = false;
 
-        superPeerCacheLock = new ReentrantLock();
-        superPeerCache = new HashSet<>();
+        fullSuperPeerCacheLock = new ReentrantLock();
+        fullSuperPeerCache = new HashSet<>();
 
         this.serviceHolder = serviceHolder;
         this.router = router;
@@ -233,48 +233,50 @@ public class OverlayNetworkManager implements RouterListener {
      * Search for a super peer in the system.
      */
     public void searchForSuperPeer() {
-        serSuperPeerStartThread = new Thread(() -> {
-            try {
-                Thread.sleep(ThreadLocalRandom.current().nextInt(
-                        serviceHolder.getConfiguration().getSerSuperPeerTimeout(),
-                        serviceHolder.getConfiguration().getSerSuperPeerTimeout() * 2
-                ));
-            } catch (InterruptedException ignored) {
-            }
-            logger.debug("Searching for super peer");
-            if (serSuperPeerStartThread != null) {
-                RoutingTable routingTable = router.getRoutingTable();
-                if (routingTable instanceof OrdinaryPeerRoutingTable) {
-                    OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
-                    if (ordinaryPeerRoutingTable.getAssignedSuperPeer() == null) {
-                        Message searchSuperPeerMessage = new Message();
-                        searchSuperPeerMessage.setType(MessageType.SER_SUPER_PEER);
-                        searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP,
-                                serviceHolder.getConfiguration().getIp());
-                        searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT,
-                                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
-                        searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
-                                Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
-                        router.route(searchSuperPeerMessage);
-
-                        serSuperPeerTimeoutThread = new Thread(() -> {
-                            try {
-                                Thread.sleep(serviceHolder.getConfiguration().getSerSuperPeerTimeout());
-                            } catch (InterruptedException ignored) {
-                            }
-                            logger.debug("Search for super peer timed out");
-                            if (serSuperPeerTimeoutThread != null) {
-                                selfPromoteSuperPeer(false);
-                                serSuperPeerTimeoutThread = null;
-                            }
-                        });
-                        serSuperPeerTimeoutThread.start();
-                    }
+        if (serSuperPeerStartThread == null) {
+            serSuperPeerStartThread = new Thread(() -> {
+                try {
+                    Thread.sleep(ThreadLocalRandom.current().nextInt(
+                            serviceHolder.getConfiguration().getSerSuperPeerTimeout(),
+                            serviceHolder.getConfiguration().getSerSuperPeerTimeout() * 2
+                    ));
+                } catch (InterruptedException ignored) {
                 }
-                serSuperPeerStartThread = null;
-            }
-        });
-        serSuperPeerStartThread.start();
+                logger.debug("Searching for super peer");
+                if (serSuperPeerStartThread != null) {
+                    RoutingTable routingTable = router.getRoutingTable();
+                    if (routingTable instanceof OrdinaryPeerRoutingTable) {
+                        OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
+                        if (ordinaryPeerRoutingTable.getAssignedSuperPeer() == null) {
+                            Message searchSuperPeerMessage = new Message();
+                            searchSuperPeerMessage.setType(MessageType.SER_SUPER_PEER);
+                            searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP,
+                                    serviceHolder.getConfiguration().getIp());
+                            searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT,
+                                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+                            searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
+                                    Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
+                            router.route(searchSuperPeerMessage);
+
+                            serSuperPeerTimeoutThread = new Thread(() -> {
+                                try {
+                                    Thread.sleep(serviceHolder.getConfiguration().getSerSuperPeerTimeout());
+                                } catch (InterruptedException ignored) {
+                                }
+                                logger.debug("Search for super peer timed out");
+                                if (serSuperPeerTimeoutThread != null) {
+                                    selfPromoteSuperPeer(false);
+                                    serSuperPeerTimeoutThread = null;
+                                }
+                            });
+                            serSuperPeerTimeoutThread.start();
+                        }
+                    }
+                    serSuperPeerStartThread = null;
+                }
+            });
+            serSuperPeerStartThread.start();
+        }
     }
 
     /**
@@ -306,10 +308,14 @@ public class OverlayNetworkManager implements RouterListener {
 
         if (joinSuperPeers) {
             logger.debug("Connecting to all the nodes in the super peer cache");
-            for (Node node : superPeerCache) {
-                connectToSuperPeer(node.getIp(), node.getPort());
+            fullSuperPeerCacheLock.lock();
+            try {
+                for (Node node : fullSuperPeerCache) {
+                    connectToSuperPeer(node.getIp(), node.getPort());
+                }
+            } finally {
+                fullSuperPeerCacheLock.unlock();
             }
-            superPeerCache.clear();
         }
         // TODO : Implement self assigning super peer. (Announce to others ?)
     }
@@ -440,7 +446,8 @@ public class OverlayNetworkManager implements RouterListener {
             if (router.getRoutingTable() instanceof OrdinaryPeerRoutingTable) {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) router.getRoutingTable();
 
-                if (ordinaryPeerRoutingTable.getAssignedSuperPeer().isAlive()) {
+                if (ordinaryPeerRoutingTable.getAssignedSuperPeer() != null &&
+                        ordinaryPeerRoutingTable.getAssignedSuperPeer().isAlive()) {
                     superPeerNodeIP = ordinaryPeerRoutingTable.getAssignedSuperPeer().getIp();
                     superPeerNodePort = ordinaryPeerRoutingTable.getAssignedSuperPeer().getPort();
                 } else {
@@ -612,22 +619,28 @@ public class OverlayNetworkManager implements RouterListener {
 
                         replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE,
                                 MessageConstants.JOIN_SUPER_PEER_OK_VALUE_SUCCESS);
-                        replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_SUCCESS_IP,
+                        replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_IP,
                                 serviceHolder.getConfiguration().getIp());
-                        replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_SUCCESS_PORT,
+                        replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_PORT,
                                 Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
                     } else {
                         List<Node> superPeers =
                                 new ArrayList<>(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes());
+                        superPeers.removeAll(fullSuperPeerCache);
+
                         if (superPeers.size() > 0) {
                             int selectedIndex = ThreadLocalRandom.current().nextInt(0, superPeers.size());
                             Node newSuperPeer = superPeers.get(selectedIndex);
 
                             replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE,
                                     MessageConstants.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL);
-                            replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_IP,
+                            replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_IP,
+                                    serviceHolder.getConfiguration().getIp());
+                            replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_PORT,
+                                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+                            replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_NEW_IP,
                                     newSuperPeer.getIp());
-                            replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_PORT,
+                            replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_NEW_PORT,
                                     Integer.toString(newSuperPeer.getPort()));
                         } else {
                             replyMessage.setData(
@@ -635,11 +648,11 @@ public class OverlayNetworkManager implements RouterListener {
                                     MessageConstants.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE
                             );
                             replyMessage.setData(
-                                    MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE_SOURCE_IP,
+                                    MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_IP,
                                     serviceHolder.getConfiguration().getIp()
                             );
                             replyMessage.setData(
-                                    MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE_SOURCE_PORT,
+                                    MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_PORT,
                                     Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort())
                             );
                         }
@@ -656,9 +669,9 @@ public class OverlayNetworkManager implements RouterListener {
 
                     replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE,
                             MessageConstants.JOIN_SUPER_PEER_OK_VALUE_SUCCESS);
-                    replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_SUCCESS_IP,
+                    replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_IP,
                             serviceHolder.getConfiguration().getIp());
-                    replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_SUCCESS_PORT,
+                    replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_PORT,
                             Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
                 } else {
                     logger.warn("Message dropped due to the requesting node belonging to unknown peer type");
@@ -680,74 +693,66 @@ public class OverlayNetworkManager implements RouterListener {
      * @param message  The message received
      */
     private void handleJoinSuperPeerOkMessage(Node fromNode, Message message) {
-        Node newNode;
         switch (message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE)) {
             case MessageConstants.JOIN_SUPER_PEER_OK_VALUE_ERROR_NOT_SUPER_PEER:
                 searchForSuperPeer();
                 break;
             case MessageConstants.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL:
-                newNode = new Node(
-                        message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_IP),
-                        Integer.parseInt(message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NEW_PORT))
-                );
-                superPeerCacheLock.lock();
+                fullSuperPeerCacheLock.lock();
                 try {
-                    if (superPeerCache.contains(newNode)) {
-                        selfPromoteSuperPeer(true);
-                    } else {
-                        superPeerCache.add(newNode);
-                        connectToSuperPeer(newNode.getIp(), newNode.getPort());
-                    }
+                    fullSuperPeerCache.add(new Node(
+                            message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_IP),
+                            Integer.parseInt(message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_PORT))
+                    ));
                 } finally {
-                    superPeerCacheLock.unlock();
+                    fullSuperPeerCacheLock.unlock();
+                }
+
+                String newNodeIP = message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_NEW_IP);
+                int newNodePort = Integer.parseInt(message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_NEW_PORT));
+                if (fullSuperPeerCache.contains(new Node(newNodeIP, newNodePort))) {
+                    selfPromoteSuperPeer(true);
+                } else {
+                    connectToSuperPeer(newNodeIP, newNodePort);
                 }
                 break;
             case MessageConstants.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE:
-                newNode = new Node(
-                        message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE_SOURCE_IP),
-                        Integer.parseInt(message.getData(
-                                MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE_SOURCE_PORT
-                        ))
-                );
-                superPeerCache.add(newNode);
+                fullSuperPeerCacheLock.lock();
+                try {
+                    fullSuperPeerCache.add(new Node(
+                            message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_IP),
+                            Integer.parseInt(message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_PORT))
+                    ));
+                } finally {
+                    fullSuperPeerCacheLock.unlock();
+                }
+
                 selfPromoteSuperPeer(true);
                 break;
             case MessageConstants.JOIN_SUPER_PEER_OK_VALUE_SUCCESS:
-                superPeerCache.clear();
                 cancelSearchForSuperPeer();
 
-                newNode = new Node(
-                        message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_SUCCESS_IP),
-                        Integer.parseInt(message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE_SUCCESS_PORT))
-                );
+                String sourceIP = message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_IP);
+                int sourcePort = Integer.parseInt(message.getData(MessageIndexes.JOIN_SUPER_PEER_OK_SOURCE_PORT));
+
+                Node newNode = router.getRoutingTable().get(sourceIP, sourcePort);
+                if (newNode == null) {
+                    newNode = new Node();
+                    newNode.setIp(sourceIP);
+                    newNode.setPort(sourcePort);
+                }
 
                 if (serviceHolder.getPeerType() == PeerType.ORDINARY_PEER) {
                     if (router.getRoutingTable() instanceof OrdinaryPeerRoutingTable) {
-                        OrdinaryPeerRoutingTable ordinaryPeerRoutingTable =
-                                (OrdinaryPeerRoutingTable) router.getRoutingTable();
-
-                        Node superPeerNode = ordinaryPeerRoutingTable.get(newNode.getIp(), newNode.getPort());
-                        if (superPeerNode == null) {
-                            superPeerNode = new Node();
-                            superPeerNode.setIp(newNode.getIp());
-                            superPeerNode.setPort(newNode.getPort());
-                        }
-                        ordinaryPeerRoutingTable.setAssignedSuperPeer(superPeerNode);
+                        ((OrdinaryPeerRoutingTable) router.getRoutingTable())
+                                .setAssignedSuperPeer(newNode);
                     } else {
                         logger.warn("Inconsistent super peer routing table in ordinary peer");
                     }
                 } else {
                     if (router.getRoutingTable() instanceof SuperPeerRoutingTable) {
-                        SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) router.getRoutingTable();
-
-                        Node newSuperPeerNode = superPeerRoutingTable.get(newNode.getIp(), newNode.getPort());
-                        if (newSuperPeerNode == null) {
-                            newSuperPeerNode = new Node();
-                            newSuperPeerNode.setIp(newNode.getIp());
-                            newSuperPeerNode.setPort(newNode.getPort());
-                        }
-
-                        superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(newSuperPeerNode);
+                        ((SuperPeerRoutingTable) router.getRoutingTable())
+                                .addSuperPeerNetworkRoutingTableEntry(newNode);
                     } else {
                         logger.warn("Inconsistent ordinary peer routing table in super peer");
                     }

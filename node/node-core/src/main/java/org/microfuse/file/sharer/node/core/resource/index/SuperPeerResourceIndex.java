@@ -6,6 +6,7 @@ import org.microfuse.file.sharer.node.core.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -34,7 +35,8 @@ public class SuperPeerResourceIndex extends ResourceIndex {
     /**
      * Put a new entry into the aggregated resource index.
      *
-     * @param resourceName The resource to be added
+     * @param resourceName The name of the resource to be added
+     * @param node         The node which contains the resource to be added
      */
     public void addResourceToAggregatedIndex(String resourceName, Node node) {
         boolean isSuccessful;
@@ -56,6 +58,16 @@ public class SuperPeerResourceIndex extends ResourceIndex {
             }
         }
         resourceIndexItem.addNode(node);
+    }
+
+    /**
+     * Put a new entry into the aggregated resource index.
+     *
+     * @param resourceNames The names of the resources to be added
+     * @param node          The node which contains the resources to be added
+     */
+    public void addAllResourcesToAggregatedIndex(Collection<String> resourceNames, Node node) {
+        resourceNames.forEach(resourceName -> addResourceToAggregatedIndex(resourceName, node));
     }
 
     /**

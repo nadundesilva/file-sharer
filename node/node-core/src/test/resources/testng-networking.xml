@@ -10,6 +10,7 @@
     <test name="file-sharer-node-core-bootstrapping-tests" enabled="true">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.BootstrappingTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.QueryingTestCase"/>
         </classes>
     </test>
 </suite>

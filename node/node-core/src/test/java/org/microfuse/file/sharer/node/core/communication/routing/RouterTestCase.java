@@ -211,14 +211,8 @@ public class RouterTestCase extends BaseTestCase {
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Message usedMessage = Message.parse("0049 " + MessageType.SER_OK.getValue()
-                + " \"" + serMessage.getData(MessageIndexes.SER_FILE_NAME) + "\""
-                + " " + MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT
-                + " " + MessageConstants.SER_OK_NOT_FOUND_IP
-                + " " + MessageConstants.SER_OK_NOT_FOUND_PORT);
-
-        Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage);
+        Mockito.verify(networkHandler, Mockito.times(0)).sendMessage(
+                Mockito.eq(sourceNode.getIp()), Mockito.eq(sourceNode.getPort()), Mockito.any(Message.class));
     }
 
     @Test(priority = 2)

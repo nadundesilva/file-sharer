@@ -526,23 +526,11 @@ public class Router implements NetworkHandlerListener {
                 if (hopCount <= serviceHolder.getConfiguration().getTimeToLive()) {
                     forwardNode(fromNode, message);
                 } else {
-                    // Unable to find resource
-                    Message serOkMessage = new Message();
-                    serOkMessage.setType(MessageType.SER_OK);
-                    serOkMessage.setData(MessageIndexes.SER_OK_QUERY_STRING,
-                            message.getData(MessageIndexes.SER_FILE_NAME));
-                    serOkMessage.setData(MessageIndexes.SER_OK_FILE_COUNT,
-                            MessageConstants.SER_OK_NOT_FOUND_FILE_COUNT);
-                    serOkMessage.setData(MessageIndexes.SER_OK_IP, MessageConstants.SER_OK_NOT_FOUND_IP);
-                    serOkMessage.setData(MessageIndexes.SER_OK_PORT, MessageConstants.SER_OK_NOT_FOUND_PORT);
-
                     logger.debug("Sending search failed back to search request source node "
                             + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
                             + message.getData(MessageIndexes.SER_SOURCE_PORT)
                             + " since the hop count of the message " + message.toString()
                             + " is higher than time to live " + serviceHolder.getConfiguration().getTimeToLive());
-                    sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
-                            Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
                 }
             }
         } else if (messageType != null && messageType == MessageType.SER_SUPER_PEER) {

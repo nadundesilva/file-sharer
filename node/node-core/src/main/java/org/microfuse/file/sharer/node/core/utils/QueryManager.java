@@ -44,6 +44,7 @@ public class QueryManager implements RouterListener {
 
     @Override
     public void onMessageReceived(Node fromNode, Message message) {
+        logger.debug("Received message " + message.toString() + " from node " + fromNode.toString());
         if (message.getType() == MessageType.SER_OK) {
             handleSerOkMessages(fromNode, message);
         } else {
