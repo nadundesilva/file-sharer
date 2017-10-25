@@ -269,6 +269,11 @@ public class Router implements NetworkHandlerListener {
         }
     }
 
+    /**
+     * Send a message to the bootstrap server.
+     *
+     * @param message The message to be sent
+     */
     public void sendMessageToBootstrapServer(Message message) {
         String ip = serviceHolder.getConfiguration().getBootstrapServerIP();
         int port = serviceHolder.getConfiguration().getBootstrapServerPort();

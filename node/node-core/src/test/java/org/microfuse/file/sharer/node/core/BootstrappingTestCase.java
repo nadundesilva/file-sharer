@@ -37,6 +37,10 @@ public class BootstrappingTestCase extends BaseTestCase {
     private Node node3;
     private Node node4;
     private Node node5;
+    private Node node6;
+    private Node node7;
+    private Node node8;
+    private Node node9;
 
     @BeforeMethod
     public void initializeMethod() {
@@ -59,19 +63,35 @@ public class BootstrappingTestCase extends BaseTestCase {
 
         node2 = new Node();
         node2.setIp(localhostIP);
-        node2.setPort(9452);
+        node2.setPort(9762);
 
         node3 = new Node();
         node3.setIp(localhostIP);
-        node3.setPort(9354);
+        node3.setPort(9763);
 
         node4 = new Node();
         node4.setIp(localhostIP);
-        node4.setPort(9642);
+        node4.setPort(9764);
 
         node5 = new Node();
         node5.setIp(localhostIP);
-        node5.setPort(9414);
+        node5.setPort(9765);
+
+        node6 = new Node();
+        node6.setIp(localhostIP);
+        node6.setPort(9766);
+
+        node7 = new Node();
+        node7.setIp(localhostIP);
+        node7.setPort(9767);
+
+        node8 = new Node();
+        node8.setIp(localhostIP);
+        node8.setPort(9768);
+
+        node9 = new Node();
+        node9.setIp(localhostIP);
+        node9.setPort(9769);
 
         bootstrapServer.start();
         waitFor(delay);
@@ -949,6 +969,627 @@ public class BootstrappingTestCase extends BaseTestCase {
             fileSharer.leaveNetwork();
             waitFor(delay);
             fileSharer.shutdown();
+            waitFor(delay);
+
+            fileSharer5.leaveNetwork();
+            waitFor(delay);
+            fileSharer5.shutdown();
+            waitFor(delay);
+
+            fileSharer4.leaveNetwork();
+            waitFor(delay);
+            fileSharer4.shutdown();
+            waitFor(delay);
+
+            fileSharer3.leaveNetwork();
+            waitFor(delay);
+            fileSharer3.shutdown();
+            waitFor(delay);
+
+            fileSharer2.leaveNetwork();
+            waitFor(delay);
+            fileSharer2.shutdown();
+            waitFor(delay);
+
+            fileSharer1.leaveNetwork();
+            waitFor(delay);
+            fileSharer1.shutdown();
+            waitFor(delay);
+        }
+    }
+
+    @Test(priority = 9)
+    public void testThirdSuperPeerPromotion() {
+        logger.info("Running Bootstrapping Test 09 - Register a node when the assigned ordinary peer count is maxed " +
+                "for the second time");
+
+        FileSharer fileSharer1 = new FileSharer();
+        Object internalStateServiceHolder1 = Whitebox.getInternalState(fileSharer1, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder1 instanceof ServiceHolder);
+        ServiceHolder serviceHolder1 = (ServiceHolder) internalStateServiceHolder1;
+        serviceHolder1.getConfiguration().setIp(node1.getIp());
+        serviceHolder1.getConfiguration().setPeerListeningPort(node1.getPort());
+
+        FileSharer fileSharer2 = new FileSharer();
+        Object internalStateServiceHolder2 = Whitebox.getInternalState(fileSharer2, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder2 instanceof ServiceHolder);
+        ServiceHolder serviceHolder2 = (ServiceHolder) internalStateServiceHolder2;
+        serviceHolder2.getConfiguration().setIp(node2.getIp());
+        serviceHolder2.getConfiguration().setPeerListeningPort(node2.getPort());
+
+        FileSharer fileSharer3 = new FileSharer();
+        Object internalStateServiceHolder3 = Whitebox.getInternalState(fileSharer3, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder3 instanceof ServiceHolder);
+        ServiceHolder serviceHolder3 = (ServiceHolder) internalStateServiceHolder3;
+        serviceHolder3.getConfiguration().setIp(node3.getIp());
+        serviceHolder3.getConfiguration().setPeerListeningPort(node3.getPort());
+
+        FileSharer fileSharer4 = new FileSharer();
+        Object internalStateServiceHolder4 = Whitebox.getInternalState(fileSharer4, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder4 instanceof ServiceHolder);
+        ServiceHolder serviceHolder4 = (ServiceHolder) internalStateServiceHolder4;
+        serviceHolder4.getConfiguration().setIp(node4.getIp());
+        serviceHolder4.getConfiguration().setPeerListeningPort(node4.getPort());
+
+        FileSharer fileSharer5 = new FileSharer();
+        Object internalStateServiceHolder5 = Whitebox.getInternalState(fileSharer5, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder5 instanceof ServiceHolder);
+        ServiceHolder serviceHolder5 = (ServiceHolder) internalStateServiceHolder5;
+        serviceHolder5.getConfiguration().setIp(node5.getIp());
+        serviceHolder5.getConfiguration().setPeerListeningPort(node5.getPort());
+
+        FileSharer fileSharer6 = new FileSharer();
+        Object internalStateServiceHolder6 = Whitebox.getInternalState(fileSharer6, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder6 instanceof ServiceHolder);
+        ServiceHolder serviceHolder6 = (ServiceHolder) internalStateServiceHolder6;
+        serviceHolder6.getConfiguration().setIp(node6.getIp());
+        serviceHolder6.getConfiguration().setPeerListeningPort(node6.getPort());
+
+        serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
+        fileSharer1.start();
+        waitFor(delay);
+
+        fileSharer2.start();
+        waitFor(delay);
+
+        fileSharer3.start();
+        waitFor(delay);
+
+        serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
+        fileSharer4.start();
+        waitFor(delay * 3);
+
+        fileSharer5.start();
+        waitFor(delay);
+
+        fileSharer6.start();
+        waitFor(delay);
+
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
+        fileSharer.start();
+        waitFor(delay * 3);
+
+        try {
+            {
+                serviceHolder1.getOverlayNetworkManager();
+                Object internalStateRouter1 = Whitebox.getInternalState(serviceHolder1, "router");
+                Assert.assertTrue(internalStateRouter1 instanceof Router);
+                Router router1 = (Router) internalStateRouter1;
+
+                Assert.assertEquals(serviceHolder1.getPeerType(), PeerType.SUPER_PEER);
+
+                RoutingTable routingTable1 = router1.getRoutingTable();
+                Assert.assertTrue(routingTable1 instanceof SuperPeerRoutingTable);
+                SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
+
+                Assert.assertTrue(
+                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                Assert.assertTrue(
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node2));
+                Assert.assertTrue(
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node3));
+
+                Assert.assertEquals(
+                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size(), 2);
+                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node4));
+                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+            }
+            {
+                serviceHolder2.getOverlayNetworkManager();
+                Object internalStateRouter2 = Whitebox.getInternalState(serviceHolder2, "router");
+                Assert.assertTrue(internalStateRouter2 instanceof Router);
+                Router router2 = (Router) internalStateRouter2;
+
+                Assert.assertEquals(serviceHolder2.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable2 = router2.getRoutingTable();
+                Assert.assertTrue(routingTable2 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable2 = (OrdinaryPeerRoutingTable) routingTable2;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable2.getAssignedSuperPeer(), node1);
+            }
+            {
+                serviceHolder3.getOverlayNetworkManager();
+                Object internalStateRouter3 = Whitebox.getInternalState(serviceHolder3, "router");
+                Assert.assertTrue(internalStateRouter3 instanceof Router);
+                Router router3 = (Router) internalStateRouter3;
+
+                Assert.assertEquals(serviceHolder3.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable3 = router3.getRoutingTable();
+                Assert.assertTrue(routingTable3 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable3 = (OrdinaryPeerRoutingTable) routingTable3;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable3.getAssignedSuperPeer(), node1);
+            }
+            {
+                serviceHolder4.getOverlayNetworkManager();
+                Object internalStateRouter4 = Whitebox.getInternalState(serviceHolder4, "router");
+                Assert.assertTrue(internalStateRouter4 instanceof Router);
+                Router router4 = (Router) internalStateRouter4;
+
+                Assert.assertEquals(serviceHolder4.getPeerType(), PeerType.SUPER_PEER);
+
+                RoutingTable routingTable4 = router4.getRoutingTable();
+                Assert.assertTrue(routingTable4 instanceof SuperPeerRoutingTable);
+                SuperPeerRoutingTable superPeerRoutingTable4 = (SuperPeerRoutingTable) routingTable4;
+
+                Assert.assertTrue(
+                        superPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                Assert.assertTrue(
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node5));
+                Assert.assertTrue(
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node6));
+
+                Assert.assertEquals(
+                        superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().size(), 2);
+                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node1));
+                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+            }
+            {
+                serviceHolder5.getOverlayNetworkManager();
+                Object internalStateRouter5 = Whitebox.getInternalState(serviceHolder5, "router");
+                Assert.assertTrue(internalStateRouter5 instanceof Router);
+                Router router5 = (Router) internalStateRouter5;
+
+                Assert.assertEquals(serviceHolder5.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable5 = router5.getRoutingTable();
+                Assert.assertTrue(routingTable5 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable5 = (OrdinaryPeerRoutingTable) routingTable5;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable5.getAssignedSuperPeer(), node4);
+            }
+            {
+                serviceHolder6.getOverlayNetworkManager();
+                Object internalStateRouter6 = Whitebox.getInternalState(serviceHolder6, "router");
+                Assert.assertTrue(internalStateRouter6 instanceof Router);
+                Router router6 = (Router) internalStateRouter6;
+
+                Assert.assertEquals(serviceHolder6.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable6 = router6.getRoutingTable();
+                Assert.assertTrue(routingTable6 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable6 = (OrdinaryPeerRoutingTable) routingTable6;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable6.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable6.getAssignedSuperPeer(), node4);
+            }
+            {
+                serviceHolder.getOverlayNetworkManager();
+                Object internalStateRouter = Whitebox.getInternalState(serviceHolder, "router");
+                Assert.assertTrue(internalStateRouter instanceof Router);
+                Router router = (Router) internalStateRouter;
+
+                Assert.assertEquals(serviceHolder.getPeerType(), PeerType.SUPER_PEER);
+
+                RoutingTable routingTable = router.getRoutingTable();
+                Assert.assertTrue(routingTable instanceof SuperPeerRoutingTable);
+                SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
+
+                Assert.assertTrue(
+                        superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(
+                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 0);
+
+                Assert.assertEquals(
+                        superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().size(), 2);
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node1));
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node4));
+            }
+        } finally {
+            fileSharer.leaveNetwork();
+            waitFor(delay);
+            fileSharer.shutdown();
+            waitFor(delay);
+
+            fileSharer6.leaveNetwork();
+            waitFor(delay);
+            fileSharer6.shutdown();
+            waitFor(delay);
+
+            fileSharer5.leaveNetwork();
+            waitFor(delay);
+            fileSharer5.shutdown();
+            waitFor(delay);
+
+            fileSharer4.leaveNetwork();
+            waitFor(delay);
+            fileSharer4.shutdown();
+            waitFor(delay);
+
+            fileSharer3.leaveNetwork();
+            waitFor(delay);
+            fileSharer3.shutdown();
+            waitFor(delay);
+
+            fileSharer2.leaveNetwork();
+            waitFor(delay);
+            fileSharer2.shutdown();
+            waitFor(delay);
+
+            fileSharer1.leaveNetwork();
+            waitFor(delay);
+            fileSharer1.shutdown();
+            waitFor(delay);
+        }
+    }
+
+    @Test(priority = 10)
+    public void testForthSuperPeerPromotion() {
+        logger.info("Running Bootstrapping Test 10 - Register a node when the assigned ordinary peer count is maxed " +
+                "for the third time");
+
+        FileSharer fileSharer1 = new FileSharer();
+        Object internalStateServiceHolder1 = Whitebox.getInternalState(fileSharer1, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder1 instanceof ServiceHolder);
+        ServiceHolder serviceHolder1 = (ServiceHolder) internalStateServiceHolder1;
+        serviceHolder1.getConfiguration().setIp(node1.getIp());
+        serviceHolder1.getConfiguration().setPeerListeningPort(node1.getPort());
+
+        FileSharer fileSharer2 = new FileSharer();
+        Object internalStateServiceHolder2 = Whitebox.getInternalState(fileSharer2, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder2 instanceof ServiceHolder);
+        ServiceHolder serviceHolder2 = (ServiceHolder) internalStateServiceHolder2;
+        serviceHolder2.getConfiguration().setIp(node2.getIp());
+        serviceHolder2.getConfiguration().setPeerListeningPort(node2.getPort());
+
+        FileSharer fileSharer3 = new FileSharer();
+        Object internalStateServiceHolder3 = Whitebox.getInternalState(fileSharer3, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder3 instanceof ServiceHolder);
+        ServiceHolder serviceHolder3 = (ServiceHolder) internalStateServiceHolder3;
+        serviceHolder3.getConfiguration().setIp(node3.getIp());
+        serviceHolder3.getConfiguration().setPeerListeningPort(node3.getPort());
+
+        FileSharer fileSharer4 = new FileSharer();
+        Object internalStateServiceHolder4 = Whitebox.getInternalState(fileSharer4, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder4 instanceof ServiceHolder);
+        ServiceHolder serviceHolder4 = (ServiceHolder) internalStateServiceHolder4;
+        serviceHolder4.getConfiguration().setIp(node4.getIp());
+        serviceHolder4.getConfiguration().setPeerListeningPort(node4.getPort());
+
+        FileSharer fileSharer5 = new FileSharer();
+        Object internalStateServiceHolder5 = Whitebox.getInternalState(fileSharer5, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder5 instanceof ServiceHolder);
+        ServiceHolder serviceHolder5 = (ServiceHolder) internalStateServiceHolder5;
+        serviceHolder5.getConfiguration().setIp(node5.getIp());
+        serviceHolder5.getConfiguration().setPeerListeningPort(node5.getPort());
+
+        FileSharer fileSharer6 = new FileSharer();
+        Object internalStateServiceHolder6 = Whitebox.getInternalState(fileSharer6, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder6 instanceof ServiceHolder);
+        ServiceHolder serviceHolder6 = (ServiceHolder) internalStateServiceHolder6;
+        serviceHolder6.getConfiguration().setIp(node6.getIp());
+        serviceHolder6.getConfiguration().setPeerListeningPort(node6.getPort());
+
+        FileSharer fileSharer7 = new FileSharer();
+        Object internalStateServiceHolder7 = Whitebox.getInternalState(fileSharer7, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder7 instanceof ServiceHolder);
+        ServiceHolder serviceHolder7 = (ServiceHolder) internalStateServiceHolder7;
+        serviceHolder7.getConfiguration().setIp(node7.getIp());
+        serviceHolder7.getConfiguration().setPeerListeningPort(node7.getPort());
+
+        FileSharer fileSharer8 = new FileSharer();
+        Object internalStateServiceHolder8 = Whitebox.getInternalState(fileSharer8, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder8 instanceof ServiceHolder);
+        ServiceHolder serviceHolder8 = (ServiceHolder) internalStateServiceHolder8;
+        serviceHolder8.getConfiguration().setIp(node8.getIp());
+        serviceHolder8.getConfiguration().setPeerListeningPort(node8.getPort());
+
+        FileSharer fileSharer9 = new FileSharer();
+        Object internalStateServiceHolder9 = Whitebox.getInternalState(fileSharer9, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder9 instanceof ServiceHolder);
+        ServiceHolder serviceHolder9 = (ServiceHolder) internalStateServiceHolder9;
+        serviceHolder9.getConfiguration().setIp(node9.getIp());
+        serviceHolder9.getConfiguration().setPeerListeningPort(node9.getPort());
+
+        serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
+        fileSharer1.start();
+        waitFor(delay);
+
+        fileSharer2.start();
+        waitFor(delay);
+
+        fileSharer3.start();
+        waitFor(delay);
+
+        serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
+        fileSharer4.start();
+        waitFor(delay * 3);
+
+        fileSharer5.start();
+        waitFor(delay);
+
+        fileSharer6.start();
+        waitFor(delay);
+
+        serviceHolder7.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
+        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay);
+        fileSharer7.start();
+        waitFor(delay * 3);
+
+        fileSharer8.start();
+        waitFor(delay);
+
+        fileSharer9.start();
+        waitFor(delay);
+
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
+        fileSharer.start();
+        waitFor(delay * 3);
+
+        try {
+            {
+                serviceHolder1.getOverlayNetworkManager();
+                Object internalStateRouter1 = Whitebox.getInternalState(serviceHolder1, "router");
+                Assert.assertTrue(internalStateRouter1 instanceof Router);
+                Router router1 = (Router) internalStateRouter1;
+
+                Assert.assertEquals(serviceHolder1.getPeerType(), PeerType.SUPER_PEER);
+
+                RoutingTable routingTable1 = router1.getRoutingTable();
+                Assert.assertTrue(routingTable1 instanceof SuperPeerRoutingTable);
+                SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
+
+                Assert.assertTrue(
+                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                Assert.assertTrue(
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node2));
+                Assert.assertTrue(
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node3));
+
+                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size() > 0);
+                Assert.assertTrue(
+                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node4) ||
+                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node7) ||
+                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+            }
+            {
+                serviceHolder2.getOverlayNetworkManager();
+                Object internalStateRouter2 = Whitebox.getInternalState(serviceHolder2, "router");
+                Assert.assertTrue(internalStateRouter2 instanceof Router);
+                Router router2 = (Router) internalStateRouter2;
+
+                Assert.assertEquals(serviceHolder2.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable2 = router2.getRoutingTable();
+                Assert.assertTrue(routingTable2 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable2 = (OrdinaryPeerRoutingTable) routingTable2;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable2.getAssignedSuperPeer(), node1);
+            }
+            {
+                serviceHolder3.getOverlayNetworkManager();
+                Object internalStateRouter3 = Whitebox.getInternalState(serviceHolder3, "router");
+                Assert.assertTrue(internalStateRouter3 instanceof Router);
+                Router router3 = (Router) internalStateRouter3;
+
+                Assert.assertEquals(serviceHolder3.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable3 = router3.getRoutingTable();
+                Assert.assertTrue(routingTable3 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable3 = (OrdinaryPeerRoutingTable) routingTable3;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable3.getAssignedSuperPeer(), node1);
+            }
+            {
+                serviceHolder4.getOverlayNetworkManager();
+                Object internalStateRouter4 = Whitebox.getInternalState(serviceHolder4, "router");
+                Assert.assertTrue(internalStateRouter4 instanceof Router);
+                Router router4 = (Router) internalStateRouter4;
+
+                Assert.assertEquals(serviceHolder4.getPeerType(), PeerType.SUPER_PEER);
+
+                RoutingTable routingTable4 = router4.getRoutingTable();
+                Assert.assertTrue(routingTable4 instanceof SuperPeerRoutingTable);
+                SuperPeerRoutingTable superPeerRoutingTable4 = (SuperPeerRoutingTable) routingTable4;
+
+                Assert.assertTrue(
+                        superPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                Assert.assertTrue(
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node5));
+                Assert.assertTrue(
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node6));
+
+                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().size() > 0);
+                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node1) ||
+                        superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node7) ||
+                        superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+            }
+            {
+                serviceHolder5.getOverlayNetworkManager();
+                Object internalStateRouter5 = Whitebox.getInternalState(serviceHolder5, "router");
+                Assert.assertTrue(internalStateRouter5 instanceof Router);
+                Router router5 = (Router) internalStateRouter5;
+
+                Assert.assertEquals(serviceHolder5.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable5 = router5.getRoutingTable();
+                Assert.assertTrue(routingTable5 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable5 = (OrdinaryPeerRoutingTable) routingTable5;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable5.getAssignedSuperPeer(), node4);
+            }
+            {
+                serviceHolder6.getOverlayNetworkManager();
+                Object internalStateRouter6 = Whitebox.getInternalState(serviceHolder6, "router");
+                Assert.assertTrue(internalStateRouter6 instanceof Router);
+                Router router6 = (Router) internalStateRouter6;
+
+                Assert.assertEquals(serviceHolder6.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable6 = router6.getRoutingTable();
+                Assert.assertTrue(routingTable6 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable6 = (OrdinaryPeerRoutingTable) routingTable6;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable6.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable6.getAssignedSuperPeer(), node4);
+            }
+            {
+                serviceHolder7.getOverlayNetworkManager();
+                Object internalStateRouter7 = Whitebox.getInternalState(serviceHolder7, "router");
+                Assert.assertTrue(internalStateRouter7 instanceof Router);
+                Router router7 = (Router) internalStateRouter7;
+
+                Assert.assertEquals(serviceHolder7.getPeerType(), PeerType.SUPER_PEER);
+
+                RoutingTable routingTable7 = router7.getRoutingTable();
+                Assert.assertTrue(routingTable7 instanceof SuperPeerRoutingTable);
+                SuperPeerRoutingTable superPeerRoutingTable7 = (SuperPeerRoutingTable) routingTable7;
+
+                Assert.assertTrue(
+                        superPeerRoutingTable7.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(
+                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                Assert.assertTrue(
+                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node8));
+                Assert.assertTrue(
+                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node9));
+
+                Assert.assertTrue(superPeerRoutingTable7.getAllSuperPeerNetworkRoutingTableNodes().size() > 0);
+                Assert.assertTrue(superPeerRoutingTable7.getAllSuperPeerNetworkRoutingTableNodes().contains(node1) ||
+                        superPeerRoutingTable7.getAllSuperPeerNetworkRoutingTableNodes().contains(node4) ||
+                        superPeerRoutingTable7.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+            }
+            {
+                serviceHolder8.getOverlayNetworkManager();
+                Object internalStateRouter8 = Whitebox.getInternalState(serviceHolder8, "router");
+                Assert.assertTrue(internalStateRouter8 instanceof Router);
+                Router router8 = (Router) internalStateRouter8;
+
+                Assert.assertEquals(serviceHolder8.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable8 = router8.getRoutingTable();
+                Assert.assertTrue(routingTable8 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable8 = (OrdinaryPeerRoutingTable) routingTable8;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable8.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable8.getAssignedSuperPeer(), node7);
+            }
+            {
+                serviceHolder9.getOverlayNetworkManager();
+                Object internalStateRouter9 = Whitebox.getInternalState(serviceHolder9, "router");
+                Assert.assertTrue(internalStateRouter9 instanceof Router);
+                Router router9 = (Router) internalStateRouter9;
+
+                Assert.assertEquals(serviceHolder9.getPeerType(), PeerType.ORDINARY_PEER);
+
+                RoutingTable routingTable9 = router9.getRoutingTable();
+                Assert.assertTrue(routingTable9 instanceof OrdinaryPeerRoutingTable);
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable9 = (OrdinaryPeerRoutingTable) routingTable9;
+
+                Assert.assertTrue(
+                        ordinaryPeerRoutingTable9.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(ordinaryPeerRoutingTable9.getAssignedSuperPeer(), node7);
+            }
+            {
+                serviceHolder.getOverlayNetworkManager();
+                Object internalStateRouter = Whitebox.getInternalState(serviceHolder, "router");
+                Assert.assertTrue(internalStateRouter instanceof Router);
+                Router router = (Router) internalStateRouter;
+
+                Assert.assertEquals(serviceHolder.getPeerType(), PeerType.SUPER_PEER);
+
+                RoutingTable routingTable = router.getRoutingTable();
+                Assert.assertTrue(routingTable instanceof SuperPeerRoutingTable);
+                SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
+
+                Assert.assertTrue(
+                        superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+
+                Assert.assertEquals(
+                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 0);
+
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().size() > 0);
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node1) ||
+                        superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node4) ||
+                        superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node7));
+            }
+        } finally {
+            fileSharer.leaveNetwork();
+            waitFor(delay);
+            fileSharer.shutdown();
+            waitFor(delay);
+
+            fileSharer9.leaveNetwork();
+            waitFor(delay);
+            fileSharer9.shutdown();
+            waitFor(delay);
+
+            fileSharer8.leaveNetwork();
+            waitFor(delay);
+            fileSharer8.shutdown();
+            waitFor(delay);
+
+            fileSharer7.leaveNetwork();
+            waitFor(delay);
+            fileSharer7.shutdown();
+            waitFor(delay);
+
+            fileSharer6.leaveNetwork();
+            waitFor(delay);
+            fileSharer6.shutdown();
             waitFor(delay);
 
             fileSharer5.leaveNetwork();
