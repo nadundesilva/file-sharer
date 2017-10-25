@@ -1,0 +1,131 @@
+<div>
+  <h1 class="mat-h1">{{ title }}</h1>
+  <span fxFlex></span>
+  <a routerLink="/home"><mat-icon>home</mat-icon></a>
+</div>
+<div>
+  <button mat-button (click)="save()"><mat-icon>save</mat-icon> Save</button>
+  <button mat-button (click)="fetchConfiguration()"><mat-icon>undo</mat-icon> Discard Changes</button>
+  <button mat-button (click)="loadDefaults()"><mat-icon>restore</mat-icon> Load Default Values</button>
+</div>
+<div fxLayoutWrap *ngIf="config">
+  <mat-card fxFlex>
+    <mat-card-title>Bootstrap Server</mat-card-title>
+    <mat-card-content>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="IP Address" [(ngModel)]="config.bootstrapServerIP">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Port" [(ngModel)]="config.bootstrapServerPort">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <span matSuffix>seconds</span>
+          <input matInput placeholder="Reply Wait Timeout" [(ngModel)]="config.bootstrapServerReplyWaitTimeout">
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card fxFlex>
+    <mat-card-title>Node</mat-card-title>
+    <mat-card-content>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Username" [(ngModel)]="config.username">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="IP Address" [(ngModel)]="config.ip">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Port" [(ngModel)]="config.peerListeningPort">
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card fxFlex>
+    <mat-card-title>Network Handler</mat-card-title>
+    <mat-card-content>
+      <div>
+        <mat-form-field>
+          <mat-select placeholder="Network Handler Type" [(ngModel)]="config.networkHandlerType">
+            <mat-option [value]="networkHandlerType.TCP_SOCKET">TCP Socket</mat-option>
+            <mat-option [value]="networkHandlerType.UDP_SOCKET">UDP Socket</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Thread Count" [(ngModel)]="config.networkHandlerThreadCount">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <span matSuffix>seconds</span>
+          <input matInput placeholder="Network Handler Send Timeout" [(ngModel)]="config.networkHandlerSendTimeout">
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card fxFlex>
+    <mat-card-title>Routing</mat-card-title>
+    <mat-card-content>
+      <div>
+        <mat-form-field>
+          <mat-select placeholder="Routing Strategy Type" [(ngModel)]="config.routingStrategyType">
+            <mat-option [value]="routingStrategyType.SUPER_PEER_FLOODING">Super Peer Flooding</mat-option>
+            <mat-option [value]="routingStrategyType.SUPER_PEER_RANDOM_WALK">Super Peer Random Walk</mat-option>
+            <mat-option [value]="routingStrategyType.UNSTRUCTURED_FLOODING">Unstructured Flooding</mat-option>
+            <mat-option [value]="routingStrategyType.UNSTRUCTURED_RANDOM_WALK">Unstructured Random Walk</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <span matSuffix>hops</span>
+          <input matInput placeholder="Search Message Time to Live" [(ngModel)]="config.timeToLive">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <span matSuffix>seconds</span>
+          <input matInput placeholder="Search for Super Peer Timeout" [(ngModel)]="config.serSuperPeerTimeout">
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card fxFlex>
+    <mat-card-title>Network</mat-card-title>
+    <mat-card-content>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Max Assigned Ordinary Peer Count" [(ngModel)]="config.maxAssignedOrdinaryPeerCount">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Maximum Unstructured Peer Count" [(ngModel)]="config.maxUnstructuredPeerCount">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <span matSuffix>seconds</span>
+          <input matInput placeholder="Heartbeat Interval" [(ngModel)]="config.heartbeatInterval">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <span matSuffix>seconds</span>
+          <input matInput placeholder="Gossiping Interval" [(ngModel)]="config.gossipingInterval">
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

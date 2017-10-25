@@ -140,8 +140,6 @@ public class BootstrappingTestCase extends BaseTestCase {
             Mockito.verify(routerListener, Mockito.times(1))
                     .onMessageReceived(serviceHolder.getConfiguration().getBootstrapServer(), message);
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
         }
@@ -170,7 +168,7 @@ public class BootstrappingTestCase extends BaseTestCase {
             RouterListener routerListener = Mockito.mock(RouterListener.class);
             router.registerListener(routerListener);
 
-            fileSharer.leaveNetwork();
+            fileSharer.shutdown();
             waitFor(delay);
 
             Assert.assertEquals(bootstrapServer.getAllNodes().size(), 0);
@@ -205,8 +203,6 @@ public class BootstrappingTestCase extends BaseTestCase {
             Assert.assertEquals(superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 0);
             Assert.assertEquals(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().size(), 0);
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
         }
@@ -272,13 +268,9 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertEquals(ordinaryPeerRoutingTable.getAssignedSuperPeer(), node1);
             }
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
 
-            fileSharer1.leaveNetwork();
-            waitFor(delay);
             fileSharer1.shutdown();
             waitFor(delay);
         }
@@ -380,18 +372,12 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertEquals(ordinaryPeerRoutingTable.getAssignedSuperPeer(), node1);
             }
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
 
-            fileSharer2.leaveNetwork();
-            waitFor(delay);
             fileSharer2.shutdown();
             waitFor(delay);
 
-            fileSharer1.leaveNetwork();
-            waitFor(delay);
             fileSharer1.shutdown();
             waitFor(delay);
         }
@@ -530,23 +516,15 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertEquals(ordinaryPeerRoutingTable.getAssignedSuperPeer(), node1);
             }
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
 
-            fileSharer3.leaveNetwork();
-            waitFor(delay);
             fileSharer3.shutdown();
             waitFor(delay);
 
-            fileSharer2.leaveNetwork();
-            waitFor(delay);
             fileSharer2.shutdown();
             waitFor(delay);
 
-            fileSharer1.leaveNetwork();
-            waitFor(delay);
             fileSharer1.shutdown();
             waitFor(delay);
         }
@@ -729,28 +707,18 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node1));
             }
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
 
-            fileSharer4.leaveNetwork();
-            waitFor(delay);
             fileSharer4.shutdown();
             waitFor(delay);
 
-            fileSharer3.leaveNetwork();
-            waitFor(delay);
             fileSharer3.shutdown();
             waitFor(delay);
 
-            fileSharer2.leaveNetwork();
-            waitFor(delay);
             fileSharer2.shutdown();
             waitFor(delay);
 
-            fileSharer1.leaveNetwork();
-            waitFor(delay);
             fileSharer1.shutdown();
             waitFor(delay);
         }
@@ -973,33 +941,21 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertEquals(ordinaryPeerRoutingTable.getAssignedSuperPeer(), node5);
             }
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
 
-            fileSharer5.leaveNetwork();
-            waitFor(delay);
             fileSharer5.shutdown();
             waitFor(delay);
 
-            fileSharer4.leaveNetwork();
-            waitFor(delay);
             fileSharer4.shutdown();
             waitFor(delay);
 
-            fileSharer3.leaveNetwork();
-            waitFor(delay);
             fileSharer3.shutdown();
             waitFor(delay);
 
-            fileSharer2.leaveNetwork();
-            waitFor(delay);
             fileSharer2.shutdown();
             waitFor(delay);
 
-            fileSharer1.leaveNetwork();
-            waitFor(delay);
             fileSharer1.shutdown();
             waitFor(delay);
         }
@@ -1224,38 +1180,24 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node4));
             }
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
 
-            fileSharer6.leaveNetwork();
-            waitFor(delay);
             fileSharer6.shutdown();
             waitFor(delay);
 
-            fileSharer5.leaveNetwork();
-            waitFor(delay);
             fileSharer5.shutdown();
             waitFor(delay);
 
-            fileSharer4.leaveNetwork();
-            waitFor(delay);
             fileSharer4.shutdown();
             waitFor(delay);
 
-            fileSharer3.leaveNetwork();
-            waitFor(delay);
             fileSharer3.shutdown();
             waitFor(delay);
 
-            fileSharer2.leaveNetwork();
-            waitFor(delay);
             fileSharer2.shutdown();
             waitFor(delay);
 
-            fileSharer1.leaveNetwork();
-            waitFor(delay);
             fileSharer1.shutdown();
             waitFor(delay);
         }
@@ -1574,53 +1516,33 @@ public class BootstrappingTestCase extends BaseTestCase {
                         superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node7));
             }
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
 
-            fileSharer9.leaveNetwork();
-            waitFor(delay);
             fileSharer9.shutdown();
             waitFor(delay);
 
-            fileSharer8.leaveNetwork();
-            waitFor(delay);
             fileSharer8.shutdown();
             waitFor(delay);
 
-            fileSharer7.leaveNetwork();
-            waitFor(delay);
             fileSharer7.shutdown();
             waitFor(delay);
 
-            fileSharer6.leaveNetwork();
-            waitFor(delay);
             fileSharer6.shutdown();
             waitFor(delay);
 
-            fileSharer5.leaveNetwork();
-            waitFor(delay);
             fileSharer5.shutdown();
             waitFor(delay);
 
-            fileSharer4.leaveNetwork();
-            waitFor(delay);
             fileSharer4.shutdown();
             waitFor(delay);
 
-            fileSharer3.leaveNetwork();
-            waitFor(delay);
             fileSharer3.shutdown();
             waitFor(delay);
 
-            fileSharer2.leaveNetwork();
-            waitFor(delay);
             fileSharer2.shutdown();
             waitFor(delay);
 
-            fileSharer1.leaveNetwork();
-            waitFor(delay);
             fileSharer1.shutdown();
             waitFor(delay);
         }
@@ -1945,53 +1867,33 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertEquals(superPeerResourceIndex.getAllAggregatedResources().size(), 0);
             }
         } finally {
-            fileSharer.leaveNetwork();
-            waitFor(delay);
             fileSharer.shutdown();
             waitFor(delay);
 
-            fileSharer9.leaveNetwork();
-            waitFor(delay);
             fileSharer9.shutdown();
             waitFor(delay);
 
-            fileSharer8.leaveNetwork();
-            waitFor(delay);
             fileSharer8.shutdown();
             waitFor(delay);
 
-            fileSharer7.leaveNetwork();
-            waitFor(delay);
             fileSharer7.shutdown();
             waitFor(delay);
 
-            fileSharer6.leaveNetwork();
-            waitFor(delay);
             fileSharer6.shutdown();
             waitFor(delay);
 
-            fileSharer5.leaveNetwork();
-            waitFor(delay);
             fileSharer5.shutdown();
             waitFor(delay);
 
-            fileSharer4.leaveNetwork();
-            waitFor(delay);
             fileSharer4.shutdown();
             waitFor(delay);
 
-            fileSharer3.leaveNetwork();
-            waitFor(delay);
             fileSharer3.shutdown();
             waitFor(delay);
 
-            fileSharer2.leaveNetwork();
-            waitFor(delay);
             fileSharer2.shutdown();
             waitFor(delay);
 
-            fileSharer1.leaveNetwork();
-            waitFor(delay);
             fileSharer1.shutdown();
             waitFor(delay);
         }

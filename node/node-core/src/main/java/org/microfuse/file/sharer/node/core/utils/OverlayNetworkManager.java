@@ -116,7 +116,7 @@ public class OverlayNetworkManager implements RouterListener {
                     while (gossipingEnabled) {
                         gossip();
                         try {
-                            Thread.sleep(serviceHolder.getConfiguration().getHeartbeatInterval());
+                            Thread.sleep(serviceHolder.getConfiguration().getGossipingInterval());
                         } catch (InterruptedException ignored) {
                         }
                     }

@@ -1,60 +1,58 @@
 package org.microfuse.file.sharer.node.ui.backend.core.api.endpoint;
 
 import com.google.gson.Gson;
-import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
-import org.microfuse.file.sharer.node.core.utils.QueryManager;
+import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.ui.backend.commons.APIConstants;
 import org.microfuse.file.sharer.node.ui.backend.commons.Status;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Querying related end point.
+ * Configuration related endpoint.
  */
-@Path("/query")
-public class QueryEndPoint {
+@Path("/config")
+public class ConfigEndPoint {
+    @GET
+    public Response getConfig() {
+        Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
+
+        Configuration configuration = FileSharerHolder.getFileSharer().getServiceHolder().getConfiguration();
+        response.put(APIConstants.DATA, configuration);
+
+        String jsonString = new Gson().toJson(response);
+        return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
+    }
+
     @POST
-    @Path("/{queryString}")
-    public Response runQuery(@PathParam("queryString") String queryString) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response saveConfig(Configuration configuration) {
         Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
-        QueryManager queryManager = FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager();
-        queryManager.query(queryString);
+        FileSharerHolder.getFileSharer().getServiceHolder().updateConfiguration(configuration);
 
         String jsonString = new Gson().toJson(response);
         return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
     }
 
-    @GET
-    public Response getQueryResult() {
+    @POST
+    @Path("/defaults")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response saveConfig() {
         Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
-        QueryManager queryManager = FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager();
-        Set<String> runningQueryStrings = queryManager.getRunningQueryStrings();
-        response.put(APIConstants.DATA, runningQueryStrings);
+        FileSharerHolder.getFileSharer().getServiceHolder().getConfiguration().loadDefaults();
+        FileSharerHolder.getFileSharer().getServiceHolder().saveConfiguration();
 
-        String jsonString = new Gson().toJson(response);
-        return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
-    }
-
-    @GET
-    @Path("/{queryString}")
-    public Response getQueryResult(@PathParam("queryString") String queryString) {
-        Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
-
-        QueryManager queryManager = FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager();
-        List<AggregatedResource> aggregatedResourceList = queryManager.getQueryResults(queryString);
-        response.put(APIConstants.DATA, aggregatedResourceList);
+        Configuration configuration = FileSharerHolder.getFileSharer().getServiceHolder().getConfiguration();
+        response.put(APIConstants.DATA, configuration);
 
         String jsonString = new Gson().toJson(response);
         return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();

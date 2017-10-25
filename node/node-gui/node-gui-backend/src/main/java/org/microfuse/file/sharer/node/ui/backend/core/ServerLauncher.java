@@ -8,9 +8,11 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.microfuse.file.sharer.node.ui.backend.commons.ServerConstants;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ConfigEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.OverlayNetworkEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.QueryEndPoint;
-import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ResourcesEndpoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ResourcesEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.SystemEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.filter.CORSFilter;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.slf4j.Logger;
@@ -32,7 +34,8 @@ public class ServerLauncher {
     private static final String MAIN_SERVLET_NAME = "main-servlet";
     private static final String CORS_FILTER_NAME = "cors-filter";
     private static final Class<?>[] endpointClassList = new Class<?>[]{
-            QueryEndPoint.class, OverlayNetworkEndPoint.class, ResourcesEndpoint.class
+            ConfigEndPoint.class, QueryEndPoint.class, OverlayNetworkEndPoint.class, ResourcesEndPoint.class,
+            SystemEndPoint.class
     };
 
     public static void main(String[] args) {

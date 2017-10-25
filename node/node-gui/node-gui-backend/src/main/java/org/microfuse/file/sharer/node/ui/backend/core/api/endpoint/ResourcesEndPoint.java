@@ -23,9 +23,8 @@ import javax.ws.rs.core.Response;
  * Resources related endpoint.
  */
 @Path("/resources")
-public class ResourcesEndpoint {
+public class ResourcesEndPoint {
     @GET
-    @Path("/")
     public Response getResourcesList() {
         Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
@@ -39,7 +38,6 @@ public class ResourcesEndpoint {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/")
     public Response saveResourcesList(SaveResourcesRequest request) {
         Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 

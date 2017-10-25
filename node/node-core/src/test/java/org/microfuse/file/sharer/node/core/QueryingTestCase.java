@@ -358,8 +358,6 @@ public class QueryingTestCase extends BaseTestCase {
         logger.info("Cleaning Up Querying Test");
 
         for (int i = 9; i >= 0; i--) {
-            fileSharers[i].leaveNetwork();
-            waitFor(delay);
             fileSharers[i].shutdown();
             waitFor(delay);
         }

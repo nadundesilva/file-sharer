@@ -14,32 +14,36 @@ public class Configuration {
     private String username;
     private String ip;
     private int peerListeningPort;
-    private int listenerHandlingThreadCount;
+    private int networkHandlerThreadCount;
     private int timeToLive;
     private int maxAssignedOrdinaryPeerCount;
     private int maxUnstructuredPeerCount;
     private int heartbeatInterval;
     private int gossipingInterval;
     private int networkHandlerSendTimeout;
-    private int networkHandlerReplyTimeout;
+    private int bootstrapServerReplyWaitTimeout;
     private int serSuperPeerTimeout;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
 
     public Configuration() {
+        loadDefaults();
+    }
+
+    public void loadDefaults() {
         bootstrapServerIP = NodeConstants.DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS;
         bootstrapServerPort = Constants.BOOTSTRAP_SERVER_PORT;
         username = NodeConstants.DEFAULT_USERNAME;
         ip = NodeConstants.DEFAULT_IP_ADDRESS;
         peerListeningPort = NodeConstants.DEFAULT_TCP_LISTENER_PORT;
-        listenerHandlingThreadCount = NodeConstants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT;
+        networkHandlerThreadCount = NodeConstants.DEFAULT_NETWORK_HANDLER_THREAD_COUNT;
         timeToLive = NodeConstants.DEFAULT_TIME_TO_LIVE;
         maxAssignedOrdinaryPeerCount = NodeConstants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT;
         maxUnstructuredPeerCount = NodeConstants.DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT;
         heartbeatInterval = NodeConstants.DEFAULT_HEARTBEAT_INTERVAL;
         gossipingInterval = NodeConstants.DEFAULT_GOSSIPING_INTERVAL;
         networkHandlerSendTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT;
-        networkHandlerReplyTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT;
+        bootstrapServerReplyWaitTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT;
         serSuperPeerTimeout = NodeConstants.DEFAULT_SER_SUPER_PEER_TIMEOUT;
         networkHandlerType = NodeConstants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = NodeConstants.DEFAULT_ROUTING_STRATEGY;
@@ -93,12 +97,12 @@ public class Configuration {
         this.peerListeningPort = peerListeningPort;
     }
 
-    public int getListenerHandlingThreadCount() {
-        return listenerHandlingThreadCount;
+    public int getNetworkHandlerThreadCount() {
+        return networkHandlerThreadCount;
     }
 
-    public void setListenerHandlingThreadCount(int listenerHandlingThreadCount) {
-        this.listenerHandlingThreadCount = listenerHandlingThreadCount;
+    public void setNetworkHandlerThreadCount(int networkHandlerThreadCount) {
+        this.networkHandlerThreadCount = networkHandlerThreadCount;
     }
 
     public int getTimeToLive() {
@@ -149,12 +153,12 @@ public class Configuration {
         this.networkHandlerSendTimeout = networkHandlerSendTimeout;
     }
 
-    public int getNetworkHandlerReplyTimeout() {
-        return networkHandlerReplyTimeout;
+    public int getBootstrapServerReplyWaitTimeout() {
+        return bootstrapServerReplyWaitTimeout;
     }
 
-    public void setNetworkHandlerReplyTimeout(int networkHandlerReplyTimeout) {
-        this.networkHandlerReplyTimeout = networkHandlerReplyTimeout;
+    public void setBootstrapServerReplyWaitTimeout(int bootstrapServerReplyWaitTimeout) {
+        this.bootstrapServerReplyWaitTimeout = bootstrapServerReplyWaitTimeout;
     }
 
     public int getSerSuperPeerTimeout() {

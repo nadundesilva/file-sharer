@@ -1,10 +1,23 @@
 import {Component, OnInit} from '@angular/core';
-import {Constants, PeerType, ServerResponse, ServerResponseStatus, TableDataSource, Node} from '../commons';
+import {Constants, PeerType, ServerResponse, ServerResponseStatus, TableDataSource, Node} from '../../commons';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/timer';
+
+class NodeInfo {
+  peerType: PeerType;
+  unstructuredNetwork: TableDataSource<Node>;
+
+  // Only in super peers
+  superPeerNetwork: TableDataSource<Node>;
+  assignedOrdinaryPeers: TableDataSource<Node>;
+
+  // Only in ordinary peers
+  assignedSuperPeer: Node;
+}
 
 @Component({
-  selector: 'network',
+  selector: 'app-network',
   templateUrl: './network.component.html',
   styleUrls: ['./network.component.css']
 })
@@ -17,11 +30,11 @@ export class NetworkComponent implements OnInit {
   constructor(private http: HttpClient) {
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.startFetchingNodeInfo();
   }
 
-  startFetchingNodeInfo() {
+  startFetchingNodeInfo(): void {
     const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
     timer.subscribe(t => {
       this.http.get<ServerResponse<any>>(Constants.API_ENDPOINT + Constants.API_NETWORK_ENDPOINT)
@@ -44,16 +57,4 @@ export class NetworkComponent implements OnInit {
         });
     });
   }
-}
-
-class NodeInfo {
-  peerType: PeerType;
-  unstructuredNetwork: TableDataSource<Node>;
-
-  // Only in super peers
-  superPeerNetwork: TableDataSource<Node>;
-  assignedOrdinaryPeers: TableDataSource<Node>;
-
-  // Only in ordinary peers
-  assignedSuperPeer: Node;
 }

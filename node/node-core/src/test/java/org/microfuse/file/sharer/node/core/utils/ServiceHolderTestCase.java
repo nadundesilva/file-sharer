@@ -8,7 +8,7 @@ import org.microfuse.file.sharer.node.commons.communication.routing.strategy.Rou
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
-import org.microfuse.file.sharer.node.core.communication.network.TCPSocketNetworkHandler;
+import org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredRandomWalkRoutingStrategy;
@@ -48,8 +48,10 @@ public class ServiceHolderTestCase extends BaseTestCase {
                 "\"heartbeatInterval\":56000," +
                 "\"gossipingInterval\":72000," +
                 "\"networkHandlerSendTimeout\":23000," +
+                "\"networkHandlerThreadCount\":14," +
                 "\"networkHandlerReplyTimeout\":46000," +
                 "\"serSuperPeerTimeout\":74562," +
+                "\"bootstrapServerReplyWaitTimeout\":465132," +
                 "\"networkHandlerType\":\"TCP_SOCKET\"," +
                 "\"routingStrategyType\":\"SUPER_PEER_RANDOM_WALK\"" +
                 "}";
@@ -67,14 +69,14 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertEquals(configuration.getUsername(), "microfuse.tester");
         Assert.assertEquals(configuration.getIp(), "192.168.1.3");
         Assert.assertEquals(configuration.getPeerListeningPort(), 4562);
-        Assert.assertEquals(configuration.getListenerHandlingThreadCount(), 14);
+        Assert.assertEquals(configuration.getNetworkHandlerThreadCount(), 14);
         Assert.assertEquals(configuration.getTimeToLive(), 3);
         Assert.assertEquals(configuration.getMaxAssignedOrdinaryPeerCount(), 13);
         Assert.assertEquals(configuration.getMaxUnstructuredPeerCount(), 24);
         Assert.assertEquals(configuration.getHeartbeatInterval(), 56000);
         Assert.assertEquals(configuration.getGossipingInterval(), 72000);
         Assert.assertEquals(configuration.getNetworkHandlerSendTimeout(), 23000);
-        Assert.assertEquals(configuration.getNetworkHandlerReplyTimeout(), 46000);
+        Assert.assertEquals(configuration.getBootstrapServerReplyWaitTimeout(), 465132);
         Assert.assertEquals(configuration.getSerSuperPeerTimeout(), 74562);
         Assert.assertEquals(configuration.getNetworkHandlerType(), NetworkHandlerType.TCP_SOCKET);
         Assert.assertEquals(configuration.getRoutingStrategyType(), RoutingStrategyType.SUPER_PEER_RANDOM_WALK);
@@ -93,8 +95,8 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertEquals(configuration.getIp(), NodeConstants.DEFAULT_IP_ADDRESS);
         Assert.assertEquals(configuration.getPeerListeningPort(), NodeConstants.DEFAULT_TCP_LISTENER_PORT);
         Assert.assertEquals(configuration.getTimeToLive(), NodeConstants.DEFAULT_TIME_TO_LIVE);
-        Assert.assertEquals(configuration.getListenerHandlingThreadCount(),
-                NodeConstants.DEFAULT_LISTENER_HANDLER_THREAD_COUNT);
+        Assert.assertEquals(configuration.getNetworkHandlerThreadCount(),
+                NodeConstants.DEFAULT_NETWORK_HANDLER_THREAD_COUNT);
         Assert.assertEquals(configuration.getMaxAssignedOrdinaryPeerCount(),
                 NodeConstants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT);
         Assert.assertEquals(configuration.getMaxUnstructuredPeerCount(),
@@ -220,13 +222,15 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertNotNull(router);
 
         NetworkHandler initialNetworkHandler = router.getNetworkHandler();
-        serviceHolder.changeNetworkHandler(NetworkHandlerType.TCP_SOCKET);
+        Configuration configuration = new Configuration();
+        configuration.setNetworkHandlerType(NetworkHandlerType.UDP_SOCKET);
+        serviceHolder.updateConfiguration(configuration);
         NetworkHandler finalNetworkHandler = router.getNetworkHandler();
 
         Assert.assertNotNull(initialNetworkHandler);
         Assert.assertNotNull(finalNetworkHandler);
         Assert.assertFalse(initialNetworkHandler == finalNetworkHandler);
-        Assert.assertTrue(finalNetworkHandler instanceof TCPSocketNetworkHandler);
+        Assert.assertTrue(finalNetworkHandler instanceof UDPSocketNetworkHandler);
 
         initialNetworkHandler.shutdown();
         finalNetworkHandler.shutdown();
@@ -254,7 +258,9 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertNotNull(router);
 
         RoutingStrategy initialRoutingStrategy = router.getRoutingStrategy();
-        serviceHolder.changeRoutingStrategy(RoutingStrategyType.UNSTRUCTURED_RANDOM_WALK);
+        Configuration configuration = new Configuration();
+        configuration.setRoutingStrategyType(RoutingStrategyType.UNSTRUCTURED_RANDOM_WALK);
+        serviceHolder.updateConfiguration(configuration);
         RoutingStrategy finalRoutingStrategy = router.getRoutingStrategy();
 
         Assert.assertNotNull(initialRoutingStrategy);

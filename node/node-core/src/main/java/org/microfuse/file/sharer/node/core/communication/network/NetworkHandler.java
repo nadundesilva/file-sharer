@@ -48,7 +48,7 @@ public abstract class NetworkHandler {
         listenerHandlerExecutorServiceLock = new ReentrantReadWriteLock();
         listenersList = new ArrayList<>();
         listenerHandlerExecutorService =
-                Executors.newFixedThreadPool(this.serviceHolder.getConfiguration().getListenerHandlingThreadCount());
+                Executors.newFixedThreadPool(this.serviceHolder.getConfiguration().getNetworkHandlerThreadCount());
         restartRequired = false;
         running = false;
     }
@@ -95,7 +95,7 @@ public abstract class NetworkHandler {
         try {
             listenerHandlerExecutorService.shutdown();
             listenerHandlerExecutorService =
-                    Executors.newFixedThreadPool(serviceHolder.getConfiguration().getListenerHandlingThreadCount());
+                    Executors.newFixedThreadPool(serviceHolder.getConfiguration().getNetworkHandlerThreadCount());
         } finally {
             listenerHandlerExecutorServiceLock.writeLock().unlock();
             restartRequired = false;

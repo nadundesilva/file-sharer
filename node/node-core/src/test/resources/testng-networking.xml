@@ -3,6 +3,7 @@
     <test name="file-sharer-node-network-handler-tests" enabled="true">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.communication.network.BootstrapServerNetworkHandlerTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.communication.network.TCPSocketNetworkHandlerTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandlerTestCase"/>
         </classes>

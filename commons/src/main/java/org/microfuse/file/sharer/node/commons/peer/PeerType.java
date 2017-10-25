@@ -8,11 +8,6 @@ public enum PeerType {
     ORDINARY_PEER("Ordinary Peer");
 
     /**
-     * The resource index class map.
-     * Maps the peer type to class.
-     */
-
-    /**
      * Contains the value to be displayed.
      */
     private String value;

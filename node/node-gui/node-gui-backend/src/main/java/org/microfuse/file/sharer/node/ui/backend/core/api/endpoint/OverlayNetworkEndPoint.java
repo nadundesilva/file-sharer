@@ -23,7 +23,6 @@ import javax.ws.rs.core.Response;
 @Path("/network")
 public class OverlayNetworkEndPoint {
     @GET
-    @Path("/")
     public Response getInfoAboutSelf() {
         Status responseStatus = Status.SUCCESS;
         Map<String, Object> data = new HashMap<>();

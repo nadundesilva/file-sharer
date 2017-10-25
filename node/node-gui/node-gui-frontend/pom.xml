@@ -44,6 +44,7 @@
                             <nodeVersion>${node.version}</nodeVersion>
                             <npmVersion>${npm.version}</npmVersion>
                         </configuration>
+                        <phase>validate</phase>
                     </execution>
                     <execution>
                         <id>npm install</id>
@@ -53,6 +54,17 @@
                         <configuration>
                             <arguments>install</arguments>
                         </configuration>
+                        <phase>validate</phase>
+                    </execution>
+                    <execution>
+                        <id>lint</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run-script lint</arguments>
+                        </configuration>
+                        <phase>validate</phase>
                     </execution>
                     <execution>
                         <id>build</id>

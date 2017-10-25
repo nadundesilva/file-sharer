@@ -49,7 +49,7 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
             DatagramSocket finalSocket = socket;
             networkHandlerSendTimeoutThread = new Thread(() -> {
                 try {
-                    Thread.sleep(serviceHolder.getConfiguration().getNetworkHandlerReplyTimeout());
+                    Thread.sleep(serviceHolder.getConfiguration().getBootstrapServerReplyWaitTimeout());
                 } catch (InterruptedException ignored) {
                 }
                 if (networkHandlerSendTimeoutThread != null) {

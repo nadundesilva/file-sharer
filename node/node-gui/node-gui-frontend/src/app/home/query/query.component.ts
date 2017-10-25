@@ -1,12 +1,11 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {
-  Constants, ServerResponse, ServerResponseStatus, TableDataSource, TableDataSourceItem, Utils
-} from '../commons';
+import {Constants, ServerResponse, ServerResponseStatus, TableDataSource, Utils} from '../../commons';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs/Rx';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/timer';
 
 @Component({
-  selector: 'query',
+  selector: 'app-query',
   templateUrl: './query.component.html',
   styleUrls: ['./query.component.css']
 })
@@ -24,12 +23,12 @@ export class QueryComponent implements OnInit {
   constructor(private http: HttpClient, private utils: Utils) {
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.startFetchingRunningQueries();
     this.startFetchingQueryResults();
   }
 
-  public query(): void {
+  query(): void {
     const queryString = this.queryString;
     if (queryString) {
       this.http.post<ServerResponse<any>>(
@@ -49,7 +48,7 @@ export class QueryComponent implements OnInit {
 
   private startFetchingRunningQueries(): void {
     const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
-    timer.subscribe(t => this.fetchRunningQueries());
+    timer.subscribe(this.fetchRunningQueries);
   }
 
   private fetchRunningQueries(): void {
@@ -65,10 +64,10 @@ export class QueryComponent implements OnInit {
 
   private startFetchingQueryResults(): void {
     const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
-    timer.subscribe(t => this.fetchQueryResults());
+    timer.subscribe(this.fetchQueryResults);
   }
 
-  public fetchQueryResults(): void {
+  fetchQueryResults(): void {
     if (this.selectedRunningQuery) {
       this.http.get<ServerResponse<AggregatedResource[]>>(
         Constants.API_ENDPOINT + Constants.API_QUERY_ENDPOINT + this.selectedRunningQuery
@@ -85,11 +84,7 @@ export class QueryComponent implements OnInit {
   }
 }
 
-class AggregatedResource extends TableDataSourceItem {
+class AggregatedResource {
   name: string;
   nodes: Node[];
-
-  get filterString(): string {
-    return this.name;
-  }
 }

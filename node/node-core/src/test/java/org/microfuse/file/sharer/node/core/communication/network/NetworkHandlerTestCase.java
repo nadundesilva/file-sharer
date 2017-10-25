@@ -32,7 +32,7 @@ public class NetworkHandlerTestCase extends BaseTestCase {
         Whitebox.setInternalState(networkHandler, "serviceHolder", serviceHolder);
 
         listenerHandlerExecutorService =
-                Executors.newFixedThreadPool(serviceHolder.getConfiguration().getListenerHandlingThreadCount());
+                Executors.newFixedThreadPool(serviceHolder.getConfiguration().getNetworkHandlerThreadCount());
         Whitebox.setInternalState(networkHandler, "listenerHandlerExecutorService",
                 listenerHandlerExecutorService);
         Whitebox.setInternalState(networkHandler, "listenersListLock", new ReentrantReadWriteLock());

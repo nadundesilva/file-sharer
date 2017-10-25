@@ -1,7 +1,6 @@
 package org.microfuse.file.sharer.node.core;
 
-import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
-import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
+import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,59 +17,38 @@ public class FileSharer {
         serviceHolder = new ServiceHolder();
     }
 
-    public FileSharer(String ip, int peerListeningPort) {
-        this();
-        serviceHolder.getConfiguration().setIp(ip);
-        serviceHolder.getConfiguration().setPeerListeningPort(peerListeningPort);
-    }
-
     /**
      * Start the current node.
      */
     public void start() {
+        Thread thread = new Thread(this::startInCurrentThread);
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.start();
+    }
+
+    /**
+     * Restarts the current node.
+     */
+    public void restart() {
         Thread thread = new Thread(() -> {
-            logger.info("Starting Node");
-            serviceHolder.getOverlayNetworkManager().register();
-            serviceHolder.getOverlayNetworkManager().enableHeartBeat();
-            serviceHolder.getOverlayNetworkManager().enableGossiping();
+            shutdownInCurrentThread();
+            try {
+                Thread.sleep(Constants.CONTINUOUS_TASK_INTERVAL);
+            } catch (InterruptedException ignored) {
+            }
+            startInCurrentThread();
         });
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.start();
     }
 
     /**
-     * Leave the bootstrap server and the network.
-     */
-    public void leaveNetwork() {
-        serviceHolder.getOverlayNetworkManager().unregister();
-        serviceHolder.getOverlayNetworkManager().leave();
-    }
-
-    /**
      * Shutdown the file sharer.
      */
     public void shutdown() {
-        serviceHolder.getOverlayNetworkManager().disableGossiping();
-        serviceHolder.getOverlayNetworkManager().disableHeartBeat();
-        serviceHolder.clear();
-    }
-
-    /**
-     * Change the network handler used by the system.
-     *
-     * @param networkHandlerType The network handler type to be used
-     */
-    public synchronized void changeNetworkHandler(NetworkHandlerType networkHandlerType) {
-        serviceHolder.changeNetworkHandler(networkHandlerType);
-    }
-
-    /**
-     * Change the network handler used by the system.
-     *
-     * @param routingStrategyType The network handler type to be used
-     */
-    public synchronized void changeRoutingStrategy(RoutingStrategyType routingStrategyType) {
-        serviceHolder.changeRoutingStrategy(routingStrategyType);
+        Thread thread = new Thread(this::shutdownInCurrentThread);
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.start();
     }
 
     /**
@@ -78,5 +56,34 @@ public class FileSharer {
      */
     public ServiceHolder getServiceHolder() {
         return serviceHolder;
+    }
+
+    /**
+     * Start the file sharer in the same thread.
+     */
+    private void startInCurrentThread() {
+        logger.info("Starting Node");
+        serviceHolder.getOverlayNetworkManager().register();
+        serviceHolder.getOverlayNetworkManager().enableHeartBeat();
+        serviceHolder.getOverlayNetworkManager().enableGossiping();
+    }
+
+    /**
+     * Shutdown the file sharer in the same thread.
+     */
+    private void shutdownInCurrentThread() {
+        logger.debug("Shutting down the Node");
+        serviceHolder.getOverlayNetworkManager().unregister();
+        serviceHolder.getOverlayNetworkManager().leave();
+
+        // Waiting with a time out to leave the network
+        try {
+            Thread.sleep(Constants.CONTINUOUS_TASK_INTERVAL);
+        } catch (InterruptedException ignored) {
+        }
+
+        serviceHolder.getOverlayNetworkManager().disableGossiping();
+        serviceHolder.getOverlayNetworkManager().disableHeartBeat();
+        serviceHolder.clear();
     }
 }

@@ -68,26 +68,6 @@ public class ServiceHolder {
     }
 
     /**
-     * Change the network handler used by the system.
-     *
-     * @param networkHandlerType The network handler type to be used
-     */
-    public synchronized void changeNetworkHandler(NetworkHandlerType networkHandlerType) {
-        getConfiguration().setNetworkHandlerType(networkHandlerType);
-        getRouter().changeNetworkHandler(instantiateNetworkHandler());
-    }
-
-    /**
-     * Change the network handler used by the system.
-     *
-     * @param routingStrategyType The network handler type to be used
-     */
-    public synchronized void changeRoutingStrategy(RoutingStrategyType routingStrategyType) {
-        getConfiguration().setRoutingStrategyType(routingStrategyType);
-        getRouter().changeRoutingStrategy(instantiateRoutingStrategy());
-    }
-
-    /**
      * Clear all the stored services.
      */
     public synchronized void clear() {
@@ -206,6 +186,54 @@ public class ServiceHolder {
     }
 
     /**
+     * Update the configuration used by the file sharer.
+     *
+     * @param configuration The configuration to be used
+     */
+    public synchronized void updateConfiguration(Configuration configuration) {
+        if (configuration != null) {
+            boolean networkHandlerReplaceRequired = false;
+            if (configuration.getNetworkHandlerType() != this.configuration.getNetworkHandlerType() ||
+                    configuration.getPeerListeningPort() != this.configuration.getPeerListeningPort() ||
+                    configuration.getNetworkHandlerThreadCount() != this.configuration.getNetworkHandlerThreadCount()) {
+                networkHandlerReplaceRequired = true;
+            }
+            boolean routingStraegyReplaceRequired = false;
+            if (configuration.getRoutingStrategyType() != this.configuration.getRoutingStrategyType()) {
+                routingStraegyReplaceRequired = true;
+            }
+
+            this.configuration = configuration;
+            if (networkHandlerReplaceRequired) {
+                getRouter().changeNetworkHandler(instantiateNetworkHandler());
+            }
+            if (routingStraegyReplaceRequired) {
+                getRouter().changeRoutingStrategy(instantiateRoutingStrategy());
+            }
+
+            saveConfiguration();
+        }
+    }
+
+    public synchronized void saveConfiguration() {
+        File configFile = new File(NodeConstants.CONFIG_FILE);
+        try {
+            if (!configFile.createNewFile()) {
+                try {
+                    Files.write(new Gson().toJson(configuration).getBytes(
+                            Constants.DEFAULT_CHARSET), configFile);
+                } catch (IOException e1) {
+                    logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
+                }
+            } else {
+                logger.warn("Failed to create file " + configFile.getAbsolutePath());
+            }
+        } catch (IOException e1) {
+            logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
+        }
+    }
+
+    /**
      * Instantiate network handler based on configuration.
      *
      * @return The network handler
@@ -243,23 +271,5 @@ public class ServiceHolder {
             routingStrategy = new UnstructuredFloodingRoutingStrategy(this);
         }
         return routingStrategy;
-    }
-
-    private synchronized void saveConfiguration() {
-        File configFile = new File(NodeConstants.CONFIG_FILE);
-        try {
-            if (!configFile.createNewFile()) {
-                try {
-                    Files.write(new Gson().toJson(configuration).getBytes(
-                            Constants.DEFAULT_CHARSET), configFile);
-                } catch (IOException e1) {
-                    logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
-                }
-            } else {
-                logger.warn("Failed to create file " + configFile.getAbsolutePath());
-            }
-        } catch (IOException e1) {
-            logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
-        }
     }
 }
