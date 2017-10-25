@@ -124,6 +124,15 @@ public class SuperPeerResourceIndex extends ResourceIndex {
     }
 
     /**
+     * Get all the aggregated resources in the index.
+     *
+     * @return The aggregated resources in the index.
+     */
+    public Set<AggregatedResource> getAllAggregatedResources() {
+        return new HashSet<>(aggregatedResources);
+    }
+
+    /**
      * Clear the resource index.
      */
     public void clear() {

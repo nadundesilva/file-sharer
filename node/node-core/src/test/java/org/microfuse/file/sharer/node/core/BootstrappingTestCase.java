@@ -12,6 +12,10 @@ import org.microfuse.file.sharer.node.core.communication.routing.RouterListener;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
+import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
+import org.microfuse.file.sharer.node.core.resource.OwnedResource;
+import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
+import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
@@ -21,6 +25,9 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Test Case for testing interactions with the bootstrap server.
@@ -1565,6 +1572,377 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node1) ||
                         superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node4) ||
                         superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node7));
+            }
+        } finally {
+            fileSharer.leaveNetwork();
+            waitFor(delay);
+            fileSharer.shutdown();
+            waitFor(delay);
+
+            fileSharer9.leaveNetwork();
+            waitFor(delay);
+            fileSharer9.shutdown();
+            waitFor(delay);
+
+            fileSharer8.leaveNetwork();
+            waitFor(delay);
+            fileSharer8.shutdown();
+            waitFor(delay);
+
+            fileSharer7.leaveNetwork();
+            waitFor(delay);
+            fileSharer7.shutdown();
+            waitFor(delay);
+
+            fileSharer6.leaveNetwork();
+            waitFor(delay);
+            fileSharer6.shutdown();
+            waitFor(delay);
+
+            fileSharer5.leaveNetwork();
+            waitFor(delay);
+            fileSharer5.shutdown();
+            waitFor(delay);
+
+            fileSharer4.leaveNetwork();
+            waitFor(delay);
+            fileSharer4.shutdown();
+            waitFor(delay);
+
+            fileSharer3.leaveNetwork();
+            waitFor(delay);
+            fileSharer3.shutdown();
+            waitFor(delay);
+
+            fileSharer2.leaveNetwork();
+            waitFor(delay);
+            fileSharer2.shutdown();
+            waitFor(delay);
+
+            fileSharer1.leaveNetwork();
+            waitFor(delay);
+            fileSharer1.shutdown();
+            waitFor(delay);
+        }
+    }
+
+    @Test(priority = 11)
+    public void testResourceIndexPopulation() {
+        logger.info("Running Bootstrapping Test 11 - Resource index population");
+
+        FileSharer fileSharer1 = new FileSharer();
+        Object internalStateServiceHolder1 = Whitebox.getInternalState(fileSharer1, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder1 instanceof ServiceHolder);
+        ServiceHolder serviceHolder1 = (ServiceHolder) internalStateServiceHolder1;
+        serviceHolder1.getConfiguration().setIp(node1.getIp());
+        serviceHolder1.getConfiguration().setPeerListeningPort(node1.getPort());
+
+        FileSharer fileSharer2 = new FileSharer();
+        Object internalStateServiceHolder2 = Whitebox.getInternalState(fileSharer2, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder2 instanceof ServiceHolder);
+        ServiceHolder serviceHolder2 = (ServiceHolder) internalStateServiceHolder2;
+        serviceHolder2.getConfiguration().setIp(node2.getIp());
+        serviceHolder2.getConfiguration().setPeerListeningPort(node2.getPort());
+
+        FileSharer fileSharer3 = new FileSharer();
+        Object internalStateServiceHolder3 = Whitebox.getInternalState(fileSharer3, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder3 instanceof ServiceHolder);
+        ServiceHolder serviceHolder3 = (ServiceHolder) internalStateServiceHolder3;
+        serviceHolder3.getConfiguration().setIp(node3.getIp());
+        serviceHolder3.getConfiguration().setPeerListeningPort(node3.getPort());
+
+        FileSharer fileSharer4 = new FileSharer();
+        Object internalStateServiceHolder4 = Whitebox.getInternalState(fileSharer4, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder4 instanceof ServiceHolder);
+        ServiceHolder serviceHolder4 = (ServiceHolder) internalStateServiceHolder4;
+        serviceHolder4.getConfiguration().setIp(node4.getIp());
+        serviceHolder4.getConfiguration().setPeerListeningPort(node4.getPort());
+
+        FileSharer fileSharer5 = new FileSharer();
+        Object internalStateServiceHolder5 = Whitebox.getInternalState(fileSharer5, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder5 instanceof ServiceHolder);
+        ServiceHolder serviceHolder5 = (ServiceHolder) internalStateServiceHolder5;
+        serviceHolder5.getConfiguration().setIp(node5.getIp());
+        serviceHolder5.getConfiguration().setPeerListeningPort(node5.getPort());
+
+        FileSharer fileSharer6 = new FileSharer();
+        Object internalStateServiceHolder6 = Whitebox.getInternalState(fileSharer6, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder6 instanceof ServiceHolder);
+        ServiceHolder serviceHolder6 = (ServiceHolder) internalStateServiceHolder6;
+        serviceHolder6.getConfiguration().setIp(node6.getIp());
+        serviceHolder6.getConfiguration().setPeerListeningPort(node6.getPort());
+
+        FileSharer fileSharer7 = new FileSharer();
+        Object internalStateServiceHolder7 = Whitebox.getInternalState(fileSharer7, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder7 instanceof ServiceHolder);
+        ServiceHolder serviceHolder7 = (ServiceHolder) internalStateServiceHolder7;
+        serviceHolder7.getConfiguration().setIp(node7.getIp());
+        serviceHolder7.getConfiguration().setPeerListeningPort(node7.getPort());
+
+        FileSharer fileSharer8 = new FileSharer();
+        Object internalStateServiceHolder8 = Whitebox.getInternalState(fileSharer8, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder8 instanceof ServiceHolder);
+        ServiceHolder serviceHolder8 = (ServiceHolder) internalStateServiceHolder8;
+        serviceHolder8.getConfiguration().setIp(node8.getIp());
+        serviceHolder8.getConfiguration().setPeerListeningPort(node8.getPort());
+
+        FileSharer fileSharer9 = new FileSharer();
+        Object internalStateServiceHolder9 = Whitebox.getInternalState(fileSharer9, "serviceHolder");
+        Assert.assertTrue(internalStateServiceHolder9 instanceof ServiceHolder);
+        ServiceHolder serviceHolder9 = (ServiceHolder) internalStateServiceHolder9;
+        serviceHolder9.getConfiguration().setIp(node9.getIp());
+        serviceHolder9.getConfiguration().setPeerListeningPort(node9.getPort());
+
+        // Registering resources
+        fileSharer1.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("Lord of the Rings 2"), new OwnedResource("Cars"),
+                new OwnedResource("Iron Man")
+        ));
+        fileSharer2.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("Lord of the Rings"), new OwnedResource("Iron Man 2"),
+                new OwnedResource("Spider Man")
+        ));
+        fileSharer3.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("Hotel Transylvania"), new OwnedResource("How to train your Dragon"),
+                new OwnedResource("Lord of the Rings")
+        ));
+        fileSharer4.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("Leap Year"), new OwnedResource("Leap Year"),
+                new OwnedResource("Two weeks Notice")
+        ));
+        fileSharer5.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("Me Before You"), new OwnedResource("Endless Love"),
+                new OwnedResource("Life as we know it")
+        ));
+        fileSharer6.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("How do you know"), new OwnedResource("The Last Song"),
+                new OwnedResource("Thor")
+        ));
+        fileSharer7.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("X-Men Origins"), new OwnedResource("Cars"),
+                new OwnedResource("Captain America")
+        ));
+        fileSharer8.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("22 Jump Street"), new OwnedResource("Iron Man 3"),
+                new OwnedResource("Lord of the Rings")
+        ));
+        fileSharer9.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("James Bond Sky fall"), new OwnedResource("Suicide Squad"),
+                new OwnedResource("Fast and Furious")
+        ));
+        fileSharer.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
+                new OwnedResource("Teenage Mutant Ninja Turtles"), new OwnedResource("Underworld"),
+                new OwnedResource("Despicable Me 3")
+        ));
+
+        serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
+        serviceHolder1.getConfiguration().setGossipingInterval(delay);
+        serviceHolder1.getConfiguration().setHeartbeatInterval(delay);
+        fileSharer1.start();
+        waitFor(delay);
+
+        fileSharer2.start();
+        waitFor(delay);
+
+        fileSharer3.start();
+        waitFor(delay);
+
+        serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder4.getConfiguration().setGossipingInterval(delay);
+        serviceHolder4.getConfiguration().setHeartbeatInterval(delay);
+        fileSharer4.start();
+        waitFor(delay * 3);
+
+        fileSharer5.start();
+        waitFor(delay);
+
+        fileSharer6.start();
+        waitFor(delay);
+
+        serviceHolder7.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
+        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder7.getConfiguration().setGossipingInterval(delay);
+        serviceHolder7.getConfiguration().setHeartbeatInterval(delay);
+        fileSharer7.start();
+        waitFor(delay * 3);
+
+        fileSharer8.start();
+        waitFor(delay);
+
+        fileSharer9.start();
+        waitFor(delay);
+
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder.getConfiguration().setGossipingInterval(delay);
+        serviceHolder.getConfiguration().setHeartbeatInterval(delay);
+        fileSharer.start();
+        waitFor(delay * 3);
+
+        try {
+            {
+                AggregatedResource aggregatedResource1 = new AggregatedResource("Lord of the Rings");
+                AggregatedResource aggregatedResource2 = new AggregatedResource("Iron Man 2");
+                AggregatedResource aggregatedResource3 = new AggregatedResource("Spider Man");
+                AggregatedResource aggregatedResource4 = new AggregatedResource("Hotel Transylvania");
+                AggregatedResource aggregatedResource5 = new AggregatedResource("How to train your Dragon");
+
+                ResourceIndex resourceIndex1 = fileSharer1.getServiceHolder().getResourceIndex();
+                Assert.assertTrue(resourceIndex1 instanceof SuperPeerResourceIndex);
+                SuperPeerResourceIndex superPeerResourceIndex1 = (SuperPeerResourceIndex) resourceIndex1;
+                Assert.assertEquals(superPeerResourceIndex1.getAllAggregatedResources().size(), 5);
+
+                Assert.assertTrue(superPeerResourceIndex1.getAllAggregatedResources().contains(aggregatedResource1));
+                AggregatedResource storedAggregatedResource1 =
+                        new ArrayList<>(superPeerResourceIndex1.findAggregatedResources(aggregatedResource1.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource1.getAllNodes().size(), 2);
+                Assert.assertTrue(storedAggregatedResource1.getAllNodes().contains(node2));
+                Assert.assertTrue(storedAggregatedResource1.getAllNodes().contains(node3));
+
+                Assert.assertTrue(superPeerResourceIndex1.getAllAggregatedResources().contains(aggregatedResource2));
+                AggregatedResource storedAggregatedResource2 =
+                        new ArrayList<>(superPeerResourceIndex1.findAggregatedResources(aggregatedResource2.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource2.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource2.getAllNodes().contains(node2));
+
+                Assert.assertTrue(superPeerResourceIndex1.getAllAggregatedResources().contains(aggregatedResource3));
+                AggregatedResource storedAggregatedResource3 =
+                        new ArrayList<>(superPeerResourceIndex1.findAggregatedResources(aggregatedResource3.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource3.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource3.getAllNodes().contains(node2));
+
+                Assert.assertTrue(superPeerResourceIndex1.getAllAggregatedResources().contains(aggregatedResource4));
+                AggregatedResource storedAggregatedResource4 =
+                        new ArrayList<>(superPeerResourceIndex1.findAggregatedResources(aggregatedResource4.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource4.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource4.getAllNodes().contains(node3));
+
+                Assert.assertTrue(superPeerResourceIndex1.getAllAggregatedResources().contains(aggregatedResource5));
+                AggregatedResource storedAggregatedResource5 =
+                        new ArrayList<>(superPeerResourceIndex1.findAggregatedResources(aggregatedResource5.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource5.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource5.getAllNodes().contains(node3));
+            }
+            {
+                AggregatedResource aggregatedResource1 = new AggregatedResource("Me Before You");
+                AggregatedResource aggregatedResource2 = new AggregatedResource("Endless Love");
+                AggregatedResource aggregatedResource3 = new AggregatedResource("Life as we know it");
+                AggregatedResource aggregatedResource4 = new AggregatedResource("How do you know");
+                AggregatedResource aggregatedResource5 = new AggregatedResource("The Last Song");
+                AggregatedResource aggregatedResource6 = new AggregatedResource("Thor");
+
+                ResourceIndex resourceIndex4 = fileSharer4.getServiceHolder().getResourceIndex();
+                Assert.assertTrue(resourceIndex4 instanceof SuperPeerResourceIndex);
+                SuperPeerResourceIndex superPeerResourceIndex4 = (SuperPeerResourceIndex) resourceIndex4;
+                Assert.assertEquals(superPeerResourceIndex4.getAllAggregatedResources().size(), 6);
+
+                Assert.assertTrue(superPeerResourceIndex4.getAllAggregatedResources().contains(aggregatedResource1));
+                AggregatedResource storedAggregatedResource1 =
+                        new ArrayList<>(superPeerResourceIndex4.findAggregatedResources(aggregatedResource1.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource1.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource1.getAllNodes().contains(node5));
+
+                Assert.assertTrue(superPeerResourceIndex4.getAllAggregatedResources().contains(aggregatedResource2));
+                AggregatedResource storedAggregatedResource2 =
+                        new ArrayList<>(superPeerResourceIndex4.findAggregatedResources(aggregatedResource2.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource2.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource2.getAllNodes().contains(node5));
+
+                Assert.assertTrue(superPeerResourceIndex4.getAllAggregatedResources().contains(aggregatedResource3));
+                AggregatedResource storedAggregatedResource3 =
+                        new ArrayList<>(superPeerResourceIndex4.findAggregatedResources(aggregatedResource3.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource3.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource3.getAllNodes().contains(node5));
+
+                Assert.assertTrue(superPeerResourceIndex4.getAllAggregatedResources().contains(aggregatedResource4));
+                AggregatedResource storedAggregatedResource4 =
+                        new ArrayList<>(superPeerResourceIndex4.findAggregatedResources(aggregatedResource4.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource4.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource4.getAllNodes().contains(node6));
+
+                Assert.assertTrue(superPeerResourceIndex4.getAllAggregatedResources().contains(aggregatedResource5));
+                AggregatedResource storedAggregatedResource5 =
+                        new ArrayList<>(superPeerResourceIndex4.findAggregatedResources(aggregatedResource5.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource5.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource5.getAllNodes().contains(node6));
+
+                Assert.assertTrue(superPeerResourceIndex4.getAllAggregatedResources().contains(aggregatedResource6));
+                AggregatedResource storedAggregatedResource6 =
+                        new ArrayList<>(superPeerResourceIndex4.findAggregatedResources(aggregatedResource6.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource6.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource6.getAllNodes().contains(node6));
+            }
+            {
+                AggregatedResource aggregatedResource1 = new AggregatedResource("22 Jump Street");
+                AggregatedResource aggregatedResource2 = new AggregatedResource("Iron Man 3");
+                AggregatedResource aggregatedResource3 = new AggregatedResource("Lord of the Rings");
+                AggregatedResource aggregatedResource4 = new AggregatedResource("James Bond Sky fall");
+                AggregatedResource aggregatedResource5 = new AggregatedResource("Suicide Squad");
+                AggregatedResource aggregatedResource6 = new AggregatedResource("Fast and Furious");
+
+                ResourceIndex resourceIndex7 = fileSharer7.getServiceHolder().getResourceIndex();
+                Assert.assertTrue(resourceIndex7 instanceof SuperPeerResourceIndex);
+                SuperPeerResourceIndex superPeerResourceIndex7 = (SuperPeerResourceIndex) resourceIndex7;
+                Assert.assertEquals(superPeerResourceIndex7.getAllAggregatedResources().size(), 6);
+
+                Assert.assertTrue(superPeerResourceIndex7.getAllAggregatedResources().contains(aggregatedResource1));
+                AggregatedResource storedAggregatedResource1 =
+                        new ArrayList<>(superPeerResourceIndex7.findAggregatedResources(aggregatedResource1.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource1.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource1.getAllNodes().contains(node8));
+
+                Assert.assertTrue(superPeerResourceIndex7.getAllAggregatedResources().contains(aggregatedResource2));
+                AggregatedResource storedAggregatedResource2 =
+                        new ArrayList<>(superPeerResourceIndex7.findAggregatedResources(aggregatedResource2.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource2.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource2.getAllNodes().contains(node8));
+
+                Assert.assertTrue(superPeerResourceIndex7.getAllAggregatedResources().contains(aggregatedResource3));
+                AggregatedResource storedAggregatedResource3 =
+                        new ArrayList<>(superPeerResourceIndex7.findAggregatedResources(aggregatedResource3.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource3.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource3.getAllNodes().contains(node8));
+
+                Assert.assertTrue(superPeerResourceIndex7.getAllAggregatedResources().contains(aggregatedResource4));
+                AggregatedResource storedAggregatedResource4 =
+                        new ArrayList<>(superPeerResourceIndex7.findAggregatedResources(aggregatedResource4.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource4.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource4.getAllNodes().contains(node9));
+
+                Assert.assertTrue(superPeerResourceIndex7.getAllAggregatedResources().contains(aggregatedResource5));
+                AggregatedResource storedAggregatedResource5 =
+                        new ArrayList<>(superPeerResourceIndex7.findAggregatedResources(aggregatedResource5.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource5.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource5.getAllNodes().contains(node9));
+
+                Assert.assertTrue(superPeerResourceIndex7.getAllAggregatedResources().contains(aggregatedResource6));
+                AggregatedResource storedAggregatedResource6 =
+                        new ArrayList<>(superPeerResourceIndex7.findAggregatedResources(aggregatedResource6.getName()))
+                                .get(0);
+                Assert.assertEquals(storedAggregatedResource6.getAllNodes().size(), 1);
+                Assert.assertTrue(storedAggregatedResource6.getAllNodes().contains(node9));
+            }
+            {
+                ResourceIndex resourceIndex = fileSharer.getServiceHolder().getResourceIndex();
+                Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
+                SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
+                Assert.assertEquals(superPeerResourceIndex.getAllAggregatedResources().size(), 0);
             }
         } finally {
             fileSharer.leaveNetwork();
