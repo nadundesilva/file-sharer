@@ -45,19 +45,19 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
 
         superPeerResourceIndex = new SuperPeerResourceIndex();
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName1, node1);
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName1, node2);
+        superPeerResourceIndex.addAggregatedResource(resourceName1, node1);
+        superPeerResourceIndex.addAggregatedResource(resourceName1, node2);
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName2, node4);
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName2, node5);
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName2, node6);
+        superPeerResourceIndex.addAggregatedResource(resourceName2, node4);
+        superPeerResourceIndex.addAggregatedResource(resourceName2, node5);
+        superPeerResourceIndex.addAggregatedResource(resourceName2, node6);
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName3, node1);
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName3, node3);
+        superPeerResourceIndex.addAggregatedResource(resourceName3, node1);
+        superPeerResourceIndex.addAggregatedResource(resourceName3, node3);
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName4, node2);
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName4, node3);
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName4, node6);
+        superPeerResourceIndex.addAggregatedResource(resourceName4, node2);
+        superPeerResourceIndex.addAggregatedResource(resourceName4, node3);
+        superPeerResourceIndex.addAggregatedResource(resourceName4, node6);
     }
 
     @Test(priority = 1)
@@ -66,7 +66,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
 
         String newAggreResourceResourceName = "Spider Man";
         Node newNode = Mockito.mock(Node.class);
-        superPeerResourceIndex.addResourceToAggregatedIndex(newAggreResourceResourceName, newNode);
+        superPeerResourceIndex.addAggregatedResource(newAggreResourceResourceName, newNode);
 
         Object ownedResourcesInternalState = Whitebox.getInternalState(superPeerResourceIndex, "aggregatedResources");
         Assert.assertTrue(ownedResourcesInternalState instanceof Set<?>);
@@ -107,7 +107,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         newNode.setIp("192.168.1.1");
         newNode.setPort(4067);
         newNode.setAlive(true);
-        superPeerResourceIndex.addResourceToAggregatedIndex(resourceName2, newNode);
+        superPeerResourceIndex.addAggregatedResource(resourceName2, newNode);
 
         Set<AggregatedResource> carsResources = superPeerResourceIndex.findAggregatedResources(resourceName2);
         AggregatedResource carsResource = carsResources.stream().findAny().orElse(null);
@@ -128,7 +128,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         newNode.setAlive(true);
         String newResourceName = "Wonder Woman";
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(newResourceName, newNode);
+        superPeerResourceIndex.addAggregatedResource(newResourceName, newNode);
         Set<AggregatedResource> wonderWomanResources = superPeerResourceIndex.findAggregatedResources(newResourceName);
         AggregatedResource wonderWomanResource = wonderWomanResources.stream().findAny().orElse(null);
 
@@ -137,7 +137,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         Assert.assertEquals(wonderWomanResource.getNodeCount(), 1);
         Assert.assertTrue(wonderWomanResource.getAllNodes().contains(newNode));
 
-        superPeerResourceIndex.removeResourceFromAggregatedIndex(newResourceName, newNode);
+        superPeerResourceIndex.removeAggregatedResource(newResourceName, newNode);
         Set<AggregatedResource> updatedWonderWomanResources =
                 superPeerResourceIndex.findAggregatedResources(newResourceName);
 

@@ -12,6 +12,9 @@ import org.microfuse.file.sharer.node.core.communication.routing.RouterListener;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
+import org.microfuse.file.sharer.node.core.resource.OwnedResource;
+import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
+import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +88,12 @@ public class OverlayNetworkManager implements RouterListener {
             case JOIN_SUPER_PEER_OK:
                 handleJoinSuperPeerOkMessage(fromNode, message);
                 break;
+            case LIST_RESOURCES:
+                handleListResourcesMessage(fromNode, message);
+                break;
+            case LIST_RESOURCES_OK:
+                handleListResourcesOkMessage(fromNode, message);
+                break;
             default:
                 logger.debug("Message " + message.toString() + " of unrecognized type ignored ");
         }
@@ -149,6 +158,30 @@ public class OverlayNetworkManager implements RouterListener {
                 serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
             logger.debug("Gossiping to grow the network");
             // TODO : Implement gossiping.
+        }
+
+        if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
+            logger.debug("Gossiping to grow the aggregated resources index");
+
+            RoutingTable routingTable = router.getRoutingTable();
+            if (routingTable instanceof SuperPeerRoutingTable) {
+                SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
+
+                Set<Node> nodes = superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes();
+                nodes.forEach(node -> {
+                    Message listResourcesMessage = new Message();
+                    listResourcesMessage.setType(MessageType.LIST_RESOURCES);
+                    listResourcesMessage.setData(MessageIndexes.LIST_RESOURCES_IP,
+                            serviceHolder.getConfiguration().getIp());
+                    listResourcesMessage.setData(MessageIndexes.LIST_RESOURCES_PORT,
+                            Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+                    logger.debug("Heart beat sent to node " + node.toString());
+                    router.sendMessage(node, listResourcesMessage);
+                });
+            } else {
+                logger.error("Inconsistent ordinary peer routing table in super peer");
+            }
         }
     }
 
@@ -761,6 +794,77 @@ public class OverlayNetworkManager implements RouterListener {
             default:
                 logger.warn("Unknown " + MessageType.JOIN_SUPER_PEER_OK.getValue() + " message value in message "
                         + message.toString());
+        }
+    }
+
+    /**
+     * Handle LIST_RESOURCES type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleListResourcesMessage(Node fromNode, Message message) {
+        Message replyMessage = new Message();
+        replyMessage.setType(MessageType.LIST_RESOURCES_OK);
+        replyMessage.setData(MessageIndexes.LIST_RESOURCES_OK_IP,
+                serviceHolder.getConfiguration().getIp());
+        replyMessage.setData(MessageIndexes.LIST_RESOURCES_OK_PORT,
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+        List<OwnedResource> ownedResources = new ArrayList<>(serviceHolder.getResourceIndex().getAllOwnedResources());
+        replyMessage.setData(MessageIndexes.LIST_RESOURCES_OK_RESOURCE_COUNT, Integer.toString(ownedResources.size()));
+        for (int i = 0; i < ownedResources.size(); i++) {
+            replyMessage.setData(MessageIndexes.LIST_RESOURCES_OK_RESOURCE_START_INDEX + i,
+                    ownedResources.get(i).getName());
+        }
+
+        router.sendMessage(
+                message.getData(MessageIndexes.LIST_RESOURCES_IP),
+                Integer.parseInt(message.getData(MessageIndexes.LIST_RESOURCES_PORT)),
+                replyMessage
+        );
+    }
+
+    /**
+     * Handle LIST_RESOURCES_OK type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleListResourcesOkMessage(Node fromNode, Message message) {
+        if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
+            RoutingTable routingTable = router.getRoutingTable();
+            if (routingTable instanceof SuperPeerRoutingTable) {
+                SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
+                ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
+                if (resourceIndex instanceof SuperPeerResourceIndex) {
+                    SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
+                    Node node = superPeerRoutingTable.getAssignedOrdinaryNetworkRoutingTableNode(
+                            message.getData(MessageIndexes.LIST_RESOURCES_OK_IP),
+                            Integer.parseInt(message.getData(MessageIndexes.LIST_RESOURCES_OK_PORT))
+                    );
+                    if (node != null) {
+                        int resourceCount = Integer.parseInt(message.getData(
+                                MessageIndexes.LIST_RESOURCES_OK_RESOURCE_COUNT));
+                        List<String> resourceNames = new ArrayList<>();
+                        for (int i = 0; i < resourceCount; i++) {
+                            resourceNames.add(message.getData(
+                                    MessageIndexes.LIST_RESOURCES_OK_RESOURCE_START_INDEX + i));
+                        }
+                        superPeerResourceIndex.removeNodeFromAggregatedResources(node);
+                        superPeerResourceIndex.addAllAggregatedResources(resourceNames, node);
+                    } else {
+                        logger.warn("Dropped message " + message.toString()
+                                + " received from an unassigned ordinary peer");
+                    }
+                } else {
+                    logger.error("Inconsistent ordinary peer resource index in super peer");
+                }
+            } else {
+                logger.error("Inconsistent ordinary peer routing table in super peer");
+            }
+        } else {
+            logger.warn(message.toString() + " Cannot be handled by ordinary peer");
         }
     }
 }

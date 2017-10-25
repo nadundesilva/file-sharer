@@ -210,8 +210,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node1);
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
 
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 fromSuperPeerNode, message);
@@ -235,8 +235,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node1);
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
 
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 null, message);
@@ -261,8 +261,8 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node1);
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
 
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 fromSuperPeerNode, message);

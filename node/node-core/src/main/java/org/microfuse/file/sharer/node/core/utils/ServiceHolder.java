@@ -46,7 +46,7 @@ public class ServiceHolder {
         peerType = PeerType.SUPER_PEER;
         if (!(getResourceIndex() instanceof SuperPeerResourceIndex)) {
             ResourceIndex newResourceIndex = new SuperPeerResourceIndex();
-            newResourceIndex.addAllResourcesToIndex(getResourceIndex().getAllResourcesInIndex());
+            newResourceIndex.addAllOwnedResources(getResourceIndex().getAllOwnedResources());
             resourceIndex = newResourceIndex;
         }
         getRouter().promoteToSuperPeer();
@@ -60,7 +60,7 @@ public class ServiceHolder {
         peerType = PeerType.ORDINARY_PEER;
         if (getResourceIndex() instanceof SuperPeerResourceIndex) {
             ResourceIndex newResourceIndex = new ResourceIndex();
-            newResourceIndex.addAllResourcesToIndex(getResourceIndex().getAllResourcesInIndex());
+            newResourceIndex.addAllOwnedResources(getResourceIndex().getAllOwnedResources());
             resourceIndex = newResourceIndex;
         }
         getRouter().demoteToOrdinaryPeer();

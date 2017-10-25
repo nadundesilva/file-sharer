@@ -84,6 +84,16 @@ public class MessageIndexes {
     public static final int HEARTBEAT_OK_IP = 0;
     public static final int HEARTBEAT_OK_PORT = 1;
 
+    // LIST_RESOURCES message
+    public static final int LIST_RESOURCES_IP = 0;
+    public static final int LIST_RESOURCES_PORT = 1;
+
+    // LIST_RESOURCES_OK message
+    public static final int LIST_RESOURCES_OK_IP = 0;
+    public static final int LIST_RESOURCES_OK_PORT = 1;
+    public static final int LIST_RESOURCES_OK_RESOURCE_COUNT = 2;
+    public static final int LIST_RESOURCES_OK_RESOURCE_START_INDEX = 3;
+
     private MessageIndexes() {   // Preventing from being initiated
     }
 }

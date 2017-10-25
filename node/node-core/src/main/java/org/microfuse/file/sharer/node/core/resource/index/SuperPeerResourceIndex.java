@@ -38,7 +38,7 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @param resourceName The name of the resource to be added
      * @param node         The node which contains the resource to be added
      */
-    public void addResourceToAggregatedIndex(String resourceName, Node node) {
+    public void addAggregatedResource(String resourceName, Node node) {
         boolean isSuccessful;
         AggregatedResource resourceIndexItem = getAggregatedResource(resourceName);
         if (resourceIndexItem == null) {
@@ -66,8 +66,8 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @param resourceNames The names of the resources to be added
      * @param node          The node which contains the resources to be added
      */
-    public void addAllResourcesToAggregatedIndex(Collection<String> resourceNames, Node node) {
-        resourceNames.forEach(resourceName -> addResourceToAggregatedIndex(resourceName, node));
+    public void addAllAggregatedResources(Collection<String> resourceNames, Node node) {
+        resourceNames.forEach(resourceName -> addAggregatedResource(resourceName, node));
     }
 
     /**
@@ -76,7 +76,7 @@ public class SuperPeerResourceIndex extends ResourceIndex {
      * @param resourceName The resource to be removed
      * @param node         The node which contains the resource
      */
-    public boolean removeResourceFromAggregatedIndex(String resourceName, Node node) {
+    public boolean removeAggregatedResource(String resourceName, Node node) {
         boolean isSuccessful = false;
         AggregatedResource resourceIndexItem = getAggregatedResource(resourceName);
         if (resourceIndexItem != null) {
@@ -135,6 +135,15 @@ public class SuperPeerResourceIndex extends ResourceIndex {
         } finally {
             aggregatedResourcesLock.writeLock().unlock();
         }
+    }
+
+    /**
+     * Remove a node from the aggregated resources.
+     *
+     * @param node The node to be removed from the resource index
+     */
+    public void removeNodeFromAggregatedResources(Node node) {
+        aggregatedResources.forEach(aggregatedResource -> aggregatedResource.getAllNodes().remove(node));
     }
 
     /**

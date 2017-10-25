@@ -154,7 +154,7 @@ public class RouterTestCase extends BaseTestCase {
                 + " message received with resource in owned resources");
 
         OwnedResource ownedResource = new OwnedResource(serMessage.getData(MessageIndexes.SER_FILE_NAME));
-        serviceHolder.getResourceIndex().addResourceToIndex(ownedResource);
+        serviceHolder.getResourceIndex().addOwnedResource(ownedResource);
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 

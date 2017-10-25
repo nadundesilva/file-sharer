@@ -34,19 +34,19 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
         ownedResource1 = new OwnedResource("Lord of the Rings");
         ownedResource1.setFile(new File("movies" + File.separator + "lord_of_the_rings.mp4"));
-        resourceIndex.addResourceToIndex(ownedResource1);
+        resourceIndex.addOwnedResource(ownedResource1);
 
         ownedResource2 = new OwnedResource("Cars");
         ownedResource2.setFile(new File("movies" + File.separator + "cars.mp4"));
-        resourceIndex.addResourceToIndex(ownedResource2);
+        resourceIndex.addOwnedResource(ownedResource2);
 
         ownedResource3 = new OwnedResource("Iron Man");
         ownedResource3.setFile(new File("movies" + File.separator + "iron_man.mp4"));
-        resourceIndex.addResourceToIndex(ownedResource3);
+        resourceIndex.addOwnedResource(ownedResource3);
 
         ownedResource4 = new OwnedResource("Iron Man 2");
         ownedResource4.setFile(new File("movies" + File.separator + "iron_man_2.mp4"));
-        resourceIndex.addResourceToIndex(ownedResource4);
+        resourceIndex.addOwnedResource(ownedResource4);
     }
 
     @Test(priority = 1)
@@ -55,7 +55,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
         OwnedResource newOwnedResource = new OwnedResource("Spider Man");
         newOwnedResource.setFile(new File("movies" + File.separator + "spider_man.mp4"));
-        resourceIndex.addResourceToIndex(newOwnedResource);
+        resourceIndex.addOwnedResource(newOwnedResource);
 
         Object ownedResourcesInternalState = Whitebox.getInternalState(resourceIndex, "ownedResources");
         Assert.assertTrue(ownedResourcesInternalState instanceof Set<?>);
@@ -68,7 +68,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
     public void testFindResources() {
         logger.info("Running Resource Index Test 02 - Find resources");
 
-        Set<OwnedResource> ironManResources = resourceIndex.findResources(ownedResource3.getName());
+        Set<OwnedResource> ironManResources = resourceIndex.findOwnedResources(ownedResource3.getName());
 
         Assert.assertEquals(ironManResources.size(), 2);
         Assert.assertFalse(ironManResources.contains(ownedResource1));
@@ -81,7 +81,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
     public void testFindResourcesWithNoMatches() {
         logger.info("Running Resource Index Test 03 - Find resources with no matches");
 
-        Set<OwnedResource> spiderManResources = resourceIndex.findResources("Spider Man");
+        Set<OwnedResource> spiderManResources = resourceIndex.findOwnedResources("Spider Man");
 
         Assert.assertEquals(spiderManResources.size(), 0);
     }
@@ -92,9 +92,9 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
         OwnedResource carsOwnedResource = new OwnedResource("Cars");
         carsOwnedResource.setFile(new File("downloaded" + File.separator + "cars.mp4"));
-        resourceIndex.addResourceToIndex(carsOwnedResource);
+        resourceIndex.addOwnedResource(carsOwnedResource);
 
-        Set<OwnedResource> carsResources = resourceIndex.findResources("Cars");
+        Set<OwnedResource> carsResources = resourceIndex.findOwnedResources("Cars");
         OwnedResource carsResource = carsResources.stream().findAny().orElse(null);
 
         Assert.assertEquals(carsResources.size(), 1);
@@ -108,10 +108,10 @@ public class ResourceIndexTestCase extends BaseTestCase {
 
         OwnedResource newOwnedResource = new OwnedResource("Wonder Woman");
         newOwnedResource.setFile(new File("movies" + File.separator + "wonder_woman.mp4"));
-        resourceIndex.addResourceToIndex(newOwnedResource);
+        resourceIndex.addOwnedResource(newOwnedResource);
 
-        resourceIndex.addResourceToIndex(newOwnedResource);
-        Set<OwnedResource> wonderWomanResources = resourceIndex.findResources(newOwnedResource.getName());
+        resourceIndex.addOwnedResource(newOwnedResource);
+        Set<OwnedResource> wonderWomanResources = resourceIndex.findOwnedResources(newOwnedResource.getName());
         OwnedResource wonderWomanResource = wonderWomanResources.stream().findAny().orElse(null);
 
         Assert.assertEquals(wonderWomanResources.size(), 1);
@@ -119,8 +119,8 @@ public class ResourceIndexTestCase extends BaseTestCase {
         Assert.assertEquals(wonderWomanResource, newOwnedResource);
         Assert.assertEquals(wonderWomanResource.getFile(), new File("movies" + File.separator + "wonder_woman.mp4"));
 
-        resourceIndex.removeResourceFromIndex(newOwnedResource.getName());
-        Set<OwnedResource> updatedWonderWomanResources = resourceIndex.findResources(newOwnedResource.getName());
+        resourceIndex.removeOwnedResource(newOwnedResource.getName());
+        Set<OwnedResource> updatedWonderWomanResources = resourceIndex.findOwnedResources(newOwnedResource.getName());
 
         Assert.assertEquals(wonderWomanResource, newOwnedResource);
         Assert.assertEquals(updatedWonderWomanResources.size(), 0);
@@ -130,7 +130,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
     public void testGetAllResourcesCopying() {
         logger.info("Running Resource Index Test 06 - Get all resources copying");
 
-        Set<OwnedResource> resources = resourceIndex.getAllResourcesInIndex();
+        Set<OwnedResource> resources = resourceIndex.getAllOwnedResources();
         Object internalState = Whitebox.getInternalState(resourceIndex, "ownedResources");
         Assert.assertFalse(resources == internalState);
     }

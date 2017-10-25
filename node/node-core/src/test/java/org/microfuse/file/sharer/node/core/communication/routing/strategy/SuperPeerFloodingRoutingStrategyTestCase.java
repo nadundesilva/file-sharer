@@ -208,8 +208,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node1);
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
 
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 fromNode, message);
@@ -234,8 +234,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node1);
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
 
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 null, message);
@@ -261,8 +261,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node1);
-        superPeerResourceIndex.addResourceToAggregatedIndex(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
 
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 fromNode, message);

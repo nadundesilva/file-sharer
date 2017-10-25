@@ -234,8 +234,9 @@ public class Router implements NetworkHandlerListener {
                     serviceHolder.getConfiguration().getIp());
             heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_PORT,
                     Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
-            sendMessage(node, heartBeatMessage);
+
             logger.debug("Heart beat sent to node " + node.toString());
+            sendMessage(node, heartBeatMessage);
         });
     }
 
@@ -494,7 +495,7 @@ public class Router implements NetworkHandlerListener {
         if (messageType != null && messageType == MessageType.SER) {
             // Checking owned resources
             Set<OwnedResource> ownedResources = serviceHolder.getResourceIndex()
-                    .findResources(message.getData(MessageIndexes.SER_FILE_NAME));
+                    .findOwnedResources(message.getData(MessageIndexes.SER_FILE_NAME));
             if (ownedResources.size() > 0) {
                 logger.debug("Resource requested by \"" + message.toString() + "\" found in owned resources");
                 Message serOkMessage = new Message();

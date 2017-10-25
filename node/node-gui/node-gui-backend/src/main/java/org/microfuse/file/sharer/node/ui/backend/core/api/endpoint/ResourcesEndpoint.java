@@ -30,7 +30,7 @@ public class ResourcesEndpoint {
         Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
         ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
-        Set<OwnedResource> ownedResources = resourceIndex.getAllResourcesInIndex();
+        Set<OwnedResource> ownedResources = resourceIndex.getAllOwnedResources();
         response.put(APIConstants.DATA, ownedResources);
 
         String jsonString = new Gson().toJson(response);
@@ -45,7 +45,7 @@ public class ResourcesEndpoint {
 
         ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
         resourceIndex.clear();
-        resourceIndex.addAllResourcesToIndex(
+        resourceIndex.addAllOwnedResources(
                 request.getResourceNames().stream().map(OwnedResource::new).collect(Collectors.toList())
         );
 

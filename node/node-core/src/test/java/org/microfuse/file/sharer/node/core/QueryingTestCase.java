@@ -55,43 +55,43 @@ public class QueryingTestCase extends BaseTestCase {
         }
 
         // Registering resources
-        fileSharers[0].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[0].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("Lord of the Rings 2"), new OwnedResource("Cars"),
                 new OwnedResource("Iron Man")
         ));
-        fileSharers[1].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[1].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("Lord of the Rings"), new OwnedResource("Iron Man 2"),
                 new OwnedResource("Spider Man")
         ));
-        fileSharers[2].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[2].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("Hotel Transylvania"), new OwnedResource("How to train your Dragon"),
                 new OwnedResource("The Bounty Hunter")
         ));
-        fileSharers[3].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[3].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("Leap Year"), new OwnedResource("Leap Year"),
                 new OwnedResource("Two weeks Notice")
         ));
-        fileSharers[4].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[4].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("Me Before You"), new OwnedResource("Endless Love"),
                 new OwnedResource("Life as we know it")
         ));
-        fileSharers[5].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[5].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("How do you know"), new OwnedResource("The Last Song"),
                 new OwnedResource("Thor")
         ));
-        fileSharers[6].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[6].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("X-Men Origins"), new OwnedResource("Cars"),
                 new OwnedResource("Captain America")
         ));
-        fileSharers[7].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[7].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("22 Jump Street"), new OwnedResource("Iron Man 3"),
                 new OwnedResource("Lord of the Rings")
         ));
-        fileSharers[8].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[8].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("James Bond Sky fall"), new OwnedResource("Suicide Squad"),
                 new OwnedResource("Fast and Furious")
         ));
-        fileSharers[9].getServiceHolder().getResourceIndex().addAllResourcesToIndex(Arrays.asList(
+        fileSharers[9].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
                 new OwnedResource("Teenage Mutant Ninja Turtles"), new OwnedResource("Underworld"),
                 new OwnedResource("Despicable Me 3")
         ));
@@ -129,27 +129,7 @@ public class QueryingTestCase extends BaseTestCase {
             superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
                     new Node(localhostIP, fileSharer1Port + 2));
 
-            ResourceIndex resourceIndex = fileSharers[0].getServiceHolder().getResourceIndex();
-            Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
-            SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
-            superPeerResourceIndex.addAllResourcesToAggregatedIndex(
-                    fileSharers[1].getServiceHolder().getResourceIndex().getAllResourcesInIndex().stream()
-                            .map(Resource::getName)
-                            .collect(Collectors.toList()),
-                    new Node(
-                            fileSharers[1].getServiceHolder().getConfiguration().getIp(),
-                            fileSharers[1].getServiceHolder().getConfiguration().getPeerListeningPort()
-                    )
-            );
-            superPeerResourceIndex.addAllResourcesToAggregatedIndex(
-                    fileSharers[2].getServiceHolder().getResourceIndex().getAllResourcesInIndex().stream()
-                            .map(Resource::getName)
-                            .collect(Collectors.toList()),
-                    new Node(
-                            fileSharers[2].getServiceHolder().getConfiguration().getIp(),
-                            fileSharers[2].getServiceHolder().getConfiguration().getPeerListeningPort()
-                    )
-            );
+            fileSharers[0].getServiceHolder().getOverlayNetworkManager().gossip();
         }
         {
             fileSharers[1].getServiceHolder().demoteToOrdinaryPeer();
@@ -216,8 +196,8 @@ public class QueryingTestCase extends BaseTestCase {
             ResourceIndex resourceIndex = fileSharers[3].getServiceHolder().getResourceIndex();
             Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
             SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
-            superPeerResourceIndex.addAllResourcesToAggregatedIndex(
-                    fileSharers[4].getServiceHolder().getResourceIndex().getAllResourcesInIndex().stream()
+            superPeerResourceIndex.addAllAggregatedResources(
+                    fileSharers[4].getServiceHolder().getResourceIndex().getAllOwnedResources().stream()
                             .map(Resource::getName)
                             .collect(Collectors.toList()),
                     new Node(
@@ -225,8 +205,8 @@ public class QueryingTestCase extends BaseTestCase {
                             fileSharers[4].getServiceHolder().getConfiguration().getPeerListeningPort()
                     )
             );
-            superPeerResourceIndex.addAllResourcesToAggregatedIndex(
-                    fileSharers[5].getServiceHolder().getResourceIndex().getAllResourcesInIndex().stream()
+            superPeerResourceIndex.addAllAggregatedResources(
+                    fileSharers[5].getServiceHolder().getResourceIndex().getAllOwnedResources().stream()
                             .map(Resource::getName)
                             .collect(Collectors.toList()),
                     new Node(
@@ -297,8 +277,8 @@ public class QueryingTestCase extends BaseTestCase {
             ResourceIndex resourceIndex = fileSharers[6].getServiceHolder().getResourceIndex();
             Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
             SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
-            superPeerResourceIndex.addAllResourcesToAggregatedIndex(
-                    fileSharers[7].getServiceHolder().getResourceIndex().getAllResourcesInIndex().stream()
+            superPeerResourceIndex.addAllAggregatedResources(
+                    fileSharers[7].getServiceHolder().getResourceIndex().getAllOwnedResources().stream()
                             .map(Resource::getName)
                             .collect(Collectors.toList()),
                     new Node(
@@ -306,8 +286,8 @@ public class QueryingTestCase extends BaseTestCase {
                             fileSharers[7].getServiceHolder().getConfiguration().getPeerListeningPort()
                     )
             );
-            superPeerResourceIndex.addAllResourcesToAggregatedIndex(
-                    fileSharers[8].getServiceHolder().getResourceIndex().getAllResourcesInIndex().stream()
+            superPeerResourceIndex.addAllAggregatedResources(
+                    fileSharers[8].getServiceHolder().getResourceIndex().getAllOwnedResources().stream()
                             .map(Resource::getName)
                             .collect(Collectors.toList()),
                     new Node(

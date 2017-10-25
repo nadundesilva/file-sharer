@@ -58,7 +58,7 @@ public class ResourceIndex {
      *
      * @param resource The resource to be added
      */
-    public boolean addResourceToIndex(OwnedResource resource) {
+    public boolean addOwnedResource(OwnedResource resource) {
         boolean isSuccessful;
         ownedResourcesLock.writeLock().lock();
         try {
@@ -67,7 +67,7 @@ public class ResourceIndex {
                     .findAny()
                     .ifPresent(ownedResource -> {
                         logger.debug("Resource " + resource.toString() + " already exists in owned resources.");
-                        removeResourceFromIndex(resource);
+                        removeOwnedResource(resource);
                     });
             isSuccessful = ownedResources.add(resource);
             if (isSuccessful) {
@@ -86,8 +86,8 @@ public class ResourceIndex {
      *
      * @param resources The resources to be added
      */
-    public void addAllResourcesToIndex(Collection<OwnedResource> resources) {
-        resources.forEach(this::addResourceToIndex);
+    public void addAllOwnedResources(Collection<OwnedResource> resources) {
+        resources.forEach(this::addOwnedResource);
     }
 
     /**
@@ -95,8 +95,8 @@ public class ResourceIndex {
      *
      * @param resourceName The name of the resource to be removed
      */
-    public boolean removeResourceFromIndex(String resourceName) {
-        return removeResourceFromIndex(new OwnedResource(resourceName));
+    public boolean removeOwnedResource(String resourceName) {
+        return removeOwnedResource(new OwnedResource(resourceName));
     }
 
     /**
@@ -104,7 +104,7 @@ public class ResourceIndex {
      *
      * @param resource The resource to be removed
      */
-    public boolean removeResourceFromIndex(OwnedResource resource) {
+    public boolean removeOwnedResource(OwnedResource resource) {
         boolean isSuccessful;
         ownedResourcesLock.writeLock().lock();
         try {
@@ -125,7 +125,7 @@ public class ResourceIndex {
      *
      * @return The resources in this index
      */
-    public Set<OwnedResource> getAllResourcesInIndex() {
+    public Set<OwnedResource> getAllOwnedResources() {
         return new HashSet<>(ownedResources);
     }
 
@@ -135,7 +135,7 @@ public class ResourceIndex {
      * @param resourceName The name of the resource
      * @return The list of ownedResources matching the resource name
      */
-    public Set<OwnedResource> findResources(String resourceName) {
+    public Set<OwnedResource> findOwnedResources(String resourceName) {
         Set<OwnedResource> requestedResources;
         ownedResourcesLock.readLock().lock();
         try {
