@@ -8,10 +8,10 @@ import java.util.Objects;
 public class Node {
     private String ip;
     private int port;
-    private boolean isAlive;
+    private NodeState state;
 
     public Node() {
-        isAlive = true;
+        state = NodeState.ACTIVE;
     }
 
     public Node(String ip, int port) {
@@ -40,12 +40,16 @@ public class Node {
         this.port = port;
     }
 
-    public boolean isAlive() {
-        return isAlive;
+    public NodeState getState() {
+        return state;
     }
 
-    public void setAlive(boolean alive) {
-        isAlive = alive;
+    public void setState(NodeState state) {
+        this.state = state;
+    }
+
+    public boolean isActive() {
+        return this.state != NodeState.INACTIVE;
     }
 
     @Override

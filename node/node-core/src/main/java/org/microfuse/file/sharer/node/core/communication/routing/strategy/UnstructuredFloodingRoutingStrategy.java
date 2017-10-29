@@ -6,9 +6,9 @@ import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Routing Strategy based on flooding the unstructured network.
@@ -32,9 +32,9 @@ public class UnstructuredFloodingRoutingStrategy extends RoutingStrategy {
             forwardingNodes.remove(fromNode);
         }
 
-        new ArrayList<>(forwardingNodes).stream().parallel()
-                .filter(node -> !node.isAlive())
-                .forEach(forwardingNodes::remove);
+        forwardingNodes = forwardingNodes.stream().parallel()
+                .filter(node -> node.isActive())
+                .collect(Collectors.toSet());
 
         return new HashSet<>(forwardingNodes);
     }

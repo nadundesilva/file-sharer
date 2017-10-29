@@ -101,7 +101,7 @@
                     <programs>
                         <program>
                             <mainClass>org.microfuse.file.sharer.node.ui.backend.core.ServerLauncher</mainClass>
-                            <name>file-sharer</name>
+                            <id>file-sharer</id>
                         </program>
                     </programs>
                 </configuration>

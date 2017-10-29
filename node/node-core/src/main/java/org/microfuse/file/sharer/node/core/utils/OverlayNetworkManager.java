@@ -6,6 +6,7 @@ import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
+import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.RouterListener;
@@ -466,7 +467,7 @@ public class OverlayNetworkManager implements RouterListener {
         Node node = new Node();
         node.setIp(message.getData(MessageIndexes.JOIN_IP));
         node.setPort(message.getData(MessageIndexes.JOIN_PORT));
-        node.setAlive(true);
+        node.setState(NodeState.ACTIVE);
 
         boolean isSuccessful = router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node);
         String superPeerNodeIP = null;
@@ -480,7 +481,7 @@ public class OverlayNetworkManager implements RouterListener {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) router.getRoutingTable();
 
                 if (ordinaryPeerRoutingTable.getAssignedSuperPeer() != null &&
-                        ordinaryPeerRoutingTable.getAssignedSuperPeer().isAlive()) {
+                        ordinaryPeerRoutingTable.getAssignedSuperPeer().isActive()) {
                     superPeerNodeIP = ordinaryPeerRoutingTable.getAssignedSuperPeer().getIp();
                     superPeerNodePort = ordinaryPeerRoutingTable.getAssignedSuperPeer().getPort();
                 } else {
@@ -564,7 +565,7 @@ public class OverlayNetworkManager implements RouterListener {
         Node node = new Node();
         node.setIp(message.getData(MessageIndexes.LEAVE_IP));
         node.setPort(message.getData(MessageIndexes.LEAVE_PORT));
-        node.setAlive(false);
+        node.setState(NodeState.INACTIVE);
 
         boolean isSuccessful = router.getRoutingTable().removeFromAll(node);
 

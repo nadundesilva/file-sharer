@@ -22,12 +22,12 @@ public class NodeTestCase {
         node = new Node();
         node.setIp("192.168.1.1");
         node.setPort(4067);
-        node.setAlive(true);
+        node.setState(NodeState.ACTIVE);
 
         nodeCopy = new Node();
         nodeCopy.setIp("192.168.1.1");
         nodeCopy.setPort("4067");
-        nodeCopy.setAlive(false);
+        nodeCopy.setState(NodeState.INACTIVE);
     }
 
     @Test(priority = 1)
@@ -45,9 +45,9 @@ public class NodeTestCase {
     }
 
     @Test(priority = 2)
-    public void testIsAlive() {
+    public void testIsActive() {
         logger.info("Running Node Test 03 - Is alive");
 
-        Assert.assertTrue(node.isAlive());
+        Assert.assertTrue(node.isActive());
     }
 }

@@ -7,6 +7,7 @@ import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
+import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
@@ -230,7 +231,7 @@ public class RouterTestCase extends BaseTestCase {
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
-        Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
+        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.INACTIVE);
     }
 
     @Test(priority = 2)
@@ -256,7 +257,7 @@ public class RouterTestCase extends BaseTestCase {
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
-        Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
+        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.INACTIVE);
     }
 
     @Test(priority = 2)
@@ -285,7 +286,7 @@ public class RouterTestCase extends BaseTestCase {
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
-        Mockito.verify(fromNode, Mockito.times(1)).setAlive(false);
+        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.INACTIVE);
     }
 
     @Test(priority = 3)

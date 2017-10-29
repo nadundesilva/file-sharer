@@ -48,19 +48,19 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         queryResourceName = "Lord of the Rings";
 
         fromNode = Mockito.mock(Node.class);
-        Mockito.when(fromNode.isAlive()).thenReturn(true);
+        Mockito.when(fromNode.isActive()).thenReturn(true);
         fromSuperPeerNode = Mockito.mock(Node.class);
-        Mockito.when(fromSuperPeerNode.isAlive()).thenReturn(true);
+        Mockito.when(fromSuperPeerNode.isActive()).thenReturn(true);
         node1 = Mockito.mock(Node.class);
-        Mockito.when(node1.isAlive()).thenReturn(true);
+        Mockito.when(node1.isActive()).thenReturn(true);
         node2 = Mockito.mock(Node.class);
-        Mockito.when(node2.isAlive()).thenReturn(true);
+        Mockito.when(node2.isActive()).thenReturn(true);
         node3 = Mockito.mock(Node.class);
-        Mockito.when(node3.isAlive()).thenReturn(true);
+        Mockito.when(node3.isActive()).thenReturn(true);
         node4 = Mockito.mock(Node.class);
-        Mockito.when(node4.isAlive()).thenReturn(true);
+        Mockito.when(node4.isActive()).thenReturn(true);
         node5 = Mockito.mock(Node.class);
-        Mockito.when(node5.isAlive()).thenReturn(true);
+        Mockito.when(node5.isActive()).thenReturn(true);
 
         Set<Node> unstructuredNetworkNode = new HashSet<>();
         unstructuredNetworkNode.add(fromSuperPeerNode);
@@ -105,7 +105,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
 
         Message message = Mockito.mock(Message.class);
         Mockito.when(ordinaryPeerRoutingTable.getAssignedSuperPeer()).thenReturn(node1);
-        Mockito.when(node1.isAlive()).thenReturn(true);
+        Mockito.when(node1.isActive()).thenReturn(true);
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 fromNode, message);
 
@@ -120,7 +120,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
 
         Message message = Mockito.mock(Message.class);
         Mockito.when(ordinaryPeerRoutingTable.getAssignedSuperPeer()).thenReturn(node1);
-        Mockito.when(node1.isAlive()).thenReturn(true);
+        Mockito.when(node1.isActive()).thenReturn(true);
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 null, message);
 
@@ -133,7 +133,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 04 - Get forwarding nodes in ordinary peer " +
                 "with dead assigned super peer");
 
-        Mockito.when(node1.isAlive()).thenReturn(false);
+        Mockito.when(node1.isActive()).thenReturn(false);
         Message message = Mockito.mock(Message.class);
         Mockito.when(ordinaryPeerRoutingTable.getAssignedSuperPeer()).thenReturn(node1);
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
@@ -183,7 +183,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 07 - Get forwarding nodes in ordinary peer " +
                 "with unassigned super peer with dead nodes");
 
-        Mockito.when(node1.isAlive()).thenReturn(false);
+        Mockito.when(node1.isActive()).thenReturn(false);
         Message message = Mockito.mock(Message.class);
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 fromNode, message);
@@ -250,7 +250,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 10 - Get forwarding nodes in super peer " +
                 "with resource in assigned ordinary peer with dead nodes");
 
-        Mockito.when(node1.isAlive()).thenReturn(false);
+        Mockito.when(node1.isActive()).thenReturn(false);
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
@@ -315,7 +315,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 13 - Get forwarding nodes in super peer " +
                 "with resource not in assigned ordinary peer with dead nodes");
 
-        Mockito.when(node4.isAlive()).thenReturn(false);
+        Mockito.when(node4.isActive()).thenReturn(false);
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 

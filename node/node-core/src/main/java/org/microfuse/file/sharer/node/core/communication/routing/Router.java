@@ -5,11 +5,14 @@ import org.microfuse.file.sharer.node.commons.messaging.MessageConstants;
 import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
 import org.microfuse.file.sharer.node.core.communication.network.BootstrapServerNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerListener;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
+import org.microfuse.file.sharer.node.core.communication.routing.strategy.SuperPeerRandomWalkRoutingStrategy;
+import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredRandomWalkRoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
@@ -98,12 +101,15 @@ public class Router implements NetworkHandlerListener {
             fromNode = new Node();
             fromNode.setIp(fromAddress);
             fromNode.setPort(fromPort);
-            fromNode.setAlive(true);
+            fromNode.setState(NodeState.ACTIVE);
         }
 
-        if (messageType != null && (messageType == MessageType.SER || messageType == MessageType.SER_SUPER_PEER ||
-                messageType == MessageType.HEARTBEAT)) {
+        if (messageType != null && (messageType == MessageType.SER || messageType == MessageType.SER_SUPER_PEER)) {
             route(fromNode, message);
+        } else if (messageType == MessageType.HEARTBEAT) {
+            handleHeartBeatMessage(fromNode, message);
+        } else if (messageType == MessageType.HEARTBEAT_OK) {
+            handleHeartBeatOkMessage(fromNode, message);
         } else {
             runTasksOnMessageReceived(fromNode, message);
         }
@@ -128,7 +134,7 @@ public class Router implements NetworkHandlerListener {
             routingTableLock.readLock().unlock();
         }
         if (receivingNode != null) {
-            receivingNode.setAlive(false);
+            receivingNode.setState(NodeState.INACTIVE);
         }
 
         if (receivingNode == null) {
@@ -141,6 +147,28 @@ public class Router implements NetworkHandlerListener {
                 messageType == MessageType.SER_SUPER_PEER || messageType == MessageType.SER_SUPER_PEER_OK ||
                 messageType == MessageType.HEARTBEAT || messageType == MessageType.HEARTBEAT_OK)) {
             logger.warn("Message " + message.toString() + " send failed to node " + receivingNode.toString());
+
+            // Trying to retry sending the message based on the message type
+            if (routingStrategy instanceof SuperPeerRandomWalkRoutingStrategy ||
+                    routingStrategy instanceof UnstructuredRandomWalkRoutingStrategy) {
+                boolean retry = false;
+                if (messageType == MessageType.SER) {
+                    message.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(
+                            Integer.parseInt(message.getData(MessageIndexes.SER_HOP_COUNT)) - 1
+                    ));
+                    retry = true;
+                } else if (messageType == MessageType.SER_SUPER_PEER) {
+                    message.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT, Integer.toString(
+                            Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT)) - 1
+                    ));
+                    retry = true;
+                }
+
+                if (retry) {
+                    logger.debug("Retrying to send failed message " + message.toString());
+                    route(message);
+                }
+            }
         } else {
             runTasksOnMessageSendFailed(receivingNode, message);
         }
@@ -228,6 +256,12 @@ public class Router implements NetworkHandlerListener {
         logger.debug("Heart beating to check nodes");
         Set<Node> nodes = routingTable.getAll();
         nodes.forEach(node -> {
+            if (node.getState() == NodeState.PENDING_INACTIVATION) {
+                node.setState(NodeState.INACTIVE);
+            } else if (node.getState() == NodeState.ACTIVE) {
+                node.setState(NodeState.PENDING_INACTIVATION);
+            }
+
             Message heartBeatMessage = new Message();
             heartBeatMessage.setType(MessageType.HEARTBEAT);
             heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_IP,
@@ -524,8 +558,7 @@ public class Router implements NetworkHandlerListener {
                 logger.debug("Resource requested by \"" + message.toString() + "\" not found in owned resources");
 
                 // Updating the hop count
-                Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_HOP_COUNT));
-                hopCount++;
+                Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_HOP_COUNT)) + 1;
                 message.setData(MessageIndexes.SER_HOP_COUNT, hopCount.toString());
                 logger.debug("Increased hop count of message" + message.toString());
 
@@ -560,7 +593,7 @@ public class Router implements NetworkHandlerListener {
                     logger.debug("Inconsistent ordinary peer with ordinary peer node");
                 }
 
-                if (assignedSuperPeer != null && assignedSuperPeer.isAlive()) {
+                if (assignedSuperPeer != null && assignedSuperPeer.isActive()) {
                     Message serOkMessage = new Message();
                     serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
                     serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP, assignedSuperPeer.getIp());
@@ -601,21 +634,6 @@ public class Router implements NetworkHandlerListener {
                     }
                 }
             }
-        } else if (messageType == MessageType.HEARTBEAT) {
-            Message heartBeatOkMessage = new Message();
-            heartBeatOkMessage.setType(MessageType.HEARTBEAT_OK);
-            heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_IP, serviceHolder.getConfiguration().getIp());
-            heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_PORT,
-                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
-
-            logger.debug("Sending heartbeat ok message back to "
-                    + message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP) + ":"
-                    + message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT));
-            sendMessage(
-                    message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP),
-                    Integer.parseInt(message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT)),
-                    heartBeatOkMessage
-            );
         } else {
             logger.warn("Not routing message of type " + messageType + ". The Router will only route messages of type "
                     + MessageType.SER + ".");
@@ -652,5 +670,52 @@ public class Router implements NetworkHandlerListener {
                             + " to " + forwardingNode.toString());
                     sendMessage(forwardingNode.getIp(), forwardingNode.getPort(), clonedMessage);
                 });
+    }
+
+    /**
+     * Handle HEARTBEAT type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleHeartBeatMessage(Node fromNode, Message message) {
+        Message heartBeatOkMessage = new Message();
+        heartBeatOkMessage.setType(MessageType.HEARTBEAT_OK);
+        heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_IP, serviceHolder.getConfiguration().getIp());
+        heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_PORT,
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+        Node node = routingTable.get(
+                message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP),
+                Integer.parseInt(message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT))
+        );
+        if (node != null) {
+            node.setState(NodeState.ACTIVE);
+        }
+
+        logger.debug("Sending heartbeat ok message back to "
+                + message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP) + ":"
+                + message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT));
+        sendMessage(
+                message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP),
+                Integer.parseInt(message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT)),
+                heartBeatOkMessage
+        );
+    }
+
+    /**
+     * Handle HEARTBEAT_OK type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleHeartBeatOkMessage(Node fromNode, Message message) {
+        Node node = routingTable.get(
+                message.getData(MessageIndexes.HEARTBEAT_OK_IP),
+                Integer.parseInt(message.getData(MessageIndexes.HEARTBEAT_OK_PORT))
+        );
+        if (node != null) {
+            node.setState(NodeState.ACTIVE);
+        }
     }
 }

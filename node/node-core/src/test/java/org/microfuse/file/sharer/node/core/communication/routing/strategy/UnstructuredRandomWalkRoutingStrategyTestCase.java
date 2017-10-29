@@ -39,11 +39,11 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
 
         fromNode = Mockito.mock(Node.class);
         node1 = Mockito.mock(Node.class);
-        Mockito.when(node1.isAlive()).thenReturn(true);
+        Mockito.when(node1.isActive()).thenReturn(true);
         node2 = Mockito.mock(Node.class);
-        Mockito.when(node2.isAlive()).thenReturn(true);
+        Mockito.when(node2.isActive()).thenReturn(true);
         node3 = Mockito.mock(Node.class);
-        Mockito.when(node3.isAlive()).thenReturn(true);
+        Mockito.when(node3.isActive()).thenReturn(true);
 
         Set<Node> unstructuredNetworkNodes = new HashSet<>();
         unstructuredNetworkNodes.add(fromNode);
@@ -91,7 +91,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
         logger.info("Running Unstructured Random Walk Routing Strategy Test 04 - Get forwarding nodes " +
                 "with dead nodes");
 
-        Mockito.when(node1.isAlive()).thenReturn(false);
+        Mockito.when(node1.isActive()).thenReturn(false);
 
         Set<Node> forwardingNodes = unstructuredRandomWalkRoutingStrategy.getForwardingNodes(routingTable,
                 fromNode, Mockito.mock(Message.class));

@@ -4,6 +4,7 @@ import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandl
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
+import org.microfuse.file.sharer.node.commons.peer.NodeState;
 
 /**
  * Configuration of this Node.
@@ -53,7 +54,7 @@ public class Configuration {
         Node node = new Node();
         node.setIp(bootstrapServerIP);
         node.setPort(bootstrapServerPort);
-        node.setAlive(true);
+        node.setState(NodeState.ACTIVE);
         return node;
     }
 

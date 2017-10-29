@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core.resource.index;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
 import org.mockito.Mockito;
@@ -106,7 +107,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         Node newNode = new Node();
         newNode.setIp("192.168.1.1");
         newNode.setPort(4067);
-        newNode.setAlive(true);
+        newNode.setState(NodeState.ACTIVE);
         superPeerResourceIndex.addAggregatedResource(resourceName2, newNode);
 
         Set<AggregatedResource> carsResources = superPeerResourceIndex.findAggregatedResources(resourceName2);
@@ -125,7 +126,7 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
         Node newNode = new Node();
         newNode.setIp("192.168.1.1");
         newNode.setPort(4067);
-        newNode.setAlive(true);
+        newNode.setState(NodeState.ACTIVE);
         String newResourceName = "Wonder Woman";
 
         superPeerResourceIndex.addAggregatedResource(newResourceName, newNode);

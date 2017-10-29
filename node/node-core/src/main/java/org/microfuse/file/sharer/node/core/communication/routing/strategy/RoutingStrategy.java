@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 /**
  * Routing strategy base abstract class.
@@ -82,9 +83,9 @@ public abstract class RoutingStrategy {
                 forwardingNodes.remove(fromNode);
             }
 
-            new ArrayList<>(forwardingNodes).stream().parallel()
-                    .filter(node -> !node.isAlive())
-                    .forEach(forwardingNodes::remove);
+            forwardingNodes = forwardingNodes.stream().parallel()
+                    .filter(node -> node.isActive())
+                    .collect(Collectors.toSet());
 
             int forwardNodeIndex = -1;
             if (forwardingNodes.size() > 1) {
@@ -103,6 +104,9 @@ public abstract class RoutingStrategy {
         if (forwardingNodes == null) {
             forwardingNodes = new HashSet<>();
         }
+        if (forwardingNodes.size() == 0) {
+            forwardingNodes.add(fromNode);
+        }
         return forwardingNodes;
     }
 
@@ -115,7 +119,7 @@ public abstract class RoutingStrategy {
     protected Set<Node> getAssignedSuperPeer(OrdinaryPeerRoutingTable ordinaryPeerRoutingTable) {
         Set<Node> forwardingNodes;
         Node superPeer = ordinaryPeerRoutingTable.getAssignedSuperPeer();
-        if (superPeer != null && superPeer.isAlive()) {
+        if (superPeer != null && superPeer.isActive()) {
             forwardingNodes = new HashSet<>(Collections.singletonList(superPeer));
         } else {
             forwardingNodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes();

@@ -43,13 +43,13 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
 
         Set<Node> unstructuredNetworkNodes = new HashSet<>();
         unstructuredNetworkNodes.add(fromNode);
-        Mockito.when(fromNode.isAlive()).thenReturn(true);
+        Mockito.when(fromNode.isActive()).thenReturn(true);
         unstructuredNetworkNodes.add(node1);
-        Mockito.when(node1.isAlive()).thenReturn(true);
+        Mockito.when(node1.isActive()).thenReturn(true);
         unstructuredNetworkNodes.add(node2);
-        Mockito.when(node2.isAlive()).thenReturn(true);
+        Mockito.when(node2.isActive()).thenReturn(true);
         unstructuredNetworkNodes.add(node3);
-        Mockito.when(node3.isAlive()).thenReturn(true);
+        Mockito.when(node3.isActive()).thenReturn(true);
         Mockito.when(routingTable.getAllUnstructuredNetworkRoutingTableNodes())
                 .thenReturn(unstructuredNetworkNodes);
     }
@@ -94,7 +94,7 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Unstructured Flooding Routing Strategy Test 04 - Get forwarding nodes " +
                 "with dead nodes");
 
-        Mockito.when(node1.isAlive()).thenReturn(false);
+        Mockito.when(node1.isActive()).thenReturn(false);
 
         Set<Node> forwardingNodes = unstructuredFloodingRoutingStrategy.getForwardingNodes(routingTable,
                 fromNode, Mockito.mock(Message.class));
