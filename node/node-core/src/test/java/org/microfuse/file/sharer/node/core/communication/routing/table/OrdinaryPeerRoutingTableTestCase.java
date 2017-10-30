@@ -52,7 +52,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         assignedSuperPeer.setIp("192.168.1.3");
         assignedSuperPeer.setPort(5643);
         assignedSuperPeer.setState(NodeState.INACTIVE);
-        ordinaryPeerRoutingTable.setAssignedSuperPeer(assignedSuperPeer);
+        ordinaryPeerRoutingTable.setAssignedSuperPeer(assignedSuperPeer.getIp(), assignedSuperPeer.getPort());
         ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(assignedSuperPeer);
     }
 
@@ -94,7 +94,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     public void testRemoveFromAllUnstructuredNetworkNode() {
         logger.info("Running Ordinary Peer Routing Table Test 04 - Remove from all unstructured network node");
 
-        Assert.assertTrue(ordinaryPeerRoutingTable.removeFromAll(node1));
+        Assert.assertTrue(ordinaryPeerRoutingTable.removeFromAll(node1.getIp(), node1.getPort()));
 
         Object internalStateUnstructuredNetwork =
                 Whitebox.getInternalState(ordinaryPeerRoutingTable, "unstructuredNetworkNodes");
@@ -108,7 +108,8 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     public void testRemoveFromAllAssignedSuperPeerNode() {
         logger.info("Running Ordinary Peer Routing Table Test 05 - Remove from all assigned super peer node");
 
-        Assert.assertTrue(ordinaryPeerRoutingTable.removeFromAll(assignedSuperPeer));
+        Assert.assertTrue(ordinaryPeerRoutingTable.removeFromAll(
+                assignedSuperPeer.getIp(), assignedSuperPeer.getPort()));
 
         Object internalStateUnstructuredNetwork =
                 Whitebox.getInternalState(ordinaryPeerRoutingTable, "unstructuredNetworkNodes");
@@ -154,16 +155,13 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     public void testGetAssignedSuperPeerNode() {
         logger.info("Running Ordinary Peer Routing Table Test 08 - Get assigned super peer node");
 
-        Node node = new Node();
-        node.setIp("192.168.1.100");
-        node.setPort(5824);
-        node.setState(NodeState.ACTIVE);
-        ordinaryPeerRoutingTable.setAssignedSuperPeer(node);
+        String ip = "192.168.1.100";
+        int port = 5824;
 
-        Node foundNode = ordinaryPeerRoutingTable.get(node.getIp(), node.getPort());
+        ordinaryPeerRoutingTable.setAssignedSuperPeer(ip, port);
+        Node foundNode = ordinaryPeerRoutingTable.get(ip, port);
 
         Assert.assertNotNull(foundNode);
-        Assert.assertTrue(foundNode == node);
     }
 
     @Test(priority = 3)

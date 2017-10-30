@@ -116,18 +116,12 @@ public class QueryingTestCase extends BaseTestCase {
             SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTables;
 
             superPeerRoutingTable.clear();
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 1));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 2));
-            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 3));
-            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 6));
-            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 1));
-            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 2));
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 1);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 2);
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 3);
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 6);
+            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 1);
+            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 2);
 
             fileSharers[0].getServiceHolder().getOverlayNetworkManager().gossip();
         }
@@ -139,12 +133,9 @@ public class QueryingTestCase extends BaseTestCase {
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTables;
 
             ordinaryPeerRoutingTable.clear();
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 2));
-            ordinaryPeerRoutingTable.setAssignedSuperPeer(
-                    new Node(localhostIP, fileSharer1Port));
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 2);
+            ordinaryPeerRoutingTable.setAssignedSuperPeer(localhostIP, fileSharer1Port);
         }
         {
             fileSharers[2].getServiceHolder().demoteToOrdinaryPeer();
@@ -154,17 +145,12 @@ public class QueryingTestCase extends BaseTestCase {
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTables;
 
             ordinaryPeerRoutingTable.clear();
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 1));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 3));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 5));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 8));
-            ordinaryPeerRoutingTable.setAssignedSuperPeer(new Node(localhostIP, fileSharer1Port));
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 1);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 3);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 5);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 8);
+            ordinaryPeerRoutingTable.setAssignedSuperPeer(localhostIP, fileSharer1Port);
         }
         {
             fileSharers[3].getServiceHolder().promoteToSuperPeer();
@@ -174,24 +160,15 @@ public class QueryingTestCase extends BaseTestCase {
             SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTables;
 
             superPeerRoutingTable.clear();
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 2));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 4));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 7));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 9));
-            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port));
-            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 6));
-            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 4));
-            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 5));
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 2);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 4);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 7);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 9);
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(localhostIP, fileSharer1Port);
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 6);
+            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 4);
+            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 5);
 
             ResourceIndex resourceIndex = fileSharers[3].getServiceHolder().getResourceIndex();
             Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
@@ -223,12 +200,9 @@ public class QueryingTestCase extends BaseTestCase {
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTables;
 
             ordinaryPeerRoutingTable.clear();
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 3));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 5));
-            ordinaryPeerRoutingTable.setAssignedSuperPeer(
-                    new Node(localhostIP, fileSharer1Port + 3));
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 3);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 5);
+            ordinaryPeerRoutingTable.setAssignedSuperPeer(localhostIP, fileSharer1Port + 3);
         }
         {
             fileSharers[5].getServiceHolder().demoteToOrdinaryPeer();
@@ -238,16 +212,11 @@ public class QueryingTestCase extends BaseTestCase {
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTables;
 
             ordinaryPeerRoutingTable.clear();
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 2));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 4));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 7));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 8));
-            ordinaryPeerRoutingTable.setAssignedSuperPeer(
-                    new Node(localhostIP, fileSharer1Port + 3));
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 2);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 4);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 7);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 8);
+            ordinaryPeerRoutingTable.setAssignedSuperPeer(localhostIP, fileSharer1Port + 3);
         }
         {
             fileSharers[6].getServiceHolder().promoteToSuperPeer();
@@ -257,22 +226,14 @@ public class QueryingTestCase extends BaseTestCase {
             SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTables;
 
             superPeerRoutingTable.clear();
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 7));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 2));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 3));
-            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port));
-            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 3));
-            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 9));
-            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 7));
-            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 8));
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 7);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 2);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 3);
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(localhostIP, fileSharer1Port);
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 3);
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 9);
+            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 7);
+            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 8);
 
             ResourceIndex resourceIndex = fileSharers[6].getServiceHolder().getResourceIndex();
             Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
@@ -304,18 +265,12 @@ public class QueryingTestCase extends BaseTestCase {
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTables;
 
             ordinaryPeerRoutingTable.clear();
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 3));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 5));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 6));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 8));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 9));
-            ordinaryPeerRoutingTable.setAssignedSuperPeer(
-                    new Node(localhostIP, fileSharer1Port + 6));
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 3);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 5);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 6);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 8);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 9);
+            ordinaryPeerRoutingTable.setAssignedSuperPeer(localhostIP, fileSharer1Port + 6);
         }
         {
             fileSharers[8].getServiceHolder().demoteToOrdinaryPeer();
@@ -325,14 +280,10 @@ public class QueryingTestCase extends BaseTestCase {
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTables;
 
             ordinaryPeerRoutingTable.clear();
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 2));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 5));
-            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 7));
-            ordinaryPeerRoutingTable.setAssignedSuperPeer(
-                    new Node(localhostIP, fileSharer1Port + 6));
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 2);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 5);
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 7);
+            ordinaryPeerRoutingTable.setAssignedSuperPeer(localhostIP, fileSharer1Port + 6);
         }
         {
             fileSharers[9].getServiceHolder().promoteToSuperPeer();
@@ -342,14 +293,10 @@ public class QueryingTestCase extends BaseTestCase {
             SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTables;
 
             superPeerRoutingTable.clear();
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 2));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 3));
-            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 7));
-            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
-                    new Node(localhostIP, fileSharer1Port + 6));
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 2);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 3);
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 7);
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(localhostIP, fileSharer1Port + 6);
         }
     }
 

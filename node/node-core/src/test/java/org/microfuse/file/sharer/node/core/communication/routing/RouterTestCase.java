@@ -355,9 +355,7 @@ public class RouterTestCase extends BaseTestCase {
                 + " message received with hop count higher than time to live");
 
         Set<Node> nodes = new HashSet<>();
-        Node node = Mockito.mock(Node.class);
-        Mockito.when(node.getIp()).thenReturn("192.168.1.5");
-        Mockito.when(node.getPort()).thenReturn(7453);
+        Node node = new Node("192.168.1.2", 6452);
         nodes.add(node);
 
         serSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
@@ -380,9 +378,10 @@ public class RouterTestCase extends BaseTestCase {
     public void testPromoteToSuperPeerInOrdinaryPeer() {
         logger.info("Running Router Test 16 - Promote to super peer in ordinary peer");
 
-        Node node = Mockito.mock(Node.class);
+        Node node = new Node("192.168.1.2", 6452);
+
         RoutingTable initialRoutingTable = router.getRoutingTable();
-        initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
+        initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
 
         router.promoteToSuperPeer();
         RoutingTable finalRoutingTable = router.getRoutingTable();
@@ -397,10 +396,11 @@ public class RouterTestCase extends BaseTestCase {
     public void testDemoteToSuperPeerInSuperPeer() {
         logger.info("Running Router Test 17 - Demote to super peer in super peer");
 
-        Node node = Mockito.mock(Node.class);
+        Node node = new Node("192.168.1.2", 6452);
+
         router.promoteToSuperPeer();
         RoutingTable initialRoutingTable = router.getRoutingTable();
-        initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
+        initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
 
         router.demoteToOrdinaryPeer();
         RoutingTable finalRoutingTable = router.getRoutingTable();
@@ -415,10 +415,11 @@ public class RouterTestCase extends BaseTestCase {
     public void testPromoteToSuperPeerInSuperPeer() {
         logger.info("Running Router Test 18 - Promote to super peer in super peer");
 
-        Node node = Mockito.mock(Node.class);
+        Node node = new Node("192.168.1.2", 6452);
+
         router.promoteToSuperPeer();
         RoutingTable initialRoutingTable = router.getRoutingTable();
-        initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
+        initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
 
         router.promoteToSuperPeer();
         RoutingTable finalRoutingTable = router.getRoutingTable();
@@ -433,9 +434,10 @@ public class RouterTestCase extends BaseTestCase {
     public void testDemoteToSuperPeerInOrdinaryPeer() {
         logger.info("Running Router Test 19 - Promote to super peer in ordinary peer");
 
-        Node node = Mockito.mock(Node.class);
+        Node node = new Node("192.168.1.2", 6452);
+
         RoutingTable initialRoutingTable = router.getRoutingTable();
-        initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
+        initialRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
 
         router.demoteToOrdinaryPeer();
         RoutingTable finalRoutingTable = router.getRoutingTable();
@@ -463,10 +465,9 @@ public class RouterTestCase extends BaseTestCase {
     public void testHeartbeat() {
         logger.info("Running Router Test 21 - Heartbeat");
 
-        Node node1 = Mockito.mock(Node.class);
-        Mockito.when(node1.getIp()).thenReturn("127.0.0.1");
-        Mockito.when(node1.getPort()).thenReturn(5642);
-        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
+        Node node = new Node("192.168.1.2", 6452);
+
+        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
 
         Configuration configuration = serviceHolder.getConfiguration();
         configuration.setHeartbeatInterval(1000);
@@ -478,40 +479,37 @@ public class RouterTestCase extends BaseTestCase {
         waitFor(1200);
 
         Mockito.verify(networkHandler, Mockito.times(2))
-                .sendMessage(node1.getIp(), node1.getPort(), message);
+                .sendMessage(node.getIp(), node.getPort(), message);
     }
 
     @Test(priority = 1)
     public void testOnHeartbeatOkMessageReceived() {
         logger.info("Running Router Test 22 - On " + MessageType.HEARTBEAT_OK.getValue() + " message received");
 
-        Node node1 = new Node();
-        node1.setIp("127.0.0.1");
-        node1.setPort(5642);
+        Node node = new Node("192.168.1.2", 6452);
 
-        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
+        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
         Configuration configuration = serviceHolder.getConfiguration();
 
-        Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + node1.getIp() + " "
-                + node1.getPort());
+        Message message = Message.parse("0029 " + MessageType.HEARTBEAT.getValue() + " " + node.getIp() + " "
+                + node.getPort());
 
-        router.onMessageReceived(node1.getIp(), node1.getPort(), message);
+        router.onMessageReceived(node.getIp(), node.getPort(), message);
 
         Message replyMessage = Message.parse("0031 " + MessageType.HEARTBEAT_OK.getValue() + " "
                 + configuration.getIp() + " " + configuration.getPeerListeningPort());
 
         Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(node1.getIp(), node1.getPort(), replyMessage);
+                .sendMessage(node.getIp(), node.getPort(), replyMessage);
     }
 
     @Test(priority = 1)
     public void testHeartbeatDisable() {
         logger.info("Running Router Test 23 - Heartbeat disable");
 
-        Node node1 = Mockito.mock(Node.class);
-        Mockito.when(node1.getIp()).thenReturn("127.0.0.1");
-        Mockito.when(node1.getPort()).thenReturn(5642);
-        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node1);
+        Node node = new Node("192.168.1.2", 6452);
+
+        router.getRoutingTable().addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
 
         Configuration configuration = serviceHolder.getConfiguration();
         configuration.setHeartbeatInterval(1000);
@@ -524,6 +522,6 @@ public class RouterTestCase extends BaseTestCase {
         router.disableHeartBeat();
         waitFor(1200);
 
-        Mockito.verify(networkHandler, Mockito.times(2)).sendMessage(node1.getIp(), node1.getPort(), message);
+        Mockito.verify(networkHandler, Mockito.times(2)).sendMessage(node.getIp(), node.getPort(), message);
     }
 }

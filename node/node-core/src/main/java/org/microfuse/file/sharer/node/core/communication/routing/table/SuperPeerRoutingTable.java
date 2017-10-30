@@ -36,47 +36,29 @@ public class SuperPeerRoutingTable extends RoutingTable {
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node   The node of the new entry
+     * @param ip   The ip of the node of the new entry
+     * @param port The port of the node of the new entry
      */
-    public boolean addSuperPeerNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
-        superPeerNetworkNodesLock.writeLock().lock();
-        try {
-            Node existingNode = get(node.getIp(), node.getPort());
-            if (existingNode != null) {
-                node = existingNode;
-            }
-            isSuccessful = superPeerNetworkNodes.add(node);
-            if (isSuccessful) {
-                logger.debug("Added node " + node.toString() + " to super peer network.");
-            } else {
-                logger.debug("Failed to add node " + node.toString() + " to super peer network.");
-            }
-        } finally {
-            superPeerNetworkNodesLock.writeLock().unlock();
+    public boolean addSuperPeerNetworkRoutingTableEntry(String ip, int port) {
+        Node node = get(ip, port);
+        if (node == null) {
+            node = new Node(ip, port);
         }
-        return isSuccessful;
+        return addSuperPeerNetworkRoutingTableEntry(node);
     }
 
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node The node of the new entry
+     * @param ip   The ip of the node of the new entry
+     * @param port The port of the node of the new entry
      */
-    public boolean removeSuperPeerNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
-        superPeerNetworkNodesLock.writeLock().lock();
-        try {
-            isSuccessful = superPeerNetworkNodes.remove(node);
-            if (isSuccessful) {
-                logger.debug("Removed node " + node.toString() + " from super peer network.");
-            } else {
-                logger.debug("Failed to remove node " + node.toString() + " from super peer network.");
-            }
-        } finally {
-            superPeerNetworkNodesLock.writeLock().unlock();
+    public boolean removeSuperPeerNetworkRoutingTableEntry(String ip, int port) {
+        Node node = get(ip, port);
+        if (node == null) {
+            node = new Node(ip, port);
         }
-        return isSuccessful;
+        return removeSuperPeerNetworkRoutingTableEntry(node);
     }
 
     /**
@@ -112,53 +94,29 @@ public class SuperPeerRoutingTable extends RoutingTable {
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node The node of the new entry
+     * @param ip   The ip of the node of the new entry
+     * @param port The port of the node of the new entry
      */
-    public boolean addAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
-        assignedOrdinaryPeerNodesLock.writeLock().lock();
-        try {
-            if (assignedOrdinaryPeerNodes.size() < serviceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
-                Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
-                if (existingNode != null) {
-                    node = existingNode;
-                }
-                isSuccessful = assignedOrdinaryPeerNodes.add(node);
-                if (isSuccessful) {
-                    logger.debug("Added node " + node.toString() + " to assigned ordinary peers.");
-                } else {
-                    logger.debug("Failed to add node " + node.toString() + " to assigned ordinary peers.");
-                }
-            } else {
-                isSuccessful = false;
-                logger.debug("Assigned super peer node count already at maximum size "
-                        + assignedOrdinaryPeerNodes.size());
-            }
-        } finally {
-            assignedOrdinaryPeerNodesLock.writeLock().unlock();
+    public boolean addAssignedOrdinaryNetworkRoutingTableEntry(String ip, int port) {
+        Node node = get(ip, port);
+        if (node == null) {
+            node = new Node(ip, port);
         }
-        return isSuccessful;
+        return addAssignedOrdinaryNetworkRoutingTableEntry(node);
     }
 
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node The node of the new entry
+     * @param ip   The ip of the node of the new entry
+     * @param port The port of the node of the new entry
      */
-    public boolean removeAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
-        assignedOrdinaryPeerNodesLock.writeLock().lock();
-        try {
-            isSuccessful = assignedOrdinaryPeerNodes.remove(node);
-            if (isSuccessful) {
-                logger.debug("Remove node " + node.toString() + " from assigned ordinary peers.");
-            } else {
-                logger.debug("Failed to remove node " + node.toString() + " from assigned ordinary peers.");
-            }
-        } finally {
-            assignedOrdinaryPeerNodesLock.writeLock().unlock();
+    public boolean removeAssignedOrdinaryNetworkRoutingTableEntry(String ip, int port) {
+        Node node = get(ip, port);
+        if (node == null) {
+            node = new Node(ip, port);
         }
-        return isSuccessful;
+        return removeAssignedOrdinaryNetworkRoutingTableEntry(node);
     }
 
     /**
@@ -192,10 +150,10 @@ public class SuperPeerRoutingTable extends RoutingTable {
     }
 
     @Override
-    public boolean removeFromAll(Node node) {
-        boolean isSuccessful = super.removeFromAll(node);
-        isSuccessful = removeSuperPeerNetworkRoutingTableEntry(node) || isSuccessful;
-        return removeAssignedOrdinaryNetworkRoutingTableEntry(node) || isSuccessful;
+    public boolean removeFromAll(String ip, int port) {
+        boolean isSuccessful = super.removeFromAll(ip, port);
+        isSuccessful = removeSuperPeerNetworkRoutingTableEntry(ip, port) || isSuccessful;
+        return removeAssignedOrdinaryNetworkRoutingTableEntry(ip, port) || isSuccessful;
     }
 
     @Override
@@ -233,5 +191,103 @@ public class SuperPeerRoutingTable extends RoutingTable {
         } finally {
             assignedOrdinaryPeerNodesLock.writeLock().unlock();
         }
+    }
+
+    /**
+     * Put a new entry into the routing table of this router.
+     *
+     * @param node The node of the new entry
+     */
+    private boolean addSuperPeerNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        superPeerNetworkNodesLock.writeLock().lock();
+        try {
+            Node existingNode = get(node.getIp(), node.getPort());
+            if (existingNode != null) {
+                node = existingNode;
+            }
+            isSuccessful = superPeerNetworkNodes.add(node);
+            if (isSuccessful) {
+                logger.debug("Added node " + node.toString() + " to super peer network.");
+            } else {
+                logger.debug("Failed to add node " + node.toString() + " to super peer network.");
+            }
+        } finally {
+            superPeerNetworkNodesLock.writeLock().unlock();
+        }
+        return isSuccessful;
+    }
+
+    /**
+     * Put a new entry into the routing table of this router.
+     *
+     * @param node The node of the new entry
+     */
+    private boolean removeSuperPeerNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        superPeerNetworkNodesLock.writeLock().lock();
+        try {
+            isSuccessful = superPeerNetworkNodes.remove(node);
+            if (isSuccessful) {
+                logger.debug("Removed node " + node.toString() + " from super peer network.");
+            } else {
+                logger.debug("Failed to remove node " + node.toString() + " from super peer network.");
+            }
+        } finally {
+            superPeerNetworkNodesLock.writeLock().unlock();
+        }
+        return isSuccessful;
+    }
+
+    /**
+     * Put a new entry into the routing table of this router.
+     *
+     * @param node The node of the new entry
+     */
+    private boolean addAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        assignedOrdinaryPeerNodesLock.writeLock().lock();
+        try {
+            if (assignedOrdinaryPeerNodes.size() < serviceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
+                Node existingNode = getUnstructuredNetworkRoutingTableNode(node.getIp(), node.getPort());
+                if (existingNode != null) {
+                    node = existingNode;
+                }
+                isSuccessful = assignedOrdinaryPeerNodes.add(node);
+                if (isSuccessful) {
+                    logger.debug("Added node " + node.toString() + " to assigned ordinary peers.");
+                } else {
+                    logger.debug("Failed to add node " + node.toString() + " to assigned ordinary peers.");
+                }
+            } else {
+                isSuccessful = false;
+                logger.debug("Assigned super peer node count already at maximum size "
+                        + assignedOrdinaryPeerNodes.size());
+            }
+        } finally {
+            assignedOrdinaryPeerNodesLock.writeLock().unlock();
+        }
+        return isSuccessful;
+    }
+
+    /**
+     * Put a new entry into the routing table of this router.
+     *
+     * @param node The node of the new entry
+     */
+    private boolean removeAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        assignedOrdinaryPeerNodesLock.writeLock().lock();
+        try {
+            isSuccessful = assignedOrdinaryPeerNodes.remove(node);
+            if (isSuccessful) {
+                logger.debug("Remove node " + node.toString() + " from assigned ordinary peers.");
+            } else {
+                logger.debug("Failed to remove node " + node.toString() + " from assigned ordinary peers.");
+            }
+        } finally {
+            assignedOrdinaryPeerNodesLock.writeLock().unlock();
+        }
+        return isSuccessful;
     }
 }

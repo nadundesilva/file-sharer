@@ -339,8 +339,9 @@ public class Router implements NetworkHandlerListener {
         try {
             if (routingTable instanceof OrdinaryPeerRoutingTable) {
                 SuperPeerRoutingTable superPeerRoutingTable = new SuperPeerRoutingTable(serviceHolder);
-                superPeerRoutingTable.addAllUnstructuredNetworkRoutingTableEntry(
-                        routingTable.getAllUnstructuredNetworkRoutingTableNodes());
+                routingTable.getAllUnstructuredNetworkRoutingTableNodes().forEach(node ->
+                        superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort())
+                );
                 routingTable = superPeerRoutingTable;
                 logger.debug("Changed routing table to super peer routing table.");
             }
@@ -358,8 +359,9 @@ public class Router implements NetworkHandlerListener {
         try {
             if (routingTable instanceof SuperPeerRoutingTable) {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable(serviceHolder);
-                ordinaryPeerRoutingTable.addAllUnstructuredNetworkRoutingTableEntry(
-                        routingTable.getAllUnstructuredNetworkRoutingTableNodes());
+                routingTable.getAllUnstructuredNetworkRoutingTableNodes().forEach(node ->
+                        ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort())
+                );
                 routingTable = ordinaryPeerRoutingTable;
                 logger.debug("Changed routing table to ordinary peer routing table.");
             }

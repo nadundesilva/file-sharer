@@ -6,7 +6,6 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -57,57 +56,29 @@ public abstract class RoutingTable {
     /**
      * Put a new entry into the routing table of this router.
      *
-     * @param node The node of the new entry
+     * @param ip   The ip of the node of the new entry
+     * @param port The port of the node of the new entry
      */
-    public boolean addUnstructuredNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
-        unstructuredNetworkNodesLock.writeLock().lock();
-        try {
-            isSuccessful = unstructuredNetworkNodes.add(node);
-            if (isSuccessful) {
-                logger.debug("Added node " + node.toString() + " to unstructured network.");
-            } else {
-                logger.debug("Failed to add node " + node.toString() + " to unstructured network.");
-            }
-        } finally {
-            unstructuredNetworkNodesLock.writeLock().unlock();
+    public boolean addUnstructuredNetworkRoutingTableEntry(String ip, int port) {
+        Node node = get(ip, port);
+        if (node == null) {
+            node = new Node(ip, port);
         }
-        return isSuccessful;
+        return addUnstructuredNetworkRoutingTableEntry(node);
     }
 
     /**
-     * Add all nodes into the unstructured network from a collection.
+     * Remove a node form the unstructured network routing table entry.
      *
-     * @param nodes The nodes to be added
+     * @param ip   The ip of the node to be removed
+     * @param port The port of the node to be removed
      */
-    public void addAllUnstructuredNetworkRoutingTableEntry(Collection<Node> nodes) {
-        unstructuredNetworkNodesLock.writeLock().lock();
-        try {
-            nodes.forEach(this::addUnstructuredNetworkRoutingTableEntry);
-        } finally {
-            unstructuredNetworkNodesLock.writeLock().unlock();
+    public boolean removeUnstructuredNetworkRoutingTableEntry(String ip, int port) {
+        Node node = get(ip, port);
+        if (node == null) {
+            node = new Node(ip, port);
         }
-    }
-
-    /**
-     * Put a new entry into the routing table of this router.
-     *
-     * @param node The node of the new entry
-     */
-    public boolean removeUnstructuredNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
-        unstructuredNetworkNodesLock.writeLock().lock();
-        try {
-            isSuccessful = unstructuredNetworkNodes.remove(node);
-            if (isSuccessful) {
-                logger.debug("Removed node " + node.toString() + " from unstructured network.");
-            } else {
-                logger.debug("Failed to remove node " + node.toString() + " from unstructured network.");
-            }
-        } finally {
-            unstructuredNetworkNodesLock.writeLock().unlock();
-        }
-        return isSuccessful;
+        return removeUnstructuredNetworkRoutingTableEntry(node);
     }
 
     /**
@@ -143,9 +114,14 @@ public abstract class RoutingTable {
     /**
      * Remove a node from all tables.
      *
-     * @param node The node to be removed
+     * @param ip   The ip of the node to be removed
+     * @param port The port of the node to be removed
      */
-    public boolean removeFromAll(Node node) {
+    public boolean removeFromAll(String ip, int port) {
+        Node node = get(ip, port);
+        if (node == null) {
+            node = new Node(ip, port);
+        }
         return removeUnstructuredNetworkRoutingTableEntry(node);
     }
 
@@ -179,5 +155,47 @@ public abstract class RoutingTable {
         } finally {
             unstructuredNetworkNodesLock.writeLock().unlock();
         }
+    }
+
+    /**
+     * Put a new entry into the routing table of this router.
+     *
+     * @param node The node of the new entry
+     */
+    protected boolean addUnstructuredNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        unstructuredNetworkNodesLock.writeLock().lock();
+        try {
+            isSuccessful = unstructuredNetworkNodes.add(node);
+            if (isSuccessful) {
+                logger.debug("Added node " + node.toString() + " to unstructured network.");
+            } else {
+                logger.debug("Failed to add node " + node.toString() + " to unstructured network.");
+            }
+        } finally {
+            unstructuredNetworkNodesLock.writeLock().unlock();
+        }
+        return isSuccessful;
+    }
+
+    /**
+     * Remove a node form the unstructured network routing table entry.
+     *
+     * @param node The node of the new entry
+     */
+    protected boolean removeUnstructuredNetworkRoutingTableEntry(Node node) {
+        boolean isSuccessful;
+        unstructuredNetworkNodesLock.writeLock().lock();
+        try {
+            isSuccessful = unstructuredNetworkNodes.remove(node);
+            if (isSuccessful) {
+                logger.debug("Removed node " + node.toString() + " from unstructured network.");
+            } else {
+                logger.debug("Failed to remove node " + node.toString() + " from unstructured network.");
+            }
+        } finally {
+            unstructuredNetworkNodesLock.writeLock().unlock();
+        }
+        return isSuccessful;
     }
 }

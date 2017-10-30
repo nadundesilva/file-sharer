@@ -34,24 +34,24 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
     /**
      * Set the assigned super peer for this node.
      *
-     * @param node The super peer to be assigned to this node
+     * @param ip   The ip of the super peer to be assigned to this node
+     * @param port The port of the super peer to be assigned to this node
      */
-    public void setAssignedSuperPeer(Node node) {
-        this.assignedSuperPeer = node;
-        if (node != null) {
-            logger.debug("Changed assigned super peer to " + node.toString());
-        } else {
-            logger.debug("Removed assigned super peer");
+    public void setAssignedSuperPeer(String ip, int port) {
+        Node node = get(ip, port);
+        if (node == null) {
+            node = new Node(ip, port);
         }
+        setAssignedSuperPeer(node);
     }
 
     @Override
-    public boolean removeFromAll(Node node) {
-        boolean isSuccessful = super.removeFromAll(node);
-        if (node.equals(getAssignedSuperPeer())) {
+    public boolean removeFromAll(String ip, int port) {
+        boolean isSuccessful = super.removeFromAll(ip, port);
+        if (new Node(ip, port).equals(getAssignedSuperPeer())) {
             setAssignedSuperPeer(null);
         }
-        return removeUnstructuredNetworkRoutingTableEntry(node) || isSuccessful;
+        return removeUnstructuredNetworkRoutingTableEntry(ip, port) || isSuccessful;
     }
 
     @Override
@@ -77,5 +77,19 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
     public void clear() {
         super.clear();
         assignedSuperPeer = null;
+    }
+
+    /**
+     * Set the assigned super peer for this node.
+     *
+     * @param node The super peer to be assigned to this node
+     */
+    private void setAssignedSuperPeer(Node node) {
+        this.assignedSuperPeer = node;
+        if (node != null) {
+            logger.debug("Changed assigned super peer to " + node.toString());
+        } else {
+            logger.debug("Removed assigned super peer");
+        }
     }
 }
