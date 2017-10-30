@@ -38,6 +38,8 @@ public abstract class NetworkHandler {
     static {
         // Populating the network handler class map
         networkHandlerClassMap = new HashMap<>();
+        networkHandlerClassMap.put(NetworkHandlerType.WEB_SERVICES, WebServicesNetworkHandler.class);
+        networkHandlerClassMap.put(NetworkHandlerType.RMI, RMINetworkHandler.class);
         networkHandlerClassMap.put(NetworkHandlerType.TCP_SOCKET, TCPSocketNetworkHandler.class);
         networkHandlerClassMap.put(NetworkHandlerType.UDP_SOCKET, UDPSocketNetworkHandler.class);
     }

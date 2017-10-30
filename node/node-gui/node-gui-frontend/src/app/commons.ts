@@ -24,6 +24,8 @@ export enum ServerResponseStatus {
 }
 
 export enum NetworkHandlerType {
+  WEB_SERVICES = <any>'WEB_SERVICES',
+  RMI = <any>'RMI',
   TCP_SOCKET = <any>'TCP_SOCKET',
   UDP_SOCKET = <any>'UDP_SOCKET'
 }

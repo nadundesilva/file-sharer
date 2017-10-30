@@ -56,6 +56,8 @@
       <div>
         <mat-form-field>
           <mat-select placeholder="Network Handler Type" [(ngModel)]="config.networkHandlerType">
+            <mat-option [value]="networkHandlerType.WEB_SERVICES">Web Services</mat-option>
+            <mat-option [value]="networkHandlerType.RMI">Java RMI</mat-option>
             <mat-option [value]="networkHandlerType.TCP_SOCKET">TCP Socket</mat-option>
             <mat-option [value]="networkHandlerType.UDP_SOCKET">UDP Socket</mat-option>
           </mat-select>
