@@ -338,11 +338,7 @@ public class Router implements NetworkHandlerListener {
         routingTableLock.writeLock().lock();
         try {
             if (routingTable instanceof OrdinaryPeerRoutingTable) {
-                SuperPeerRoutingTable superPeerRoutingTable = new SuperPeerRoutingTable(serviceHolder);
-                routingTable.getAllUnstructuredNetworkRoutingTableNodes().forEach(node ->
-                        superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort())
-                );
-                routingTable = superPeerRoutingTable;
+                routingTable = new SuperPeerRoutingTable(serviceHolder, (OrdinaryPeerRoutingTable) routingTable);
                 logger.debug("Changed routing table to super peer routing table.");
             }
         } finally {
@@ -358,11 +354,7 @@ public class Router implements NetworkHandlerListener {
         routingTableLock.writeLock().lock();
         try {
             if (routingTable instanceof SuperPeerRoutingTable) {
-                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable(serviceHolder);
-                routingTable.getAllUnstructuredNetworkRoutingTableNodes().forEach(node ->
-                        ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort())
-                );
-                routingTable = ordinaryPeerRoutingTable;
+                routingTable = new OrdinaryPeerRoutingTable(serviceHolder, (SuperPeerRoutingTable) routingTable);
                 logger.debug("Changed routing table to ordinary peer routing table.");
             }
         } finally {
@@ -473,6 +465,7 @@ public class Router implements NetworkHandlerListener {
      * Register a new listener.
      *
      * @param listener The new listener to be registered
+     * @return True if registering was successful
      */
     public boolean registerListener(RouterListener listener) {
         boolean isSuccessful;
@@ -494,6 +487,7 @@ public class Router implements NetworkHandlerListener {
      * Unregister an existing listener.
      *
      * @param listener The listener to be removed
+     * @return True if unregister was successful
      */
     public boolean unregisterListener(RouterListener listener) {
         boolean isSuccessful;

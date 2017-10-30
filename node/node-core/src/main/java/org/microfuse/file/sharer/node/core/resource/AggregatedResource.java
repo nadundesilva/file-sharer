@@ -29,6 +29,7 @@ public class AggregatedResource extends Resource {
      * Put a new entry into the nodes list.
      *
      * @param node The node which contains the resource
+     * @return True if adding was successful
      */
     public boolean addNode(Node node) {
         boolean isSuccessful;
@@ -50,6 +51,7 @@ public class AggregatedResource extends Resource {
      * Remove entry from the nodes list.
      *
      * @param node The node which contains the resource
+     * @return True if removing was successful
      */
     public boolean removeNode(Node node) {
         boolean isSuccessful;

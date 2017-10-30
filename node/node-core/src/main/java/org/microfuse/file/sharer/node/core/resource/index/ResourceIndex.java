@@ -3,9 +3,11 @@ package org.microfuse.file.sharer.node.core.resource.index;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
 import org.microfuse.file.sharer.node.core.resource.OwnedResource;
 import org.microfuse.file.sharer.node.core.resource.Resource;
+import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +33,8 @@ public class ResourceIndex {
 
     private final ReadWriteLock ownedResourcesLock;
 
+    protected ServiceHolder serviceHolder;
+
     static {
         // Populating the resource index class map
         resourceIndexClassMap = new HashMap<>();
@@ -38,9 +42,15 @@ public class ResourceIndex {
         resourceIndexClassMap.put(PeerType.SUPER_PEER, SuperPeerResourceIndex.class);
     }
 
-    public ResourceIndex() {
+    public ResourceIndex(ServiceHolder serviceHolder) {
         ownedResourcesLock = new ReentrantReadWriteLock();
         ownedResources = new HashSet<>();
+        this.serviceHolder = serviceHolder;
+    }
+
+    public ResourceIndex(ServiceHolder serviceHolder, SuperPeerResourceIndex superPeerResourceIndex) {
+        this(serviceHolder);
+        superPeerResourceIndex.getAllOwnedResources().forEach(this::addOwnedResource);
     }
 
     /**
@@ -56,24 +66,33 @@ public class ResourceIndex {
     /**
      * Put a new entry into the resource index.
      *
-     * @param resource The resource to be added
+     * @param resourceName The name of the resource to be added
+     * @param storedFile The file which has the resource stored
+     * @return True if adding was successful
      */
-    public boolean addOwnedResource(OwnedResource resource) {
+    public boolean addOwnedResource(String resourceName, File storedFile) {
         boolean isSuccessful;
         ownedResourcesLock.writeLock().lock();
         try {
-            ownedResources.stream().parallel()
-                    .filter(ownedResource -> ownedResource.equals(resource))
+            OwnedResource existingOwnedResource = ownedResources.stream().parallel()
+                    .filter(ownedResource -> ownedResource.getName().equals(resourceName))
                     .findAny()
-                    .ifPresent(ownedResource -> {
-                        logger.debug("Resource " + resource.toString() + " already exists in owned resources.");
-                        removeOwnedResource(resource);
-                    });
-            isSuccessful = ownedResources.add(resource);
-            if (isSuccessful) {
-                logger.debug("Added resource " + resource.toString() + " to owned resources.");
+                    .orElse(null);
+
+            if (existingOwnedResource != null) {
+                logger.debug("Resource " + resourceName + " already exists in owned resources.");
+                existingOwnedResource.setFile(storedFile);
+                isSuccessful = true;
             } else {
-                logger.debug("Failed to add resource " + resource.toString() + " to owned resources.");
+                OwnedResource ownedResource = new OwnedResource(resourceName);
+                ownedResource.setFile(storedFile);
+                isSuccessful = addOwnedResource(ownedResource);
+            }
+
+            if (isSuccessful) {
+                logger.debug("Added resource " + resourceName + " to owned resources.");
+            } else {
+                logger.debug("Failed to add resource " + resourceName + " to owned resources.");
             }
         } finally {
             ownedResourcesLock.writeLock().unlock();
@@ -82,37 +101,25 @@ public class ResourceIndex {
     }
 
     /**
-     * Add all resources in a collection to the index.
-     *
-     * @param resources The resources to be added
-     */
-    public void addAllOwnedResources(Collection<OwnedResource> resources) {
-        resources.forEach(this::addOwnedResource);
-    }
-
-    /**
      * Remove entry from the resource index.
      *
      * @param resourceName The name of the resource to be removed
+     * @return True if removing was successful
      */
     public boolean removeOwnedResource(String resourceName) {
-        return removeOwnedResource(new OwnedResource(resourceName));
-    }
-
-    /**
-     * Remove entry from the resource index.
-     *
-     * @param resource The resource to be removed
-     */
-    public boolean removeOwnedResource(OwnedResource resource) {
         boolean isSuccessful;
         ownedResourcesLock.writeLock().lock();
         try {
-            isSuccessful = ownedResources.remove(resource);
+            OwnedResource existingOwnedResource = ownedResources.stream().parallel()
+                    .filter(ownedResource -> resourceName.equals(ownedResource.getName()))
+                    .findAny()
+                    .orElse(null);
+
+            isSuccessful = ownedResources.remove(existingOwnedResource);
             if (isSuccessful) {
-                logger.debug("Removed resource " + resource.toString() + " from owned resources");
+                logger.debug("Removed resource " + resourceName + " from owned resources");
             } else {
-                logger.debug("Failed to remove resource " + resource.toString() + " from owned resources");
+                logger.debug("Failed to remove resource " + resourceName + " from owned resources");
             }
         } finally {
             ownedResourcesLock.writeLock().unlock();
@@ -182,5 +189,15 @@ public class ResourceIndex {
                     return matcher.find();
                 })
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Add owned resource.
+     *
+     * @param ownedResource The owned resource to be added.
+     * @return True if adding was successful
+     */
+    protected boolean addOwnedResource(OwnedResource ownedResource) {
+        return ownedResources.add(ownedResource);
     }
 }

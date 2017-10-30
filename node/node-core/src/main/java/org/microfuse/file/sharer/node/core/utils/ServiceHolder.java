@@ -44,10 +44,9 @@ public class ServiceHolder {
      */
     public synchronized void promoteToSuperPeer() {
         peerType = PeerType.SUPER_PEER;
-        if (!(getResourceIndex() instanceof SuperPeerResourceIndex)) {
-            ResourceIndex newResourceIndex = new SuperPeerResourceIndex();
-            newResourceIndex.addAllOwnedResources(getResourceIndex().getAllOwnedResources());
-            resourceIndex = newResourceIndex;
+        ResourceIndex resourceIndex = getResourceIndex();
+        if (!(resourceIndex instanceof SuperPeerResourceIndex)) {
+            this.resourceIndex = new SuperPeerResourceIndex(this, resourceIndex);
         }
         getRouter().promoteToSuperPeer();
         logger.debug("Promoted to super peer");
@@ -58,10 +57,9 @@ public class ServiceHolder {
      */
     public synchronized void demoteToOrdinaryPeer() {
         peerType = PeerType.ORDINARY_PEER;
-        if (getResourceIndex() instanceof SuperPeerResourceIndex) {
-            ResourceIndex newResourceIndex = new ResourceIndex();
-            newResourceIndex.addAllOwnedResources(getResourceIndex().getAllOwnedResources());
-            resourceIndex = newResourceIndex;
+        ResourceIndex resourceIndex = getResourceIndex();
+        if (resourceIndex instanceof SuperPeerResourceIndex) {
+            this.resourceIndex = new ResourceIndex(this, (SuperPeerResourceIndex) resourceIndex);
         }
         getRouter().demoteToOrdinaryPeer();
         logger.debug("Demoted to ordinary peer");
@@ -89,6 +87,8 @@ public class ServiceHolder {
 
     /**
      * Get a singleton instance of this nodes configuration.
+     * This is not a singleton.
+     * However this is the instance used by all classes in the file sharer.
      *
      * @return The configuration of this node
      */
@@ -120,6 +120,7 @@ public class ServiceHolder {
     /**
      * Returns the resource index instance used by this node.
      * This is not a singleton.
+     * However this is the instance used by all classes in the file sharer.
      *
      * @return The resource index instance
      */
@@ -127,11 +128,12 @@ public class ServiceHolder {
         if (resourceIndex == null) {
             try {
                 resourceIndex = ResourceIndex.getResourceIndexClass(getPeerType())
-                        .newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                        .getConstructor(ServiceHolder.class).newInstance(this);
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                    InvocationTargetException e) {
                 logger.error("Failed to instantiate resource index for " + getPeerType().getValue()
                         + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
-                resourceIndex = new ResourceIndex();
+                resourceIndex = new ResourceIndex(this);
             }
         }
         return resourceIndex;
@@ -139,6 +141,8 @@ public class ServiceHolder {
 
     /**
      * Get the bootstrapping manager singleton instance.
+     * This is not a singleton.
+     * However this is the instance used by all classes in the file sharer.
      *
      * @return The Bootstrapping Manager
      */
@@ -151,6 +155,8 @@ public class ServiceHolder {
 
     /**
      * Get the query manager singleton instance.
+     * This is not a singleton.
+     * However this is the instance used by all classes in the file sharer.
      *
      * @return The Query Manager
      */
@@ -175,6 +181,8 @@ public class ServiceHolder {
 
     /**
      * Get a singleton instance of the router used by this node.
+     * This is not a singleton.
+     * However this is the instance used by all classes in the file sharer.
      *
      * @return The router used by this node
      */
@@ -215,6 +223,9 @@ public class ServiceHolder {
         }
     }
 
+    /**
+     * Save the configuration used by this file sharer.
+     */
     public synchronized void saveConfiguration() {
         File configFile = new File(NodeConstants.CONFIG_FILE);
         try {

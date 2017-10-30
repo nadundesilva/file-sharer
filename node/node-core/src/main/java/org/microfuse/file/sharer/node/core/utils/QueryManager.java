@@ -81,6 +81,11 @@ public class QueryManager implements RouterListener {
         router.route(message);
     }
 
+    /**
+     * Get the running query strings.
+     *
+     * @return The set of query strings.
+     */
     public Set<String> getRunningQueryStrings() {
         queryResultsLock.readLock().lock();
         try {

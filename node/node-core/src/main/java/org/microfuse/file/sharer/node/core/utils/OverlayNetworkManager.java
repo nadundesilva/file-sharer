@@ -825,8 +825,8 @@ public class OverlayNetworkManager implements RouterListener {
                             resourceNames.add(message.getData(
                                     MessageIndexes.LIST_RESOURCES_OK_RESOURCE_START_INDEX + i));
                         }
-                        superPeerResourceIndex.removeNodeFromAggregatedResources(node);
-                        superPeerResourceIndex.addAllAggregatedResources(resourceNames, node);
+                        superPeerResourceIndex.removeNodeFromAggregatedResources(node.getIp(), node.getPort());
+                        superPeerResourceIndex.addAllAggregatedResources(resourceNames, node.getIp(), node.getPort());
                     } else {
                         logger.warn("Dropped message " + message.toString()
                                 + " received from an unassigned ordinary peer");

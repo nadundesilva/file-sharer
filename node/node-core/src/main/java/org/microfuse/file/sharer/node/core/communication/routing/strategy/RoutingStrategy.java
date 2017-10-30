@@ -75,7 +75,7 @@ public abstract class RoutingStrategy {
      *
      * @param forwardingNodes The nodes from which the random node should be selected
      * @param fromNode        The node which sent the message to the current node
-     * @return
+     * @return The random node selected from the list of nodes
      */
     protected Set<Node> getRandomNode(Set<Node> forwardingNodes, Node fromNode) {
         if (forwardingNodes != null) {
@@ -84,7 +84,7 @@ public abstract class RoutingStrategy {
             }
 
             forwardingNodes = forwardingNodes.stream().parallel()
-                    .filter(node -> node.isActive())
+                    .filter(Node::isActive)
                     .collect(Collectors.toSet());
 
             int forwardNodeIndex = -1;

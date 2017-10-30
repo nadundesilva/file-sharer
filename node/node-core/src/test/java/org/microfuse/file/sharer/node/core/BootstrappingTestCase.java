@@ -13,7 +13,6 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryP
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
-import org.microfuse.file.sharer.node.core.resource.OwnedResource;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
@@ -27,7 +26,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Test Case for testing interactions with the bootstrap server.
@@ -1616,46 +1614,55 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder9.getConfiguration().setPeerListeningPort(node9.getPort());
 
         // Registering resources
-        fileSharer1.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Lord of the Rings 2"), new OwnedResource("Cars"),
-                new OwnedResource("Iron Man")
-        ));
-        fileSharer2.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Lord of the Rings"), new OwnedResource("Iron Man 2"),
-                new OwnedResource("Spider Man")
-        ));
-        fileSharer3.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Hotel Transylvania"), new OwnedResource("How to train your Dragon"),
-                new OwnedResource("Lord of the Rings")
-        ));
-        fileSharer4.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Leap Year"), new OwnedResource("Leap Year"),
-                new OwnedResource("Two weeks Notice")
-        ));
-        fileSharer5.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Me Before You"), new OwnedResource("Endless Love"),
-                new OwnedResource("Life as we know it")
-        ));
-        fileSharer6.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("How do you know"), new OwnedResource("The Last Song"),
-                new OwnedResource("Thor")
-        ));
-        fileSharer7.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("X-Men Origins"), new OwnedResource("Cars"),
-                new OwnedResource("Captain America")
-        ));
-        fileSharer8.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("22 Jump Street"), new OwnedResource("Iron Man 3"),
-                new OwnedResource("Lord of the Rings")
-        ));
-        fileSharer9.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("James Bond Sky fall"), new OwnedResource("Suicide Squad"),
-                new OwnedResource("Fast and Furious")
-        ));
-        fileSharer.getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Teenage Mutant Ninja Turtles"), new OwnedResource("Underworld"),
-                new OwnedResource("Despicable Me 3")
-        ));
+        ResourceIndex resourceIndices1 = fileSharer1.getServiceHolder().getResourceIndex();
+        resourceIndices1.addOwnedResource("Lord of the Rings 2", null);
+        resourceIndices1.addOwnedResource("Cars", null);
+        resourceIndices1.addOwnedResource("Iron Man", null);
+
+        ResourceIndex resourceIndices2 = fileSharer2.getServiceHolder().getResourceIndex();
+        resourceIndices2.addOwnedResource("Lord of the Rings", null);
+        resourceIndices2.addOwnedResource("Iron Man 2", null);
+        resourceIndices2.addOwnedResource("Spider Man", null);
+
+        ResourceIndex resourceIndices3 = fileSharer3.getServiceHolder().getResourceIndex();
+        resourceIndices3.addOwnedResource("Hotel Transylvania", null);
+        resourceIndices3.addOwnedResource("How to train your Dragon", null);
+        resourceIndices3.addOwnedResource("Lord of the Rings", null);
+
+        ResourceIndex resourceIndices4 = fileSharer4.getServiceHolder().getResourceIndex();
+        resourceIndices4.addOwnedResource("Leap Year", null);
+        resourceIndices4.addOwnedResource("Leap Year", null);
+        resourceIndices4.addOwnedResource("Two weeks Notice", null);
+
+        ResourceIndex resourceIndices5 = fileSharer5.getServiceHolder().getResourceIndex();
+        resourceIndices5.addOwnedResource("Me Before You", null);
+        resourceIndices5.addOwnedResource("Endless Love", null);
+        resourceIndices5.addOwnedResource("Life as we know it", null);
+
+        ResourceIndex resourceIndices6 = fileSharer6.getServiceHolder().getResourceIndex();
+        resourceIndices6.addOwnedResource("How do you know", null);
+        resourceIndices6.addOwnedResource("The Last Song", null);
+        resourceIndices6.addOwnedResource("Thor", null);
+
+        ResourceIndex resourceIndices7 = fileSharer7.getServiceHolder().getResourceIndex();
+        resourceIndices7.addOwnedResource("X-Men Origins", null);
+        resourceIndices7.addOwnedResource("Cars", null);
+        resourceIndices7.addOwnedResource("Captain America", null);
+
+        ResourceIndex resourceIndices8 = fileSharer8.getServiceHolder().getResourceIndex();
+        resourceIndices8.addOwnedResource("22 Jump Street", null);
+        resourceIndices8.addOwnedResource("Iron Man 3", null);
+        resourceIndices8.addOwnedResource("Lord of the Rings", null);
+
+        ResourceIndex resourceIndices9 = fileSharer9.getServiceHolder().getResourceIndex();
+        resourceIndices9.addOwnedResource("James Bond Sky fall", null);
+        resourceIndices9.addOwnedResource("Suicide Squad", null);
+        resourceIndices9.addOwnedResource("Fast and Furious", null);
+
+        ResourceIndex resourceIndices = fileSharer.getServiceHolder().getResourceIndex();
+        resourceIndices.addOwnedResource("Teenage Mutant Ninja Turtles", null);
+        resourceIndices.addOwnedResource("Underworld", null);
+        resourceIndices.addOwnedResource("Despicable Me 3", null);
 
         serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         serviceHolder1.getConfiguration().setGossipingInterval(delay);

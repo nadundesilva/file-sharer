@@ -72,7 +72,7 @@ public class SuperPeerFloodingRoutingStrategy extends RoutingStrategy {
         }
 
         forwardingNodes = forwardingNodes.stream().parallel()
-                .filter(node -> node.isActive())
+                .filter(Node::isActive)
                 .collect(Collectors.toSet());
 
         return new HashSet<>(forwardingNodes);

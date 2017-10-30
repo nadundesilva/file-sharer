@@ -3,8 +3,10 @@ package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
+import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
@@ -46,18 +48,20 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable(serviceHolder));
         queryResourceName = "Lord of the Rings";
 
-        fromNode = Mockito.mock(Node.class);
-        Mockito.when(fromNode.isActive()).thenReturn(true);
-        node1 = Mockito.mock(Node.class);
-        Mockito.when(node1.isActive()).thenReturn(true);
-        node2 = Mockito.mock(Node.class);
-        Mockito.when(node2.isActive()).thenReturn(true);
-        node3 = Mockito.mock(Node.class);
-        Mockito.when(node3.isActive()).thenReturn(true);
-        node4 = Mockito.mock(Node.class);
-        Mockito.when(node4.isActive()).thenReturn(true);
-        node5 = Mockito.mock(Node.class);
-        Mockito.when(node5.isActive()).thenReturn(true);
+        fromNode = new Node("192.168.1.10", 6010);
+        node1 = new Node("192.168.1.1", 6001);
+        node2 = new Node("192.168.1.2", 6002);
+        node3 = new Node("192.168.1.3", 6003);
+        node4 = new Node("192.168.1.4", 6004);
+        node5 = new Node("192.168.1.5", 6005);
+
+        RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
+        routingTable.addUnstructuredNetworkRoutingTableEntry(fromNode.getIp(), fromNode.getPort());
+        routingTable.addUnstructuredNetworkRoutingTableEntry(node1.getIp(), node1.getPort());
+        routingTable.addUnstructuredNetworkRoutingTableEntry(node2.getIp(), node2.getPort());
+        routingTable.addUnstructuredNetworkRoutingTableEntry(node3.getIp(), node3.getPort());
+        routingTable.addUnstructuredNetworkRoutingTableEntry(node4.getIp(), node4.getPort());
+        routingTable.addUnstructuredNetworkRoutingTableEntry(node5.getIp(), node5.getPort());
 
         Set<Node> unstructuredNetworkNode = new HashSet<>();
         unstructuredNetworkNode.add(fromNode);
@@ -114,8 +118,7 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
                 "with assigned super peer in the starting node");
 
         Message message = Mockito.mock(Message.class);
-        Mockito.when(ordinaryPeerRoutingTable.getAssignedSuperPeer()).thenReturn(node1);
-        Mockito.when(node1.isActive()).thenReturn(true);
+        ordinaryPeerRoutingTable.setAssignedSuperPeer(node1.getIp(), node1.getPort());
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 null, message);
 
@@ -128,7 +131,7 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Flooding Routing Strategy Test 04 - Get forwarding nodes in ordinary peer " +
                 "with dead assigned super peer");
 
-        Mockito.when(node1.isActive()).thenReturn(false);
+        node1.setState(NodeState.INACTIVE);
         Message message = Mockito.mock(Message.class);
         Mockito.when(ordinaryPeerRoutingTable.getAssignedSuperPeer()).thenReturn(node1);
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
@@ -181,7 +184,7 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Flooding Routing Strategy Test 07 - Get forwarding nodes in ordinary peer " +
                 "with unassigned super peer with dead nodes");
 
-        Mockito.when(node1.isActive()).thenReturn(false);
+        node1.setState(NodeState.INACTIVE);
         Message message = Mockito.mock(Message.class);
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 fromNode, message);
@@ -208,8 +211,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
-        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1.getIp(), node1.getPort());
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2.getIp(), node2.getPort());
 
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 fromNode, message);
@@ -234,8 +237,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
-        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1.getIp(), node1.getPort());
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2.getIp(), node2.getPort());
 
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 null, message);
@@ -250,7 +253,7 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Flooding Routing Strategy Test 10 - Get forwarding nodes in super peer " +
                 "with resource in assigned ordinary peer with dead nodes");
 
-        Mockito.when(node1.isActive()).thenReturn(false);
+        serviceHolder.getRouter().getRoutingTable().get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 
@@ -261,8 +264,8 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
         SuperPeerResourceIndex superPeerResourceIndex = (SuperPeerResourceIndex) resourceIndex;
 
-        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1);
-        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2);
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node1.getIp(), node1.getPort());
+        superPeerResourceIndex.addAggregatedResource(queryResourceName, node2.getIp(), node2.getPort());
 
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(superPeerRoutingTable,
                 fromNode, message);
@@ -317,7 +320,7 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Flooding Routing Strategy Test 13 - Get forwarding nodes in super peer " +
                 "with resource not in assigned ordinary peer with dead super peers");
 
-        Mockito.when(node4.isActive()).thenReturn(false);
+        node4.setState(NodeState.INACTIVE);
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 

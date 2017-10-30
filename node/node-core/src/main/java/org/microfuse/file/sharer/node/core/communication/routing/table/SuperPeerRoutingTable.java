@@ -33,11 +33,18 @@ public class SuperPeerRoutingTable extends RoutingTable {
         assignedOrdinaryPeerNodes = new HashSet<>();
     }
 
+    public SuperPeerRoutingTable(ServiceHolder serviceHolder, OrdinaryPeerRoutingTable ordinaryPeerRoutingTable) {
+        this(serviceHolder);
+        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()
+                .forEach(this::addUnstructuredNetworkRoutingTableEntry);
+    }
+
     /**
      * Put a new entry into the routing table of this router.
      *
      * @param ip   The ip of the node of the new entry
      * @param port The port of the node of the new entry
+     * @return True if adding was successful
      */
     public boolean addSuperPeerNetworkRoutingTableEntry(String ip, int port) {
         Node node = get(ip, port);
@@ -52,6 +59,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @param ip   The ip of the node of the new entry
      * @param port The port of the node of the new entry
+     * @return True if removing was successful
      */
     public boolean removeSuperPeerNetworkRoutingTableEntry(String ip, int port) {
         Node node = get(ip, port);
@@ -96,6 +104,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @param ip   The ip of the node of the new entry
      * @param port The port of the node of the new entry
+     * @return True if adding was successful
      */
     public boolean addAssignedOrdinaryNetworkRoutingTableEntry(String ip, int port) {
         Node node = get(ip, port);
@@ -110,6 +119,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @param ip   The ip of the node of the new entry
      * @param port The port of the node of the new entry
+     * @return True if removing was successful
      */
     public boolean removeAssignedOrdinaryNetworkRoutingTableEntry(String ip, int port) {
         Node node = get(ip, port);
@@ -197,6 +207,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * Put a new entry into the routing table of this router.
      *
      * @param node The node of the new entry
+     * @return True if adding was successful
      */
     private boolean addSuperPeerNetworkRoutingTableEntry(Node node) {
         boolean isSuccessful;
@@ -222,6 +233,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * Put a new entry into the routing table of this router.
      *
      * @param node The node of the new entry
+     * @return True if removing was successful
      */
     private boolean removeSuperPeerNetworkRoutingTableEntry(Node node) {
         boolean isSuccessful;
@@ -243,6 +255,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * Put a new entry into the routing table of this router.
      *
      * @param node The node of the new entry
+     * @return True if adding was successful
      */
     private boolean addAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
         boolean isSuccessful;
@@ -274,6 +287,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * Put a new entry into the routing table of this router.
      *
      * @param node The node of the new entry
+     * @return True if removing was successful
      */
     private boolean removeAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
         boolean isSuccessful;

@@ -30,7 +30,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Resource Index Test");
 
-        resourceIndex = new ResourceIndex();
+        resourceIndex = new ResourceIndex(serviceHolder);
 
         ownedResource1 = new OwnedResource("Lord of the Rings");
         ownedResource1.setFile(new File("movies" + File.separator + "lord_of_the_rings.mp4"));
@@ -90,9 +90,7 @@ public class ResourceIndexTestCase extends BaseTestCase {
     public void testFindResourcesWithDuplicates() {
         logger.info("Running Resource Index Test 04 - Find resources with duplicates");
 
-        OwnedResource carsOwnedResource = new OwnedResource("Cars");
-        carsOwnedResource.setFile(new File("downloaded" + File.separator + "cars.mp4"));
-        resourceIndex.addOwnedResource(carsOwnedResource);
+        resourceIndex.addOwnedResource("Cars", new File("downloaded" + File.separator + "cars.mp4"));
 
         Set<OwnedResource> carsResources = resourceIndex.findOwnedResources("Cars");
         OwnedResource carsResource = carsResources.stream().findAny().orElse(null);

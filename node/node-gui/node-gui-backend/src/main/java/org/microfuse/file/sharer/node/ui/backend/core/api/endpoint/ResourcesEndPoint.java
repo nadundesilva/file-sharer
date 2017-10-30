@@ -11,7 +11,6 @@ import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -43,9 +42,7 @@ public class ResourcesEndPoint {
 
         ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
         resourceIndex.clear();
-        resourceIndex.addAllOwnedResources(
-                request.getResourceNames().stream().map(OwnedResource::new).collect(Collectors.toList())
-        );
+        request.getResourceNames().forEach(resourceName -> resourceIndex.addOwnedResource(resourceName, null));
 
         String jsonString = new Gson().toJson(response);
         return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();

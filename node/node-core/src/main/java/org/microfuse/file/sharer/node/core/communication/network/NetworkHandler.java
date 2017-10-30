@@ -155,13 +155,14 @@ public abstract class NetworkHandler {
      * Register a new listener.
      *
      * @param listener The new listener to be registered
+     * @return True if registering listener was successful
      */
     public boolean registerListener(NetworkHandlerListener listener) {
-        boolean isSuccessul;
+        boolean isSuccessful;
         listenersListLock.writeLock().lock();
         try {
-            isSuccessul = listenersList.add(listener);
-            if (isSuccessul) {
+            isSuccessful = listenersList.add(listener);
+            if (isSuccessful) {
                 logger.debug("Registered network handler listener " + listener.getClass());
             } else {
                 logger.debug("Failed to register network handler listener " + listener.getClass());
@@ -169,18 +170,21 @@ public abstract class NetworkHandler {
         } finally {
             listenersListLock.writeLock().unlock();
         }
-        return isSuccessul;
+        return isSuccessful;
     }
 
     /**
      * Unregister an existing listener.
      *
      * @param listener The listener to be removed
+     * @return True if unregister was successful
      */
-    public void unregisterListener(NetworkHandlerListener listener) {
+    public boolean unregisterListener(NetworkHandlerListener listener) {
+        boolean isSuccessful;
         listenersListLock.writeLock().lock();
         try {
-            if (listenersList.remove(listener)) {
+            isSuccessful = listenersList.remove(listener);
+            if (isSuccessful) {
                 logger.debug("Unregistered network handler listener " + listener.getClass());
             } else {
                 logger.debug("Failed to unregister network handler listener " + listener.getClass());
@@ -188,6 +192,7 @@ public abstract class NetworkHandler {
         } finally {
             listenersListLock.writeLock().unlock();
         }
+        return isSuccessful;
     }
 
     /**

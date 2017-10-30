@@ -22,6 +22,12 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
         super(serviceHolder);
     }
 
+    public OrdinaryPeerRoutingTable(ServiceHolder serviceHolder, SuperPeerRoutingTable superPeerRoutingTable) {
+        this(serviceHolder);
+        superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()
+                .forEach(this::addUnstructuredNetworkRoutingTableEntry);
+    }
+
     /**
      * Get the super peer assigned to this node.
      *

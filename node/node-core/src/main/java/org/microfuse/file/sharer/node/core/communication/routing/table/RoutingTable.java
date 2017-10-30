@@ -58,6 +58,7 @@ public abstract class RoutingTable {
      *
      * @param ip   The ip of the node of the new entry
      * @param port The port of the node of the new entry
+     * @return True if adding was successful
      */
     public boolean addUnstructuredNetworkRoutingTableEntry(String ip, int port) {
         Node node = get(ip, port);
@@ -72,6 +73,7 @@ public abstract class RoutingTable {
      *
      * @param ip   The ip of the node to be removed
      * @param port The port of the node to be removed
+     * @return True if adding was successful
      */
     public boolean removeUnstructuredNetworkRoutingTableEntry(String ip, int port) {
         Node node = get(ip, port);
@@ -116,6 +118,7 @@ public abstract class RoutingTable {
      *
      * @param ip   The ip of the node to be removed
      * @param port The port of the node to be removed
+     * @return True if removing was successful
      */
     public boolean removeFromAll(String ip, int port) {
         Node node = get(ip, port);
@@ -161,6 +164,7 @@ public abstract class RoutingTable {
      * Put a new entry into the routing table of this router.
      *
      * @param node The node of the new entry
+     * @return True if adding was successful
      */
     protected boolean addUnstructuredNetworkRoutingTableEntry(Node node) {
         boolean isSuccessful;
@@ -182,6 +186,7 @@ public abstract class RoutingTable {
      * Remove a node form the unstructured network routing table entry.
      *
      * @param node The node of the new entry
+     * @return True if removing was successful
      */
     protected boolean removeUnstructuredNetworkRoutingTableEntry(Node node) {
         boolean isSuccessful;

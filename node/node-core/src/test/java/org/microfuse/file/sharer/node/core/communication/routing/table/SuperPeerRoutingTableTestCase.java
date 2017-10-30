@@ -51,8 +51,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         ordinaryPeerNode3 = new Node();
         ordinaryPeerNode3.setIp("192.168.1.3");
         ordinaryPeerNode3.setPort(5643);
-        ordinaryPeerNode3.setState(NodeState.INACTIVE);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(ordinaryPeerNode3);
+        superPeerRoutingTable.get(ordinaryPeerNode3.getIp(), ordinaryPeerNode3.getPort()).setState(NodeState.INACTIVE);
 
         superPeerNode1 = new Node();
         superPeerNode1.setIp("192.168.1.4");
@@ -73,10 +73,10 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         superPeerNode3 = new Node();
         superPeerNode3.setIp("192.168.1.6");
         superPeerNode3.setPort(4562);
-        superPeerNode3.setState(NodeState.INACTIVE);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(superPeerNode3);
         superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
                 superPeerNode3.getIp(), superPeerNode3.getPort());
+        superPeerRoutingTable.get(superPeerNode3.getIp(), superPeerNode3.getPort()).setState(NodeState.INACTIVE);
     }
 
     @Test(priority = 1)

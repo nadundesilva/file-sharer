@@ -13,7 +13,6 @@ import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
-import org.microfuse.file.sharer.node.core.resource.OwnedResource;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.Logger;
@@ -154,8 +153,8 @@ public class RouterTestCase extends BaseTestCase {
         logger.info("Running Router Test 06 - On " + MessageType.SER.getValue()
                 + " message received with resource in owned resources");
 
-        OwnedResource ownedResource = new OwnedResource(serMessage.getData(MessageIndexes.SER_FILE_NAME));
-        serviceHolder.getResourceIndex().addOwnedResource(ownedResource);
+        String ownedResourceName = serMessage.getData(MessageIndexes.SER_FILE_NAME);
+        serviceHolder.getResourceIndex().addOwnedResource(ownedResourceName, null);
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
@@ -164,7 +163,7 @@ public class RouterTestCase extends BaseTestCase {
                 + " 1"
                 + " " + serviceHolder.getConfiguration().getIp()
                 + " " + Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort())
-                + " \"" + ownedResource.getName() + "\"");
+                + " \"" + ownedResourceName + "\"");
 
         Mockito.verify(networkHandler, Mockito.times(1))
                 .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message);

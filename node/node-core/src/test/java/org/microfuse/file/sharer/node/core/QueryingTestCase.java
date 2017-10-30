@@ -8,7 +8,6 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryP
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
-import org.microfuse.file.sharer.node.core.resource.OwnedResource;
 import org.microfuse.file.sharer.node.core.resource.Resource;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
@@ -19,7 +18,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,46 +53,55 @@ public class QueryingTestCase extends BaseTestCase {
         }
 
         // Registering resources
-        fileSharers[0].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Lord of the Rings 2"), new OwnedResource("Cars"),
-                new OwnedResource("Iron Man")
-        ));
-        fileSharers[1].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Lord of the Rings"), new OwnedResource("Iron Man 2"),
-                new OwnedResource("Spider Man")
-        ));
-        fileSharers[2].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Hotel Transylvania"), new OwnedResource("How to train your Dragon"),
-                new OwnedResource("The Bounty Hunter")
-        ));
-        fileSharers[3].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Leap Year"), new OwnedResource("Leap Year"),
-                new OwnedResource("Two weeks Notice")
-        ));
-        fileSharers[4].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Me Before You"), new OwnedResource("Endless Love"),
-                new OwnedResource("Life as we know it")
-        ));
-        fileSharers[5].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("How do you know"), new OwnedResource("The Last Song"),
-                new OwnedResource("Thor")
-        ));
-        fileSharers[6].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("X-Men Origins"), new OwnedResource("Cars"),
-                new OwnedResource("Captain America")
-        ));
-        fileSharers[7].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("22 Jump Street"), new OwnedResource("Iron Man 3"),
-                new OwnedResource("Lord of the Rings")
-        ));
-        fileSharers[8].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("James Bond Sky fall"), new OwnedResource("Suicide Squad"),
-                new OwnedResource("Fast and Furious")
-        ));
-        fileSharers[9].getServiceHolder().getResourceIndex().addAllOwnedResources(Arrays.asList(
-                new OwnedResource("Teenage Mutant Ninja Turtles"), new OwnedResource("Underworld"),
-                new OwnedResource("Despicable Me 3")
-        ));
+        ResourceIndex resourceIndices1 = fileSharers[0].getServiceHolder().getResourceIndex();
+        resourceIndices1.addOwnedResource("Lord of the Rings 2", null);
+        resourceIndices1.addOwnedResource("Cars", null);
+        resourceIndices1.addOwnedResource("Iron Man", null);
+
+        ResourceIndex resourceIndices2 = fileSharers[1].getServiceHolder().getResourceIndex();
+        resourceIndices2.addOwnedResource("Lord of the Rings", null);
+        resourceIndices2.addOwnedResource("Iron Man 2", null);
+        resourceIndices2.addOwnedResource("Spider Man", null);
+
+        ResourceIndex resourceIndices3 = fileSharers[2].getServiceHolder().getResourceIndex();
+        resourceIndices3.addOwnedResource("Hotel Transylvania", null);
+        resourceIndices3.addOwnedResource("How to train your Dragon", null);
+        resourceIndices3.addOwnedResource("The Bounty Hunter", null);
+
+        ResourceIndex resourceIndices4 = fileSharers[3].getServiceHolder().getResourceIndex();
+        resourceIndices4.addOwnedResource("Leap Year", null);
+        resourceIndices4.addOwnedResource("Amazing Spider Man", null);
+        resourceIndices4.addOwnedResource("Two weeks Notice", null);
+
+        ResourceIndex resourceIndices5 = fileSharers[4].getServiceHolder().getResourceIndex();
+        resourceIndices5.addOwnedResource("Me Before You", null);
+        resourceIndices5.addOwnedResource("Endless Love", null);
+        resourceIndices5.addOwnedResource("Life as we know it", null);
+
+        ResourceIndex resourceIndices6 = fileSharers[5].getServiceHolder().getResourceIndex();
+        resourceIndices6.addOwnedResource("How do you know", null);
+        resourceIndices6.addOwnedResource("The Last Song", null);
+        resourceIndices6.addOwnedResource("Thor", null);
+
+        ResourceIndex resourceIndices7 = fileSharers[6].getServiceHolder().getResourceIndex();
+        resourceIndices7.addOwnedResource("X-Men Origins", null);
+        resourceIndices7.addOwnedResource("Cars", null);
+        resourceIndices7.addOwnedResource("Captain America", null);
+
+        ResourceIndex resourceIndices8 = fileSharers[7].getServiceHolder().getResourceIndex();
+        resourceIndices8.addOwnedResource("22 Jump Street", null);
+        resourceIndices8.addOwnedResource("Iron Man 3", null);
+        resourceIndices8.addOwnedResource("Lord of the Rings", null);
+
+        ResourceIndex resourceIndices9 = fileSharers[8].getServiceHolder().getResourceIndex();
+        resourceIndices9.addOwnedResource("James Bond Sky fall", null);
+        resourceIndices9.addOwnedResource("Suicide Squad", null);
+        resourceIndices9.addOwnedResource("Fast and Furious", null);
+
+        ResourceIndex resourceIndices10 = fileSharers[9].getServiceHolder().getResourceIndex();
+        resourceIndices10.addOwnedResource("Teenage Mutant Ninja Turtles", null);
+        resourceIndices10.addOwnedResource("Underworld", null);
+        resourceIndices10.addOwnedResource("Despicable Me 3", null);
 
         bootstrapServer.start();
         waitFor(delay);
@@ -177,19 +184,15 @@ public class QueryingTestCase extends BaseTestCase {
                     fileSharers[4].getServiceHolder().getResourceIndex().getAllOwnedResources().stream()
                             .map(Resource::getName)
                             .collect(Collectors.toList()),
-                    new Node(
-                            fileSharers[4].getServiceHolder().getConfiguration().getIp(),
-                            fileSharers[4].getServiceHolder().getConfiguration().getPeerListeningPort()
-                    )
+                    fileSharers[4].getServiceHolder().getConfiguration().getIp(),
+                    fileSharers[4].getServiceHolder().getConfiguration().getPeerListeningPort()
             );
             superPeerResourceIndex.addAllAggregatedResources(
                     fileSharers[5].getServiceHolder().getResourceIndex().getAllOwnedResources().stream()
                             .map(Resource::getName)
                             .collect(Collectors.toList()),
-                    new Node(
-                            fileSharers[5].getServiceHolder().getConfiguration().getIp(),
-                            fileSharers[5].getServiceHolder().getConfiguration().getPeerListeningPort()
-                    )
+                    fileSharers[5].getServiceHolder().getConfiguration().getIp(),
+                    fileSharers[5].getServiceHolder().getConfiguration().getPeerListeningPort()
             );
         }
         {
@@ -242,19 +245,15 @@ public class QueryingTestCase extends BaseTestCase {
                     fileSharers[7].getServiceHolder().getResourceIndex().getAllOwnedResources().stream()
                             .map(Resource::getName)
                             .collect(Collectors.toList()),
-                    new Node(
-                            fileSharers[7].getServiceHolder().getConfiguration().getIp(),
-                            fileSharers[7].getServiceHolder().getConfiguration().getPeerListeningPort()
-                    )
+                    fileSharers[7].getServiceHolder().getConfiguration().getIp(),
+                    fileSharers[7].getServiceHolder().getConfiguration().getPeerListeningPort()
             );
             superPeerResourceIndex.addAllAggregatedResources(
                     fileSharers[8].getServiceHolder().getResourceIndex().getAllOwnedResources().stream()
                             .map(Resource::getName)
                             .collect(Collectors.toList()),
-                    new Node(
-                            fileSharers[8].getServiceHolder().getConfiguration().getIp(),
-                            fileSharers[8].getServiceHolder().getConfiguration().getPeerListeningPort()
-                    )
+                    fileSharers[8].getServiceHolder().getConfiguration().getIp(),
+                    fileSharers[8].getServiceHolder().getConfiguration().getPeerListeningPort()
             );
         }
         {
