@@ -174,6 +174,13 @@ public class ResourceIndex {
     }
 
     /**
+     * Collect garbage in the resource index.
+     */
+    public void collectGarbage() {
+        logger.debug("Skipping garbage collection in owned resources");
+    }
+
+    /**
      * Match the resource with a resource name.
      * Returns the list of ownedResources that match the file name.
      *

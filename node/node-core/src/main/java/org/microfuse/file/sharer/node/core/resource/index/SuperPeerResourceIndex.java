@@ -182,6 +182,21 @@ public class SuperPeerResourceIndex extends ResourceIndex {
         }
     }
 
+    @Override
+    public void collectGarbage() {
+        super.collectGarbage();
+        Set<Node> garbageNodes = aggregatedResources.stream().parallel()
+                .flatMap(aggregatedResource ->
+                        aggregatedResource.getAllNodes().stream().parallel()
+                                .filter(node -> !node.isActive())
+                ).collect(Collectors.toSet());
+
+        garbageNodes.forEach(node -> {
+            logger.debug("Removed inactive node " + node.toString() + " from the routing table");
+            removeNodeFromAggregatedResources(node.getIp(), node.getPort());
+        });
+    }
+
     /**
      * Get an aggregated resource by the name.
      * The name queried and the name of the resource returned will be equal.

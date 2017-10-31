@@ -20,6 +20,7 @@ public class NodeConstants {
     public static final int DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT = 3000;
     public static final int DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT = 6000;
     public static final int DEFAULT_SER_SUPER_PEER_TIMEOUT = 5000;
+    public static final int DEFAULT_AUTOMATED_GARBAGE_COLLECTION_INTERVAL = 300000;
     public static final NetworkHandlerType DEFAULT_NETWORK_HANDLER = NetworkHandlerType.TCP_SOCKET;
     public static final RoutingStrategyType DEFAULT_ROUTING_STRATEGY = RoutingStrategyType.SUPER_PEER_FLOODING;
 

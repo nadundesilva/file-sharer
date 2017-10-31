@@ -203,6 +203,24 @@ public class SuperPeerRoutingTable extends RoutingTable {
         }
     }
 
+    @Override
+    public void collectGarbage() {
+        super.collectGarbage();
+        superPeerNetworkNodesLock.writeLock().lock();
+        try {
+            removeInactiveNodesFromSet(superPeerNetworkNodes);
+        } finally {
+            superPeerNetworkNodesLock.writeLock().unlock();
+        }
+
+        assignedOrdinaryPeerNodesLock.writeLock().lock();
+        try {
+            removeInactiveNodesFromSet(assignedOrdinaryPeerNodes);
+        } finally {
+            assignedOrdinaryPeerNodesLock.writeLock().unlock();
+        }
+    }
+
     /**
      * Put a new entry into the routing table of this router.
      *

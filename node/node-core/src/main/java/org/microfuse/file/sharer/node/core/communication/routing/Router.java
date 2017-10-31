@@ -72,13 +72,13 @@ public class Router implements NetworkHandlerListener {
             routingTable = new OrdinaryPeerRoutingTable(serviceHolder);
         }
         heartBeatingEnabled = false;
+        listenersList = new ArrayList<>();
+
+        bootstrapServerNetworkHandler = new BootstrapServerNetworkHandler(serviceHolder);
+        bootstrapServerNetworkHandler.registerListener(this);
+
         this.serviceHolder = serviceHolder;
         this.routingStrategy = routingStrategy;
-        this.listenersList = new ArrayList<>();
-
-        this.bootstrapServerNetworkHandler = new BootstrapServerNetworkHandler(serviceHolder);
-        this.bootstrapServerNetworkHandler.registerListener(this);
-
         this.networkHandler = networkHandler;
         this.networkHandler.registerListener(this);
         this.networkHandler.startListening();
@@ -214,11 +214,11 @@ public class Router implements NetworkHandlerListener {
                 heartBeatingEnabled = true;
                 heartBeatThread = new Thread(() -> {
                     while (heartBeatingEnabled) {
-                        heartBeat();
                         try {
                             Thread.sleep(serviceHolder.getConfiguration().getHeartbeatInterval());
                         } catch (InterruptedException ignored) {
                         }
+                        heartBeat();
                     }
                     logger.debug("Stopped Heart beating");
                 });

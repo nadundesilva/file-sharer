@@ -477,7 +477,7 @@ public class RouterTestCase extends BaseTestCase {
         router.enableHeartBeat();
         waitFor(1200);
 
-        Mockito.verify(networkHandler, Mockito.times(2))
+        Mockito.verify(networkHandler, Mockito.times(1))
                 .sendMessage(node.getIp(), node.getPort(), message);
     }
 

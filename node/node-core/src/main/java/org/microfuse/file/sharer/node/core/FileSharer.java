@@ -66,6 +66,7 @@ public class FileSharer {
         serviceHolder.getOverlayNetworkManager().register();
         serviceHolder.getOverlayNetworkManager().enableHeartBeat();
         serviceHolder.getOverlayNetworkManager().enableGossiping();
+        serviceHolder.enableAutomatedGarbageCollection();
     }
 
     /**
@@ -82,6 +83,7 @@ public class FileSharer {
         } catch (InterruptedException ignored) {
         }
 
+        serviceHolder.disableAutomatedGarbageCollection();
         serviceHolder.getOverlayNetworkManager().disableGossiping();
         serviceHolder.getOverlayNetworkManager().disableHeartBeat();
         serviceHolder.clear();

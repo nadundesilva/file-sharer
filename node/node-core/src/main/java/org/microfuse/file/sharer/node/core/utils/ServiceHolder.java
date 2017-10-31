@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ServiceHolder singleton class.
@@ -32,57 +34,223 @@ import java.util.List;
 public class ServiceHolder {
     private static final Logger logger = LoggerFactory.getLogger(ServiceHolder.class);
 
-    private volatile PeerType peerType;
-    private volatile Configuration configuration;
-    private volatile Router router;
-    private volatile ResourceIndex resourceIndex;
-    private volatile OverlayNetworkManager overlayNetworkManager;
-    private volatile QueryManager queryManager;
+    private PeerType peerType;
+    private Configuration configuration;
+    private Router router;
+    private ResourceIndex resourceIndex;
+    private OverlayNetworkManager overlayNetworkManager;
+    private QueryManager queryManager;
+
+    private Lock peerTypeLock;
+    private Lock configurationLock;
+    private Lock routerLock;
+    private Lock resourceIndexLock;
+    private Lock overlayNetworkManagerLock;
+    private Lock queryManagerLock;
+
+    private Thread automatedGarbageCollectionThread;
+    private boolean automatedGarbageCollectionEnabled;
+
+    private Lock automatedGarbageCollectionLock;
+
+    public ServiceHolder() {
+        peerTypeLock = new ReentrantLock();
+        configurationLock = new ReentrantLock();
+        routerLock = new ReentrantLock();
+        resourceIndexLock = new ReentrantLock();
+        overlayNetworkManagerLock = new ReentrantLock();
+        queryManagerLock = new ReentrantLock();
+
+        automatedGarbageCollectionEnabled = false;
+        automatedGarbageCollectionLock = new ReentrantLock();
+    }
+
+    /**
+     * Enable automated garbage collection.
+     */
+    public void enableAutomatedGarbageCollection() {
+        automatedGarbageCollectionLock.lock();
+        try {
+            if (!automatedGarbageCollectionEnabled) {
+                automatedGarbageCollectionEnabled = true;
+                automatedGarbageCollectionThread = new Thread(() -> {
+                    while (automatedGarbageCollectionEnabled) {
+                        try {
+                            Thread.sleep(getConfiguration().getAutomatedGarbageCollectionInterval());
+                        } catch (InterruptedException ignored) {
+                        }
+                        collectGarbage();
+                    }
+                    logger.debug("Stopped gossiping");
+                });
+                automatedGarbageCollectionThread.setPriority(Thread.MIN_PRIORITY);
+                automatedGarbageCollectionThread.setDaemon(true);
+                automatedGarbageCollectionThread.start();
+                logger.debug("Started automated garbage collection");
+            }
+        } finally {
+            automatedGarbageCollectionLock.unlock();
+        }
+    }
+
+    /**
+     * Disable automated garbage collection.
+     */
+    public void disableAutomatedGarbageCollection() {
+        automatedGarbageCollectionLock.lock();
+        try {
+            if (automatedGarbageCollectionEnabled) {
+                automatedGarbageCollectionEnabled = false;
+                if (automatedGarbageCollectionThread != null) {
+                    automatedGarbageCollectionThread.interrupt();
+                }
+            }
+        } finally {
+            automatedGarbageCollectionLock.unlock();
+        }
+    }
+
+    /**
+     * Collect garbage objects.
+     */
+    public void collectGarbage() {
+        routerLock.lock();
+        try {
+            if (router != null) {
+                router.getRoutingTable().collectGarbage();
+            }
+        } finally {
+            routerLock.unlock();
+        }
+
+        resourceIndexLock.lock();
+        try {
+            if (resourceIndex != null) {
+                resourceIndex.collectGarbage();
+            }
+        } finally {
+            resourceIndexLock.unlock();
+        }
+    }
 
     /**
      * Promote the current node to an ordinary peer.
      */
-    public synchronized void promoteToSuperPeer() {
-        peerType = PeerType.SUPER_PEER;
-        ResourceIndex resourceIndex = getResourceIndex();
-        if (!(resourceIndex instanceof SuperPeerResourceIndex)) {
-            this.resourceIndex = new SuperPeerResourceIndex(this, resourceIndex);
+    public void promoteToSuperPeer() {
+        peerTypeLock.lock();
+        try {
+            peerType = PeerType.SUPER_PEER;
+        } finally {
+            peerTypeLock.unlock();
         }
-        getRouter().promoteToSuperPeer();
+
+        resourceIndexLock.lock();
+        try {
+            ResourceIndex resourceIndex = getResourceIndex();
+            if (!(resourceIndex instanceof SuperPeerResourceIndex)) {
+                this.resourceIndex = new SuperPeerResourceIndex(this, resourceIndex);
+            }
+        } finally {
+            resourceIndexLock.unlock();
+        }
+
+        routerLock.lock();
+        try {
+            getRouterInstance().promoteToSuperPeer();
+        } finally {
+            routerLock.unlock();
+        }
         logger.debug("Promoted to super peer");
     }
 
     /**
      * Demote the current node to a super peer.
      */
-    public synchronized void demoteToOrdinaryPeer() {
-        peerType = PeerType.ORDINARY_PEER;
-        ResourceIndex resourceIndex = getResourceIndex();
-        if (resourceIndex instanceof SuperPeerResourceIndex) {
-            this.resourceIndex = new ResourceIndex(this, (SuperPeerResourceIndex) resourceIndex);
+    public void demoteToOrdinaryPeer() {
+        peerTypeLock.lock();
+        try {
+            peerType = PeerType.ORDINARY_PEER;
+        } finally {
+            peerTypeLock.unlock();
         }
-        getRouter().demoteToOrdinaryPeer();
+
+        resourceIndexLock.lock();
+        try {
+            ResourceIndex resourceIndex = getResourceIndex();
+            if (resourceIndex instanceof SuperPeerResourceIndex) {
+                this.resourceIndex = new ResourceIndex(this, (SuperPeerResourceIndex) resourceIndex);
+            }
+        } finally {
+            resourceIndexLock.unlock();
+        }
+
+        routerLock.lock();
+        try {
+            getRouterInstance().demoteToOrdinaryPeer();
+        } finally {
+            routerLock.unlock();
+        }
         logger.debug("Demoted to ordinary peer");
     }
 
     /**
      * Clear all the stored services.
      */
-    public synchronized void clear() {
-        if (router != null) {
-            router.shutdown();
+    public void clear() {
+        routerLock.lock();
+        try {
+            if (router != null) {
+                router.shutdown();
+            }
+            router = null;
+            logger.debug("Cleared router");
+        } finally {
+            routerLock.unlock();
         }
-        if (overlayNetworkManager != null) {
-            overlayNetworkManager.cancelSearchForSuperPeer();
-        }
-        saveConfiguration();
 
-        peerType = null;
-        configuration = null;
-        router = null;
-        resourceIndex = null;
-        overlayNetworkManager = null;
-        queryManager = null;
+        overlayNetworkManagerLock.lock();
+        try {
+            if (overlayNetworkManager != null) {
+                overlayNetworkManager.cancelSearchForSuperPeer();
+            }
+            overlayNetworkManager = null;
+            logger.debug("Cleared overlay network manager");
+        } finally {
+            overlayNetworkManagerLock.unlock();
+        }
+
+        peerTypeLock.lock();
+        try {
+            peerType = null;
+            logger.debug("Cleared peer type");
+        } finally {
+            peerTypeLock.unlock();
+        }
+
+        configurationLock.lock();
+        try {
+            saveConfigurationToFile(configuration);
+            configuration = null;
+            logger.debug("Cleared configuration");
+        } finally {
+            configurationLock.unlock();
+        }
+
+        resourceIndexLock.lock();
+        try {
+            resourceIndex = null;
+            logger.debug("Cleared resource index");
+        } finally {
+            resourceIndexLock.unlock();
+        }
+
+        queryManagerLock.lock();
+        try {
+            queryManager = null;
+            logger.debug("Cleared query manager");
+        } finally {
+            queryManagerLock.unlock();
+        }
     }
 
     /**
@@ -92,29 +260,34 @@ public class ServiceHolder {
      *
      * @return The configuration of this node
      */
-    public synchronized Configuration getConfiguration() {
-        if (configuration == null) {
-            File configFile = new File(NodeConstants.CONFIG_FILE);
-            boolean configFileExists = false;
-            try {
-                // Loading the configuration from config file
-                List<String> configFileLines = Files.readLines(configFile, Constants.DEFAULT_CHARSET);
-                if (configFileLines.size() > 0) {
-                    String configString = String.join("", configFileLines);
-                    configuration = new Gson().fromJson(configString, Configuration.class);
-                    configFileExists = true;
+    public Configuration getConfiguration() {
+        configurationLock.lock();
+        try {
+            if (configuration == null) {
+                File configFile = new File(NodeConstants.CONFIG_FILE);
+                boolean configFileExists = false;
+                try {
+                    // Loading the configuration from config file
+                    List<String> configFileLines = Files.readLines(configFile, Constants.DEFAULT_CHARSET);
+                    if (configFileLines.size() > 0) {
+                        String configString = String.join("", configFileLines);
+                        configuration = new Gson().fromJson(configString, Configuration.class);
+                        configFileExists = true;
+                    }
+                } catch (IOException e) {
+                    logger.warn("Failed to load configuration from config file. Creating new configuration.", e);
                 }
-            } catch (IOException e) {
-                logger.warn("Failed to load configuration from config file. Creating new configuration.", e);
-            }
 
-            if (!configFileExists) {
-                // Creating a new configuration file based on default values
-                configuration = new Configuration();
-                saveConfiguration();
+                if (!configFileExists) {
+                    // Creating a new configuration file based on default values
+                    configuration = new Configuration();
+                    saveConfigurationToFile(configuration);
+                }
             }
+            return configuration;
+        } finally {
+            configurationLock.unlock();
         }
-        return configuration;
     }
 
     /**
@@ -124,19 +297,24 @@ public class ServiceHolder {
      *
      * @return The resource index instance
      */
-    public synchronized ResourceIndex getResourceIndex() {
-        if (resourceIndex == null) {
-            try {
-                resourceIndex = ResourceIndex.getResourceIndexClass(getPeerType())
-                        .getConstructor(ServiceHolder.class).newInstance(this);
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                    InvocationTargetException e) {
-                logger.error("Failed to instantiate resource index for " + getPeerType().getValue()
-                        + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
-                resourceIndex = new ResourceIndex(this);
+    public ResourceIndex getResourceIndex() {
+        resourceIndexLock.lock();
+        try {
+            if (resourceIndex == null) {
+                try {
+                    resourceIndex = ResourceIndex.getResourceIndexClass(getPeerType())
+                            .getConstructor(ServiceHolder.class).newInstance(this);
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                        InvocationTargetException e) {
+                    logger.error("Failed to instantiate resource index for " + getPeerType().getValue()
+                            + ". Using resource index for " + PeerType.ORDINARY_PEER.getValue() + " instead.", e);
+                    resourceIndex = new ResourceIndex(this);
+                }
             }
+            return resourceIndex;
+        } finally {
+            resourceIndexLock.unlock();
         }
-        return resourceIndex;
     }
 
     /**
@@ -146,11 +324,16 @@ public class ServiceHolder {
      *
      * @return The Bootstrapping Manager
      */
-    public synchronized OverlayNetworkManager getOverlayNetworkManager() {
-        if (overlayNetworkManager == null) {
-            overlayNetworkManager = new OverlayNetworkManager(getRouter(), this);
+    public OverlayNetworkManager getOverlayNetworkManager() {
+        overlayNetworkManagerLock.lock();
+        try {
+            if (overlayNetworkManager == null) {
+                overlayNetworkManager = new OverlayNetworkManager(getRouter(), this);
+            }
+            return overlayNetworkManager;
+        } finally {
+            overlayNetworkManagerLock.unlock();
         }
-        return overlayNetworkManager;
     }
 
     /**
@@ -160,11 +343,16 @@ public class ServiceHolder {
      *
      * @return The Query Manager
      */
-    public synchronized QueryManager getQueryManager() {
-        if (queryManager == null) {
-            queryManager = new QueryManager(getRouter(), this);
+    public QueryManager getQueryManager() {
+        queryManagerLock.lock();
+        try {
+            if (queryManager == null) {
+                queryManager = new QueryManager(getRouter(), this);
+            }
+            return queryManager;
+        } finally {
+            queryManagerLock.unlock();
         }
-        return queryManager;
     }
 
     /**
@@ -172,11 +360,16 @@ public class ServiceHolder {
      *
      * @return The peer type of the node
      */
-    public synchronized PeerType getPeerType() {
-        if (peerType == null) {
-            peerType = PeerType.ORDINARY_PEER;
+    public PeerType getPeerType() {
+        peerTypeLock.lock();
+        try {
+            if (peerType == null) {
+                peerType = PeerType.ORDINARY_PEER;
+            }
+            return peerType;
+        } finally {
+            peerTypeLock.unlock();
         }
-        return peerType;
     }
 
     /**
@@ -186,11 +379,13 @@ public class ServiceHolder {
      *
      * @return The router used by this node
      */
-    public synchronized Router getRouter() {
-        if (router == null) {
-            router = new Router(instantiateNetworkHandler(), instantiateRoutingStrategy(), this);
+    public Router getRouter() {
+        routerLock.lock();
+        try {
+            return getRouterInstance();
+        } finally {
+            routerLock.unlock();
         }
-        return router;
     }
 
     /**
@@ -198,49 +393,46 @@ public class ServiceHolder {
      *
      * @param configuration The configuration to be used
      */
-    public synchronized void updateConfiguration(Configuration configuration) {
-        if (configuration != null) {
-            boolean networkHandlerReplaceRequired = false;
-            if (configuration.getNetworkHandlerType() != this.configuration.getNetworkHandlerType() ||
-                    configuration.getPeerListeningPort() != this.configuration.getPeerListeningPort() ||
-                    configuration.getNetworkHandlerThreadCount() != this.configuration.getNetworkHandlerThreadCount()) {
-                networkHandlerReplaceRequired = true;
-            }
-            boolean routingStraegyReplaceRequired = false;
-            if (configuration.getRoutingStrategyType() != this.configuration.getRoutingStrategyType()) {
-                routingStraegyReplaceRequired = true;
-            }
+    public void updateConfiguration(Configuration configuration) {
+        configurationLock.lock();
+        try {
+            if (configuration != null) {
+                boolean networkHandlerReplaceRequired = false;
+                if (configuration.getNetworkHandlerType() != this.configuration.getNetworkHandlerType() ||
+                        configuration.getPeerListeningPort() != this.configuration.getPeerListeningPort() ||
+                        configuration.getNetworkHandlerThreadCount()
+                                != this.configuration.getNetworkHandlerThreadCount()) {
+                    networkHandlerReplaceRequired = true;
+                }
+                boolean routingStraegyReplaceRequired = false;
+                if (configuration.getRoutingStrategyType() != this.configuration.getRoutingStrategyType()) {
+                    routingStraegyReplaceRequired = true;
+                }
 
-            this.configuration = configuration;
-            if (networkHandlerReplaceRequired) {
-                getRouter().changeNetworkHandler(instantiateNetworkHandler());
-            }
-            if (routingStraegyReplaceRequired) {
-                getRouter().changeRoutingStrategy(instantiateRoutingStrategy());
-            }
+                this.configuration = configuration;
+                if (networkHandlerReplaceRequired) {
+                    getRouter().changeNetworkHandler(instantiateNetworkHandler());
+                }
+                if (routingStraegyReplaceRequired) {
+                    getRouter().changeRoutingStrategy(instantiateRoutingStrategy());
+                }
 
-            saveConfiguration();
+                saveConfigurationToFile(configuration);
+            }
+        } finally {
+            configurationLock.unlock();
         }
     }
 
     /**
      * Save the configuration used by this file sharer.
      */
-    public synchronized void saveConfiguration() {
-        File configFile = new File(NodeConstants.CONFIG_FILE);
+    public void saveConfiguration() {
+        configurationLock.lock();
         try {
-            if (!configFile.createNewFile()) {
-                try {
-                    Files.write(new Gson().toJson(configuration).getBytes(
-                            Constants.DEFAULT_CHARSET), configFile);
-                } catch (IOException e1) {
-                    logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
-                }
-            } else {
-                logger.warn("Failed to create file " + configFile.getAbsolutePath());
-            }
-        } catch (IOException e1) {
-            logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
+            saveConfigurationToFile(configuration);
+        } finally {
+            configurationLock.unlock();
         }
     }
 
@@ -249,7 +441,7 @@ public class ServiceHolder {
      *
      * @return The network handler
      */
-    private synchronized NetworkHandler instantiateNetworkHandler() {
+    private NetworkHandler instantiateNetworkHandler() {
         NetworkHandler networkHandler;
         try {
             networkHandler = NetworkHandler.getNetworkHandlerClass(getConfiguration().getNetworkHandlerType())
@@ -269,7 +461,7 @@ public class ServiceHolder {
      *
      * @return The routing strategy
      */
-    private synchronized RoutingStrategy instantiateRoutingStrategy() {
+    private RoutingStrategy instantiateRoutingStrategy() {
         RoutingStrategy routingStrategy;
         try {
             routingStrategy = RoutingStrategy.getRoutingStrategyClass(getConfiguration().getRoutingStrategyType())
@@ -282,5 +474,38 @@ public class ServiceHolder {
             routingStrategy = new UnstructuredFloodingRoutingStrategy(this);
         }
         return routingStrategy;
+    }
+
+    /**
+     * Save the current configuration to file.
+     */
+    private void saveConfigurationToFile(Configuration configuration) {
+        File configFile = new File(NodeConstants.CONFIG_FILE);
+        try {
+            if (!configFile.createNewFile()) {
+                try {
+                    Files.write(new Gson().toJson(configuration).getBytes(
+                            Constants.DEFAULT_CHARSET), configFile);
+                } catch (IOException e1) {
+                    logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);
+                }
+            } else {
+                logger.warn("Failed to create file " + configFile.getAbsolutePath());
+            }
+        } catch (IOException e1) {
+            logger.warn("Failed to create file " + configFile.getAbsolutePath(), e1);
+        }
+    }
+
+    /**
+     * Get the router instance.
+     *
+     * @return The router instance
+     */
+    private Router getRouterInstance() {
+        if (router == null) {
+            router = new Router(instantiateNetworkHandler(), instantiateRoutingStrategy(), this);
+        }
+        return router;
     }
 }

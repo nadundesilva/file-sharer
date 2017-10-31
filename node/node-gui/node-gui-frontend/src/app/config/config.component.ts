@@ -72,6 +72,7 @@ export class ConfigComponent implements OnInit {
       this.config.serSuperPeerTimeout = this.config.serSuperPeerTimeout / 1000;
       this.config.heartbeatInterval = this.config.heartbeatInterval / 1000;
       this.config.gossipingInterval = this.config.gossipingInterval / 1000;
+      this.config.automatedGarbageCollectionInterval = this.config.automatedGarbageCollectionInterval / 1000;
     }
   }
 
@@ -82,6 +83,7 @@ export class ConfigComponent implements OnInit {
     config.serSuperPeerTimeout = config.serSuperPeerTimeout * 1000;
     config.heartbeatInterval = config.heartbeatInterval * 1000;
     config.gossipingInterval = config.gossipingInterval * 1000;
+    config.automatedGarbageCollectionInterval = config.automatedGarbageCollectionInterval * 1000;
     return config;
   }
 }
@@ -101,6 +103,7 @@ class Config {
   networkHandlerSendTimeout: number;
   bootstrapServerReplyWaitTimeout: number;
   serSuperPeerTimeout: number;
+  automatedGarbageCollectionInterval: number;
   networkHandlerType: NetworkHandlerType;
   routingStrategyType: RoutingStrategyType;
 }

@@ -32,63 +32,45 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
 
         superPeerRoutingTable = new SuperPeerRoutingTable(serviceHolder);
 
-        ordinaryPeerNode1 = new Node();
-        ordinaryPeerNode1.setIp("192.168.1.1");
-        ordinaryPeerNode1.setPort(4532);
-        ordinaryPeerNode1.setState(NodeState.ACTIVE);
+        ordinaryPeerNode1 = new Node("192.168.1.1", 4532);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(ordinaryPeerNode1);
         superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
                 ordinaryPeerNode1.getIp(), ordinaryPeerNode1.getPort());
 
-        ordinaryPeerNode2 = new Node();
-        ordinaryPeerNode2.setIp("192.168.1.2");
-        ordinaryPeerNode2.setPort(6542);
-        ordinaryPeerNode2.setState(NodeState.ACTIVE);
+        ordinaryPeerNode2 = new Node("192.168.1.2", 6542);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(ordinaryPeerNode2);
         superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
                 ordinaryPeerNode2.getIp(), ordinaryPeerNode2.getPort());
 
-        ordinaryPeerNode3 = new Node();
-        ordinaryPeerNode3.setIp("192.168.1.3");
-        ordinaryPeerNode3.setPort(5643);
+        ordinaryPeerNode3 = new Node("192.168.1.3", 5643);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(ordinaryPeerNode3);
-        superPeerRoutingTable.get(ordinaryPeerNode3.getIp(), ordinaryPeerNode3.getPort()).setState(NodeState.INACTIVE);
 
-        superPeerNode1 = new Node();
-        superPeerNode1.setIp("192.168.1.4");
-        superPeerNode1.setPort(7543);
-        superPeerNode1.setState(NodeState.ACTIVE);
+        superPeerNode1 = new Node("192.168.1.4", 7543);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(superPeerNode1);
         superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
                 superPeerNode1.getIp(), superPeerNode1.getPort());
 
-        superPeerNode2 = new Node();
-        superPeerNode2.setIp("192.168.1.5");
-        superPeerNode2.setPort(7431);
-        superPeerNode2.setState(NodeState.ACTIVE);
+        superPeerNode2 = new Node("192.168.1.5", 7431);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(superPeerNode2);
         superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
                 superPeerNode2.getIp(), superPeerNode2.getPort());
 
-        superPeerNode3 = new Node();
-        superPeerNode3.setIp("192.168.1.6");
-        superPeerNode3.setPort(4562);
+        superPeerNode3 = new Node("192.168.1.6", 4562);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(superPeerNode3);
         superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(
                 superPeerNode3.getIp(), superPeerNode3.getPort());
-        superPeerRoutingTable.get(superPeerNode3.getIp(), superPeerNode3.getPort()).setState(NodeState.INACTIVE);
     }
 
     @Test(priority = 1)
     public void testGetSuperPeerNetworkRoutingTableNode() {
         logger.info("Running Super Peer Routing Table Test 01 - Get name");
 
-        Node superPeerNetworkRoutingTableNode =
-                superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode("192.168.1.5", 7431);
+        Node superPeerNetworkRoutingTableNode = superPeerRoutingTable
+                .getSuperPeerNetworkRoutingTableNode(superPeerNode2.getIp(), superPeerNode2.getPort());
 
         Assert.assertNotNull(superPeerNetworkRoutingTableNode);
-        Assert.assertEquals(superPeerNetworkRoutingTableNode.getIp(), "192.168.1.5");
-        Assert.assertEquals(superPeerNetworkRoutingTableNode.getPort(), 7431);
+        Assert.assertEquals(superPeerNetworkRoutingTableNode.getIp(), superPeerNode2.getIp());
+        Assert.assertEquals(superPeerNetworkRoutingTableNode.getPort(), superPeerNode2.getPort());
         Assert.assertTrue(superPeerNetworkRoutingTableNode.isActive());
     }
 
@@ -97,8 +79,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         logger.info("Running Super Peer Routing Table Test 02 - Get super peer network routing table " +
                 "non existent node");
 
-        Node unstructuredNetworkRoutingTableNode =
-                superPeerRoutingTable.getSuperPeerNetworkRoutingTableNode("192.168.1.2", 6542);
+        Node unstructuredNetworkRoutingTableNode = superPeerRoutingTable
+                .getSuperPeerNetworkRoutingTableNode(ordinaryPeerNode2.getIp(), ordinaryPeerNode2.getPort());
 
         Assert.assertNull(unstructuredNetworkRoutingTableNode);
     }
@@ -107,12 +89,12 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     public void testGetAssignedOrdinaryNetworkRoutingTableNode() {
         logger.info("Running Super Peer Routing Table Test 03 - Get assigned ordinary network routing table node");
 
-        Node superPeerNetworkRoutingTableNode =
-                superPeerRoutingTable.getAssignedOrdinaryNetworkRoutingTableNode("192.168.1.2", 6542);
+        Node superPeerNetworkRoutingTableNode = superPeerRoutingTable
+                .getAssignedOrdinaryNetworkRoutingTableNode(ordinaryPeerNode2.getIp(), ordinaryPeerNode2.getPort());
 
         Assert.assertNotNull(superPeerNetworkRoutingTableNode);
-        Assert.assertEquals(superPeerNetworkRoutingTableNode.getIp(), "192.168.1.2");
-        Assert.assertEquals(superPeerNetworkRoutingTableNode.getPort(), 6542);
+        Assert.assertEquals(superPeerNetworkRoutingTableNode.getIp(), ordinaryPeerNode2.getIp());
+        Assert.assertEquals(superPeerNetworkRoutingTableNode.getPort(), ordinaryPeerNode2.getPort());
         Assert.assertTrue(superPeerNetworkRoutingTableNode.isActive());
     }
 
@@ -121,8 +103,8 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         logger.info("Running Super Peer Routing Table Test 04 - Get assigned ordinary network routing table " +
                 "non existent node");
 
-        Node unstructuredNetworkRoutingTableNode =
-                superPeerRoutingTable.getAssignedOrdinaryNetworkRoutingTableNode("192.168.1.5", 7431);
+        Node unstructuredNetworkRoutingTableNode = superPeerRoutingTable
+                .getAssignedOrdinaryNetworkRoutingTableNode(superPeerNode2.getIp(), superPeerNode2.getPort());
 
         Assert.assertNull(unstructuredNetworkRoutingTableNode);
     }
@@ -218,7 +200,6 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         Node node = new Node();
         node.setIp("192.168.1.100");
         node.setPort(5824);
-        node.setState(NodeState.ACTIVE);
         superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node);
 
         Node foundNode = superPeerRoutingTable.get(node.getIp(), node.getPort());
@@ -305,5 +286,41 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         Assert.assertTrue(assignedSuperPeer.contains(ordinaryPeerNode2));
         Assert.assertTrue(assignedSuperPeer.contains(newNode1));
         Assert.assertFalse(assignedSuperPeer.contains(newNode2));
+    }
+
+    @Test(priority = 5)
+    public void testGarbageCollectionWithInactiveAssignedOrdinaryPeerNode() {
+        logger.info("Running Super Peer Routing Table Test 16 - " +
+                "Garbage collection with inactive assigned ordinary peer");
+
+        Node node = superPeerRoutingTable.get(ordinaryPeerNode1.getIp(), ordinaryPeerNode1.getPort());
+        node.setState(NodeState.INACTIVE);
+        superPeerRoutingTable.collectGarbage();
+
+        Assert.assertNotNull(node);
+        Assert.assertNull(superPeerRoutingTable.get(ordinaryPeerNode1.getIp(), ordinaryPeerNode1.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(ordinaryPeerNode2.getIp(), ordinaryPeerNode2.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(ordinaryPeerNode3.getIp(), ordinaryPeerNode3.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(superPeerNode1.getIp(), superPeerNode1.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(superPeerNode2.getIp(), superPeerNode2.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(superPeerNode3.getIp(), superPeerNode3.getPort()));
+    }
+
+    @Test(priority = 5)
+    public void testGarbageCollectionWithInactiveSuperPeerNetworkNode() {
+        logger.info("Running Super Peer Routing Table Test 17 - " +
+                "Garbage collection with inactive super peer network node");
+
+        Node node = superPeerRoutingTable.get(superPeerNode1.getIp(), superPeerNode1.getPort());
+        node.setState(NodeState.INACTIVE);
+        superPeerRoutingTable.collectGarbage();
+
+        Assert.assertNotNull(node);
+        Assert.assertNotNull(superPeerRoutingTable.get(ordinaryPeerNode1.getIp(), ordinaryPeerNode1.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(ordinaryPeerNode2.getIp(), ordinaryPeerNode2.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(ordinaryPeerNode3.getIp(), ordinaryPeerNode3.getPort()));
+        Assert.assertNull(superPeerRoutingTable.get(superPeerNode1.getIp(), superPeerNode1.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(superPeerNode2.getIp(), superPeerNode2.getPort()));
+        Assert.assertNotNull(superPeerRoutingTable.get(superPeerNode3.getIp(), superPeerNode3.getPort()));
     }
 }

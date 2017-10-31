@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 /**
  * The routing table containing the node information.
@@ -161,6 +162,18 @@ public abstract class RoutingTable {
     }
 
     /**
+     * Collect the garbage nodes in the routing table.
+     */
+    public void collectGarbage() {
+        unstructuredNetworkNodesLock.writeLock().lock();
+        try {
+            removeInactiveNodesFromSet(unstructuredNetworkNodes);
+        } finally {
+            unstructuredNetworkNodesLock.writeLock().unlock();
+        }
+    }
+
+    /**
      * Put a new entry into the routing table of this router.
      *
      * @param node The node of the new entry
@@ -202,5 +215,16 @@ public abstract class RoutingTable {
             unstructuredNetworkNodesLock.writeLock().unlock();
         }
         return isSuccessful;
+    }
+
+    protected void removeInactiveNodesFromSet(Set<Node> nodeSet) {
+        Set<Node> garbageNodes = nodeSet.stream().parallel()
+                .filter(node -> !node.isActive())
+                .collect(Collectors.toSet());
+
+        garbageNodes.forEach(node -> {
+            logger.debug("Removed inactive node " + node.toString() + " from the routing table");
+            removeFromAll(node.getIp(), node.getPort());
+        });
     }
 }

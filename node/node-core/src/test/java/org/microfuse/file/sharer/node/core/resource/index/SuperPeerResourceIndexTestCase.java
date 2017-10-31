@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core.resource.index;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
@@ -27,18 +28,22 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
     private String resourceName4;
     private SuperPeerResourceIndex superPeerResourceIndex;
 
+    private RoutingTable routingTable;
+    private Node node1;
+    private Node node2;
+
     @BeforeMethod
     public void initializeMethod() {
         logger.info("Initializing Super Peer Resource Index Test");
 
-        Node node1 = new Node("192.168.1.1", 6001);
-        Node node2 = new Node("192.168.1.2", 6002);
+        node1 = new Node("192.168.1.1", 6001);
+        node2 = new Node("192.168.1.2", 6002);
         Node node3 = new Node("192.168.1.3", 6003);
         Node node4 = new Node("192.168.1.4", 6004);
         Node node5 = new Node("192.168.1.5", 6005);
         Node node6 = new Node("192.168.1.6", 6006);
 
-        RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
+        routingTable = serviceHolder.getRouter().getRoutingTable();
         routingTable.addUnstructuredNetworkRoutingTableEntry(node1.getIp(), node1.getPort());
         routingTable.addUnstructuredNetworkRoutingTableEntry(node2.getIp(), node2.getPort());
         routingTable.addUnstructuredNetworkRoutingTableEntry(node3.getIp(), node3.getPort());
@@ -151,5 +156,17 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
 
         Assert.assertEquals(wonderWomanResource.getNodeCount(), 0);
         Assert.assertEquals(updatedWonderWomanResources.size(), 0);
+    }
+
+    @Test(priority = 4)
+    public void testGarbageCollectionWithInactiveNodesInAggregatedResources() {
+        logger.info("Running Super Peer Resource Index Test 06 - " +
+                "Garbage collection with inactive nodes in aggregated resources");
+
+        routingTable.get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
+        routingTable.get(node2.getIp(), node2.getPort()).setState(NodeState.INACTIVE);
+        superPeerResourceIndex.collectGarbage();
+
+        Assert.assertEquals(superPeerResourceIndex.findAggregatedResources(resourceName1).size(), 0);
     }
 }

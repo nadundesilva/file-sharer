@@ -24,6 +24,7 @@ public class Configuration {
     private int networkHandlerSendTimeout;
     private int bootstrapServerReplyWaitTimeout;
     private int serSuperPeerTimeout;
+    private int automatedGarbageCollectionInterval;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
 
@@ -46,6 +47,7 @@ public class Configuration {
         networkHandlerSendTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT;
         bootstrapServerReplyWaitTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT;
         serSuperPeerTimeout = NodeConstants.DEFAULT_SER_SUPER_PEER_TIMEOUT;
+        automatedGarbageCollectionInterval = NodeConstants.DEFAULT_AUTOMATED_GARBAGE_COLLECTION_INTERVAL;
         networkHandlerType = NodeConstants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = NodeConstants.DEFAULT_ROUTING_STRATEGY;
     }
@@ -168,6 +170,14 @@ public class Configuration {
 
     public void setSerSuperPeerTimeout(int serSuperPeerTimeout) {
         this.serSuperPeerTimeout = serSuperPeerTimeout;
+    }
+
+    public int getAutomatedGarbageCollectionInterval() {
+        return automatedGarbageCollectionInterval;
+    }
+
+    public void setAutomatedGarbageCollectionInterval(int automatedGarbageCollectionInterval) {
+        this.automatedGarbageCollectionInterval = automatedGarbageCollectionInterval;
     }
 
     public NetworkHandlerType getNetworkHandlerType() {

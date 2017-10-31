@@ -85,6 +85,14 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
         assignedSuperPeer = null;
     }
 
+    @Override
+    public void collectGarbage() {
+        super.collectGarbage();
+        if (assignedSuperPeer != null && !assignedSuperPeer.isActive()) {
+            removeFromAll(assignedSuperPeer.getIp(), assignedSuperPeer.getPort());
+        }
+    }
+
     /**
      * Set the assigned super peer for this node.
      *
