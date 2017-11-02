@@ -50,7 +50,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
         unstructuredNetworkNodes.add(node1);
         unstructuredNetworkNodes.add(node2);
         unstructuredNetworkNodes.add(node3);
-        Mockito.when(routingTable.getAllUnstructuredNetworkRoutingTableNodes())
+        Mockito.when(routingTable.getAllUnstructuredNetworkNodes())
                 .thenReturn(unstructuredNetworkNodes);
     }
 

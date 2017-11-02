@@ -93,7 +93,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertEquals(configuration.getBootstrapServerIP(), NodeConstants.DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS);
         Assert.assertEquals(configuration.getBootstrapServerPort(), Constants.BOOTSTRAP_SERVER_PORT);
         Assert.assertEquals(configuration.getIp(), NodeConstants.DEFAULT_IP_ADDRESS);
-        Assert.assertEquals(configuration.getPeerListeningPort(), NodeConstants.DEFAULT_TCP_LISTENER_PORT);
+        Assert.assertEquals(configuration.getPeerListeningPort(), NodeConstants.DEFAULT_PEER_LISTENING_PORT);
         Assert.assertEquals(configuration.getTimeToLive(), NodeConstants.DEFAULT_TIME_TO_LIVE);
         Assert.assertEquals(configuration.getNetworkHandlerThreadCount(),
                 NodeConstants.DEFAULT_NETWORK_HANDLER_THREAD_COUNT);
@@ -151,7 +151,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
         Assert.assertNotNull(overlayNetworkManager);
 
-        Object routerInternalState = Whitebox.getInternalState(overlayNetworkManager, "router");
+        Object routerInternalState = Whitebox.getInternalState(serviceHolder, "router");
         Assert.assertNotNull(routerInternalState);
         Object listenersListInternalState = Whitebox.getInternalState(routerInternalState, "listenersList");
         Assert.assertTrue(listenersListInternalState instanceof List<?>);
@@ -180,7 +180,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
 
         Assert.assertNotNull(queryManager);
 
-        Object routerInternalState = Whitebox.getInternalState(queryManager, "router");
+        Object routerInternalState = Whitebox.getInternalState(serviceHolder, "router");
         Assert.assertNotNull(routerInternalState);
         Object listenersListInternalState = Whitebox.getInternalState(routerInternalState, "listenersList");
         Assert.assertTrue(listenersListInternalState instanceof List<?>);

@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
 
     public OrdinaryPeerRoutingTable(ServiceHolder serviceHolder, SuperPeerRoutingTable superPeerRoutingTable) {
         this(serviceHolder);
-        superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()
+        superPeerRoutingTable.getAllUnstructuredNetworkNodes()
                 .forEach(this::addUnstructuredNetworkRoutingTableEntry);
     }
 
@@ -82,7 +83,7 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
     @Override
     public void clear() {
         super.clear();
-        assignedSuperPeer = null;
+        setAssignedSuperPeer(null);
     }
 
     @Override
@@ -99,11 +100,31 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
      * @param node The super peer to be assigned to this node
      */
     private void setAssignedSuperPeer(Node node) {
-        this.assignedSuperPeer = node;
         if (node != null) {
-            logger.debug("Changed assigned super peer to " + node.toString());
+            logger.debug("Adding assigned super peer to " + node.toString());
+
+            // Notifying the tracer
+            Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
+            if (tracer != null) {
+                tracer.addAssignedOrdinaryPeerConnection(
+                        serviceHolder.getConfiguration().getIp(),
+                        serviceHolder.getConfiguration().getPeerListeningPort(),
+                        node.getIp(), node.getPort()
+                );
+            }
         } else {
-            logger.debug("Removed assigned super peer");
+            logger.debug("Removing assigned super peer");
+
+            // Notifying the tracer
+            Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
+            if (tracer != null) {
+                tracer.removeAssignedOrdinaryPeerConnection(
+                        serviceHolder.getConfiguration().getIp(),
+                        serviceHolder.getConfiguration().getPeerListeningPort(),
+                        assignedSuperPeer.getIp(), assignedSuperPeer.getPort()
+                );
+            }
         }
+        this.assignedSuperPeer = node;
     }
 }

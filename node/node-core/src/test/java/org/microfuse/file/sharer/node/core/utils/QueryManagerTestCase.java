@@ -38,7 +38,8 @@ public class QueryManagerTestCase extends BaseTestCase {
                 new UnstructuredFloodingRoutingStrategy(serviceHolder),
                 serviceHolder
         ));
-        queryManager = new QueryManager(router, serviceHolder);
+        Whitebox.setInternalState(serviceHolder, "router", router);
+        queryManager = new QueryManager(serviceHolder);
     }
 
     @AfterMethod
@@ -52,7 +53,7 @@ public class QueryManagerTestCase extends BaseTestCase {
     public void testConstructor() {
         logger.info("Running Query Manager Test 01 - Constructor");
 
-        Object internalStateRouter = Whitebox.getInternalState(queryManager, "router");
+        Object internalStateRouter = Whitebox.getInternalState(serviceHolder, "router");
         Assert.assertNotNull(internalStateRouter);
         Assert.assertTrue(internalStateRouter == router);
 

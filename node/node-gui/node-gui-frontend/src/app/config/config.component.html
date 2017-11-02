@@ -1,7 +1,9 @@
 <div>
   <h1 class="mat-h1">{{ title }}</h1>
   <span fxFlex></span>
-  <a routerLink="/home"><mat-icon>home</mat-icon></a>
+  <div class="top-menu">
+    <button mat-button color="primary" routerLink="/home"><mat-icon>home</mat-icon></button>
+  </div>
 </div>
 <div>
   <button mat-button (click)="save()"><mat-icon>save</mat-icon> Save</button>
@@ -26,6 +28,21 @@
         <mat-form-field>
           <span matSuffix>seconds</span>
           <input matInput placeholder="Reply Wait Timeout" [(ngModel)]="config.bootstrapServerReplyWaitTimeout">
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card fxFlex>
+    <mat-card-title>Tracing</mat-card-title>
+    <mat-card-content>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Tracer IP Address" [(ngModel)]="config.tracerServeIP">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Tracer Port" [(ngModel)]="config.tracerServePort">
         </mat-form-field>
       </div>
     </mat-card-content>

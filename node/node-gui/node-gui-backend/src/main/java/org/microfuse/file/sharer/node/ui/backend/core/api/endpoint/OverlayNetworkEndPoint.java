@@ -31,14 +31,14 @@ public class OverlayNetworkEndPoint {
         data.put(APIConstants.PEER_TYPE, peerType.getValue());
 
         RoutingTable routingTable = FileSharerHolder.getFileSharer().getServiceHolder().getRouter().getRoutingTable();
-        data.put(APIConstants.UNSTRUCTURED_NETWORK, routingTable.getAllUnstructuredNetworkRoutingTableNodes());
+        data.put(APIConstants.UNSTRUCTURED_NETWORK, routingTable.getAllUnstructuredNetworkNodes());
         if (peerType == PeerType.SUPER_PEER) {
             if (routingTable instanceof SuperPeerRoutingTable) {
                 SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
                 data.put(APIConstants.SUPER_PEER_NETWORK,
-                        superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes());
+                        superPeerRoutingTable.getAllSuperPeerNetworkNodes());
                 data.put(APIConstants.ASSIGNED_ORDINARY_PEERS,
-                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes());
+                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes());
             } else {
                 responseStatus = Status.ERROR;
             }

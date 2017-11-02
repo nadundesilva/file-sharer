@@ -15,6 +15,9 @@ export class Constants {
   public static API_CONFIG_ENDPOINT_DEFAULTS_PATH = 'defaults/';
   public static API_SYSTEM_ENDPOINT = 'system/';
   public static API_SYSTEM_ENDPOINT_RESTART_PATH = 'restart/';
+  public static API_TRACE_ENDPOINT = 'trace/';
+  public static API_TRACE_ENDPOINT_MODE_PATH = 'mode/';
+  public static API_TRACE_ENDPOINT_NETWORK_PATH = 'network/';
   public static REFRESH_FREQUENCY = 3000;
 }
 
@@ -37,20 +40,53 @@ export enum RoutingStrategyType {
   SUPER_PEER_RANDOM_WALK = <any>'SUPER_PEER_RANDOM_WALK'
 }
 
+export enum TracingMode {
+  TRACEABLE = <any>'TRACEABLE',
+  TRACER = <any>'TRACER',
+  OFF = <any>'OFF'
+}
+
 export enum PeerType {
-  SUPER_PEER = <any>'Super Peer',
-  ORDINARY_PEER = <any>'Ordinary Peer'
+  SUPER_PEER = <any>'SUPER_PEER',
+  ORDINARY_PEER = <any>'ORDINARY_PEER'
+}
+
+export enum NodeState {
+  ACTIVE = <any>'ACTIVE',
+  PENDING_INACTIVATION = <any>'PENDING_INACTIVATION',
+  INACTIVE = <any>'INACTIVE'
 }
 
 export class Node {
   ip: string;
   port: number;
-  isAlive: boolean;
+  state: NodeState;
 }
 
 export interface ServerResponse<T> {
   status: ServerResponseStatus;
   data: T;
+}
+
+export class TraceableNode extends Node {
+  peerType: PeerType;
+}
+
+export enum ConnectionType {
+  MAIN = <any>'MAIN',
+  SUB = <any>'SUB'
+}
+
+export class NetworkConnection {
+  node1: TraceableNode;
+  node2: TraceableNode;
+  type: ConnectionType;
+}
+
+export class Network {
+  unstructuredNetwork: NetworkConnection[] = [];
+  superPeerNetwork: NetworkConnection[] = [];
+  assignedSuperPeersNetwork: NetworkConnection[] = [];
 }
 
 @Injectable()

@@ -1,19 +1,22 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Constants, ServerResponse, ServerResponseStatus, TableDataSource, Utils} from '../../commons';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-query',
-  templateUrl: './query.component.html',
-  styleUrls: ['./query.component.css']
+  templateUrl: './query.component.html'
 })
-export class QueryComponent implements OnInit {
+export class QueryComponent implements OnInit, OnDestroy {
   queryString = '';
 
   runningQueries: string[];
+  runningQueriesFetchSubscription: Subscription;
+
   selectedRunningQuery: string;
+  selectedRunningQueryFetchSubscription: Subscription;
 
   queryResults: TableDataSource<AggregatedResource>;
   displayedColumns = ['name', 'node-ip', 'node-port'];
@@ -26,6 +29,11 @@ export class QueryComponent implements OnInit {
   ngOnInit(): void {
     this.startFetchingRunningQueries();
     this.startFetchingQueryResults();
+  }
+
+  ngOnDestroy(): void {
+    this.stopFetchingRunningQueries();
+    this.stopFetchingQueryResults();
   }
 
   query(): void {
@@ -47,8 +55,16 @@ export class QueryComponent implements OnInit {
   }
 
   private startFetchingRunningQueries(): void {
+    this.stopFetchingRunningQueries();
     const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
-    timer.subscribe(this.fetchRunningQueries);
+    this.runningQueriesFetchSubscription = timer.subscribe(t => this.fetchRunningQueries());
+  }
+
+  private stopFetchingRunningQueries(): void {
+    if (this.runningQueriesFetchSubscription) {
+      this.runningQueriesFetchSubscription.unsubscribe();
+      this.runningQueriesFetchSubscription = null;
+    }
   }
 
   private fetchRunningQueries(): void {
@@ -63,8 +79,16 @@ export class QueryComponent implements OnInit {
   }
 
   private startFetchingQueryResults(): void {
+    this.stopFetchingQueryResults();
     const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
-    timer.subscribe(this.fetchQueryResults);
+    this.selectedRunningQueryFetchSubscription = timer.subscribe(t => this.fetchQueryResults());
+  }
+
+  private stopFetchingQueryResults(): void {
+    if (this.selectedRunningQueryFetchSubscription) {
+      this.selectedRunningQueryFetchSubscription.unsubscribe();
+      this.selectedRunningQueryFetchSubscription = null;
+    }
   }
 
   fetchQueryResults(): void {

@@ -10,7 +10,9 @@ public class NodeConstants {
     public static final String DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS = "127.0.0.1";
     public static final String DEFAULT_USERNAME = "microfuse.2017";
     public static final String DEFAULT_IP_ADDRESS = "127.0.0.1";
-    public static final int DEFAULT_TCP_LISTENER_PORT = 4444;
+    public static final String DEFAULT_TRACER_SERVE_IP = "127.0.0.1";
+    public static final int DEFAULT_TRACER_SERVE_PORT = 9999;
+    public static final int DEFAULT_PEER_LISTENING_PORT = 4444;
     public static final int DEFAULT_NETWORK_HANDLER_THREAD_COUNT = 5;
     public static final int DEFAULT_TIME_TO_LIVE = 20;
     public static final int DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT = 5;

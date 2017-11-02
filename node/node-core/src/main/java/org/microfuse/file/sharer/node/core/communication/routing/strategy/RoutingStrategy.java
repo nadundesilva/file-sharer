@@ -122,7 +122,7 @@ public abstract class RoutingStrategy {
         if (superPeer != null && superPeer.isActive()) {
             forwardingNodes = new HashSet<>(Collections.singletonList(superPeer));
         } else {
-            forwardingNodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes();
+            forwardingNodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes();
             serviceHolder.getOverlayNetworkManager().searchForSuperPeer();
         }
         return forwardingNodes;

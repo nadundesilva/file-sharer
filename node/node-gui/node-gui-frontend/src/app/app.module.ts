@@ -6,7 +6,7 @@ import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
   MatButtonModule, MatCardModule, MatDialogModule, MatIconModule, MatInputModule, MatListModule, MatPaginatorModule,
-  MatSelectModule, MatSnackBarModule, MatTableModule, MatTabsModule, MatToolbarModule
+  MatSelectModule, MatSlideToggleModule, MatSnackBarModule, MatTableModule, MatTabsModule, MatToolbarModule
 } from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import {QueryComponent} from './home/query/query.component';
@@ -19,6 +19,10 @@ import {AddResourceDialogComponent} from './home/resources/add-resource-dialog.c
 import {ConfigComponent} from './config/config.component';
 import {HomeComponent} from './home/home.component';
 import {FlexLayoutModule} from '@angular/flex-layout';
+import {TraceComponent} from './trace/trace.component';
+import {TracerEnableConfirmationComponent} from './trace/tracer-enable-confirmation.component';
+import {D3Service} from 'd3-ng2-service';
+import { TraceNetworkComponent } from './trace/trace-network/trace-network.component';
 
 const appRoutes: Routes = [
   {
@@ -28,6 +32,10 @@ const appRoutes: Routes = [
   {
     path: 'config',
     component: ConfigComponent
+  },
+  {
+    path: 'trace',
+    component: TraceComponent
   },
   {
     path: '',
@@ -43,17 +51,18 @@ const appRoutes: Routes = [
 @NgModule({
   declarations: [
     AppComponent, HomeComponent, QueryComponent, NetworkComponent, ResourcesComponent, AddResourceDialogComponent,
-    ConfigComponent
+    ConfigComponent, TraceComponent, TracerEnableConfirmationComponent, TraceNetworkComponent
   ],
   entryComponents: [
-    AddResourceDialogComponent
+    AddResourceDialogComponent, TracerEnableConfirmationComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes), FlexLayoutModule, BrowserModule, BrowserAnimationsModule, HttpClientModule,
     MatTableModule, MatPaginatorModule, MatSelectModule, FormsModule, MatTabsModule, MatListModule, MatSnackBarModule,
-    MatInputModule, MatButtonModule, MatCardModule, FilePickerModule, MatDialogModule, MatIconModule, MatToolbarModule
+    MatInputModule, MatButtonModule, MatCardModule, FilePickerModule, MatDialogModule, MatIconModule, MatToolbarModule,
+    MatSlideToggleModule
   ],
-  providers: [Utils],
+  providers: [Utils, D3Service],
   bootstrap: [AppComponent]
 })
 export class AppModule {

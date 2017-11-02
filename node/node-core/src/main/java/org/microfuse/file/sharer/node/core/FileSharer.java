@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Node Manager class.
+ * File Sharer Manager class.
  */
 public class FileSharer {
     private static final Logger logger = LoggerFactory.getLogger(FileSharer.class);
@@ -86,6 +86,13 @@ public class FileSharer {
         serviceHolder.disableAutomatedGarbageCollection();
         serviceHolder.getOverlayNetworkManager().disableGossiping();
         serviceHolder.getOverlayNetworkManager().disableHeartBeat();
+
+        // Waiting with a time out to threads to exit
+        try {
+            Thread.sleep(Constants.THREAD_DISABLE_TIMEOUT);
+        } catch (InterruptedException ignored) {
+        }
+
         serviceHolder.clear();
     }
 }

@@ -114,7 +114,7 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         logger.info("Running Super Peer Routing Table Test 05 - Get all assigned ordinary network routing table " +
                 "nodes copying");
 
-        Set<Node> nodes = superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes();
+        Set<Node> nodes = superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes();
         Object internalState = Whitebox.getInternalState(superPeerRoutingTable, "assignedOrdinaryPeerNodes");
         Assert.assertFalse(nodes == internalState);
     }
@@ -123,7 +123,7 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     public void testGetAllSuperPeerNetworkRoutingTableNodes() {
         logger.info("Running Super Peer Routing Table Test 06 - Get all super peer network routing table nodes");
 
-        Set<Node> nodes = superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes();
+        Set<Node> nodes = superPeerRoutingTable.getAllSuperPeerNetworkNodes();
         Object internalState = Whitebox.getInternalState(superPeerRoutingTable, "superPeerNetworkNodes");
         Assert.assertFalse(nodes == internalState);
     }
@@ -278,7 +278,7 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
         superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(newNode1.getIp(), newNode1.getPort());
         boolean isSuccessful = superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(
                 newNode2.getIp(), newNode2.getPort());
-        Set<Node> assignedSuperPeer = superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes();
+        Set<Node> assignedSuperPeer = superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes();
 
         Assert.assertFalse(isSuccessful);
         Assert.assertEquals(assignedSuperPeer.size(), 3);

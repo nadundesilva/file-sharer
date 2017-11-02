@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core;
 
 import org.microfuse.file.sharer.bootstrap.BootstrapServer;
+import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.messaging.MessageConstants;
 import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
@@ -34,6 +35,7 @@ public class BootstrappingTestCase extends BaseTestCase {
     private static final Logger logger = LoggerFactory.getLogger(BootstrappingTestCase.class);
 
     private int delay;
+    private int shutDownDelay;
     private BootstrapServer bootstrapServer;
     private FileSharer fileSharer;
     private Node node;
@@ -54,6 +56,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         String localhostIP = "127.0.0.1";
 
         delay = 1000;
+        shutDownDelay = delay + Constants.CONTINUOUS_TASK_INTERVAL + Constants.THREAD_DISABLE_TIMEOUT;
         bootstrapServer = new BootstrapServer();
         fileSharer = new FileSharer();
         Whitebox.setInternalState(fileSharer, "serviceHolder", serviceHolder);
@@ -139,7 +142,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                     .onMessageReceived(serviceHolder.getConfiguration().getBootstrapServer(), message);
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -167,14 +170,14 @@ public class BootstrappingTestCase extends BaseTestCase {
             router.registerListener(routerListener);
 
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             Assert.assertEquals(bootstrapServer.getAllNodes().size(), 0);
             Mockito.verify(routerListener, Mockito.times(1))
                     .onMessageReceived(serviceHolder.getConfiguration().getBootstrapServer(), unRegOkMessage);
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -197,12 +200,12 @@ public class BootstrappingTestCase extends BaseTestCase {
             Assert.assertTrue(routingTable instanceof SuperPeerRoutingTable);
             SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
 
-            Assert.assertEquals(superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 0);
-            Assert.assertEquals(superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 0);
-            Assert.assertEquals(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().size(), 0);
+            Assert.assertEquals(superPeerRoutingTable.getAllUnstructuredNetworkNodes().size(), 0);
+            Assert.assertEquals(superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes().size(), 0);
+            Assert.assertEquals(superPeerRoutingTable.getAllSuperPeerNetworkNodes().size(), 0);
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -236,15 +239,15 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertTrue(routingTable1 instanceof SuperPeerRoutingTable);
                 SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
 
-                Assert.assertEquals(superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size(), 1);
-                Assert.assertTrue(superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node));
+                Assert.assertEquals(superPeerRoutingTable1.getAllUnstructuredNetworkNodes().size(), 1);
+                Assert.assertTrue(superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 1);
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().size(), 1);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node));
 
-                Assert.assertEquals(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size(), 0);
+                Assert.assertEquals(superPeerRoutingTable1.getAllSuperPeerNetworkNodes().size(), 0);
             }
             {
                 serviceHolder.getOverlayNetworkManager();
@@ -259,18 +262,18 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
 
                 Assert.assertEquals(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 1);
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().size(), 1);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node1));
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node1));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable.getAssignedSuperPeer(), node1);
             }
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer1.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -314,18 +317,18 @@ public class BootstrappingTestCase extends BaseTestCase {
                 Assert.assertTrue(routingTable1 instanceof SuperPeerRoutingTable);
                 SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
 
-                Assert.assertEquals(superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size(), 2);
-                Assert.assertTrue(superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node));
-                Assert.assertTrue(superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node2));
+                Assert.assertEquals(superPeerRoutingTable1.getAllUnstructuredNetworkNodes().size(), 2);
+                Assert.assertTrue(superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node));
+                Assert.assertTrue(superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node2));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().size(), 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node2));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node2));
 
-                Assert.assertEquals(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size(), 0);
+                Assert.assertEquals(superPeerRoutingTable1.getAllSuperPeerNetworkNodes().size(), 0);
             }
             {
                 serviceHolder2.getOverlayNetworkManager();
@@ -340,11 +343,11 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable2 = (OrdinaryPeerRoutingTable) routingTable2;
 
                 Assert.assertEquals(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().size(), 2);
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().size(), 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node));
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node));
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node1));
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node1));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable2.getAssignedSuperPeer(), node1);
             }
@@ -361,23 +364,23 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
 
                 Assert.assertEquals(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 2);
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().size(), 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node1));
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node1));
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node2));
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node2));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable.getAssignedSuperPeer(), node1);
             }
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer2.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer1.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -432,23 +435,23 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node3));
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node) ||
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node2) ||
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node3));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 3);
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().size(), 3);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node2));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node2));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node3));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node3));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size(), 0);
+                        superPeerRoutingTable1.getAllSuperPeerNetworkNodes().size(), 0);
             }
             {
                 serviceHolder2.getOverlayNetworkManager();
@@ -463,11 +466,11 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable2 = (OrdinaryPeerRoutingTable) routingTable2;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node3));
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node) ||
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node1) ||
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node3));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable2.getAssignedSuperPeer(), node1);
             }
@@ -484,11 +487,11 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable3 = (OrdinaryPeerRoutingTable) routingTable3;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node2));
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node) ||
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node1) ||
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node2));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable3.getAssignedSuperPeer(), node1);
             }
@@ -505,26 +508,26 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node3));
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node1) ||
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node2) ||
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node3));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable.getAssignedSuperPeer(), node1);
             }
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer3.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer2.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer1.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -591,25 +594,25 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                                superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                                superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node3) ||
-                                superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node4));
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node) ||
+                                superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node2) ||
+                                superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node3) ||
+                                superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node4));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 3);
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().size(), 3);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node2));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node2));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node3));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node3));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node4));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node4));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size(), 1);
-                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+                        superPeerRoutingTable1.getAllSuperPeerNetworkNodes().size(), 1);
+                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkNodes().contains(node));
             }
             {
                 serviceHolder2.getOverlayNetworkManager();
@@ -624,12 +627,12 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable2 = (OrdinaryPeerRoutingTable) routingTable2;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node3) ||
-                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node4));
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node) ||
+                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node1) ||
+                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node3) ||
+                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node4));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable2.getAssignedSuperPeer(), node1);
             }
@@ -646,12 +649,12 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable3 = (OrdinaryPeerRoutingTable) routingTable3;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node4));
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node) ||
+                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node1) ||
+                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node2) ||
+                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node4));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable3.getAssignedSuperPeer(), node1);
             }
@@ -668,12 +671,12 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable4 = (OrdinaryPeerRoutingTable) routingTable4;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node3));
+                        ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node) ||
+                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node1) ||
+                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node2) ||
+                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node3));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable4.getAssignedSuperPeer(), node1);
             }
@@ -690,35 +693,35 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                                superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                                superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node3) ||
-                                superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node4));
+                        superPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node1) ||
+                                superPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node2) ||
+                                superPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node3) ||
+                                superPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node4));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 0);
+                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes().size(), 0);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().size(), 1);
-                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node1));
+                        superPeerRoutingTable.getAllSuperPeerNetworkNodes().size(), 1);
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkNodes().contains(node1));
             }
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer4.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer3.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer2.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer1.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -795,26 +798,26 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                                superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                                superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node3) ||
-                                superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node4) ||
-                                superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().contains(node5));
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node) ||
+                                superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node2) ||
+                                superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node3) ||
+                                superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node4) ||
+                                superPeerRoutingTable1.getAllUnstructuredNetworkNodes().contains(node5));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 3);
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().size(), 3);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node2));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node2));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node3));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node3));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node4));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node4));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size(), 1);
-                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node5));
+                        superPeerRoutingTable1.getAllSuperPeerNetworkNodes().size(), 1);
+                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkNodes().contains(node5));
             }
             {
                 serviceHolder2.getOverlayNetworkManager();
@@ -829,13 +832,13 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable2 = (OrdinaryPeerRoutingTable) routingTable2;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node3) ||
-                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node4) ||
-                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().contains(node5));
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node) ||
+                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node1) ||
+                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node3) ||
+                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node4) ||
+                            ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().contains(node5));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable2.getAssignedSuperPeer(), node1);
             }
@@ -852,13 +855,13 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable3 = (OrdinaryPeerRoutingTable) routingTable3;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node4) ||
-                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().contains(node5));
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node) ||
+                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node1) ||
+                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node2) ||
+                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node4) ||
+                            ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().contains(node5));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable3.getAssignedSuperPeer(), node1);
             }
@@ -875,13 +878,13 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable4 = (OrdinaryPeerRoutingTable) routingTable4;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node3) ||
-                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().contains(node5));
+                        ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node) ||
+                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node1) ||
+                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node2) ||
+                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node3) ||
+                            ordinaryPeerRoutingTable4.getAllUnstructuredNetworkNodes().contains(node5));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable4.getAssignedSuperPeer(), node1);
             }
@@ -898,22 +901,22 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable5 = (SuperPeerRoutingTable) routingTable5;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable5.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().contains(node) ||
-                                superPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                                superPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                                superPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().contains(node3) ||
-                                superPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().contains(node4));
+                        superPeerRoutingTable5.getAllUnstructuredNetworkNodes().contains(node) ||
+                                superPeerRoutingTable5.getAllUnstructuredNetworkNodes().contains(node1) ||
+                                superPeerRoutingTable5.getAllUnstructuredNetworkNodes().contains(node2) ||
+                                superPeerRoutingTable5.getAllUnstructuredNetworkNodes().contains(node3) ||
+                                superPeerRoutingTable5.getAllUnstructuredNetworkNodes().contains(node4));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable5.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 1);
+                        superPeerRoutingTable5.getAllAssignedOrdinaryNetworkNodes().size(), 1);
                 Assert.assertTrue(
-                        superPeerRoutingTable5.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node));
+                        superPeerRoutingTable5.getAllAssignedOrdinaryNetworkNodes().contains(node));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable5.getAllSuperPeerNetworkRoutingTableNodes().size(), 1);
-                Assert.assertTrue(superPeerRoutingTable5.getAllSuperPeerNetworkRoutingTableNodes().contains(node1));
+                        superPeerRoutingTable5.getAllSuperPeerNetworkNodes().size(), 1);
+                Assert.assertTrue(superPeerRoutingTable5.getAllSuperPeerNetworkNodes().contains(node1));
             }
             {
                 serviceHolder.getOverlayNetworkManager();
@@ -928,34 +931,34 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().size() >= 2);
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node1) ||
-                            ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node2) ||
-                            ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node3) ||
-                            ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node4) ||
-                            ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().contains(node5));
+                        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node1) ||
+                            ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node2) ||
+                            ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node3) ||
+                            ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node4) ||
+                            ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes().contains(node5));
 
                 Assert.assertEquals(ordinaryPeerRoutingTable.getAssignedSuperPeer(), node5);
             }
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer5.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer4.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer3.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer2.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer1.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -1045,19 +1048,19 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().size(), 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node2));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node2));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node3));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node3));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size(), 2);
-                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node4));
-                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+                        superPeerRoutingTable1.getAllSuperPeerNetworkNodes().size(), 2);
+                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkNodes().contains(node4));
+                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkNodes().contains(node));
             }
             {
                 serviceHolder2.getOverlayNetworkManager();
@@ -1072,7 +1075,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable2 = (OrdinaryPeerRoutingTable) routingTable2;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable2.getAssignedSuperPeer(), node1);
             }
@@ -1089,7 +1092,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable3 = (OrdinaryPeerRoutingTable) routingTable3;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable3.getAssignedSuperPeer(), node1);
             }
@@ -1106,19 +1109,19 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable4 = (SuperPeerRoutingTable) routingTable4;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable4.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkNodes().size(), 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node5));
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkNodes().contains(node5));
                 Assert.assertTrue(
-                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node6));
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkNodes().contains(node6));
 
                 Assert.assertEquals(
-                        superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().size(), 2);
-                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node1));
-                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+                        superPeerRoutingTable4.getAllSuperPeerNetworkNodes().size(), 2);
+                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkNodes().contains(node1));
+                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkNodes().contains(node));
             }
             {
                 serviceHolder5.getOverlayNetworkManager();
@@ -1133,7 +1136,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable5 = (OrdinaryPeerRoutingTable) routingTable5;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable5.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable5.getAssignedSuperPeer(), node4);
             }
@@ -1150,7 +1153,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable6 = (OrdinaryPeerRoutingTable) routingTable6;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable6.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable6.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable6.getAssignedSuperPeer(), node4);
             }
@@ -1167,37 +1170,37 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 0);
+                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes().size(), 0);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().size(), 2);
-                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node1));
-                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node4));
+                        superPeerRoutingTable.getAllSuperPeerNetworkNodes().size(), 2);
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkNodes().contains(node1));
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkNodes().contains(node4));
             }
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer6.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer5.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer4.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer3.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer2.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer1.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -1319,20 +1322,20 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable1 = (SuperPeerRoutingTable) routingTable1;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable1.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().size(), 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node2));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node2));
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node3));
+                        superPeerRoutingTable1.getAllAssignedOrdinaryNetworkNodes().contains(node3));
 
-                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().size() > 0);
+                Assert.assertTrue(superPeerRoutingTable1.getAllSuperPeerNetworkNodes().size() > 0);
                 Assert.assertTrue(
-                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node4) ||
-                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node7) ||
-                        superPeerRoutingTable1.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+                        superPeerRoutingTable1.getAllSuperPeerNetworkNodes().contains(node4) ||
+                        superPeerRoutingTable1.getAllSuperPeerNetworkNodes().contains(node7) ||
+                        superPeerRoutingTable1.getAllSuperPeerNetworkNodes().contains(node));
             }
             {
                 serviceHolder2.getOverlayNetworkManager();
@@ -1347,7 +1350,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable2 = (OrdinaryPeerRoutingTable) routingTable2;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable2.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable2.getAssignedSuperPeer(), node1);
             }
@@ -1364,7 +1367,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable3 = (OrdinaryPeerRoutingTable) routingTable3;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable3.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable3.getAssignedSuperPeer(), node1);
             }
@@ -1381,19 +1384,19 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable4 = (SuperPeerRoutingTable) routingTable4;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable4.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable4.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkNodes().size(), 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node5));
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkNodes().contains(node5));
                 Assert.assertTrue(
-                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node6));
+                        superPeerRoutingTable4.getAllAssignedOrdinaryNetworkNodes().contains(node6));
 
-                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().size() > 0);
-                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node1) ||
-                        superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node7) ||
-                        superPeerRoutingTable4.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkNodes().size() > 0);
+                Assert.assertTrue(superPeerRoutingTable4.getAllSuperPeerNetworkNodes().contains(node1) ||
+                        superPeerRoutingTable4.getAllSuperPeerNetworkNodes().contains(node7) ||
+                        superPeerRoutingTable4.getAllSuperPeerNetworkNodes().contains(node));
             }
             {
                 serviceHolder5.getOverlayNetworkManager();
@@ -1408,7 +1411,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable5 = (OrdinaryPeerRoutingTable) routingTable5;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable5.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable5.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable5.getAssignedSuperPeer(), node4);
             }
@@ -1425,7 +1428,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable6 = (OrdinaryPeerRoutingTable) routingTable6;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable6.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable6.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable6.getAssignedSuperPeer(), node4);
             }
@@ -1442,19 +1445,19 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable7 = (SuperPeerRoutingTable) routingTable7;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable7.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable7.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 2);
+                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkNodes().size(), 2);
                 Assert.assertTrue(
-                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node8));
+                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkNodes().contains(node8));
                 Assert.assertTrue(
-                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkRoutingTableNodes().contains(node9));
+                        superPeerRoutingTable7.getAllAssignedOrdinaryNetworkNodes().contains(node9));
 
-                Assert.assertTrue(superPeerRoutingTable7.getAllSuperPeerNetworkRoutingTableNodes().size() > 0);
-                Assert.assertTrue(superPeerRoutingTable7.getAllSuperPeerNetworkRoutingTableNodes().contains(node1) ||
-                        superPeerRoutingTable7.getAllSuperPeerNetworkRoutingTableNodes().contains(node4) ||
-                        superPeerRoutingTable7.getAllSuperPeerNetworkRoutingTableNodes().contains(node));
+                Assert.assertTrue(superPeerRoutingTable7.getAllSuperPeerNetworkNodes().size() > 0);
+                Assert.assertTrue(superPeerRoutingTable7.getAllSuperPeerNetworkNodes().contains(node1) ||
+                        superPeerRoutingTable7.getAllSuperPeerNetworkNodes().contains(node4) ||
+                        superPeerRoutingTable7.getAllSuperPeerNetworkNodes().contains(node));
             }
             {
                 serviceHolder8.getOverlayNetworkManager();
@@ -1469,7 +1472,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable8 = (OrdinaryPeerRoutingTable) routingTable8;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable8.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable8.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable8.getAssignedSuperPeer(), node7);
             }
@@ -1486,7 +1489,7 @@ public class BootstrappingTestCase extends BaseTestCase {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable9 = (OrdinaryPeerRoutingTable) routingTable9;
 
                 Assert.assertTrue(
-                        ordinaryPeerRoutingTable9.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        ordinaryPeerRoutingTable9.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(ordinaryPeerRoutingTable9.getAssignedSuperPeer(), node7);
             }
@@ -1503,46 +1506,46 @@ public class BootstrappingTestCase extends BaseTestCase {
                 SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
 
                 Assert.assertTrue(
-                        superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size() >= 2);
+                        superPeerRoutingTable.getAllUnstructuredNetworkNodes().size() >= 2);
 
                 Assert.assertEquals(
-                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes().size(), 0);
+                        superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes().size(), 0);
 
-                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().size() > 0);
-                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node1) ||
-                        superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node4) ||
-                        superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes().contains(node7));
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkNodes().size() > 0);
+                Assert.assertTrue(superPeerRoutingTable.getAllSuperPeerNetworkNodes().contains(node1) ||
+                        superPeerRoutingTable.getAllSuperPeerNetworkNodes().contains(node4) ||
+                        superPeerRoutingTable.getAllSuperPeerNetworkNodes().contains(node7));
             }
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer9.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer8.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer7.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer6.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer5.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer4.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer3.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer2.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer1.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 
@@ -1875,34 +1878,34 @@ public class BootstrappingTestCase extends BaseTestCase {
             }
         } finally {
             fileSharer.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer9.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer8.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer7.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer6.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer5.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer4.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer3.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer2.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
 
             fileSharer1.shutdown();
-            waitFor(delay);
+            waitFor(shutDownDelay);
         }
     }
 }

@@ -1,2 +1,15 @@
 @import "../node_modules/material-design-icons/iconfont/material-icons.css";
 @import "~@angular/material/prebuilt-themes/deeppurple-amber.css";
+
+.top-menu > a, .top-menu > mat-slide-toggle {
+  padding: 1em;
+}
+
+.mat-dialog-content > p {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.links > line {
+  stroke: #000000;
+  stroke-opacity: 0.7;
+}

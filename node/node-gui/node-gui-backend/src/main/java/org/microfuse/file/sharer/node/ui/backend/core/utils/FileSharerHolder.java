@@ -8,6 +8,11 @@ import org.microfuse.file.sharer.node.core.FileSharer;
 public class FileSharerHolder {
     private static FileSharer instance;
 
+    /**
+     * Get a singleton instance of the file sharer.
+     *
+     * @return The file sharer singleton instance
+     */
     public static synchronized FileSharer getFileSharer() {
         if (instance == null) {
             instance = new FileSharer();

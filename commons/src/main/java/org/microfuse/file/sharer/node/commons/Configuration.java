@@ -13,6 +13,8 @@ public class Configuration {
     private String bootstrapServerIP;
     private int bootstrapServerPort;
     private String username;
+    private String tracerServeIP;
+    private int tracerServePort;
     private String ip;
     private int peerListeningPort;
     private int networkHandlerThreadCount;
@@ -36,8 +38,10 @@ public class Configuration {
         bootstrapServerIP = NodeConstants.DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS;
         bootstrapServerPort = Constants.BOOTSTRAP_SERVER_PORT;
         username = NodeConstants.DEFAULT_USERNAME;
+        tracerServeIP = NodeConstants.DEFAULT_TRACER_SERVE_IP;
+        tracerServePort = NodeConstants.DEFAULT_TRACER_SERVE_PORT;
         ip = NodeConstants.DEFAULT_IP_ADDRESS;
-        peerListeningPort = NodeConstants.DEFAULT_TCP_LISTENER_PORT;
+        peerListeningPort = NodeConstants.DEFAULT_PEER_LISTENING_PORT;
         networkHandlerThreadCount = NodeConstants.DEFAULT_NETWORK_HANDLER_THREAD_COUNT;
         timeToLive = NodeConstants.DEFAULT_TIME_TO_LIVE;
         maxAssignedOrdinaryPeerCount = NodeConstants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT;
@@ -82,6 +86,22 @@ public class Configuration {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getTracerServeIP() {
+        return tracerServeIP;
+    }
+
+    public void setTracerServeIP(String tracerServeIP) {
+        this.tracerServeIP = tracerServeIP;
+    }
+
+    public int getTracerServePort() {
+        return tracerServePort;
+    }
+
+    public void setTracerServePort(int tracerServePort) {
+        this.tracerServePort = tracerServePort;
     }
 
     public String getIp() {

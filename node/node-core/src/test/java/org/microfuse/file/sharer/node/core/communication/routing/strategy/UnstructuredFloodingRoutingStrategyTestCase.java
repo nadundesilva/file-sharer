@@ -50,7 +50,7 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
         Mockito.when(node2.isActive()).thenReturn(true);
         unstructuredNetworkNodes.add(node3);
         Mockito.when(node3.isActive()).thenReturn(true);
-        Mockito.when(routingTable.getAllUnstructuredNetworkRoutingTableNodes())
+        Mockito.when(routingTable.getAllUnstructuredNetworkNodes())
                 .thenReturn(unstructuredNetworkNodes);
     }
 

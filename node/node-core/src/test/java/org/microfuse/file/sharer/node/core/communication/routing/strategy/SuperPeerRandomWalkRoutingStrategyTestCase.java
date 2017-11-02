@@ -74,9 +74,9 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         unstructuredNetworkNode.add(node3);
         unstructuredNetworkNode.add(node4);
         unstructuredNetworkNode.add(node5);
-        Mockito.when(ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes())
+        Mockito.when(ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes())
                 .thenReturn(unstructuredNetworkNode);
-        Mockito.when(superPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes())
+        Mockito.when(superPeerRoutingTable.getAllUnstructuredNetworkNodes())
                 .thenReturn(unstructuredNetworkNode);
 
         Set<Node> assignedOrdinaryPeerNodes = new HashSet<>();
@@ -84,14 +84,14 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         assignedOrdinaryPeerNodes.add(node1);
         assignedOrdinaryPeerNodes.add(node2);
         assignedOrdinaryPeerNodes.add(node3);
-        Mockito.when(superPeerRoutingTable.getAllAssignedOrdinaryNetworkRoutingTableNodes())
+        Mockito.when(superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes())
                 .thenReturn(assignedOrdinaryPeerNodes);
 
         Set<Node> superPeerNetworkNodes = new HashSet<>();
         superPeerNetworkNodes.add(fromSuperPeerNode);
         superPeerNetworkNodes.add(node4);
         superPeerNetworkNodes.add(node5);
-        Mockito.when(superPeerRoutingTable.getAllSuperPeerNetworkRoutingTableNodes())
+        Mockito.when(superPeerRoutingTable.getAllSuperPeerNetworkNodes())
                 .thenReturn(superPeerNetworkNodes);
     }
 

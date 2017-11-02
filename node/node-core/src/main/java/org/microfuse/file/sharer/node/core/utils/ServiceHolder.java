@@ -40,6 +40,7 @@ public class ServiceHolder {
     private ResourceIndex resourceIndex;
     private OverlayNetworkManager overlayNetworkManager;
     private QueryManager queryManager;
+    private TraceManager traceManager;
 
     private Lock peerTypeLock;
     private Lock configurationLock;
@@ -47,6 +48,7 @@ public class ServiceHolder {
     private Lock resourceIndexLock;
     private Lock overlayNetworkManagerLock;
     private Lock queryManagerLock;
+    private Lock traceManagerLock;
 
     private Thread automatedGarbageCollectionThread;
     private boolean automatedGarbageCollectionEnabled;
@@ -60,6 +62,7 @@ public class ServiceHolder {
         resourceIndexLock = new ReentrantLock();
         overlayNetworkManagerLock = new ReentrantLock();
         queryManagerLock = new ReentrantLock();
+        traceManagerLock = new ReentrantLock();
 
         automatedGarbageCollectionEnabled = false;
         automatedGarbageCollectionLock = new ReentrantLock();
@@ -251,6 +254,14 @@ public class ServiceHolder {
         } finally {
             queryManagerLock.unlock();
         }
+
+        traceManagerLock.lock();
+        try {
+            traceManager = null;
+            logger.debug("Cleared tracing manager");
+        } finally {
+            traceManagerLock.unlock();
+        }
     }
 
     /**
@@ -328,7 +339,7 @@ public class ServiceHolder {
         overlayNetworkManagerLock.lock();
         try {
             if (overlayNetworkManager == null) {
-                overlayNetworkManager = new OverlayNetworkManager(getRouter(), this);
+                overlayNetworkManager = new OverlayNetworkManager(this);
             }
             return overlayNetworkManager;
         } finally {
@@ -347,11 +358,30 @@ public class ServiceHolder {
         queryManagerLock.lock();
         try {
             if (queryManager == null) {
-                queryManager = new QueryManager(getRouter(), this);
+                queryManager = new QueryManager(this);
             }
             return queryManager;
         } finally {
             queryManagerLock.unlock();
+        }
+    }
+
+    /**
+     * Get the tracing manager singleton instance.
+     * This is not a singleton.
+     * However this is the instance used by all classes in the file sharer.
+     *
+     * @return The Tracing Manager
+     */
+    public TraceManager getTraceManager() {
+        traceManagerLock.lock();
+        try {
+            if (traceManager == null) {
+                traceManager = new TraceManager(this);
+            }
+            return traceManager;
+        } finally {
+            traceManagerLock.unlock();
         }
     }
 

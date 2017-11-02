@@ -386,8 +386,8 @@ public class RouterTestCase extends BaseTestCase {
         RoutingTable finalRoutingTable = router.getRoutingTable();
 
         Assert.assertFalse(initialRoutingTable == finalRoutingTable);
-        Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 1);
-        Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()).get(0),
+        Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkNodes().size(), 1);
+        Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkNodes()).get(0),
                 node);
     }
 
@@ -405,8 +405,8 @@ public class RouterTestCase extends BaseTestCase {
         RoutingTable finalRoutingTable = router.getRoutingTable();
 
         Assert.assertFalse(initialRoutingTable == finalRoutingTable);
-        Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 1);
-        Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()).get(0),
+        Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkNodes().size(), 1);
+        Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkNodes()).get(0),
                 node);
     }
 
@@ -424,8 +424,8 @@ public class RouterTestCase extends BaseTestCase {
         RoutingTable finalRoutingTable = router.getRoutingTable();
 
         Assert.assertTrue(initialRoutingTable == finalRoutingTable);
-        Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 1);
-        Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()).get(0),
+        Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkNodes().size(), 1);
+        Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkNodes()).get(0),
                 node);
     }
 
@@ -442,8 +442,8 @@ public class RouterTestCase extends BaseTestCase {
         RoutingTable finalRoutingTable = router.getRoutingTable();
 
         Assert.assertTrue(initialRoutingTable == finalRoutingTable);
-        Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes().size(), 1);
-        Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()).get(0),
+        Assert.assertEquals(finalRoutingTable.getAllUnstructuredNetworkNodes().size(), 1);
+        Assert.assertEquals(new ArrayList<>(finalRoutingTable.getAllUnstructuredNetworkNodes()).get(0),
                 node);
     }
 

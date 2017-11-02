@@ -7,8 +7,7 @@ import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'app-config',
-  templateUrl: './config.component.html',
-  styleUrls: ['./config.component.css']
+  templateUrl: './config.component.html'
 })
 export class ConfigComponent implements OnInit {
   title = 'Configuration';
@@ -92,6 +91,8 @@ class Config {
   bootstrapServerIP: string;
   bootstrapServerPort: number;
   username: string;
+  tracerServeIP: string;
+  tracerServePort: number;
   ip: string;
   peerListeningPort: number;
   networkHandlerThreadCount: number;

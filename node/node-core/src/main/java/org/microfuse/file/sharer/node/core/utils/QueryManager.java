@@ -6,7 +6,6 @@ import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
-import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.RouterListener;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
 import org.slf4j.Logger;
@@ -28,15 +27,13 @@ public class QueryManager implements RouterListener {
     private static final Logger logger = LoggerFactory.getLogger(QueryManager.class);
 
     private ServiceHolder serviceHolder;
-    private Router router;
 
     private Map<String, List<AggregatedResource>> queryResults;
     private final ReadWriteLock queryResultsLock;
 
-    public QueryManager(Router router, ServiceHolder serviceHolder) {
+    public QueryManager(ServiceHolder serviceHolder) {
         this.serviceHolder = serviceHolder;
-        this.router = router;
-        this.router.registerListener(this);
+        this.serviceHolder.getRouter().registerListener(this);
 
         queryResultsLock = new ReentrantReadWriteLock();
         queryResults = new HashMap<>();
@@ -78,7 +75,7 @@ public class QueryManager implements RouterListener {
         message.setData(MessageIndexes.SER_SOURCE_PORT, Integer.toString(configuration.getPeerListeningPort()));
         message.setData(MessageIndexes.SER_FILE_NAME, queryString);
         message.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
-        router.route(message);
+        serviceHolder.getRouter().route(message);
     }
 
     /**

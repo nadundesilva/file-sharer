@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core;
 
 import org.microfuse.file.sharer.bootstrap.BootstrapServer;
+import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
@@ -305,7 +306,7 @@ public class QueryingTestCase extends BaseTestCase {
 
         for (int i = 9; i >= 0; i--) {
             fileSharers[i].shutdown();
-            waitFor(delay);
+            waitFor(delay + Constants.CONTINUOUS_TASK_INTERVAL + Constants.THREAD_DISABLE_TIMEOUT);
         }
 
         bootstrapServer.shutdown();

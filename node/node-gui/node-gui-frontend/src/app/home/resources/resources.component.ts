@@ -12,8 +12,7 @@ class ResourceListItem {
 
 @Component({
   selector: 'app-resources',
-  templateUrl: './resources.component.html',
-  styleUrls: ['./resources.component.css']
+  templateUrl: './resources.component.html'
 })
 export class ResourcesComponent implements OnInit {
   resources: ResourceListItem[];

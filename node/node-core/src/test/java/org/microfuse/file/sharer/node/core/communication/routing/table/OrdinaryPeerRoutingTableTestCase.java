@@ -74,7 +74,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
         logger.info("Running Ordinary Peer Routing Table Test 03 - Get all assigned ordinary network routing table " +
                 "nodes copying");
 
-        Set<Node> nodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes();
+        Set<Node> nodes = ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes();
         Object internalState = Whitebox.getInternalState(ordinaryPeerRoutingTable, "unstructuredNetworkNodes");
         Assert.assertFalse(nodes == internalState);
     }

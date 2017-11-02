@@ -13,6 +13,7 @@ import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.OverlayNetwor
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.QueryEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ResourcesEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.SystemEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.TraceEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.filter.CORSFilter;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class ServerLauncher {
     private static final String CORS_FILTER_NAME = "cors-filter";
     private static final Class<?>[] endpointClassList = new Class<?>[]{
             ConfigEndPoint.class, QueryEndPoint.class, OverlayNetworkEndPoint.class, ResourcesEndPoint.class,
-            SystemEndPoint.class
+            SystemEndPoint.class, TraceEndPoint.class
     };
 
     public static void main(String[] args) {

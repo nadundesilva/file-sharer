@@ -52,6 +52,11 @@ public class Node {
         return this.state != NodeState.INACTIVE;
     }
 
+    public boolean equals(String ip, int port) {
+        return Objects.equals(ip, this.getIp())
+                && Objects.equals(port, this.getPort());
+    }
+
     @Override
     public String toString() {
         return ip + ":" + port;
@@ -69,6 +74,6 @@ public class Node {
 
     @Override
     public int hashCode() {
-        return (ip + ":" + port).hashCode();
+        return toString().hashCode();
     }
 }

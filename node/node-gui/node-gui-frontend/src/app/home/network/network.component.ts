@@ -1,8 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Constants, PeerType, ServerResponse, ServerResponseStatus, TableDataSource, Node} from '../../commons';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
+import {Subscription} from 'rxjs/Subscription';
 
 class NodeInfo {
   peerType: PeerType;
@@ -18,14 +19,14 @@ class NodeInfo {
 
 @Component({
   selector: 'app-network',
-  templateUrl: './network.component.html',
-  styleUrls: ['./network.component.css']
+  templateUrl: './network.component.html'
 })
-export class NetworkComponent implements OnInit {
+export class NetworkComponent implements OnInit, OnDestroy {
   displayedColumns = ['node-ip', 'node-port'];
   peerType = PeerType;
 
   nodeInfo: NodeInfo;
+  nodeInfoFetchSubscription: Subscription;
 
   constructor(private http: HttpClient) {
   }
@@ -34,9 +35,14 @@ export class NetworkComponent implements OnInit {
     this.startFetchingNodeInfo();
   }
 
-  startFetchingNodeInfo(): void {
+  ngOnDestroy(): void {
+    this.stopFetchingNodeInfo();
+  }
+
+  private startFetchingNodeInfo(): void {
+    this.stopFetchingNodeInfo();
     const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
-    timer.subscribe(t => {
+    this.nodeInfoFetchSubscription = timer.subscribe(t => {
       this.http.get<ServerResponse<any>>(Constants.API_ENDPOINT + Constants.API_NETWORK_ENDPOINT)
         .subscribe(response => {
           if (response.status === ServerResponseStatus.SUCCESS) {
@@ -56,5 +62,12 @@ export class NetworkComponent implements OnInit {
           }
         });
     });
+  }
+
+  private stopFetchingNodeInfo(): void {
+    if (this.nodeInfoFetchSubscription) {
+      this.nodeInfoFetchSubscription.unsubscribe();
+      this.nodeInfoFetchSubscription = null;
+    }
   }
 }

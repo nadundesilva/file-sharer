@@ -2,6 +2,7 @@ package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
+import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public abstract class RoutingTable {
      *
      * @return The list of nodes in the routing table
      */
-    public Set<Node> getAllUnstructuredNetworkRoutingTableNodes() {
+    public Set<Node> getAllUnstructuredNetworkNodes() {
         return new HashSet<>(unstructuredNetworkNodes);
     }
 
@@ -135,7 +136,7 @@ public abstract class RoutingTable {
      * @return The nodes registered
      */
     public Set<Node> getAll() {
-        return getAllUnstructuredNetworkRoutingTableNodes();
+        return getAllUnstructuredNetworkNodes();
     }
 
     /**
@@ -155,7 +156,7 @@ public abstract class RoutingTable {
     public void clear() {
         unstructuredNetworkNodesLock.writeLock().lock();
         try {
-            unstructuredNetworkNodes.clear();
+            getAllUnstructuredNetworkNodes().forEach(this::removeUnstructuredNetworkRoutingTableEntry);
         } finally {
             unstructuredNetworkNodesLock.writeLock().unlock();
         }
@@ -186,6 +187,16 @@ public abstract class RoutingTable {
             isSuccessful = unstructuredNetworkNodes.add(node);
             if (isSuccessful) {
                 logger.debug("Added node " + node.toString() + " to unstructured network.");
+
+                // Notifying the tracer
+                Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
+                if (tracer != null) {
+                    tracer.addUnstructuredNetworkConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            node.getIp(), node.getPort()
+                    );
+                }
             } else {
                 logger.debug("Failed to add node " + node.toString() + " to unstructured network.");
             }
@@ -208,6 +219,16 @@ public abstract class RoutingTable {
             isSuccessful = unstructuredNetworkNodes.remove(node);
             if (isSuccessful) {
                 logger.debug("Removed node " + node.toString() + " from unstructured network.");
+
+                // Notifying the tracer
+                Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
+                if (tracer != null) {
+                    tracer.removeUnstructuredNetworkConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            node.getIp(), node.getPort()
+                    );
+                }
             } else {
                 logger.debug("Failed to remove node " + node.toString() + " from unstructured network.");
             }

@@ -1,5 +1,6 @@
 package org.microfuse.file.sharer.node.core.resource;
 
+import com.google.gson.annotations.Expose;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class AggregatedResource extends Resource {
     private static final Logger logger = LoggerFactory.getLogger(AggregatedResource.class);
 
+    @Expose
     private Set<Node> nodes;
 
+    @Expose(serialize = false)
     private final ReadWriteLock nodeLock;
 
     public AggregatedResource(String name) {

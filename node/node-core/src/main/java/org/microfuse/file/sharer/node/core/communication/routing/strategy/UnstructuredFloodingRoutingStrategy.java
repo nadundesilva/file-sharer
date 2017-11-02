@@ -27,7 +27,7 @@ public class UnstructuredFloodingRoutingStrategy extends RoutingStrategy {
 
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
-        Set<Node> forwardingNodes = routingTable.getAllUnstructuredNetworkRoutingTableNodes();
+        Set<Node> forwardingNodes = routingTable.getAllUnstructuredNetworkNodes();
         if (fromNode != null) {
             forwardingNodes.remove(fromNode);
         }

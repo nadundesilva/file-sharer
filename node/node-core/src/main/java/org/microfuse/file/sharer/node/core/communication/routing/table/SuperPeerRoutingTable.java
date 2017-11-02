@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
 
     public SuperPeerRoutingTable(ServiceHolder serviceHolder, OrdinaryPeerRoutingTable ordinaryPeerRoutingTable) {
         this(serviceHolder);
-        ordinaryPeerRoutingTable.getAllUnstructuredNetworkRoutingTableNodes()
+        ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes()
                 .forEach(this::addUnstructuredNetworkRoutingTableEntry);
     }
 
@@ -74,7 +75,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @return The list of nodes in the routing table
      */
-    public Set<Node> getAllSuperPeerNetworkRoutingTableNodes() {
+    public Set<Node> getAllSuperPeerNetworkNodes() {
         return new HashSet<>(superPeerNetworkNodes);
     }
 
@@ -134,7 +135,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      *
      * @return The list of nodes in the routing table
      */
-    public Set<Node> getAllAssignedOrdinaryNetworkRoutingTableNodes() {
+    public Set<Node> getAllAssignedOrdinaryNetworkNodes() {
         return new HashSet<>(assignedOrdinaryPeerNodes);
     }
 
@@ -169,8 +170,8 @@ public class SuperPeerRoutingTable extends RoutingTable {
     @Override
     public Set<Node> getAll() {
         Set<Node> nodes = super.getAll();
-        nodes.addAll(getAllSuperPeerNetworkRoutingTableNodes());
-        nodes.addAll(getAllAssignedOrdinaryNetworkRoutingTableNodes());
+        nodes.addAll(getAllSuperPeerNetworkNodes());
+        nodes.addAll(getAllAssignedOrdinaryNetworkNodes());
         return nodes;
     }
 
@@ -191,13 +192,14 @@ public class SuperPeerRoutingTable extends RoutingTable {
         super.clear();
         superPeerNetworkNodesLock.writeLock().lock();
         try {
-            superPeerNetworkNodes.clear();
+            getAllSuperPeerNetworkNodes().forEach(this::removeSuperPeerNetworkRoutingTableEntry);
         } finally {
             superPeerNetworkNodesLock.writeLock().unlock();
         }
         assignedOrdinaryPeerNodesLock.writeLock().lock();
         try {
-            assignedOrdinaryPeerNodes.clear();
+            getAllAssignedOrdinaryNetworkNodes()
+                    .forEach(this::removeAssignedOrdinaryNetworkRoutingTableEntry);
         } finally {
             assignedOrdinaryPeerNodesLock.writeLock().unlock();
         }
@@ -238,6 +240,16 @@ public class SuperPeerRoutingTable extends RoutingTable {
             isSuccessful = superPeerNetworkNodes.add(node);
             if (isSuccessful) {
                 logger.debug("Added node " + node.toString() + " to super peer network.");
+
+                // Notifying the tracer
+                Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
+                if (tracer != null) {
+                    tracer.addSuperPeerNetworkConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            node.getIp(), node.getPort()
+                    );
+                }
             } else {
                 logger.debug("Failed to add node " + node.toString() + " to super peer network.");
             }
@@ -260,6 +272,16 @@ public class SuperPeerRoutingTable extends RoutingTable {
             isSuccessful = superPeerNetworkNodes.remove(node);
             if (isSuccessful) {
                 logger.debug("Removed node " + node.toString() + " from super peer network.");
+
+                // Notifying the tracer
+                Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
+                if (tracer != null) {
+                    tracer.removeSuperPeerNetworkConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            node.getIp(), node.getPort()
+                    );
+                }
             } else {
                 logger.debug("Failed to remove node " + node.toString() + " from super peer network.");
             }
@@ -287,6 +309,16 @@ public class SuperPeerRoutingTable extends RoutingTable {
                 isSuccessful = assignedOrdinaryPeerNodes.add(node);
                 if (isSuccessful) {
                     logger.debug("Added node " + node.toString() + " to assigned ordinary peers.");
+
+                    // Notifying the tracer
+                    Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
+                    if (tracer != null) {
+                        tracer.addAssignedOrdinaryPeerConnection(
+                                serviceHolder.getConfiguration().getIp(),
+                                serviceHolder.getConfiguration().getPeerListeningPort(),
+                                node.getIp(), node.getPort()
+                        );
+                    }
                 } else {
                     logger.debug("Failed to add node " + node.toString() + " to assigned ordinary peers.");
                 }
@@ -314,6 +346,16 @@ public class SuperPeerRoutingTable extends RoutingTable {
             isSuccessful = assignedOrdinaryPeerNodes.remove(node);
             if (isSuccessful) {
                 logger.debug("Remove node " + node.toString() + " from assigned ordinary peers.");
+
+                // Notifying the tracer
+                Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
+                if (tracer != null) {
+                    tracer.removeAssignedOrdinaryPeerConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            node.getIp(), node.getPort()
+                    );
+                }
             } else {
                 logger.debug("Failed to remove node " + node.toString() + " from assigned ordinary peers.");
             }

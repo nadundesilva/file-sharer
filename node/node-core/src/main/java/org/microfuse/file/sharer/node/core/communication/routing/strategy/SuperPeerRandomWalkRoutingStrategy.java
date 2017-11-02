@@ -53,7 +53,7 @@ public class SuperPeerRandomWalkRoutingStrategy extends RoutingStrategy {
 
             if (forwardingNodes == null || forwardingNodes.size() == 0) {
                 // Random walking the super-peer network
-                forwardingNodes = ((SuperPeerRoutingTable) routingTable).getAllSuperPeerNetworkRoutingTableNodes();
+                forwardingNodes = ((SuperPeerRoutingTable) routingTable).getAllSuperPeerNetworkNodes();
             }
         } else if (routingTable instanceof OrdinaryPeerRoutingTable) {
             forwardingNodes = getAssignedSuperPeer((OrdinaryPeerRoutingTable) routingTable);

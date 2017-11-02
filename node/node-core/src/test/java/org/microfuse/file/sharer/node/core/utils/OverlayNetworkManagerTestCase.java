@@ -33,7 +33,8 @@ public class OverlayNetworkManagerTestCase extends BaseTestCase {
                 new UnstructuredFloodingRoutingStrategy(serviceHolder),
                 serviceHolder
         ));
-        overlayNetworkManager = new OverlayNetworkManager(router, serviceHolder);
+        Whitebox.setInternalState(serviceHolder, "router", router);
+        overlayNetworkManager = new OverlayNetworkManager(serviceHolder);
     }
 
     @AfterMethod
@@ -47,7 +48,7 @@ public class OverlayNetworkManagerTestCase extends BaseTestCase {
     public void testConstructor() {
         logger.info("Running Overlay Network Manager Test 01 - Constructor");
 
-        Object internalStateRouter = Whitebox.getInternalState(overlayNetworkManager, "router");
+        Object internalStateRouter = Whitebox.getInternalState(serviceHolder, "router");
         Assert.assertNotNull(internalStateRouter);
         Assert.assertTrue(internalStateRouter == router);
 
