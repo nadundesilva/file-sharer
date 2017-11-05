@@ -3,6 +3,7 @@ package org.microfuse.file.sharer.node.core.tracing;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
  * Tracer interface.
@@ -16,7 +17,7 @@ public interface Tracer extends Remote {
      * @param port                The port of the traceable node
      * @param currentRoutingTable The current routing table in the traceable node
      */
-    void register(String ip, int port, RoutingTable currentRoutingTable);
+    void register(String ip, int port, RoutingTable currentRoutingTable) throws RemoteException;
 
     /**
      * Add a unstructured network connection.
@@ -26,7 +27,7 @@ public interface Tracer extends Remote {
      * @param ip2    The ip of node2
      * @param port2  The port of node2
      */
-    void addUnstructuredNetworkConnection(String ip1, int port1, String ip2, int port2);
+    void addUnstructuredNetworkConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
 
     /**
      * Add a super peer network connection.
@@ -36,7 +37,7 @@ public interface Tracer extends Remote {
      * @param ip2    The ip of node2
      * @param port2  The port of node2
      */
-    void addSuperPeerNetworkConnection(String ip1, int port1, String ip2, int port2);
+    void addSuperPeerNetworkConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
 
     /**
      * Add a assigned ordinary peer connection.
@@ -46,7 +47,7 @@ public interface Tracer extends Remote {
      * @param ip2    The ip of node2
      * @param port2  The port of node2
      */
-    void addAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2);
+    void addAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
 
     /**
      * Remove a unstructured network connection.
@@ -56,7 +57,7 @@ public interface Tracer extends Remote {
      * @param ip2    The ip of node2
      * @param port2  The port of node2
      */
-    void removeUnstructuredNetworkConnection(String ip1, int port1, String ip2, int port2);
+    void removeUnstructuredNetworkConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
 
     /**
      * Remove a super peer network connection.
@@ -66,7 +67,7 @@ public interface Tracer extends Remote {
      * @param ip2    The ip of node2
      * @param port2  The port of node2
      */
-    void removeSuperPeerNetworkConnection(String ip1, int port1, String ip2, int port2);
+    void removeSuperPeerNetworkConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
 
     /**
      * Remove a assigned ordinary peer connection.
@@ -76,5 +77,5 @@ public interface Tracer extends Remote {
      * @param ip2    The ip of node2
      * @param port2  The port of node2
      */
-    void removeAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2);
+    void removeAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
 }

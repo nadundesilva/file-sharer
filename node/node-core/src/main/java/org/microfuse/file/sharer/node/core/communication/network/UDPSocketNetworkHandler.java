@@ -41,7 +41,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                     int portNumber = serviceHolder.getConfiguration().getPeerListeningPort();
                     try {
                         serverSocket = new DatagramSocket(portNumber);
-                        logger.debug("Started listening at " + portNumber + ".");
+                        logger.debug("Starting listening at " + portNumber + ".");
                         while (running && !restartRequired) {
                             byte[] buffer = new byte[65536];
                             DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);

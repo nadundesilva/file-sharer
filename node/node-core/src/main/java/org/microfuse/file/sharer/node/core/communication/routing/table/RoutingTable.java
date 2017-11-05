@@ -7,6 +7,7 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -191,11 +192,15 @@ public abstract class RoutingTable {
                 // Notifying the tracer
                 Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
                 if (tracer != null) {
-                    tracer.addUnstructuredNetworkConnection(
-                            serviceHolder.getConfiguration().getIp(),
-                            serviceHolder.getConfiguration().getPeerListeningPort(),
-                            node.getIp(), node.getPort()
-                    );
+                    try {
+                        tracer.addUnstructuredNetworkConnection(
+                                serviceHolder.getConfiguration().getIp(),
+                                serviceHolder.getConfiguration().getPeerListeningPort(),
+                                node.getIp(), node.getPort()
+                        );
+                    } catch (RemoteException e) {
+                        logger.warn("Failed to add unstructured network connection to the tracer", e);
+                    }
                 }
             } else {
                 logger.debug("Failed to add node " + node.toString() + " to unstructured network.");
@@ -223,11 +228,15 @@ public abstract class RoutingTable {
                 // Notifying the tracer
                 Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
                 if (tracer != null) {
-                    tracer.removeUnstructuredNetworkConnection(
-                            serviceHolder.getConfiguration().getIp(),
-                            serviceHolder.getConfiguration().getPeerListeningPort(),
-                            node.getIp(), node.getPort()
-                    );
+                    try {
+                        tracer.removeUnstructuredNetworkConnection(
+                                serviceHolder.getConfiguration().getIp(),
+                                serviceHolder.getConfiguration().getPeerListeningPort(),
+                                node.getIp(), node.getPort()
+                        );
+                    } catch (RemoteException e) {
+                        logger.warn("Failed to remove unstructured network connection from the tracer", e);
+                    }
                 }
             } else {
                 logger.debug("Failed to remove node " + node.toString() + " from unstructured network.");

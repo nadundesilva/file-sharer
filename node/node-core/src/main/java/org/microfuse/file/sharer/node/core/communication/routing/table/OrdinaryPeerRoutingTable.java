@@ -6,6 +6,7 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.rmi.RemoteException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -106,11 +107,15 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
             // Notifying the tracer
             Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
             if (tracer != null) {
-                tracer.addAssignedOrdinaryPeerConnection(
-                        serviceHolder.getConfiguration().getIp(),
-                        serviceHolder.getConfiguration().getPeerListeningPort(),
-                        node.getIp(), node.getPort()
-                );
+                try {
+                    tracer.addAssignedOrdinaryPeerConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            node.getIp(), node.getPort()
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to add assigned ordinary peer connection to the tracer", e);
+                }
             }
         } else {
             logger.debug("Removing assigned super peer");
@@ -118,11 +123,15 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
             // Notifying the tracer
             Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
             if (tracer != null) {
-                tracer.removeAssignedOrdinaryPeerConnection(
-                        serviceHolder.getConfiguration().getIp(),
-                        serviceHolder.getConfiguration().getPeerListeningPort(),
-                        assignedSuperPeer.getIp(), assignedSuperPeer.getPort()
-                );
+                try {
+                    tracer.removeAssignedOrdinaryPeerConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            assignedSuperPeer.getIp(), assignedSuperPeer.getPort()
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to remove assigned ordinary peer connection from the tracer", e);
+                }
             }
         }
         this.assignedSuperPeer = node;

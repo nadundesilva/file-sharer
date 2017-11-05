@@ -40,7 +40,7 @@ public class ServerLauncher {
     };
 
     public static void main(String[] args) {
-        FileSharerHolder.getFileSharer();       // Instantiating the file sharer
+        FileSharerHolder.getFileSharer().start();       // Instantiating the file sharer
         startTomcatServer();
     }
 

@@ -6,6 +6,7 @@
             <class name="org.microfuse.file.sharer.node.core.communication.network.BootstrapServerNetworkHandlerTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.communication.network.TCPSocketNetworkHandlerTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandlerTestCase"/>
+            <class name="org.microfuse.file.sharer.node.core.communication.network.RMINetworkHandlerTestCase"/>
         </classes>
     </test>
     <test name="file-sharer-node-core-bootstrapping-tests" enabled="true">

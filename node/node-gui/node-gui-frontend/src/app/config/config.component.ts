@@ -102,6 +102,7 @@ class Config {
   heartbeatInterval: number;
   gossipingInterval: number;
   networkHandlerSendTimeout: number;
+  rmiRegistryEntryPrefix: string;
   bootstrapServerReplyWaitTimeout: number;
   serSuperPeerTimeout: number;
   automatedGarbageCollectionInterval: number;

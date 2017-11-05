@@ -18,6 +18,7 @@ public class Configuration {
     private String ip;
     private int peerListeningPort;
     private int networkHandlerThreadCount;
+    private String rmiRegistryEntryPrefix;
     private int timeToLive;
     private int maxAssignedOrdinaryPeerCount;
     private int maxUnstructuredPeerCount;
@@ -43,6 +44,7 @@ public class Configuration {
         ip = NodeConstants.DEFAULT_IP_ADDRESS;
         peerListeningPort = NodeConstants.DEFAULT_PEER_LISTENING_PORT;
         networkHandlerThreadCount = NodeConstants.DEFAULT_NETWORK_HANDLER_THREAD_COUNT;
+        rmiRegistryEntryPrefix = NodeConstants.DEFAULT_RMI_REGISTRY_ENTRY_PREFIX;
         timeToLive = NodeConstants.DEFAULT_TIME_TO_LIVE;
         maxAssignedOrdinaryPeerCount = NodeConstants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT;
         maxUnstructuredPeerCount = NodeConstants.DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT;
@@ -126,6 +128,14 @@ public class Configuration {
 
     public void setNetworkHandlerThreadCount(int networkHandlerThreadCount) {
         this.networkHandlerThreadCount = networkHandlerThreadCount;
+    }
+
+    public String getRmiRegistryEntryPrefix() {
+        return rmiRegistryEntryPrefix;
+    }
+
+    public void setRmiRegistryEntryPrefix(String rmiRegistryEntryPrefix) {
+        this.rmiRegistryEntryPrefix = rmiRegistryEntryPrefix;
     }
 
     public int getTimeToLive() {

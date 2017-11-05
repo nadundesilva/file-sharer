@@ -10,7 +10,10 @@ import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.rmi.NoSuchObjectException;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -25,10 +28,28 @@ public class TraceManager implements Tracer {
     private TracingMode mode;
     private Network network;
 
+    private Registry registry;
+    private Remote stub;
+
     public TraceManager(ServiceHolder serviceHolder) {
         this.serviceHolder = serviceHolder;
         mode = TracingMode.OFF;
         network = new Network();
+
+        try {
+            LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT);
+        } catch (RemoteException e) {
+            logger.warn("RMI registry already exists at port "
+                    + serviceHolder.getConfiguration().getTracerServePort(), e);
+        }
+        try {
+            registry = LocateRegistry.getRegistry(
+                    serviceHolder.getConfiguration().getTracerServeIP(),
+                    Constants.RMI_REGISTRY_PORT
+            );
+        } catch (RemoteException e) {
+            logger.warn("Failed to fetch RMI registry", e);
+        }
     }
 
     /**
@@ -48,14 +69,18 @@ public class TraceManager implements Tracer {
                 stopServingTracer();
             }
 
-            // Register or unregister in the tracer
+            // Register in the tracer
             Tracer tracer = getTracerReference();
             if (tracer != null) {
-                tracer.register(
-                        serviceHolder.getConfiguration().getIp(),
-                        serviceHolder.getConfiguration().getPeerListeningPort(),
-                        serviceHolder.getRouter().getRoutingTable()
-                );
+                try {
+                    tracer.register(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            serviceHolder.getRouter().getRoutingTable()
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to register node in tracer", e);
+                }
             }
         }
     }
@@ -88,12 +113,12 @@ public class TraceManager implements Tracer {
         Tracer tracer = null;
         if (mode == TracingMode.TRACEABLE) {
             try {
-                Registry registry = LocateRegistry.getRegistry(
+                Registry tracerRegistry = LocateRegistry.getRegistry(
                         serviceHolder.getConfiguration().getTracerServeIP(),
-                        serviceHolder.getConfiguration().getTracerServePort()
+                        Constants.RMI_REGISTRY_PORT
                 );
-                tracer = (Tracer) registry.lookup(Constants.TRACER_REGISTRY_ENTRY);
-            } catch (Exception e) {
+                tracer = (Tracer) tracerRegistry.lookup(Constants.RMI_REGISTRY_ENTRY_TRACER);
+            } catch (NotBoundException | RemoteException e) {
                 logger.warn("Failed to get hold of the tracer stub", e);
             }
         } else {
@@ -109,13 +134,14 @@ public class TraceManager implements Tracer {
         logger.debug("Starting tracer listening");
         if (mode == TracingMode.TRACER) {
             try {
-                Remote stub = UnicastRemoteObject.exportObject(
-                        this, serviceHolder.getConfiguration().getTracerServePort());
-                Registry registry = LocateRegistry.getRegistry();
-                registry.bind(Constants.TRACER_REGISTRY_ENTRY, stub);
-                logger.debug("Bind RMI registry item " + Constants.TRACER_REGISTRY_ENTRY + " with object from class "
-                        + stub.getClass());
-            } catch (Exception e) {
+                if (stub == null) {
+                    stub = UnicastRemoteObject.exportObject(
+                            this, serviceHolder.getConfiguration().getTracerServePort());
+                }
+                registry.rebind(Constants.RMI_REGISTRY_ENTRY_TRACER, stub);
+                logger.debug("Bind RMI registry item " + Constants.RMI_REGISTRY_ENTRY_TRACER
+                        + " with object from class " + this.getClass());
+            } catch (RemoteException e) {
                 logger.warn("Failed to serve the RMI remote", e);
             }
         } else {
@@ -130,10 +156,15 @@ public class TraceManager implements Tracer {
         logger.debug("Stopping tracer listening");
         if (mode == TracingMode.TRACER) {
             try {
-                Registry registry = LocateRegistry.getRegistry();
-                registry.unbind(Constants.TRACER_REGISTRY_ENTRY);
-                logger.debug("Unbind RMI registry item " + Constants.TRACER_REGISTRY_ENTRY);
-            } catch (Exception e) {
+                while (UnicastRemoteObject.unexportObject(this, false)) { }
+                logger.debug("Un-exported object");
+            } catch (NoSuchObjectException e) {
+                logger.warn("Failed to un-export object", e);
+            }
+            try {
+                registry.unbind(Constants.RMI_REGISTRY_ENTRY_TRACER);
+                logger.debug("Unbind RMI registry item " + Constants.RMI_REGISTRY_ENTRY_TRACER);
+            } catch (NotBoundException | RemoteException e) {
                 logger.warn("Failed to stop serving tracer");
             }
         } else {
