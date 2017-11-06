@@ -576,9 +576,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer4.start();
         waitFor(delay);
 
-        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         fileSharer.start();
-        waitFor(delay * 2);
+        waitFor(delay * 6);
 
         try {
             {
@@ -777,9 +777,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer4.start();
         waitFor(delay);
 
-        serviceHolder5.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder5.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         fileSharer5.start();
-        waitFor(delay * 2);
+        waitFor(delay * 6);
 
         fileSharer.start();
         waitFor(delay);
@@ -1020,9 +1020,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         waitFor(delay);
 
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         fileSharer4.start();
-        waitFor(delay * 3);
+        waitFor(delay * 6);
 
         fileSharer5.start();
         waitFor(delay);
@@ -1030,9 +1030,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer6.start();
         waitFor(delay);
 
-        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         fileSharer.start();
-        waitFor(delay * 3);
+        waitFor(delay * 6);
 
         try {
             {
@@ -1283,9 +1283,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         waitFor(delay);
 
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         fileSharer4.start();
-        waitFor(delay * 3);
+        waitFor(delay * 6);
 
         fileSharer5.start();
         waitFor(delay);
@@ -1294,9 +1294,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         waitFor(delay);
 
         serviceHolder7.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         fileSharer7.start();
-        waitFor(delay * 3);
+        waitFor(delay * 6);
 
         fileSharer8.start();
         waitFor(delay);
@@ -1304,9 +1304,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer9.start();
         waitFor(delay);
 
-        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         fileSharer.start();
-        waitFor(delay * 3);
+        waitFor(delay * 6);
 
         try {
             {
@@ -1671,7 +1671,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder1.getConfiguration().setGossipingInterval(delay);
         serviceHolder1.getConfiguration().setHeartbeatInterval(delay);
         fileSharer1.start();
-        waitFor(delay);
+        waitFor(delay * 6);
 
         fileSharer2.start();
         waitFor(delay);
@@ -1680,11 +1680,11 @@ public class BootstrappingTestCase extends BaseTestCase {
         waitFor(delay);
 
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         serviceHolder4.getConfiguration().setGossipingInterval(delay);
         serviceHolder4.getConfiguration().setHeartbeatInterval(delay);
         fileSharer4.start();
-        waitFor(delay * 3);
+        waitFor(delay * 6);
 
         fileSharer5.start();
         waitFor(delay);
@@ -1693,11 +1693,11 @@ public class BootstrappingTestCase extends BaseTestCase {
         waitFor(delay);
 
         serviceHolder7.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         serviceHolder7.getConfiguration().setGossipingInterval(delay);
         serviceHolder7.getConfiguration().setHeartbeatInterval(delay);
         fileSharer7.start();
-        waitFor(delay * 3);
+        waitFor(delay * 6);
 
         fileSharer8.start();
         waitFor(delay);
@@ -1705,11 +1705,11 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer9.start();
         waitFor(delay);
 
-        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay * 2);
         serviceHolder.getConfiguration().setGossipingInterval(delay);
         serviceHolder.getConfiguration().setHeartbeatInterval(delay);
         fileSharer.start();
-        waitFor(delay * 3);
+        waitFor(delay * 6);
 
         try {
             {

@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -393,7 +394,7 @@ public class QueryingTestCase extends BaseTestCase {
         fileSharers[5].getServiceHolder().getQueryManager().query("Lord of the Rings");
         fileSharers[5].getServiceHolder().getQueryManager().query("Captain America");
         fileSharers[5].getServiceHolder().getQueryManager().query("Iron Man");
-        waitFor(delay);
+        waitFor(delay * 2);
 
         {
             List<AggregatedResource> resources =
@@ -424,12 +425,17 @@ public class QueryingTestCase extends BaseTestCase {
             List<AggregatedResource> resources =
                     fileSharers[5].getServiceHolder().getQueryManager().getQueryResults("Lord");
             Assert.assertEquals(resources.size(), 2);
-            Assert.assertEquals(resources.get(0).getName(), "Lord of the Rings");
-            Assert.assertEquals(resources.get(0).getNodeCount(), 1);
-            Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 7)));
-            Assert.assertEquals(resources.get(1).getName(), "Lord of the Rings 2");
-            Assert.assertEquals(resources.get(1).getNodeCount(), 1);
-            Assert.assertTrue(resources.get(1).getAllNodes().contains(new Node(localhostIP, fileSharer1Port)));
+            for (int i = 0; i < 2; i++) {
+                if (Objects.equals(resources.get(i).getName(), "Lord of the Rings")) {
+                    Assert.assertEquals(resources.get(i).getNodeCount(), 1);
+                    Assert.assertTrue(resources.get(i).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 7)));
+                } else if (Objects.equals(resources.get(i).getName(), "Lord of the Rings 2")) {
+                    Assert.assertEquals(resources.get(i).getNodeCount(), 1);
+                    Assert.assertTrue(resources.get(i).getAllNodes().contains(new Node(localhostIP, fileSharer1Port)));
+                } else {
+                    Assert.fail("Expected either \"Lord of the Rings\" and \"Lord of the Rings 2\"");
+                }
+            }
         }
         {
             List<AggregatedResource> resources =
@@ -459,12 +465,18 @@ public class QueryingTestCase extends BaseTestCase {
                     fileSharers[5].getServiceHolder().getQueryManager()
                             .getQueryResults("Lord of the Rings");
             Assert.assertEquals(resources.size(), 2);
-            Assert.assertEquals(resources.get(0).getName(), "Lord of the Rings");
-            Assert.assertEquals(resources.get(0).getNodeCount(), 1);
-            Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 7)));
-            Assert.assertEquals(resources.get(1).getName(), "Lord of the Rings 2");
-            Assert.assertEquals(resources.get(1).getNodeCount(), 1);
-            Assert.assertTrue(resources.get(1).getAllNodes().contains(new Node(localhostIP, fileSharer1Port)));
+            for (int i = 0; i < 2; i++) {
+                if (Objects.equals(resources.get(i).getName(), "Lord of the Rings 2")) {
+                    Assert.assertEquals(resources.get(i).getNodeCount(), 1);
+                    Assert.assertTrue(resources.get(i).getAllNodes().contains(new Node(localhostIP, fileSharer1Port)));
+                } else if (Objects.equals(resources.get(i).getName(), "Lord of the Rings")) {
+                    Assert.assertEquals(resources.get(i).getNodeCount(), 1);
+                    Assert.assertTrue(resources.get(i).getAllNodes().contains(
+                            new Node(localhostIP, fileSharer1Port + 7)));
+                } else {
+                    Assert.fail("Expected either \"Lord of the Rings\" and \"Lord of the Rings 2\"");
+                }
+            }
         }
         {
             List<AggregatedResource> resources =
@@ -480,12 +492,18 @@ public class QueryingTestCase extends BaseTestCase {
                     fileSharers[5].getServiceHolder().getQueryManager()
                             .getQueryResults("Iron Man");
             Assert.assertEquals(resources.size(), 2);
-            Assert.assertEquals(resources.get(0).getName(), "Iron Man 3");
-            Assert.assertEquals(resources.get(0).getNodeCount(), 1);
-            Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 7)));
-            Assert.assertEquals(resources.get(1).getName(), "Iron Man");
-            Assert.assertEquals(resources.get(1).getNodeCount(), 1);
-            Assert.assertTrue(resources.get(1).getAllNodes().contains(new Node(localhostIP, fileSharer1Port)));
+            for (int i = 0; i < 2; i++) {
+                if (Objects.equals(resources.get(i).getName(), "Iron Man 3")) {
+                    Assert.assertEquals(resources.get(i).getNodeCount(), 1);
+                    Assert.assertTrue(resources.get(i).getAllNodes().contains(
+                            new Node(localhostIP, fileSharer1Port + 7)));
+                } else if (Objects.equals(resources.get(i).getName(), "Iron Man")) {
+                    Assert.assertEquals(resources.get(i).getNodeCount(), 1);
+                    Assert.assertTrue(resources.get(i).getAllNodes().contains(new Node(localhostIP, fileSharer1Port)));
+                } else {
+                    Assert.fail("Expected either \"Iron Man 3\" and \"Iron Man\"");
+                }
+            }
         }
     }
 }

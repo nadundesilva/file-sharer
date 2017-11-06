@@ -41,6 +41,8 @@ public class MessageIndexes {
 
     // LEAVE_OK message
     public static final int LEAVE_OK_VALUE = 0;
+    public static final int LEAVE_OK_IP = 1;
+    public static final int LEAVE_OK_PORT = 2;
 
     // SER message
     public static final int SER_SOURCE_IP = 0;
@@ -68,6 +70,8 @@ public class MessageIndexes {
     public static final int JOIN_SUPER_PEER_SOURCE_TYPE = 0;
     public static final int JOIN_SUPER_PEER_SOURCE_IP = 1;
     public static final int JOIN_SUPER_PEER_SOURCE_PORT = 2;
+    public static final int JOIN_SUPER_PEER_RESOURCE_COUNT = 3;
+    public static final int JOIN_SUPER_PEER_RESOURCE_START_INDEX = 4;
 
     // JOIN_SUPER_PEER_OK message
     public static final int JOIN_SUPER_PEER_OK_VALUE = 0;
@@ -93,6 +97,26 @@ public class MessageIndexes {
     public static final int LIST_RESOURCES_OK_PORT = 1;
     public static final int LIST_RESOURCES_OK_RESOURCE_COUNT = 2;
     public static final int LIST_RESOURCES_OK_RESOURCE_START_INDEX = 3;
+
+    // LIST_UNSTRUCTURED_CONNECTIONS message
+    public static final int LIST_UNSTRUCTURED_CONNECTIONS_IP = 0;
+    public static final int LIST_UNSTRUCTURED_CONNECTIONS_PORT = 1;
+
+    // LIST_UNSTRUCTURED_CONNECTIONS_OK message
+    public static final int LIST_UNSTRUCTURED_CONNECTIONS_OK_IP = 0;
+    public static final int LIST_UNSTRUCTURED_CONNECTIONS_OK_PORT = 1;
+    public static final int LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_COUNT = 2;
+    public static final int LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_START_INDEX = 3;
+
+    // LIST_SUPER_PEER_CONNECTIONS message
+    public static final int LIST_SUPER_PEER_CONNECTIONS_IP = 0;
+    public static final int LIST_SUPER_PEER_CONNECTIONS_PORT = 1;
+
+    // LIST_SUPER_PEER_CONNECTIONS_OK message
+    public static final int LIST_SUPER_PEER_CONNECTIONS_OK_IP = 0;
+    public static final int LIST_SUPER_PEER_CONNECTIONS_OK_PORT = 1;
+    public static final int LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT = 2;
+    public static final int LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_START_INDEX = 3;
 
     private MessageIndexes() {   // Preventing from being initiated
     }

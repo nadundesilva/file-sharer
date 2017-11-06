@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -91,6 +92,18 @@ public class OverlayNetworkManager implements RouterListener {
             case LIST_RESOURCES_OK:
                 handleListResourcesOkMessage(fromNode, message);
                 break;
+            case LIST_UNSTRUCTURED_CONNECTIONS:
+                handleListUnstructuredConnectionsMessage(fromNode, message);
+                break;
+            case LIST_UNSTRUCTURED_CONNECTIONS_OK:
+                handleListUnstructuredConnectionsOkMessage(fromNode, message);
+                break;
+            case LIST_SUPER_PEER_CONNECTIONS:
+                handleListSuperPeerConnectionsMessage(fromNode, message);
+                break;
+            case LIST_SUPER_PEER_CONNECTIONS_OK:
+                handleListSuperPeerConnectionsOkMessage(fromNode, message);
+                break;
             default:
                 logger.debug("Message " + message.toString() + " of unrecognized type ignored ");
         }
@@ -153,8 +166,27 @@ public class OverlayNetworkManager implements RouterListener {
     public void gossip() {
         if (serviceHolder.getRouter().getRoutingTable().getAllUnstructuredNetworkNodes().size() <=
                 serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
-            logger.debug("Gossiping to grow the network");
-            // TODO : Implement gossiping.
+            logger.debug("Gossiping to grow the unstructured network");
+            List<Node> nodes = new ArrayList<>(serviceHolder.getRouter().getRoutingTable().getAll());
+
+            if (nodes.size() > 0) {
+                int selectedIndex = ThreadLocalRandom.current().nextInt(0, nodes.size());
+                requestUnstructuredConnections(new HashSet<>(Collections.singletonList(nodes.get(selectedIndex))));
+
+                RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
+                if (routingTable instanceof SuperPeerRoutingTable) {
+                    logger.debug("Gossiping to grow the super peer network");
+                    List<Node> superPeerNodes =
+                            new ArrayList<>(((SuperPeerRoutingTable) routingTable).getAllSuperPeerNetworkNodes());
+                    if (superPeerNodes.size() > 0) {
+                        int selectedSuperPeerIndex =
+                                ThreadLocalRandom.current().nextInt(0, superPeerNodes.size());
+                        requestSuperPeerConnections(
+                                new HashSet<>(Collections.singletonList(superPeerNodes.get(selectedSuperPeerIndex)))
+                        );
+                    }
+                }
+            }
         }
 
         if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
@@ -162,20 +194,7 @@ public class OverlayNetworkManager implements RouterListener {
 
             RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
             if (routingTable instanceof SuperPeerRoutingTable) {
-                SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
-
-                Set<Node> nodes = superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes();
-                nodes.forEach(node -> {
-                    Message listResourcesMessage = new Message();
-                    listResourcesMessage.setType(MessageType.LIST_RESOURCES);
-                    listResourcesMessage.setData(MessageIndexes.LIST_RESOURCES_IP,
-                            serviceHolder.getConfiguration().getIp());
-                    listResourcesMessage.setData(MessageIndexes.LIST_RESOURCES_PORT,
-                            Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
-
-                    logger.debug("Heart beat sent to node " + node.toString());
-                    serviceHolder.getRouter().sendMessage(node, listResourcesMessage);
-                });
+                requestOwnedResourcesList((SuperPeerRoutingTable) routingTable);
             } else {
                 logger.error("Inconsistent ordinary peer routing table in super peer");
             }
@@ -213,7 +232,7 @@ public class OverlayNetworkManager implements RouterListener {
      *
      * @param nodes The nodes to connect to
      */
-    private void join(List<Node> nodes) {
+    private void join(Set<Node> nodes) {
         nodes.forEach(node -> {
             Message joinMessage = new Message();
             joinMessage.setType(MessageType.JOIN);
@@ -354,12 +373,22 @@ public class OverlayNetworkManager implements RouterListener {
      * Connect to a super peer.
      */
     private void connectToSuperPeer(String ip, int port) {
+        PeerType currentPeerType = serviceHolder.getPeerType();
+
         Message joinMessage = new Message();
         joinMessage.setType(MessageType.JOIN_SUPER_PEER);
-        joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_TYPE, serviceHolder.getPeerType().toString());
+        joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_TYPE, currentPeerType.toString());
         joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_IP, serviceHolder.getConfiguration().getIp());
         joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_PORT,
                 Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+        if (currentPeerType == PeerType.ORDINARY_PEER) {
+            List<OwnedResource> ownedResources = new ArrayList<>(serviceHolder.getResourceIndex().getAllOwnedResources());
+            joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_RESOURCE_COUNT, Integer.toString(ownedResources.size()));
+            for (int i = 0; i < ownedResources.size(); i++) {
+                joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_RESOURCE_START_INDEX + i,
+                        ownedResources.get(i).getName());
+            }
+        }
         serviceHolder.getRouter().sendMessage(ip, port, joinMessage);
     }
 
@@ -400,7 +429,7 @@ public class OverlayNetworkManager implements RouterListener {
                 break;
             default:
                 int nodesCount = Integer.parseInt(message.getData(MessageIndexes.REG_OK_NODES_COUNT));
-                List<Node> nodesList = new ArrayList<>();
+                Set<Node> nodesSet = new HashSet<>();
                 if (nodesCount > 0) {
                     if (nodesCount <= 2) {
                         for (int i = 0; i < nodesCount * 2; i += 2) {
@@ -408,7 +437,7 @@ public class OverlayNetworkManager implements RouterListener {
                             Node node = new Node();
                             node.setIp(message.getData(messageIndex));
                             node.setPort(message.getData(messageIndex + 1));
-                            nodesList.add(node);
+                            nodesSet.add(node);
                         }
                     } else {
                         for (int i = 0; i < 2; ) {
@@ -418,8 +447,8 @@ public class OverlayNetworkManager implements RouterListener {
                             node.setIp(message.getData(messageIndex));
                             node.setPort(message.getData(messageIndex + 1));
 
-                            if (!nodesList.contains(node)) {
-                                nodesList.add(node);
+                            if (!nodesSet.contains(node)) {
+                                nodesSet.add(node);
                                 i++;
                             }
                         }
@@ -427,8 +456,8 @@ public class OverlayNetworkManager implements RouterListener {
 
 
                 }
-                if (nodesList.size() > 0) {
-                    join(nodesList);
+                if (nodesSet.size() > 0) {
+                    join(nodesSet);
                 } else {
                     selfPromoteSuperPeer(false);
                 }
@@ -472,9 +501,9 @@ public class OverlayNetworkManager implements RouterListener {
             superPeerNodeIP = serviceHolder.getConfiguration().getIp();
             superPeerNodePort = serviceHolder.getConfiguration().getPeerListeningPort();
         } else {
-            if (serviceHolder.getRouter().getRoutingTable() instanceof OrdinaryPeerRoutingTable) {
-                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable =
-                        (OrdinaryPeerRoutingTable) serviceHolder.getRouter().getRoutingTable();
+            RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
+            if (routingTable instanceof OrdinaryPeerRoutingTable) {
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
 
                 if (ordinaryPeerRoutingTable.getAssignedSuperPeer() != null &&
                         ordinaryPeerRoutingTable.getAssignedSuperPeer().isActive()) {
@@ -511,12 +540,13 @@ public class OverlayNetworkManager implements RouterListener {
      * @param message  The message received
      */
     private void handleJoinOkMessage(Node fromNode, Message message) {
+        String newIP = message.getData(MessageIndexes.JOIN_OK_IP);
+        int newPort = Integer.parseInt(message.getData(MessageIndexes.JOIN_OK_PORT));
+
         if (Objects.equals(message.getData(MessageIndexes.JOIN_OK_VALUE), MessageConstants.JOIN_OK_VALUE_SUCCESS)) {
-            String ip = message.getData(MessageIndexes.JOIN_OK_IP);
-            int port = Integer.parseInt(message.getData(MessageIndexes.JOIN_OK_PORT));
 
             RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
-            routingTable.addUnstructuredNetworkRoutingTableEntry(ip, port);
+            routingTable.addUnstructuredNetworkRoutingTableEntry(newIP, newPort);
 
             if (routingTable instanceof OrdinaryPeerRoutingTable) {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
@@ -530,7 +560,7 @@ public class OverlayNetworkManager implements RouterListener {
                             Node superPeerNode = new Node();
                             superPeerNode.setIp(superPeerIP);
                             superPeerNode.setPort(superPeerPort);
-                            routingTable.addUnstructuredNetworkRoutingTableEntry(ip, port);
+                            routingTable.addUnstructuredNetworkRoutingTableEntry(newIP, newPort);
 
                             connectToSuperPeer(superPeerIP, Integer.parseInt(superPeerPort));
                         } else {
@@ -543,7 +573,7 @@ public class OverlayNetworkManager implements RouterListener {
             }
         } else if (Objects.equals(message.getData(MessageIndexes.JOIN_OK_VALUE),
                 MessageConstants.JOIN_OK_VALUE_ERROR)) {
-            logger.warn("Failed to create unstructured connection with " + fromNode.toString());
+            logger.warn("Failed to create unstructured connection with " + newIP + ":" + newPort);
         } else {
             logger.debug("Unknown value " + message.getData(MessageIndexes.JOIN_OK_VALUE) + " in message \""
                     + message.toString() + "\"");
@@ -568,6 +598,11 @@ public class OverlayNetworkManager implements RouterListener {
                 MessageIndexes.LEAVE_OK_VALUE,
                 (isSuccessful ? MessageConstants.LEAVE_OK_VALUE_SUCCESS : MessageConstants.LEAVE_OK_VALUE_ERROR)
         );
+        replyMessage.setData(MessageIndexes.LEAVE_OK_IP, serviceHolder.getConfiguration().getIp());
+        replyMessage.setData(
+                MessageIndexes.LEAVE_OK_PORT,
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort())
+        );
         serviceHolder.getRouter().sendMessage(ip, port, replyMessage);
     }
 
@@ -578,11 +613,19 @@ public class OverlayNetworkManager implements RouterListener {
      * @param message  The message received
      */
     private void handleLeaveOkMessage(Node fromNode, Message message) {
+        String leavingIP = message.getData(MessageIndexes.LEAVE_OK_IP);
+        int leavingPort = Integer.parseInt(message.getData(MessageIndexes.LEAVE_OK_PORT));
+
         if (Objects.equals(message.getData(MessageIndexes.LEAVE_OK_VALUE), MessageConstants.LEAVE_OK_VALUE_SUCCESS)) {
-            serviceHolder.getRouter().getRoutingTable().removeFromAll(fromNode.getIp(), fromNode.getPort());
+            serviceHolder.getRouter().getRoutingTable().removeFromAll(leavingIP, leavingPort);
+
+            ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
+            if (resourceIndex instanceof SuperPeerResourceIndex) {
+                ((SuperPeerResourceIndex) resourceIndex).removeNodeFromAggregatedResources(leavingIP, leavingPort);
+            }
         } else if (Objects.equals(message.getData(MessageIndexes.LEAVE_OK_VALUE),
                 MessageConstants.LEAVE_OK_VALUE_ERROR)) {
-            logger.warn("Failed to disconnect unstructured connection with " + fromNode.toString());
+            logger.warn("Failed to disconnect unstructured connection with " + leavingIP + ":" + leavingPort);
         } else {
             logger.debug("Unknown value " + message.getData(MessageIndexes.LEAVE_OK_VALUE) + " in message \""
                     + message.toString() + "\"");
@@ -637,6 +680,22 @@ public class OverlayNetworkManager implements RouterListener {
                             null || superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes().size() <
                             serviceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
                         superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(newNodeIP, newNodePort);
+
+                        ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
+                        if (resourceIndex instanceof SuperPeerResourceIndex) {
+                            SuperPeerResourceIndex superPeerResourceIndex = ((SuperPeerResourceIndex) resourceIndex);
+
+                            int resourceCount = Integer.parseInt(message.getData(
+                                    MessageIndexes.JOIN_SUPER_PEER_RESOURCE_COUNT));
+                            for (int i = 0; i < resourceCount; i++) {
+                                superPeerResourceIndex.addAggregatedResource(
+                                        message.getData(MessageIndexes.JOIN_SUPER_PEER_RESOURCE_START_INDEX + i),
+                                        newNodeIP, newNodePort
+                                );
+                            }
+                        } else {
+                            logger.warn("Inconsistent ordinary resource index in super peer type");
+                        }
 
                         replyMessage.setData(MessageIndexes.JOIN_SUPER_PEER_OK_VALUE,
                                 MessageConstants.JOIN_SUPER_PEER_OK_VALUE_SUCCESS);
@@ -840,5 +899,205 @@ public class OverlayNetworkManager implements RouterListener {
         } else {
             logger.warn(message.toString() + " Cannot be handled by ordinary peer");
         }
+    }
+
+    /**
+     * Handle LIST_UNSTRUCTURED_CONNECTIONS type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleListUnstructuredConnectionsMessage(Node fromNode, Message message) {
+        Message replyMessage = new Message();
+        replyMessage.setType(MessageType.LIST_UNSTRUCTURED_CONNECTIONS_OK);
+        replyMessage.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_IP,
+                serviceHolder.getConfiguration().getIp());
+        replyMessage.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_PORT,
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+        List<Node> unstructuredNodes =
+                new ArrayList<>(serviceHolder.getRouter().getRoutingTable().getAllUnstructuredNetworkNodes());
+
+        if (unstructuredNodes.size() > 0) {
+            int selectedNodesCount = (unstructuredNodes.size() > MessageConstants.LIST_UNSTRUCTURED_CONNECTIONS_MAX_COUNT)
+                    ? MessageConstants.LIST_UNSTRUCTURED_CONNECTIONS_MAX_COUNT : unstructuredNodes.size();
+
+            replyMessage.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_COUNT,
+                    Integer.toString(selectedNodesCount));
+
+            // Selecting random nodes
+            for (int i = 0; i < selectedNodesCount * 2; i += 2) {
+                Node node = unstructuredNodes.get(ThreadLocalRandom.current().nextInt(0, unstructuredNodes.size()));
+                unstructuredNodes.remove(node);
+                replyMessage.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i,
+                        node.getIp());
+                replyMessage.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i + 1,
+                        Integer.toString(node.getPort()));
+            }
+        } else {
+            replyMessage.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_COUNT, "0");
+        }
+
+        serviceHolder.getRouter().sendMessage(
+                message.getData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_IP),
+                Integer.parseInt(message.getData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_PORT)),
+                replyMessage
+        );
+    }
+
+    /**
+     * Handle LIST_UNSTRUCTURED_CONNECTIONS_OK type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleListUnstructuredConnectionsOkMessage(Node fromNode, Message message) {
+        int nodesCount = Integer.parseInt(
+                message.getData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_COUNT)
+        );
+
+        Set<Node> newNodes = new HashSet<>();
+        for (int i = 0; i < nodesCount * 2; i += 2) {
+            String ip =
+                    message.getData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i);
+            int port = Integer.parseInt(
+                    message.getData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i + 1)
+            );
+            newNodes.add(new Node(ip, port));
+        }
+        join(newNodes);
+    }
+
+    /**
+     * Handle LIST_SUPER_PEER_CONNECTIONS type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleListSuperPeerConnectionsMessage(Node fromNode, Message message) {
+        Message replyMessage = new Message();
+        replyMessage.setType(MessageType.LIST_SUPER_PEER_CONNECTIONS_OK);
+        replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_IP,
+                serviceHolder.getConfiguration().getIp());
+        replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_PORT,
+                Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+        RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
+        if (routingTable instanceof SuperPeerRoutingTable) {
+            SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
+
+            List<Node> superPeerNodes =
+                    new ArrayList<>(superPeerRoutingTable.getAllSuperPeerNetworkNodes());
+            if (superPeerNodes.size() > 0) {
+                int selectedNodesCount = (superPeerNodes.size() > MessageConstants.LIST_SUPER_PEER_CONNECTIONS_MAX_COUNT)
+                        ? MessageConstants.LIST_SUPER_PEER_CONNECTIONS_MAX_COUNT : superPeerNodes.size();
+
+                replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT,
+                        Integer.toString(selectedNodesCount));
+
+                // Selecting random nodes
+                for (int i = 0; i < selectedNodesCount * 2; i += 2) {
+                    Node node = superPeerNodes.get(ThreadLocalRandom.current().nextInt(0, superPeerNodes.size()));
+                    superPeerNodes.remove(node);
+                    replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i,
+                            node.getIp());
+                    replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i + 1,
+                            Integer.toString(node.getPort()));
+                }
+            } else {
+                replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT, "0");
+            }
+        } else {
+            replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT,
+                    Integer.toString(MessageConstants.LIST_SUPER_PEER_CONNECTIONS_NOT_SUPER_PEER));
+        }
+
+        serviceHolder.getRouter().sendMessage(
+                message.getData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_IP),
+                Integer.parseInt(message.getData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_PORT)),
+                replyMessage
+        );
+    }
+
+    /**
+     * Handle LIST_SUPER_PEER_CONNECTIONS_OK type messages.
+     *
+     * @param fromNode The node from which the message was received
+     * @param message  The message received
+     */
+    private void handleListSuperPeerConnectionsOkMessage(Node fromNode, Message message) {
+        int nodesCount = Integer.parseInt(
+                message.getData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT)
+        );
+
+        if (nodesCount != MessageConstants.LIST_SUPER_PEER_CONNECTIONS_NOT_SUPER_PEER) {
+            for (int i = 0; i < nodesCount * 2; i += 2) {
+                String ip =
+                        message.getData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i);
+                int port = Integer.parseInt(
+                        message.getData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i + 1)
+                );
+                connectToSuperPeer(ip, port);
+            }
+        }
+    }
+
+    /**
+     * Request the owned resources list from the assigned ordinary peers.
+     * This will not be called by ordinary peers.
+     *
+     * @param superPeerRoutingTable The super peer routing table used by the current node
+     */
+    private void requestOwnedResourcesList(SuperPeerRoutingTable superPeerRoutingTable) {
+        Set<Node> nodes = superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes();
+        nodes.forEach(node -> {
+            Message listResourcesMessage = new Message();
+            listResourcesMessage.setType(MessageType.LIST_RESOURCES);
+            listResourcesMessage.setData(MessageIndexes.LIST_RESOURCES_IP,
+                    serviceHolder.getConfiguration().getIp());
+            listResourcesMessage.setData(MessageIndexes.LIST_RESOURCES_PORT,
+                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+            logger.debug("Requesting to list owned resource from node " + node.toString());
+            serviceHolder.getRouter().sendMessage(node, listResourcesMessage);
+        });
+    }
+
+    /**
+     * Request to list the unstructured connections.
+     *
+     * @param nodes The nodes to which the request should be sent
+     */
+    private void requestUnstructuredConnections(Set<Node> nodes) {
+        nodes.forEach(node -> {
+            Message listUnstructuredConnections = new Message();
+            listUnstructuredConnections.setType(MessageType.LIST_UNSTRUCTURED_CONNECTIONS);
+            listUnstructuredConnections.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_IP,
+                    serviceHolder.getConfiguration().getIp());
+            listUnstructuredConnections.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_PORT,
+                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+            logger.debug("Requesting to list unstructured connections from node " + node.toString());
+            serviceHolder.getRouter().sendMessage(node, listUnstructuredConnections);
+        });
+    }
+
+    /**
+     * Request to list the super peer connections.
+     *
+     * @param nodes The nodes to which the request should be sent
+     */
+    private void requestSuperPeerConnections(Set<Node> nodes) {
+        nodes.forEach(node -> {
+            Message listUnstructuredConnections = new Message();
+            listUnstructuredConnections.setType(MessageType.LIST_SUPER_PEER_CONNECTIONS);
+            listUnstructuredConnections.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_IP,
+                    serviceHolder.getConfiguration().getIp());
+            listUnstructuredConnections.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_PORT,
+                    Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+            logger.debug("Requesting to list super peer connections from node " + node.toString());
+            serviceHolder.getRouter().sendMessage(node, listUnstructuredConnections);
+        });
     }
 }

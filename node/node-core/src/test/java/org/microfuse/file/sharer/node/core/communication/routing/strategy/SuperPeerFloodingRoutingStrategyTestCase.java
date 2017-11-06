@@ -70,25 +70,27 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         unstructuredNetworkNode.add(node3);
         unstructuredNetworkNode.add(node4);
         unstructuredNetworkNode.add(node5);
-        Mockito.when(ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes())
-                .thenReturn(unstructuredNetworkNode);
-        Mockito.when(superPeerRoutingTable.getAllUnstructuredNetworkNodes())
-                .thenReturn(unstructuredNetworkNode);
+        unstructuredNetworkNode.forEach(node -> {
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
+        });
 
         Set<Node> assignedOrdinaryPeerNodes = new HashSet<>();
         assignedOrdinaryPeerNodes.add(fromNode);
         assignedOrdinaryPeerNodes.add(node1);
         assignedOrdinaryPeerNodes.add(node2);
         assignedOrdinaryPeerNodes.add(node3);
-        Mockito.when(superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes())
-                .thenReturn(assignedOrdinaryPeerNodes);
+        assignedOrdinaryPeerNodes.forEach(node -> {
+            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(node.getIp(), node.getPort());
+        });
 
         Set<Node> superPeerNetworkNodes = new HashSet<>();
         superPeerNetworkNodes.add(fromNode);
         superPeerNetworkNodes.add(node4);
         superPeerNetworkNodes.add(node5);
-        Mockito.when(superPeerRoutingTable.getAllSuperPeerNetworkNodes())
-                .thenReturn(superPeerNetworkNodes);
+        superPeerNetworkNodes.forEach(node -> {
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(node.getIp(), node.getPort());
+        });
     }
 
     @Test(priority = 1)
@@ -131,9 +133,10 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Flooding Routing Strategy Test 04 - Get forwarding nodes in ordinary peer " +
                 "with dead assigned super peer");
 
-        node1.setState(NodeState.INACTIVE);
+        ordinaryPeerRoutingTable.get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
+        serviceHolder.getRouter().getRoutingTable().get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
+
         Message message = Mockito.mock(Message.class);
-        Mockito.when(ordinaryPeerRoutingTable.getAssignedSuperPeer()).thenReturn(node1);
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 fromNode, message);
 
@@ -184,7 +187,9 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Flooding Routing Strategy Test 07 - Get forwarding nodes in ordinary peer " +
                 "with unassigned super peer with dead nodes");
 
-        node1.setState(NodeState.INACTIVE);
+        ordinaryPeerRoutingTable.get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
+        serviceHolder.getRouter().getRoutingTable().get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
+
         Message message = Mockito.mock(Message.class);
         Set<Node> forwardingNodes = superPeerFloodingRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 fromNode, message);
@@ -320,7 +325,9 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Flooding Routing Strategy Test 13 - Get forwarding nodes in super peer " +
                 "with resource not in assigned ordinary peer with dead super peers");
 
-        node4.setState(NodeState.INACTIVE);
+        superPeerRoutingTable.get(node4.getIp(), node4.getPort()).setState(NodeState.INACTIVE);
+        serviceHolder.getRouter().getRoutingTable().get(node4.getIp(), node4.getPort()).setState(NodeState.INACTIVE);
+
         Message message = Mockito.mock(Message.class);
         Mockito.when(message.getData(MessageIndexes.SER_FILE_NAME)).thenReturn(queryResourceName);
 

@@ -57,15 +57,6 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         node4 = new Node("192.168.1.4", 6004);
         node5 = new Node("192.168.1.5", 6005);
 
-        RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
-        routingTable.addUnstructuredNetworkRoutingTableEntry(fromNode.getIp(), fromNode.getPort());
-        routingTable.addUnstructuredNetworkRoutingTableEntry(fromSuperPeerNode.getIp(), fromSuperPeerNode.getPort());
-        routingTable.addUnstructuredNetworkRoutingTableEntry(node1.getIp(), node1.getPort());
-        routingTable.addUnstructuredNetworkRoutingTableEntry(node2.getIp(), node2.getPort());
-        routingTable.addUnstructuredNetworkRoutingTableEntry(node3.getIp(), node3.getPort());
-        routingTable.addUnstructuredNetworkRoutingTableEntry(node4.getIp(), node4.getPort());
-        routingTable.addUnstructuredNetworkRoutingTableEntry(node5.getIp(), node5.getPort());
-
         Set<Node> unstructuredNetworkNode = new HashSet<>();
         unstructuredNetworkNode.add(fromSuperPeerNode);
         unstructuredNetworkNode.add(fromNode);
@@ -74,25 +65,29 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         unstructuredNetworkNode.add(node3);
         unstructuredNetworkNode.add(node4);
         unstructuredNetworkNode.add(node5);
-        Mockito.when(ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes())
-                .thenReturn(unstructuredNetworkNode);
-        Mockito.when(superPeerRoutingTable.getAllUnstructuredNetworkNodes())
-                .thenReturn(unstructuredNetworkNode);
+        unstructuredNetworkNode.forEach(node -> {
+            ordinaryPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
+            superPeerRoutingTable.addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
+            serviceHolder.getRouter().getRoutingTable()
+                    .addUnstructuredNetworkRoutingTableEntry(node.getIp(), node.getPort());
+        });
 
         Set<Node> assignedOrdinaryPeerNodes = new HashSet<>();
         assignedOrdinaryPeerNodes.add(fromNode);
         assignedOrdinaryPeerNodes.add(node1);
         assignedOrdinaryPeerNodes.add(node2);
         assignedOrdinaryPeerNodes.add(node3);
-        Mockito.when(superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes())
-                .thenReturn(assignedOrdinaryPeerNodes);
+        assignedOrdinaryPeerNodes.forEach(node -> {
+            superPeerRoutingTable.addAssignedOrdinaryNetworkRoutingTableEntry(node.getIp(), node.getPort());
+        });
 
         Set<Node> superPeerNetworkNodes = new HashSet<>();
         superPeerNetworkNodes.add(fromSuperPeerNode);
         superPeerNetworkNodes.add(node4);
         superPeerNetworkNodes.add(node5);
-        Mockito.when(superPeerRoutingTable.getAllSuperPeerNetworkNodes())
-                .thenReturn(superPeerNetworkNodes);
+        superPeerNetworkNodes.forEach(node -> {
+            superPeerRoutingTable.addSuperPeerNetworkRoutingTableEntry(node.getIp(), node.getPort());
+        });
     }
 
     @Test(priority = 1)
@@ -135,9 +130,10 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 04 - Get forwarding nodes in ordinary peer " +
                 "with dead assigned super peer");
 
-        node1.setState(NodeState.INACTIVE);
+        ordinaryPeerRoutingTable.get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
+        serviceHolder.getRouter().getRoutingTable().get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
+
         Message message = Mockito.mock(Message.class);
-        Mockito.when(ordinaryPeerRoutingTable.getAssignedSuperPeer()).thenReturn(node1);
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 fromNode, message);
 
@@ -185,7 +181,9 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Super Peer Random Walk Routing Strategy Test 07 - Get forwarding nodes in ordinary peer " +
                 "with unassigned super peer with dead nodes");
 
+        ordinaryPeerRoutingTable.get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
         serviceHolder.getRouter().getRoutingTable().get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
+
         Message message = Mockito.mock(Message.class);
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(ordinaryPeerRoutingTable,
                 fromNode, message);
@@ -259,6 +257,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         resourceIndex.clear();
 
+        superPeerRoutingTable.get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
         serviceHolder.getRouter().getRoutingTable().get(node1.getIp(), node1.getPort()).setState(NodeState.INACTIVE);
 
         Assert.assertTrue(resourceIndex instanceof SuperPeerResourceIndex);
@@ -325,6 +324,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         ResourceIndex resourceIndex = serviceHolder.getResourceIndex();
         resourceIndex.clear();
 
+        superPeerRoutingTable.get(node4.getIp(), node4.getPort()).setState(NodeState.INACTIVE);
         serviceHolder.getRouter().getRoutingTable().get(node4.getIp(), node4.getPort()).setState(NodeState.INACTIVE);
 
         Set<Node> forwardingNodes = superPeerRandomWalkRoutingStrategy.getForwardingNodes(superPeerRoutingTable,

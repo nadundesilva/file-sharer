@@ -88,10 +88,8 @@ public abstract class RoutingStrategy {
                     .collect(Collectors.toSet());
 
             int forwardNodeIndex = -1;
-            if (forwardingNodes.size() > 1) {
-                forwardNodeIndex = ThreadLocalRandom.current().nextInt(0, forwardingNodes.size() - 1);
-            } else if (forwardingNodes.size() == 1) {
-                forwardNodeIndex = 0;
+            if (forwardingNodes.size() > 0) {
+                forwardNodeIndex = ThreadLocalRandom.current().nextInt(0, forwardingNodes.size());
             }
 
             if (forwardNodeIndex >= 0) {
