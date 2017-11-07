@@ -1,11 +1,11 @@
 package org.microfuse.file.sharer.node.core.utils;
 
 import org.microfuse.file.sharer.node.commons.Configuration;
-import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
-import org.microfuse.file.sharer.node.commons.messaging.MessageType;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.RouterListener;
 import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
 import org.slf4j.Logger;

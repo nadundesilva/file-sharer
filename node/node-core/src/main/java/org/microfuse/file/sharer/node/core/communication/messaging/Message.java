@@ -1,4 +1,6 @@
-package org.microfuse.file.sharer.node.commons.messaging;
+package org.microfuse.file.sharer.node.core.communication.messaging;
+
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 
 import java.util.ArrayList;
 import java.util.List;

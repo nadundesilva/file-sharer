@@ -2,7 +2,7 @@ package org.microfuse.file.sharer.node.core.communication.network.rmi;
 
 import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
-import org.microfuse.file.sharer.node.commons.messaging.Message;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;

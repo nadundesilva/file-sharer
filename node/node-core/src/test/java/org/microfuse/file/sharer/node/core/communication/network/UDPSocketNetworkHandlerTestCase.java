@@ -1,10 +1,11 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
 import org.microfuse.file.sharer.node.commons.Configuration;
-import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.commons.messaging.MessageType;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
+import org.microfuse.file.sharer.node.core.communication.network.udp.UDPSocketNetworkHandler;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,14 +108,14 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         udpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message4);
         waitFor(delay);
 
-        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1)).onMessageReceived(
-                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
-        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1)).onMessageReceived(
-                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message2));
-        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).onMessageReceived(
-                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
-        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).onMessageReceived(
-                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message4));
+        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
+        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message2));
+        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
+        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message4));
     }
 
     @Test(priority = 4)
@@ -126,11 +127,10 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message1);
         waitFor(delay);
 
-        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(0)).onMessageReceived(
-                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
-        // TODO : uncomment after implementing reliability in UDP
-//        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).runTasksOnMessageSendFailed(
-//                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
+        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(0))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
+//        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1))
+//                .onMessageSendFailed(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));
     }
 
     @Test(priority = 5)
@@ -150,12 +150,11 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
         udpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message3);
         waitFor(delay);
 
-        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1)).onMessageReceived(
-                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message2));
-        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(0)).onMessageReceived(
-                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
-        // TODO : uncomment after implementing reliability in UDP
-//        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1)).runTasksOnMessageSendFailed(
-//                Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
+        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(1))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message2));
+        Mockito.verify(udpSocketNetworkHandler2Listener, Mockito.times(0))
+                .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
+//        Mockito.verify(udpSocketNetworkHandler1Listener, Mockito.times(1))
+//                .onMessageSendFailed(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message3));
     }
 }

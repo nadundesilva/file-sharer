@@ -1,10 +1,10 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
 import org.microfuse.file.sharer.node.commons.Configuration;
-import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.commons.messaging.MessageType;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

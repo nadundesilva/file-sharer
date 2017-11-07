@@ -1,6 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
-import org.microfuse.file.sharer.node.commons.messaging.Message;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 
 /**
  * The network handler listener.

@@ -1,14 +1,14 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
 import org.microfuse.file.sharer.node.commons.Configuration;
-import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.commons.messaging.MessageConstants;
-import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
-import org.microfuse.file.sharer.node.commons.messaging.MessageType;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageConstants;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;

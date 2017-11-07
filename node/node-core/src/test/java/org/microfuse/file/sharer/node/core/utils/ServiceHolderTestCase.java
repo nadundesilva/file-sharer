@@ -8,7 +8,7 @@ import org.microfuse.file.sharer.node.commons.communication.routing.strategy.Rou
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
-import org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler;
+import org.microfuse.file.sharer.node.core.communication.network.udp.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredRandomWalkRoutingStrategy;

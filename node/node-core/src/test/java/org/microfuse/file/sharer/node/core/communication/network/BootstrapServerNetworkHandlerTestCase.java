@@ -1,11 +1,11 @@
 package org.microfuse.file.sharer.node.core.communication.network;
 
 import org.microfuse.file.sharer.bootstrap.BootstrapServer;
-import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.commons.messaging.MessageConstants;
-import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
-import org.microfuse.file.sharer.node.commons.messaging.MessageType;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageConstants;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.mockito.Mockito;

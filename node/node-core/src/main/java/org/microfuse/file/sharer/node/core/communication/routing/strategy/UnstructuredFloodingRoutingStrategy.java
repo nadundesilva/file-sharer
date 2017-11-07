@@ -1,8 +1,8 @@
 package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
-import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 

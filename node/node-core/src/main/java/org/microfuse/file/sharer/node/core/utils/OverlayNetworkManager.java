@@ -1,12 +1,12 @@
 package org.microfuse.file.sharer.node.core.utils;
 
-import org.microfuse.file.sharer.node.commons.messaging.Message;
-import org.microfuse.file.sharer.node.commons.messaging.MessageConstants;
-import org.microfuse.file.sharer.node.commons.messaging.MessageIndexes;
-import org.microfuse.file.sharer.node.commons.messaging.MessageType;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageConstants;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.RouterListener;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
@@ -382,7 +382,8 @@ public class OverlayNetworkManager implements RouterListener {
         joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_SOURCE_PORT,
                 Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
         if (currentPeerType == PeerType.ORDINARY_PEER) {
-            List<OwnedResource> ownedResources = new ArrayList<>(serviceHolder.getResourceIndex().getAllOwnedResources());
+            List<OwnedResource> ownedResources =
+                    new ArrayList<>(serviceHolder.getResourceIndex().getAllOwnedResources());
             joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_RESOURCE_COUNT, Integer.toString(ownedResources.size()));
             for (int i = 0; i < ownedResources.size(); i++) {
                 joinMessage.setData(MessageIndexes.JOIN_SUPER_PEER_RESOURCE_START_INDEX + i,
@@ -919,7 +920,8 @@ public class OverlayNetworkManager implements RouterListener {
                 new ArrayList<>(serviceHolder.getRouter().getRoutingTable().getAllUnstructuredNetworkNodes());
 
         if (unstructuredNodes.size() > 0) {
-            int selectedNodesCount = (unstructuredNodes.size() > MessageConstants.LIST_UNSTRUCTURED_CONNECTIONS_MAX_COUNT)
+            int selectedNodesCount = (unstructuredNodes.size()
+                    > MessageConstants.LIST_UNSTRUCTURED_CONNECTIONS_MAX_COUNT)
                     ? MessageConstants.LIST_UNSTRUCTURED_CONNECTIONS_MAX_COUNT : unstructuredNodes.size();
 
             replyMessage.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_OK_CONNECTIONS_COUNT,
@@ -989,7 +991,8 @@ public class OverlayNetworkManager implements RouterListener {
             List<Node> superPeerNodes =
                     new ArrayList<>(superPeerRoutingTable.getAllSuperPeerNetworkNodes());
             if (superPeerNodes.size() > 0) {
-                int selectedNodesCount = (superPeerNodes.size() > MessageConstants.LIST_SUPER_PEER_CONNECTIONS_MAX_COUNT)
+                int selectedNodesCount = (superPeerNodes.size()
+                        > MessageConstants.LIST_SUPER_PEER_CONNECTIONS_MAX_COUNT)
                         ? MessageConstants.LIST_SUPER_PEER_CONNECTIONS_MAX_COUNT : superPeerNodes.size();
 
                 replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT,

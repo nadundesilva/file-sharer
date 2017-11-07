@@ -1,7 +1,7 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
-import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 
 /**
  * The base class for listeners waiting for router events.

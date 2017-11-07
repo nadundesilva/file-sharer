@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.commons.messaging;
+package org.microfuse.file.sharer.node.commons.communication.messaging;
 
 import java.util.HashMap;
 import java.util.Map;

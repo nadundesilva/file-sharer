@@ -2,7 +2,6 @@
 <suite name="File-Sharer-Node-Test-Suite">
     <test name="file-sharer-node-commons-tests" enabled="true">
         <classes>
-            <class name="org.microfuse.file.sharer.node.commons.messaging.MessageTestCase"/>
             <class name="org.microfuse.file.sharer.node.commons.peer.NodeTestCase"/>
         </classes>
     </test>

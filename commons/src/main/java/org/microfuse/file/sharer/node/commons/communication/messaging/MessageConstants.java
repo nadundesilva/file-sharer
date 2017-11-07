@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.commons.messaging;
+package org.microfuse.file.sharer.node.commons.communication.messaging;
 
 /**
  * Message related constants.

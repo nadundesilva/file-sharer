@@ -1,5 +1,6 @@
-package org.microfuse.file.sharer.node.commons.messaging;
+package org.microfuse.file.sharer.node.core.communication.messaging;
 
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;

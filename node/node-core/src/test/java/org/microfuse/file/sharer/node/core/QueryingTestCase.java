@@ -428,7 +428,8 @@ public class QueryingTestCase extends BaseTestCase {
             for (int i = 0; i < 2; i++) {
                 if (Objects.equals(resources.get(i).getName(), "Lord of the Rings")) {
                     Assert.assertEquals(resources.get(i).getNodeCount(), 1);
-                    Assert.assertTrue(resources.get(i).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 7)));
+                    Assert.assertTrue(resources.get(i).getAllNodes()
+                            .contains(new Node(localhostIP, fileSharer1Port + 7)));
                 } else if (Objects.equals(resources.get(i).getName(), "Lord of the Rings 2")) {
                     Assert.assertEquals(resources.get(i).getNodeCount(), 1);
                     Assert.assertTrue(resources.get(i).getAllNodes().contains(new Node(localhostIP, fileSharer1Port)));

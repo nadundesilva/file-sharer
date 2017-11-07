@@ -1,8 +1,8 @@
 package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 
-import org.microfuse.file.sharer.node.commons.messaging.Message;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
