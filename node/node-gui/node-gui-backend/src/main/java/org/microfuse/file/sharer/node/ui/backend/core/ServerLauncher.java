@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 import javax.servlet.ServletException;
 
 /**
@@ -40,15 +41,30 @@ public class ServerLauncher {
     };
 
     public static void main(String[] args) {
+        int webAppPort = ServerConstants.WEB_APP_PORT;
+
+        // Reading console parameters
+        for (int i = 0; i < args.length;) {
+            if (Objects.equals(args[i], ServerConstants.WEB_APP_PORT_CONSOLE_ARGUEMENT_KEY)) {
+                String argument = args[i + 1];
+                try {
+                    webAppPort = Integer.parseInt(argument);
+                    i += 2;
+                } catch (NumberFormatException e) {
+                    logger.warn("Invalid web app port " + argument + " provided. Using " + webAppPort + " instead.");
+                }
+            }
+        }
+
         FileSharerHolder.getFileSharer().start();       // Instantiating the file sharer
-        startTomcatServer();
+        startTomcatServer(webAppPort);
     }
 
-    private static void startTomcatServer() {
+    private static void startTomcatServer(int port) {
         Thread thread = new Thread(() -> {
             try {
                 Tomcat tomcat = new Tomcat();
-                tomcat.setPort(ServerConstants.WEB_APP_PORT);
+                tomcat.setPort(port);
 
                 // Adding the main servlet
                 Context context = tomcat.addWebapp("", new File(ServerConstants.WEB_APP_DIRECTORY).getAbsolutePath());
@@ -70,7 +86,7 @@ public class ServerLauncher {
 
                 tomcat.start();
 
-                String appURI = "http://localhost:" + ServerConstants.WEB_APP_PORT + "/";
+                String appURI = "http://localhost:" + port + "/";
                 logger.info("File Sharer running at " + appURI);
                 try {
                     Desktop.getDesktop().browse(new URI(appURI));

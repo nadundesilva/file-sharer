@@ -49,6 +49,7 @@ export class NetworkComponent implements OnInit, OnDestroy {
             this.nodeInfo = new NodeInfo();
             this.nodeInfo.peerType = response.data.peerType;
             this.nodeInfo.unstructuredNetwork = new TableDataSource<Node>(response.data.unstructuredNetwork);
+            console.log(this.nodeInfo.peerType === PeerType.SUPER_PEER);
             if (this.nodeInfo.peerType === PeerType.SUPER_PEER) {
               this.nodeInfo.superPeerNetwork = new TableDataSource<Node>(response.data.superPeerNetwork);
               this.nodeInfo.assignedOrdinaryPeers = new TableDataSource<Node>(response.data.assignedOrdinaryPeers);

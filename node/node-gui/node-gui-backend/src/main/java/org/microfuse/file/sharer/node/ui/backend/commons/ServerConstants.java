@@ -8,6 +8,8 @@ public class ServerConstants {
     public static final String WEB_APP_DIRECTORY = "app";
     public static final String WEB_APP_API_URL = "/api";
 
+    public static final String WEB_APP_PORT_CONSOLE_ARGUEMENT_KEY = "--port";
+
     private ServerConstants() {   // Preventing from being initiated
     }
 }

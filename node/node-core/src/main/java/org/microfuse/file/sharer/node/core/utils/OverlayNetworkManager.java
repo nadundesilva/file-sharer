@@ -105,13 +105,23 @@ public class OverlayNetworkManager implements RouterListener {
                 handleListSuperPeerConnectionsOkMessage(fromNode, message);
                 break;
             default:
-                logger.debug("Message " + message.toString() + " of unrecognized type ignored ");
+                logger.debug("Message " + message.toString() + " of unrecognized type ignored");
         }
     }
 
     @Override
     public void onMessageSendFailed(Node toNode, Message message) {
-
+        logger.debug("Sending message " + message.toString() + " failed to node " + toNode.toString());
+        switch (message.getType()) {
+            case JOIN_SUPER_PEER:
+                searchForSuperPeer();
+                break;
+            case SER_SUPER_PEER:
+                selfPromoteSuperPeer(true);
+                break;
+            default:
+                logger.debug("Message send failed " + message.toString() + " of unrecognized type ignored");
+        }
     }
 
     /**

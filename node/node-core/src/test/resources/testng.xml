@@ -1,24 +1,24 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="File-Sharer-Node-Test-Suite">
-    <test name="file-sharer-node-resource-tests" enabled="true">
+<suite name="File-Sharer-Node-Test-Suite" parallel="false">
+    <test name="file-sharer-node-resource-tests" enabled="true" parallel="false">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.resource.OwnedResourceTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.resource.AggregatedResourceTestCase"/>
         </classes>
     </test>
-    <test name="file-sharer-node-resource-index-tests" enabled="true">
+    <test name="file-sharer-node-resource-index-tests" enabled="true" parallel="false">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.resource.index.ResourceIndexTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndexTestCase"/>
         </classes>
     </test>
-    <test name="file-sharer-node-routing-table-tests" enabled="true">
+    <test name="file-sharer-node-routing-table-tests" enabled="true" parallel="false">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTableTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTableTestCase"/>
         </classes>
     </test>
-    <test name="file-sharer-node-routing-strategy-tests" enabled="true">
+    <test name="file-sharer-node-routing-strategy-tests" enabled="true" parallel="false">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategyTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredRandomWalkRoutingStrategyTestCase"/>
@@ -26,7 +26,7 @@
             <class name="org.microfuse.file.sharer.node.core.communication.routing.strategy.SuperPeerRandomWalkRoutingStrategyTestCase"/>
         </classes>
     </test>
-    <test name="file-sharer-node-routing-core-tests" enabled="true">
+    <test name="file-sharer-node-routing-core-tests" enabled="true" parallel="false">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.communication.routing.RouterTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.utils.OverlayNetworkManagerTestCase"/>

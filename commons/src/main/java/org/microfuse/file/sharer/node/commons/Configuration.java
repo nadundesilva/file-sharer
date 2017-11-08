@@ -28,6 +28,8 @@ public class Configuration {
     private int bootstrapServerReplyWaitTimeout;
     private int serSuperPeerTimeout;
     private int automatedGarbageCollectionInterval;
+    private int udpNetworkHandlerRetryInterval;
+    private int udpNetworkHandlerRetryCount;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
 
@@ -54,6 +56,8 @@ public class Configuration {
         bootstrapServerReplyWaitTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT;
         serSuperPeerTimeout = NodeConstants.DEFAULT_SER_SUPER_PEER_TIMEOUT;
         automatedGarbageCollectionInterval = NodeConstants.DEFAULT_AUTOMATED_GARBAGE_COLLECTION_INTERVAL;
+        udpNetworkHandlerRetryInterval = NodeConstants.DEFAULT_UDP_NETWORK_HANDLER_RETRY_INTERVAL;
+        udpNetworkHandlerRetryCount = NodeConstants.DEFAULT_UDP_NETWORK_HANDLER_RETRY_COUNT;
         networkHandlerType = NodeConstants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = NodeConstants.DEFAULT_ROUTING_STRATEGY;
     }
@@ -208,6 +212,22 @@ public class Configuration {
 
     public void setAutomatedGarbageCollectionInterval(int automatedGarbageCollectionInterval) {
         this.automatedGarbageCollectionInterval = automatedGarbageCollectionInterval;
+    }
+
+    public int getUdpNetworkHandlerRetryInterval() {
+        return udpNetworkHandlerRetryInterval;
+    }
+
+    public void setUdpNetworkHandlerRetryInterval(int udpNetworkHandlerRetryInterval) {
+        this.udpNetworkHandlerRetryInterval = udpNetworkHandlerRetryInterval;
+    }
+
+    public int getUdpNetworkHandlerRetryCount() {
+        return udpNetworkHandlerRetryCount;
+    }
+
+    public void setUdpNetworkHandlerRetryCount(int udpNetworkHandlerRetryCount) {
+        this.udpNetworkHandlerRetryCount = udpNetworkHandlerRetryCount;
     }
 
     public NetworkHandlerType getNetworkHandlerType() {

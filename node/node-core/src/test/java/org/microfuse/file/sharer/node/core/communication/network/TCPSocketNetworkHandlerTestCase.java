@@ -105,7 +105,7 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
         tcpSocketNetworkHandler1.sendMessage(localhostIP, peerListeningPort2, message2);
         tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message3);
         tcpSocketNetworkHandler2.sendMessage(localhostIP, peerListeningPort1, message4);
-        waitFor(delay);
+        waitFor(delay * 2);
 
         Mockito.verify(tcpSocketNetworkHandler2Listener, Mockito.times(1))
                 .onMessageReceived(Mockito.eq(localhostIP), Mockito.anyInt(), Mockito.eq(message1));

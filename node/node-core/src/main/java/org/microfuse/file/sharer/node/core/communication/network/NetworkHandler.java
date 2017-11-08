@@ -84,9 +84,9 @@ public abstract class NetworkHandler {
     /**
      * Send a message to the specified node.
      *
-     * @param ip           The ip address to which the message should be sent
-     * @param port         The port to which the message should be sent
-     * @param message      The message to be sent
+     * @param ip      The ip address to which the message should be sent
+     * @param port    The port to which the message should be sent
+     * @param message The message to be sent
      */
     public abstract void sendMessage(String ip, int port, Message message);
 
@@ -123,10 +123,13 @@ public abstract class NetworkHandler {
         listenersListLock.readLock().lock();
         try {
             listenerHandlerExecutorServiceLock.readLock().lock();
-            listenersList.forEach(listener -> listenerHandlerExecutorService.execute(() ->
-                    listener.onMessageReceived(fromAddress, fromPort, message)
-            ));
-            listenerHandlerExecutorServiceLock.readLock().unlock();
+            try {
+                listenersList.forEach(listener -> listenerHandlerExecutorService.execute(() ->
+                        listener.onMessageReceived(fromAddress, fromPort, message)
+                ));
+            } finally {
+                listenerHandlerExecutorServiceLock.readLock().unlock();
+            }
         } finally {
             listenersListLock.readLock().unlock();
         }
@@ -144,10 +147,13 @@ public abstract class NetworkHandler {
         listenersListLock.readLock().lock();
         try {
             listenerHandlerExecutorServiceLock.readLock().lock();
-            listenersList.forEach(listener -> listenerHandlerExecutorService.execute(() ->
-                    listener.onMessageSendFailed(toAddress, toPort, message)
-            ));
-            listenerHandlerExecutorServiceLock.readLock().unlock();
+            try {
+                listenersList.forEach(listener -> listenerHandlerExecutorService.execute(() ->
+                        listener.onMessageSendFailed(toAddress, toPort, message)
+                ));
+            } finally {
+                listenerHandlerExecutorServiceLock.readLock().unlock();
+            }
         } finally {
             listenersListLock.readLock().unlock();
         }

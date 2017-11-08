@@ -1671,7 +1671,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder1.getConfiguration().setGossipingInterval(delay);
         serviceHolder1.getConfiguration().setHeartbeatInterval(delay);
         fileSharer1.start();
-        waitFor(delay * 6);
+        waitFor(delay * 8);
 
         fileSharer2.start();
         waitFor(delay);
@@ -1684,7 +1684,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder4.getConfiguration().setGossipingInterval(delay);
         serviceHolder4.getConfiguration().setHeartbeatInterval(delay);
         fileSharer4.start();
-        waitFor(delay * 6);
+        waitFor(delay * 8);
 
         fileSharer5.start();
         waitFor(delay);
@@ -1697,7 +1697,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder7.getConfiguration().setGossipingInterval(delay);
         serviceHolder7.getConfiguration().setHeartbeatInterval(delay);
         fileSharer7.start();
-        waitFor(delay * 6);
+        waitFor(delay * 8);
 
         fileSharer8.start();
         waitFor(delay);
@@ -1709,7 +1709,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder.getConfiguration().setGossipingInterval(delay);
         serviceHolder.getConfiguration().setHeartbeatInterval(delay);
         fileSharer.start();
-        waitFor(delay * 6);
+        waitFor(delay * 8);
 
         try {
             {

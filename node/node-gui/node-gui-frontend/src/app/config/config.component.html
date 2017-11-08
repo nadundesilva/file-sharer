@@ -101,6 +101,18 @@
           <input matInput placeholder="Network Handler Send Timeout" [(ngModel)]="config.networkHandlerSendTimeout">
         </mat-form-field>
       </div>
+      <div>
+        <mat-form-field>
+          <span matSuffix>seconds</span>
+          <input matInput placeholder="UDP Network Handler Retry Interval" [(ngModel)]="config.udpNetworkHandlerRetryInterval">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <span matSuffix>seconds</span>
+          <input matInput placeholder="UDP Network Handler Retry Count" [(ngModel)]="config.udpNetworkHandlerRetryCount">
+        </mat-form-field>
+      </div>
     </mat-card-content>
   </mat-card>
   <mat-card fxFlex>

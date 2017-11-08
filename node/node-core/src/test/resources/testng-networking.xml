@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="File-Sharer-Node-Test-Suite">
-    <test name="file-sharer-node-network-handler-tests" enabled="true">
+<suite name="File-Sharer-Node-Test-Suite" parallel="false">
+    <test name="file-sharer-node-network-handler-tests" enabled="true" parallel="false">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.communication.network.NetworkHandlerTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.communication.network.BootstrapServerNetworkHandlerTestCase"/>
@@ -9,7 +9,7 @@
             <class name="org.microfuse.file.sharer.node.core.communication.network.RMINetworkHandlerTestCase"/>
         </classes>
     </test>
-    <test name="file-sharer-node-core-bootstrapping-tests" enabled="true">
+    <test name="file-sharer-node-core-bootstrapping-tests" enabled="true" parallel="false">
         <classes>
             <class name="org.microfuse.file.sharer.node.core.BootstrappingTestCase"/>
             <class name="org.microfuse.file.sharer.node.core.QueryingTestCase"/>

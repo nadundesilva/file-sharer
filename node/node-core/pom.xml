@@ -76,6 +76,7 @@
                                 <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                                 <suiteXmlFile>src/test/resources/testng-networking.xml</suiteXmlFile>
                             </suiteXmlFiles>
+                            <forkCount>1</forkCount>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -92,6 +93,7 @@
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                             </suiteXmlFiles>
+                            <forkCount>1</forkCount>
                         </configuration>
                     </plugin>
                 </plugins>

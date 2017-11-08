@@ -106,6 +106,8 @@ class Config {
   bootstrapServerReplyWaitTimeout: number;
   serSuperPeerTimeout: number;
   automatedGarbageCollectionInterval: number;
+  udpNetworkHandlerRetryInterval: number;
+  udpNetworkHandlerRetryCount: number;
   networkHandlerType: NetworkHandlerType;
   routingStrategyType: RoutingStrategyType;
 }

@@ -28,7 +28,7 @@ public class OverlayNetworkEndPoint {
         Map<String, Object> data = new HashMap<>();
 
         PeerType peerType = FileSharerHolder.getFileSharer().getServiceHolder().getPeerType();
-        data.put(APIConstants.PEER_TYPE, peerType.getValue());
+        data.put(APIConstants.PEER_TYPE, peerType.toString());
 
         RoutingTable routingTable = FileSharerHolder.getFileSharer().getServiceHolder().getRouter().getRoutingTable();
         data.put(APIConstants.UNSTRUCTURED_NETWORK, routingTable.getAllUnstructuredNetworkNodes());
