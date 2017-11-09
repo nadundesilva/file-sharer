@@ -6,7 +6,7 @@ import java.util.List;
  * Save resources request POJO.
  */
 public class SaveResourcesRequest {
-    List<String> resourceNames;
+    private List<String> resourceNames;
 
     public List<String> getResourceNames() {
         return resourceNames;

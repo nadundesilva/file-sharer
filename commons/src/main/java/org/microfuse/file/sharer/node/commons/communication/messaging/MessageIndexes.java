@@ -47,8 +47,9 @@ public class MessageIndexes {
     // SER message
     public static final int SER_SOURCE_IP = 0;
     public static final int SER_SOURCE_PORT = 1;
-    public static final int SER_FILE_NAME = 2;
-    public static final int SER_HOP_COUNT = 3;
+    public static final int SER_SEQUENCE_NUMBER = 2;
+    public static final int SER_FILE_NAME = 3;
+    public static final int SER_HOP_COUNT = 4;
 
     // SER_OK message
     public static final int SER_OK_QUERY_STRING = 0;
@@ -60,7 +61,8 @@ public class MessageIndexes {
     // SER_SUPER_PEER message
     public static final int SER_SUPER_PEER_SOURCE_IP = 0;
     public static final int SER_SUPER_PEER_SOURCE_PORT = 1;
-    public static final int SER_SUPER_PEER_HOP_COUNT = 2;
+    public static final int SER_SUPER_PEER_SEQUENCE_NUMBER = 2;
+    public static final int SER_SUPER_PEER_HOP_COUNT = 3;
 
     // SER_SUPER_PEER_OK message
     public static final int SER_SUPER_PEER_OK_IP = 0;

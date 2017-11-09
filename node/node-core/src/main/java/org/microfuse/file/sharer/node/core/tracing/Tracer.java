@@ -78,4 +78,20 @@ public interface Tracer extends Remote {
      * @param port2  The port of node2
      */
     void removeAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
+
+    /**
+     * Promote a node to a super peer.
+     *
+     * @param ip   The ip of the node to be promoted
+     * @param port The port of the node to be promoted
+     */
+    void promoteToSuperPeer(String ip, int port) throws RemoteException;
+
+    /**
+     * Demote a node to a ordinary peer.
+     *
+     * @param ip   The ip of the node to be demoted
+     * @param port The port of the node to be demoted
+     */
+    void demoteToOrdinaryPeer(String ip, int port) throws RemoteException;
 }

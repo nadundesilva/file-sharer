@@ -58,11 +58,11 @@ public class RouterTestCase extends BaseTestCase {
         sourceNode.setPort(6534);
 
         serMessage = Message.parse("0049 " + MessageType.SER.getValue() + " " + sourceNode.getIp()
-                + " " + sourceNode.getPort() + " \"Lord of the Rings\" "
+                + " " + sourceNode.getPort() + " 0 \"Lord of the Rings\" "
                 + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1));
 
         serSuperPeerMessage = Message.parse("0036 " + MessageType.SER_SUPER_PEER.getValue() + " " + sourceNode.getIp()
-                + " " + sourceNode.getPort() + " "
+                + " " + sourceNode.getPort() + " 0 "
                 + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1));
 
         RoutingTable routingTable = router.getRoutingTable();

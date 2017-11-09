@@ -1,11 +1,14 @@
 package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,12 +23,20 @@ import java.util.stream.Collectors;
  * Routing strategy base abstract class.
  */
 public abstract class RoutingStrategy {
+    private static final Logger logger = LoggerFactory.getLogger(RoutingStrategy.class);
+
     private static Map<RoutingStrategyType, Class<? extends RoutingStrategy>> routingStrategyClassMap;
 
     protected ServiceHolder serviceHolder;
 
+    private Map<Message, CacheEntry> serMessageCache;
+    private Map<Message, CacheEntry> serSuperPeerMessageCache;
+
     public RoutingStrategy(ServiceHolder serviceHolder) {
         this.serviceHolder = serviceHolder;
+
+        serMessageCache = new HashMap<>();
+        serSuperPeerMessageCache = new HashMap<>();
     }
 
     static {
@@ -71,27 +82,60 @@ public abstract class RoutingStrategy {
     public abstract Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message);
 
     /**
+     * Collect the garbage cache in routing strategy.
+     */
+    public void collectGarbage() {
+        long currentTimeStamp = System.currentTimeMillis();
+
+        // Removing old entries from the SER message cache
+        Set<Message> serEntriesToBeRemoved = serMessageCache.entrySet().stream().parallel()
+                .filter(messageCacheEntryEntry ->
+                        messageCacheEntryEntry.getValue().getTimeStamp()
+                                + serviceHolder.getConfiguration().getAutomatedGarbageCollectionInterval()
+                                < currentTimeStamp)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        serEntriesToBeRemoved.forEach(message -> serMessageCache.remove(message));
+
+        // Removing old entries from the SER_SUPER_PEER message cache
+        Set<Message> serSuperPeerEntriesToBeRemoved = serSuperPeerMessageCache.entrySet().stream().parallel()
+                .filter(messageCacheEntryEntry ->
+                        messageCacheEntryEntry.getValue().getTimeStamp()
+                                + serviceHolder.getConfiguration().getAutomatedGarbageCollectionInterval()
+                                < currentTimeStamp)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        serSuperPeerEntriesToBeRemoved.forEach(message -> serSuperPeerMessageCache.remove(message));
+    }
+
+    /**
      * Get a random node from a list of nodes.
      *
+     * @param message         The message which will be sent
      * @param forwardingNodes The nodes from which the random node should be selected
      * @param fromNode        The node which sent the message to the current node
      * @return The random node selected from the list of nodes
      */
-    protected Set<Node> getRandomNode(Set<Node> forwardingNodes, Node fromNode) {
+    protected Set<Node> getRandomNode(Message message, Set<Node> forwardingNodes, Node fromNode) {
         if (forwardingNodes != null) {
+            // Remove the node which sent the
             if (fromNode != null) {
                 forwardingNodes.remove(fromNode);
             }
 
+            // Removing inactive nodes
             forwardingNodes = forwardingNodes.stream().parallel()
                     .filter(Node::isActive)
                     .collect(Collectors.toSet());
 
+            // Removing nodes to which this message had been already routed to
+            forwardingNodes = filterUnCachedNodes(message, forwardingNodes);
+
+            // Selecting a random node
             int forwardNodeIndex = -1;
             if (forwardingNodes.size() > 0) {
                 forwardNodeIndex = ThreadLocalRandom.current().nextInt(0, forwardingNodes.size());
             }
-
             if (forwardNodeIndex >= 0) {
                 forwardingNodes = new HashSet<>(Collections.singletonList(
                         new ArrayList<>(forwardingNodes).get(forwardNodeIndex)
@@ -99,9 +143,12 @@ public abstract class RoutingStrategy {
             }
         }
 
+        // Creating empty set no nodes are available
         if (forwardingNodes == null) {
             forwardingNodes = new HashSet<>();
         }
+
+        // Sending back to the same node if no nodes are present
         if (forwardingNodes.size() == 0) {
             forwardingNodes.add(fromNode);
         }
@@ -124,5 +171,57 @@ public abstract class RoutingStrategy {
             serviceHolder.getOverlayNetworkManager().searchForSuperPeer();
         }
         return forwardingNodes;
+    }
+
+    /**
+     * Gets the list of uncached nodes from a list of nodes.
+     * The current forwarding nodes are added to the cache as well.
+     *
+     * @param message         The message to be cached
+     * @param forwardingNodes The nodes to be filtered
+     * @return The nodes which are not currently in the cache
+     */
+    protected Set<Node> filterUnCachedNodes(Message message, Set<Node> forwardingNodes) {
+        CacheEntry cacheEntry = null;
+        MessageType messageType = message.getType();
+        if (messageType == MessageType.SER) {
+            cacheEntry = serMessageCache.computeIfAbsent(message, k -> new CacheEntry());
+        } else if (messageType == MessageType.SER_SUPER_PEER) {
+            cacheEntry = serSuperPeerMessageCache.computeIfAbsent(message, k -> new CacheEntry());
+        } else {
+            logger.debug("Unknown type of message"
+                    + (messageType == null ? "" : " belonging to type " + messageType.getValue())
+                    + " not added to the cache");
+        }
+
+        if (cacheEntry != null) {
+            cacheEntry.setTimeStamp(System.currentTimeMillis());
+
+            collectGarbage();
+            forwardingNodes.removeAll(cacheEntry.getAllForwardedNodes());
+
+            cacheEntry.addAllForwardedNodes(forwardingNodes);
+        }
+
+        return forwardingNodes;
+    }
+
+    /**
+     * Notify the routing strategy of failed sent messages.
+     *
+     * @param message The message which was sent
+     * @param node    The node to which the message was sent
+     */
+    public void notifyFailedMessages(Message message, Node node) {
+        MessageType messageType = message.getType();
+        if (messageType == MessageType.SER) {
+            serMessageCache.get(message).removeForwardedNode(node);
+        } else if (messageType == MessageType.SER_SUPER_PEER) {
+            serSuperPeerMessageCache.get(message).removeForwardedNode(node);
+        } else {
+            logger.debug("Unknown type of message"
+                    + (messageType == null ? "" : " belonging to type " + messageType.getValue())
+                    + " not added to the cache");
+        }
     }
 }

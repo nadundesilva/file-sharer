@@ -40,9 +40,9 @@ public class AggregatedResource extends Resource {
         try {
             isSuccessful = nodes.add(node);
             if (isSuccessful) {
-                logger.debug("Added node " + node.toString() + " to aggregated resource " + toString());
+                logger.info("Added node " + node.toString() + " to aggregated resource " + toString());
             } else {
-                logger.debug("Failed to add node " + node.toString() + " to aggregated resource " + toString());
+                logger.info("Failed to add node " + node.toString() + " to aggregated resource " + toString());
             }
         } finally {
             nodeLock.writeLock().unlock();
@@ -62,9 +62,9 @@ public class AggregatedResource extends Resource {
         try {
             isSuccessful = nodes.remove(node);
             if (isSuccessful) {
-                logger.debug("Removed node " + node.toString() + " from aggregated resource " + toString());
+                logger.info("Removed node " + node.toString() + " from aggregated resource " + toString());
             } else {
-                logger.debug("Failed to remove node " + node.toString() + " from aggregated resource " + toString());
+                logger.info("Failed to remove node " + node.toString() + " from aggregated resource " + toString());
             }
         } finally {
             nodeLock.writeLock().unlock();

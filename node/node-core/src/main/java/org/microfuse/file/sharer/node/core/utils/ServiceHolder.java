@@ -2,6 +2,7 @@ package org.microfuse.file.sharer.node.core.utils;
 
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.microfuse.file.sharer.node.commons.Configuration;
 import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
@@ -15,12 +16,14 @@ import org.microfuse.file.sharer.node.core.communication.routing.strategy.Routin
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
+import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -117,6 +120,7 @@ public class ServiceHolder {
      * Collect garbage objects.
      */
     public void collectGarbage() {
+        logger.debug("Collecting routing table garbage");
         routerLock.lock();
         try {
             if (router != null) {
@@ -126,6 +130,7 @@ public class ServiceHolder {
             routerLock.unlock();
         }
 
+        logger.debug("Collecting resource index garbage");
         resourceIndexLock.lock();
         try {
             if (resourceIndex != null) {
@@ -133,6 +138,16 @@ public class ServiceHolder {
             }
         } finally {
             resourceIndexLock.unlock();
+        }
+
+        logger.debug("Collecting routing strategy garbage");
+        routerLock.lock();
+        try {
+            if (router != null) {
+                router.getRoutingStrategy().collectGarbage();
+            }
+        } finally {
+            routerLock.unlock();
         }
     }
 
@@ -164,6 +179,16 @@ public class ServiceHolder {
             routerLock.unlock();
         }
         logger.debug("Promoted to super peer");
+
+        // Notifying the tracer
+        Tracer tracer = getTraceManager().getTracerReference();
+        if (tracer != null) {
+            try {
+                tracer.promoteToSuperPeer(getConfiguration().getIp(), getConfiguration().getPeerListeningPort());
+            } catch (RemoteException e) {
+                logger.warn("Failed to notify the tracer of the promotion", e);
+            }
+        }
     }
 
     /**
@@ -194,6 +219,16 @@ public class ServiceHolder {
             routerLock.unlock();
         }
         logger.debug("Demoted to ordinary peer");
+
+        // Notifying the tracer
+        Tracer tracer = getTraceManager().getTracerReference();
+        if (tracer != null) {
+            try {
+                tracer.demoteToOrdinaryPeer(getConfiguration().getIp(), getConfiguration().getPeerListeningPort());
+            } catch (RemoteException e) {
+                logger.warn("Failed to notify the tracer of the demotion", e);
+            }
+        }
     }
 
     /**
@@ -427,6 +462,7 @@ public class ServiceHolder {
         configurationLock.lock();
         try {
             if (configuration != null) {
+                // Checking if the network handler needs to be replaced
                 boolean networkHandlerReplaceRequired = false;
                 if (configuration.getNetworkHandlerType() != this.configuration.getNetworkHandlerType() ||
                         configuration.getPeerListeningPort() != this.configuration.getPeerListeningPort() ||
@@ -434,16 +470,20 @@ public class ServiceHolder {
                                 != this.configuration.getNetworkHandlerThreadCount()) {
                     networkHandlerReplaceRequired = true;
                 }
-                boolean routingStraegyReplaceRequired = false;
+
+                // Checking if the routing strategy needs to be replaced
+                boolean routingStrategyReplaceRequired = false;
                 if (configuration.getRoutingStrategyType() != this.configuration.getRoutingStrategyType()) {
-                    routingStraegyReplaceRequired = true;
+                    routingStrategyReplaceRequired = true;
                 }
 
                 this.configuration = configuration;
+
+                // Changing the relevant component based on the new configuration
                 if (networkHandlerReplaceRequired) {
                     getRouter().changeNetworkHandler(instantiateNetworkHandler());
                 }
-                if (routingStraegyReplaceRequired) {
+                if (routingStrategyReplaceRequired) {
                     getRouter().changeRoutingStrategy(instantiateRoutingStrategy());
                 }
 
@@ -514,7 +554,8 @@ public class ServiceHolder {
         try {
             if (!configFile.createNewFile()) {
                 try {
-                    Files.write(new Gson().toJson(configuration).getBytes(
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    Files.write(gson.toJson(configuration).getBytes(
                             Constants.DEFAULT_CHARSET), configFile);
                 } catch (IOException e1) {
                     logger.warn("Failed to write configuration to " + configFile.getAbsolutePath(), e1);

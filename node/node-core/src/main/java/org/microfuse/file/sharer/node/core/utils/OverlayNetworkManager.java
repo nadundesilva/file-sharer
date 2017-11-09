@@ -1,5 +1,6 @@
 package org.microfuse.file.sharer.node.core.utils;
 
+import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageConstants;
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
@@ -43,6 +44,7 @@ public class OverlayNetworkManager implements RouterListener {
 
     private final Lock fullSuperPeerCacheLock;
     private Set<Node> fullSuperPeerCache;
+    private long sequenceNumber;
 
     public OverlayNetworkManager(ServiceHolder serviceHolder) {
         gossipingLock = new ReentrantLock();
@@ -50,6 +52,7 @@ public class OverlayNetworkManager implements RouterListener {
 
         fullSuperPeerCacheLock = new ReentrantLock();
         fullSuperPeerCache = new HashSet<>();
+        sequenceNumber = 0;
 
         this.serviceHolder = serviceHolder;
         this.serviceHolder.getRouter().registerListener(this);
@@ -194,8 +197,23 @@ public class OverlayNetworkManager implements RouterListener {
                         requestSuperPeerConnections(
                                 new HashSet<>(Collections.singletonList(superPeerNodes.get(selectedSuperPeerIndex)))
                         );
+                    } else {
+                        searchForSuperPeer();
+                    }
+                } else if (routingTable instanceof OrdinaryPeerRoutingTable) {
+                    OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
+                    if (ordinaryPeerRoutingTable.getAssignedSuperPeer() == null) {
+                        searchForSuperPeer();
                     }
                 }
+            } else {
+                // Isolated node
+                unregister();
+                try {
+                    Thread.sleep(Constants.TASK_INTERVAL);
+                } catch (InterruptedException ignored) {
+                }
+                register();
             }
         }
 
@@ -220,7 +238,10 @@ public class OverlayNetworkManager implements RouterListener {
         regMessage.setData(MessageIndexes.REG_IP, serviceHolder.getConfiguration().getIp());
         regMessage.setData(MessageIndexes.REG_PORT,
                 Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
-        regMessage.setData(MessageIndexes.REG_USERNAME, serviceHolder.getConfiguration().getUsername());
+        regMessage.setData(MessageIndexes.REG_USERNAME,
+                serviceHolder.getConfiguration().getUsernamePrefix()
+                        + serviceHolder.getConfiguration().getIp() + ":"
+                        + serviceHolder.getConfiguration().getPeerListeningPort());
         serviceHolder.getRouter().sendMessageToBootstrapServer(regMessage);
     }
 
@@ -233,7 +254,7 @@ public class OverlayNetworkManager implements RouterListener {
         unregMessage.setData(MessageIndexes.UNREG_IP, serviceHolder.getConfiguration().getIp());
         unregMessage.setData(MessageIndexes.UNREG_PORT,
                 Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
-        unregMessage.setData(MessageIndexes.UNREG_USERNAME, serviceHolder.getConfiguration().getUsername());
+        unregMessage.setData(MessageIndexes.UNREG_USERNAME, serviceHolder.getConfiguration().getUsernamePrefix());
         serviceHolder.getRouter().sendMessageToBootstrapServer(unregMessage);
     }
 
@@ -313,6 +334,8 @@ public class OverlayNetworkManager implements RouterListener {
                                     serviceHolder.getConfiguration().getIp());
                             searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT,
                                     Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+                            searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SEQUENCE_NUMBER,
+                                    Long.toString(sequenceNumber++));
                             searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
                                     Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
                             serviceHolder.getRouter().route(searchSuperPeerMessage);
@@ -334,6 +357,7 @@ public class OverlayNetworkManager implements RouterListener {
                     serSuperPeerStartThread = null;
                 }
             });
+            serSuperPeerStartThread.setDaemon(true);
             serSuperPeerStartThread.start();
         }
     }

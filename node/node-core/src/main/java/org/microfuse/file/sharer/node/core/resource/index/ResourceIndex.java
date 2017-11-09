@@ -80,7 +80,7 @@ public class ResourceIndex {
                     .orElse(null);
 
             if (existingOwnedResource != null) {
-                logger.debug("Resource " + resourceName + " already exists in owned resources.");
+                logger.info("Resource " + resourceName + " already exists in owned resources.");
                 existingOwnedResource.setFile(storedFile);
                 isSuccessful = true;
             } else {
@@ -90,9 +90,9 @@ public class ResourceIndex {
             }
 
             if (isSuccessful) {
-                logger.debug("Added resource " + resourceName + " to owned resources.");
+                logger.info("Added resource " + resourceName + " to owned resources.");
             } else {
-                logger.debug("Failed to add resource " + resourceName + " to owned resources.");
+                logger.info("Failed to add resource " + resourceName + " to owned resources.");
             }
         } finally {
             ownedResourcesLock.writeLock().unlock();
@@ -117,9 +117,9 @@ public class ResourceIndex {
 
             isSuccessful = ownedResources.remove(existingOwnedResource);
             if (isSuccessful) {
-                logger.debug("Removed resource " + resourceName + " from owned resources");
+                logger.info("Removed resource " + resourceName + " from owned resources");
             } else {
-                logger.debug("Failed to remove resource " + resourceName + " from owned resources");
+                logger.info("Failed to remove resource " + resourceName + " from owned resources");
             }
         } finally {
             ownedResourcesLock.writeLock().unlock();
@@ -167,7 +167,7 @@ public class ResourceIndex {
         ownedResourcesLock.writeLock().lock();
         try {
             ownedResources.clear();
-            logger.debug("Cleared owned resources.");
+            logger.info("Cleared owned resources.");
         } finally {
             ownedResourcesLock.writeLock().unlock();
         }
@@ -177,7 +177,7 @@ public class ResourceIndex {
      * Collect garbage in the resource index.
      */
     public void collectGarbage() {
-        logger.debug("Skipping garbage collection in owned resources");
+        logger.info("Skipping garbage collection in owned resources");
     }
 
     /**

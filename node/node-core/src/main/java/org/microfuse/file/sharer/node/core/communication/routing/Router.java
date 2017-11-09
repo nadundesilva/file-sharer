@@ -86,10 +86,11 @@ public class Router implements NetworkHandlerListener {
 
     @Override
     public void onMessageReceived(String fromAddress, int fromPort, Message message) {
-        logger.debug("Received message " + message.toString() + " from node " + fromAddress
+        logger.info("Received message " + message.toString() + " from node " + fromAddress
                 + ":" + fromPort);
         MessageType messageType = message.getType();
 
+        // Finding the node object from the routing table
         Node fromNode;
         routingTableLock.readLock().lock();
         try {
@@ -97,6 +98,8 @@ public class Router implements NetworkHandlerListener {
         } finally {
             routingTableLock.readLock().unlock();
         }
+
+        // Creating new node object if it is not present in the routing table
         if (fromNode == null) {
             fromNode = new Node();
             fromNode.setIp(fromAddress);
@@ -104,6 +107,7 @@ public class Router implements NetworkHandlerListener {
             fromNode.setState(NodeState.ACTIVE);
         }
 
+        // Running tasks based on the message type
         if (messageType != null && (messageType == MessageType.SER || messageType == MessageType.SER_SUPER_PEER)) {
             route(fromNode, message);
         } else if (messageType == MessageType.HEARTBEAT) {
@@ -117,8 +121,9 @@ public class Router implements NetworkHandlerListener {
 
     @Override
     public void onMessageSendFailed(String toAddress, int toPort, Message message) {
-        logger.debug("Sending message " + message.toString() + " to node " + toAddress + ":" + toPort + " failed");
-        // Marking the node as inactive
+        logger.info("Sending message " + message.toString() + " to node " + toAddress + ":" + toPort + " failed");
+
+        // Finding the node object from the routing table
         Node receivingNode;
         routingTableLock.readLock().lock();
         try {
@@ -133,15 +138,19 @@ public class Router implements NetworkHandlerListener {
         } finally {
             routingTableLock.readLock().unlock();
         }
+
+        // Marking the node as inactive
         if (receivingNode != null) {
             receivingNode.setState(NodeState.INACTIVE);
         }
 
+        // Creating new node object if it is not present in the routing table
         if (receivingNode == null) {
             receivingNode = new Node();
             receivingNode.setIp(toAddress);
             receivingNode.setPort(toPort);
         }
+
         MessageType messageType = message.getType();
         if (messageType != null && (messageType == MessageType.SER || messageType == MessageType.SER_OK ||
                 messageType == MessageType.SER_SUPER_PEER || messageType == MessageType.SER_SUPER_PEER_OK ||
@@ -152,6 +161,8 @@ public class Router implements NetworkHandlerListener {
             if (routingStrategy instanceof SuperPeerRandomWalkRoutingStrategy ||
                     routingStrategy instanceof UnstructuredRandomWalkRoutingStrategy) {
                 boolean retry = false;
+
+                // Updating the hop count
                 if (messageType == MessageType.SER) {
                     message.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(
                             Integer.parseInt(message.getData(MessageIndexes.SER_HOP_COUNT)) - 1
@@ -165,7 +176,8 @@ public class Router implements NetworkHandlerListener {
                 }
 
                 if (retry) {
-                    logger.debug("Retrying to send failed message " + message.toString());
+                    logger.info("Retrying to send failed message " + message.toString());
+                    routingStrategy.notifyFailedMessages(message, receivingNode);
                     route(message);
                 }
             }
@@ -178,12 +190,15 @@ public class Router implements NetworkHandlerListener {
      * Restart the router with new configuration.
      */
     public void restart() {
+        // Clearing the routing table
         routingTableLock.readLock().lock();
         try {
             routingTable.clear();
         } finally {
             routingTableLock.readLock().unlock();
         }
+
+        // Restarting the network handler
         networkHandlerLock.readLock().lock();
         try {
             networkHandler.restart();
@@ -196,6 +211,15 @@ public class Router implements NetworkHandlerListener {
      * Shutdown the router.
      */
     public void shutdown() {
+        // Clearing the routing table
+        routingTableLock.readLock().lock();
+        try {
+            routingTable.clear();
+        } finally {
+            routingTableLock.readLock().unlock();
+        }
+
+        // Shutting down the network handler
         networkHandlerLock.writeLock().lock();
         try {
             networkHandler.shutdown();
@@ -220,12 +244,12 @@ public class Router implements NetworkHandlerListener {
                         }
                         heartBeat();
                     }
-                    logger.debug("Stopped Heart beating");
+                    logger.info("Stopped Heart beating");
                 });
                 heartBeatThread.setPriority(Thread.MIN_PRIORITY);
                 heartBeatThread.setDaemon(true);
                 heartBeatThread.start();
-                logger.debug("Started Heart beating");
+                logger.info("Started Heart beating");
             }
         } finally {
             heartBeatLock.unlock();
@@ -253,15 +277,17 @@ public class Router implements NetworkHandlerListener {
      * Heartbeat to all nodes and verify if they are alive.
      */
     public void heartBeat() {
-        logger.debug("Heart beating to check nodes");
+        logger.info("Heart beating to check nodes");
         Set<Node> nodes = routingTable.getAll();
         nodes.forEach(node -> {
+            // Updating the node state
             if (node.getState() == NodeState.PENDING_INACTIVATION) {
-                node.setState(NodeState.INACTIVE);
+                node.setState(NodeState.INACTIVE);                  // Deleted by the garbage collection thread
             } else if (node.getState() == NodeState.ACTIVE) {
-                node.setState(NodeState.PENDING_INACTIVATION);
+                node.setState(NodeState.PENDING_INACTIVATION);      // Marked inactive in the next heartbeat
             }
 
+            // Preparing the HEARTBEAT message
             Message heartBeatMessage = new Message();
             heartBeatMessage.setType(MessageType.HEARTBEAT);
             heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_IP,
@@ -269,7 +295,7 @@ public class Router implements NetworkHandlerListener {
             heartBeatMessage.setData(MessageIndexes.HEARTBEAT_SOURCE_PORT,
                     Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
-            logger.debug("Heart beat sent to node " + node.toString());
+            logger.info("Heart beat sent to node " + node.toString());
             sendMessage(node, heartBeatMessage);
         });
     }
@@ -296,7 +322,7 @@ public class Router implements NetworkHandlerListener {
     public void sendMessage(String ip, int port, Message message) {
         networkHandlerLock.readLock().lock();
         try {
-            logger.debug("Sending message " + message.toString() + " to node " + ip + ":" + port);
+            logger.info("Sending message " + message.toString() + " to node " + ip + ":" + port);
             networkHandler.sendMessage(ip, port, message);
         } finally {
             networkHandlerLock.readLock().unlock();
@@ -312,9 +338,10 @@ public class Router implements NetworkHandlerListener {
         String ip = serviceHolder.getConfiguration().getBootstrapServerIP();
         int port = serviceHolder.getConfiguration().getBootstrapServerPort();
 
+        // Sending message to the bootstrap server
         bootstrapServerNetworkHandlerLock.readLock().lock();
         try {
-            logger.debug("Sending message to bootstrap server " + message.toString() + " to node " + ip + ":" + port);
+            logger.info("Sending message to bootstrap server " + message.toString() + " to node " + ip + ":" + port);
             bootstrapServerNetworkHandler.sendMessage(ip, port, message);
         } finally {
             bootstrapServerNetworkHandlerLock.readLock().unlock();
@@ -327,7 +354,7 @@ public class Router implements NetworkHandlerListener {
      * @param message The message to be sent
      */
     public void route(Message message) {
-        logger.debug("Routing new message " + message.toString() + " over the network.");
+        logger.info("Routing new message " + message.toString() + " over the network.");
         route(null, message);
     }
 
@@ -339,12 +366,12 @@ public class Router implements NetworkHandlerListener {
         try {
             if (routingTable instanceof OrdinaryPeerRoutingTable) {
                 routingTable = new SuperPeerRoutingTable(serviceHolder, (OrdinaryPeerRoutingTable) routingTable);
-                logger.debug("Changed routing table to super peer routing table.");
+                logger.info("Changed routing table to super peer routing table.");
             }
         } finally {
             routingTableLock.writeLock().unlock();
         }
-        logger.debug("Promoted router to super peer router.");
+        logger.info("Promoted router to super peer router.");
     }
 
     /**
@@ -355,12 +382,12 @@ public class Router implements NetworkHandlerListener {
         try {
             if (routingTable instanceof SuperPeerRoutingTable) {
                 routingTable = new OrdinaryPeerRoutingTable(serviceHolder, (SuperPeerRoutingTable) routingTable);
-                logger.debug("Changed routing table to ordinary peer routing table.");
+                logger.info("Changed routing table to ordinary peer routing table.");
             }
         } finally {
             routingTableLock.writeLock().unlock();
         }
-        logger.debug("Demoted router to ordinary peer router.");
+        logger.info("Demoted router to ordinary peer router.");
     }
 
     /**
@@ -473,9 +500,9 @@ public class Router implements NetworkHandlerListener {
         try {
             isSuccessful = listenersList.add(listener);
             if (isSuccessful) {
-                logger.debug("Registered router listener " + listener.getClass());
+                logger.info("Registered router listener " + listener.getClass());
             } else {
-                logger.debug("Failed to register router listener " + listener.getClass());
+                logger.info("Failed to register router listener " + listener.getClass());
             }
         } finally {
             listenersListLock.writeLock().unlock();
@@ -495,9 +522,9 @@ public class Router implements NetworkHandlerListener {
         try {
             isSuccessful = listenersList.remove(listener);
             if (isSuccessful) {
-                logger.debug("Unregistered router listener " + listener.getClass());
+                logger.info("Unregistered router listener " + listener.getClass());
             } else {
-                logger.debug("Failed to unregister router listener " + listener.getClass());
+                logger.info("Failed to unregister router listener " + listener.getClass());
             }
         } finally {
             listenersListLock.writeLock().unlock();
@@ -512,7 +539,7 @@ public class Router implements NetworkHandlerListener {
         listenersListLock.writeLock().lock();
         try {
             listenersList.clear();
-            logger.debug("Cleared network handler listeners");
+            logger.info("Cleared network handler listeners");
         } finally {
             listenersListLock.writeLock().lock();
         }
@@ -531,37 +558,43 @@ public class Router implements NetworkHandlerListener {
             // Checking owned resources
             Set<OwnedResource> ownedResources = serviceHolder.getResourceIndex()
                     .findOwnedResources(message.getData(MessageIndexes.SER_FILE_NAME));
+
             if (ownedResources.size() > 0) {
-                logger.debug("Resource requested by \"" + message.toString() + "\" found in owned resources");
+                logger.info("Resource requested by \"" + message.toString() + "\" found in owned resources");
+
+                // Preparing SER_OK message
                 Message serOkMessage = new Message();
                 serOkMessage.setType(MessageType.SER_OK);
 
+                // Preparing the SER_OK message data
                 List<String> serOkData = new ArrayList<>();
                 serOkData.add(MessageIndexes.SER_OK_QUERY_STRING, message.getData(MessageIndexes.SER_FILE_NAME));
                 serOkData.add(MessageIndexes.SER_OK_FILE_COUNT, Integer.toString(ownedResources.size()));
                 serOkData.add(MessageIndexes.SER_OK_IP, serviceHolder.getConfiguration().getIp());
                 serOkData.add(MessageIndexes.SER_OK_PORT,
                         Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+
+                // Adding the list of resources to the SER_OK message
                 ownedResources.forEach(resource -> serOkData.add(resource.getName()));
                 serOkMessage.setData(serOkData);
 
-                logger.debug("Sending search request success message \"" + message.toString() + "\" back to "
+                logger.info("Sending search request success message \"" + message.toString() + "\" back to "
                         + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
                         + message.getData(MessageIndexes.SER_SOURCE_PORT));
                 sendMessage(message.getData(MessageIndexes.SER_SOURCE_IP),
                         Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT)), serOkMessage);
             } else {
-                logger.debug("Resource requested by \"" + message.toString() + "\" not found in owned resources");
+                logger.info("Resource requested by \"" + message.toString() + "\" not found in owned resources");
 
                 // Updating the hop count
                 Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_HOP_COUNT)) + 1;
                 message.setData(MessageIndexes.SER_HOP_COUNT, hopCount.toString());
-                logger.debug("Increased hop count of message" + message.toString());
+                logger.info("Increased hop count of message" + message.toString());
 
                 if (hopCount <= serviceHolder.getConfiguration().getTimeToLive()) {
                     forwardNode(fromNode, message);
                 } else {
-                    logger.debug("Sending search failed back to search request source node "
+                    logger.info("Sending search failed back to search request source node "
                             + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
                             + message.getData(MessageIndexes.SER_SOURCE_PORT)
                             + " since the hop count of the message " + message.toString()
@@ -570,6 +603,7 @@ public class Router implements NetworkHandlerListener {
             }
         } else if (messageType != null && messageType == MessageType.SER_SUPER_PEER) {
             if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
+                // Preparing the SER_SUPER_PEER_OK message
                 Message serOkMessage = new Message();
                 serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
                 serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP, serviceHolder.getConfiguration().getIp());
@@ -580,54 +614,32 @@ public class Router implements NetworkHandlerListener {
                         Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
                         serOkMessage);
             } else if (serviceHolder.getPeerType() == PeerType.ORDINARY_PEER) {
-                logger.debug("Node is an ordinary peer");
+                logger.info("Node is an ordinary peer");
 
-                Node assignedSuperPeer = null;
-                if (routingTable instanceof OrdinaryPeerRoutingTable) {
-                    assignedSuperPeer = ((OrdinaryPeerRoutingTable) routingTable).getAssignedSuperPeer();
+                // Updating the hop count
+                Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT)) + 1;
+                message.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT, hopCount.toString());
+                logger.info("Increased hop count of message" + message.toString());
+
+                if (hopCount <= serviceHolder.getConfiguration().getTimeToLive()) {
+                    forwardNode(fromNode, message);
                 } else {
-                    logger.debug("Inconsistent ordinary peer with ordinary peer node");
-                }
-
-                if (assignedSuperPeer != null && assignedSuperPeer.isActive()) {
+                    // Unable to find a super peer
                     Message serOkMessage = new Message();
                     serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
-                    serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP, assignedSuperPeer.getIp());
+                    serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP,
+                            MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_IP);
                     serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_PORT,
-                            Integer.toString(assignedSuperPeer.getPort()));
+                            MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT);
 
+                    logger.info("Sending search failed back to search request source node "
+                            + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP) + ":"
+                            + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)
+                            + " since the hop count of the message " + message.toString()
+                            + " is higher than time to live " + serviceHolder.getConfiguration().getTimeToLive());
                     sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
                             Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
                             serOkMessage);
-                } else {
-                    logger.debug("Routing message " + message.toString() + " because no super peer was assigned");
-
-                    // Updating the hop count
-                    Integer hopCount = Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT));
-                    hopCount++;
-                    message.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT, hopCount.toString());
-                    logger.debug("Increased hop count of message" + message.toString());
-
-                    if (hopCount <= serviceHolder.getConfiguration().getTimeToLive()) {
-                        forwardNode(fromNode, message);
-                    } else {
-                        // Unable to find a super peer
-                        Message serOkMessage = new Message();
-                        serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
-                        serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP,
-                                MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_IP);
-                        serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_PORT,
-                                MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT);
-
-                        logger.debug("Sending search failed back to search request source node "
-                                + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP) + ":"
-                                + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)
-                                + " since the hop count of the message " + message.toString()
-                                + " is higher than time to live " + serviceHolder.getConfiguration().getTimeToLive());
-                        sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
-                                Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
-                                serOkMessage);
-                    }
                 }
             }
         } else {
@@ -643,9 +655,10 @@ public class Router implements NetworkHandlerListener {
      * @param message  The message to be sent
      */
     private void forwardNode(Node fromNode, Message message) {
-        logger.debug("The hop count of the message " + message.toString() + " is lower than time to live"
+        logger.info("The hop count of the message " + message.toString() + " is lower than time to live "
                 + serviceHolder.getConfiguration().getTimeToLive());
 
+        // Using the routing strategy to get the nodes the message should be routed to
         Set<Node> forwardingNodes;
         routingTableLock.readLock().lock();
         try {
@@ -659,10 +672,11 @@ public class Router implements NetworkHandlerListener {
             routingTableLock.readLock().unlock();
         }
 
+        // Sending to all the selected nodes
         forwardingNodes.stream().parallel()
                 .forEach(forwardingNode -> {
                     Message clonedMessage = message.clone();
-                    logger.debug("Forwarding message " + clonedMessage.toString()
+                    logger.info("Forwarding message " + clonedMessage.toString()
                             + " to " + forwardingNode.toString());
                     sendMessage(forwardingNode.getIp(), forwardingNode.getPort(), clonedMessage);
                 });
@@ -675,21 +689,25 @@ public class Router implements NetworkHandlerListener {
      * @param message  The message received
      */
     private void handleHeartBeatMessage(Node fromNode, Message message) {
+        // Preparing the HEARTBEAT_OK message
         Message heartBeatOkMessage = new Message();
         heartBeatOkMessage.setType(MessageType.HEARTBEAT_OK);
         heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_IP, serviceHolder.getConfiguration().getIp());
         heartBeatOkMessage.setData(MessageIndexes.HEARTBEAT_OK_PORT,
                 Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
+        // Fetching the node which sent the HEARTBEAT message
         Node node = routingTable.get(
                 message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP),
                 Integer.parseInt(message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT))
         );
+
+        // Marking the node as ACTIVE
         if (node != null) {
             node.setState(NodeState.ACTIVE);
         }
 
-        logger.debug("Sending heartbeat ok message back to "
+        logger.info("Sending heartbeat ok message back to "
                 + message.getData(MessageIndexes.HEARTBEAT_SOURCE_IP) + ":"
                 + message.getData(MessageIndexes.HEARTBEAT_SOURCE_PORT));
         sendMessage(
@@ -706,10 +724,13 @@ public class Router implements NetworkHandlerListener {
      * @param message  The message received
      */
     private void handleHeartBeatOkMessage(Node fromNode, Message message) {
+        // Fetching the node which sent the HEARTBEAT_OK message
         Node node = routingTable.get(
                 message.getData(MessageIndexes.HEARTBEAT_OK_IP),
                 Integer.parseInt(message.getData(MessageIndexes.HEARTBEAT_OK_PORT))
         );
+
+        // Marking the node as active
         if (node != null) {
             node.setState(NodeState.ACTIVE);
         }

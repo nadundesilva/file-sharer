@@ -8,7 +8,7 @@ import org.microfuse.file.sharer.node.commons.communication.routing.strategy.Rou
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
-import org.microfuse.file.sharer.node.core.communication.network.udp.UDPSocketNetworkHandler;
+import org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.RoutingStrategy;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredRandomWalkRoutingStrategy;
@@ -38,7 +38,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         String configString = "{" +
                 "\"bootstrapServerIP\":\"192.168.1.15\"," +
                 "\"bootstrapServerPort\":4765," +
-                "\"username\":\"microfuse.tester\"," +
+                "\"usernamePrefix\":\"microfuse.tester\"," +
                 "\"ip\":\"192.168.1.3\"," +
                 "\"peerListeningPort\":4562," +
                 "\"listenerHandlingThreadCount\":14," +
@@ -66,7 +66,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertNotNull(configuration);
         Assert.assertEquals(configuration.getBootstrapServerIP(), "192.168.1.15");
         Assert.assertEquals(configuration.getBootstrapServerPort(), 4765);
-        Assert.assertEquals(configuration.getUsername(), "microfuse.tester");
+        Assert.assertEquals(configuration.getUsernamePrefix(), "microfuse.tester");
         Assert.assertEquals(configuration.getIp(), "192.168.1.3");
         Assert.assertEquals(configuration.getPeerListeningPort(), 4562);
         Assert.assertEquals(configuration.getNetworkHandlerThreadCount(), 14);
@@ -89,7 +89,7 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Configuration configuration = serviceHolder.getConfiguration();
 
         Assert.assertNotNull(configuration);
-        Assert.assertEquals(configuration.getUsername(), NodeConstants.DEFAULT_USERNAME);
+        Assert.assertEquals(configuration.getUsernamePrefix(), NodeConstants.DEFAULT_USERNAME_PREFIX);
         Assert.assertEquals(configuration.getBootstrapServerIP(), NodeConstants.DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS);
         Assert.assertEquals(configuration.getBootstrapServerPort(), Constants.BOOTSTRAP_SERVER_PORT);
         Assert.assertEquals(configuration.getIp(), NodeConstants.DEFAULT_IP_ADDRESS);

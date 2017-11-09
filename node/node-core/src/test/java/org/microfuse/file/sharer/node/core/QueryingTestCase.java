@@ -307,7 +307,7 @@ public class QueryingTestCase extends BaseTestCase {
 
         for (int i = 9; i >= 0; i--) {
             fileSharers[i].shutdown();
-            waitFor(delay + Constants.CONTINUOUS_TASK_INTERVAL + Constants.THREAD_DISABLE_TIMEOUT);
+            waitFor(delay + Constants.TASK_INTERVAL + Constants.THREAD_DISABLE_TIMEOUT);
         }
 
         bootstrapServer.shutdown();

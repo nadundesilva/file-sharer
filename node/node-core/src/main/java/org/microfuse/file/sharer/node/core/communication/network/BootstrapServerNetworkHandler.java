@@ -43,7 +43,7 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
                     messageString.getBytes(Constants.DEFAULT_CHARSET).length,
                     InetAddress.getByName(ip), port);
             socket.send(datagramPacket);
-            logger.debug("Message " + message.toString() + " sent to node " + ip + ":" + port);
+            logger.info("Message " + message.toString() + " sent to node " + ip + ":" + port);
 
             // Starting a timeout to mark as failed
             DatagramSocket finalSocket = socket;
@@ -60,9 +60,10 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
                     networkHandlerSendTimeoutThread = null;
                 }
             });
+            networkHandlerSendTimeoutThread.setDaemon(true);
             networkHandlerSendTimeoutThread.start();
 
-            logger.debug("Waiting for reply from node " + ip + ":" + port);
+            logger.info("Waiting for reply from node " + ip + ":" + port);
             byte[] buffer = new byte[65536];
             DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
             socket.receive(incomingPacket);
@@ -71,7 +72,7 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
             String replyMessageString =
                     new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
 
-            logger.debug("Reply to message " + messageString + " received from node " + ip + ":" + port);
+            logger.info("Reply to message " + messageString + " received from node " + ip + ":" + port);
             runTasksOnMessageReceived(ip, port, Message.parse(replyMessageString));
         } catch (IOException e) {
             logger.error("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
@@ -86,18 +87,18 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
 
     @Override
     public void startListening() {
-        logger.debug("Ignoring request to start listening since the bootstrap server does not initiate communication");
+        logger.info("Ignoring request to start listening since the bootstrap server does not initiate communication");
     }
 
     @Override
     public void restart() {
         super.restart();
-        logger.debug("Ignoring request to restart listening since no ports will be used by this network handler");
+        logger.info("Ignoring request to restart listening since no ports will be used by this network handler");
     }
 
     @Override
     public void shutdown() {
-        logger.debug("Cancelling waits for replies");
+        logger.info("Cancelling waits for replies");
         if (networkHandlerSendTimeoutThread != null) {
             Thread thread = networkHandlerSendTimeoutThread;
             networkHandlerSendTimeoutThread = null;

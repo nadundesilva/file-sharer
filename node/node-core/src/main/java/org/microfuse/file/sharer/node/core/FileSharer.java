@@ -23,6 +23,7 @@ public class FileSharer {
     public void start() {
         Thread thread = new Thread(this::startInCurrentThread);
         thread.setPriority(Thread.MAX_PRIORITY);
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -33,12 +34,13 @@ public class FileSharer {
         Thread thread = new Thread(() -> {
             shutdownInCurrentThread();
             try {
-                Thread.sleep(Constants.CONTINUOUS_TASK_INTERVAL);
+                Thread.sleep(Constants.TASK_INTERVAL);
             } catch (InterruptedException ignored) {
             }
             startInCurrentThread();
         });
         thread.setPriority(Thread.MAX_PRIORITY);
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -48,6 +50,7 @@ public class FileSharer {
     public void shutdown() {
         Thread thread = new Thread(this::shutdownInCurrentThread);
         thread.setPriority(Thread.MAX_PRIORITY);
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -73,13 +76,13 @@ public class FileSharer {
      * Shutdown the file sharer in the same thread.
      */
     private void shutdownInCurrentThread() {
-        logger.debug("Shutting down the Node");
+        logger.info("Shutting down the Node");
         serviceHolder.getOverlayNetworkManager().unregister();
         serviceHolder.getOverlayNetworkManager().leave();
 
         // Waiting with a time out to leave the network
         try {
-            Thread.sleep(Constants.CONTINUOUS_TASK_INTERVAL);
+            Thread.sleep(Constants.TASK_INTERVAL);
         } catch (InterruptedException ignored) {
         }
 

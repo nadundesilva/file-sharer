@@ -22,7 +22,8 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import {TraceComponent} from './trace/trace.component';
 import {TracerEnableConfirmationComponent} from './trace/tracer-enable-confirmation.component';
 import {D3Service} from 'd3-ng2-service';
-import { TraceNetworkComponent } from './trace/trace-network/trace-network.component';
+import {TraceNetworkComponent} from './trace/trace-network/trace-network.component';
+import {ShutdownConfirmationComponent} from './home/shutdown-confirmation.component';
 
 const appRoutes: Routes = [
   {
@@ -51,10 +52,11 @@ const appRoutes: Routes = [
 @NgModule({
   declarations: [
     AppComponent, HomeComponent, QueryComponent, NetworkComponent, ResourcesComponent, AddResourceDialogComponent,
-    ConfigComponent, TraceComponent, TracerEnableConfirmationComponent, TraceNetworkComponent
+    ConfigComponent, TraceComponent, TracerEnableConfirmationComponent, TraceNetworkComponent,
+    ShutdownConfirmationComponent
   ],
   entryComponents: [
-    AddResourceDialogComponent, TracerEnableConfirmationComponent
+    AddResourceDialogComponent, TracerEnableConfirmationComponent, ShutdownConfirmationComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes), FlexLayoutModule, BrowserModule, BrowserAnimationsModule, HttpClientModule,

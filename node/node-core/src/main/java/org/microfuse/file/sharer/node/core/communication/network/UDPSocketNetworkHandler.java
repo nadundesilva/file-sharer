@@ -1,4 +1,4 @@
-package org.microfuse.file.sharer.node.core.communication.network.udp;
+package org.microfuse.file.sharer.node.core.communication.network;
 
 import com.google.common.io.Closeables;
 import org.microfuse.file.sharer.node.commons.Constants;
@@ -7,7 +7,6 @@ import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandl
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.messaging.UDPMessage;
-import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +54,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
         if (!running) {
             super.startListening();
             startRetryThread();
-            new Thread(() -> {
+            Thread thread = new Thread(() -> {
                 while (running) {
                     int portNumber = serviceHolder.getConfiguration().getPeerListeningPort();
                     try {
@@ -69,7 +68,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                             byte[] data = incomingPacket.getData();
                             String messageString =
                                     new String(data, 0, incomingPacket.getLength(), Constants.DEFAULT_CHARSET);
-                            logger.debug("Message received from " + incomingPacket.getAddress().getHostAddress()
+                            logger.info("Message received from " + incomingPacket.getAddress().getHostAddress()
                                     + ":" + incomingPacket.getPort() + " : " + messageString);
 
                             UDPMessage udpMessage = UDPMessage.parse(messageString);
@@ -92,7 +91,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                                         missingDataSequenceNumbers.remove(currentSequenceNumber);
                                         isRelevant = true;
                                     } else {
-                                        logger.debug("Dropped repeated message " + udpMessage.toString() + " from node "
+                                        logger.info("Dropped repeated message " + udpMessage.toString() + " from node "
                                                 + fromIP + ";" + fromPort);
                                     }
 
@@ -119,12 +118,14 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                             }
                         }
                     } catch (IOException e) {
-                        logger.debug("Listening stopped", e);
+                        logger.info("Listening stopped", e);
                     } finally {
                         closeSocket();
                     }
                 }
-            }).start();
+            });
+            thread.setDaemon(true);
+            thread.start();
         } else {
             logger.warn("The UDP network handler is already listening. Ignored request to start again.");
         }
@@ -147,7 +148,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void shutdown() {
-        logger.debug("Shutting down UDP network handler");
+        logger.info("Shutting down UDP network handler");
         running = false;
         closeSocket();
         closeRetryThread();
@@ -183,6 +184,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
             retryThread = null;
         });
         retryThread.setPriority(Thread.NORM_PRIORITY);
+        retryThread.setDaemon(true);
         retryThread.start();
     }
 
@@ -218,7 +220,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                     messageString.getBytes(Constants.DEFAULT_CHARSET).length,
                     InetAddress.getByName(ip), port);
             socket.send(datagramPacket);
-            logger.debug("Message " + messageString + " sent to node " + ip + ":" + port);
+            logger.info("Message " + messageString + " sent to node " + ip + ":" + port);
         } catch (IOException e) {
             logger.error("Failed to send message " + messageString + " to " + ip + ":" + port, e);
         } finally {
@@ -244,9 +246,9 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                             < serviceHolder.getConfiguration().getUdpNetworkHandlerRetryCount()) {
                         udpMessage.setUsedRetriesCount(udpMessage.getUsedRetriesCount() + 1);
                         sendMessage(node.getIp(), node.getPort(), udpMessage);
-                        logger.debug("Retrying to send message " + udpMessage.toString());
+                        logger.info("Retrying to send message " + udpMessage.toString());
                     } else {
-                        logger.debug("Failed to send message " + udpMessage.toString());
+                        logger.info("Failed to send message " + udpMessage.toString());
                         runTasksOnMessageSendFailed(node.getIp(), node.getPort(), udpMessage.getMessage());
 
                         Set<UDPMessage> udpMessages = messagesToBeRemoved.computeIfAbsent(node, k -> new HashSet<>());

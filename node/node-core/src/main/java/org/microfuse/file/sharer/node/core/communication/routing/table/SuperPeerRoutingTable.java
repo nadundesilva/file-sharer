@@ -37,6 +37,8 @@ public class SuperPeerRoutingTable extends RoutingTable {
 
     public SuperPeerRoutingTable(ServiceHolder serviceHolder, OrdinaryPeerRoutingTable ordinaryPeerRoutingTable) {
         this(serviceHolder);
+
+        // Copying all the unstructured nodes
         ordinaryPeerRoutingTable.getAllUnstructuredNetworkNodes()
                 .forEach(this::addUnstructuredNetworkRoutingTableEntry);
     }
@@ -49,11 +51,17 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return True if adding was successful
      */
     public boolean addSuperPeerNetworkRoutingTableEntry(String ip, int port) {
-        Node node = get(ip, port);
-        if (node == null) {
-            node = new Node(ip, port);
+        if (!(Objects.equals(ip, serviceHolder.getConfiguration().getIp())
+                && port == serviceHolder.getConfiguration().getPeerListeningPort())) {
+            Node node = get(ip, port);
+            if (node == null) {
+                node = new Node(ip, port);
+            }
+            return addSuperPeerNetworkRoutingTableEntry(node);
+        } else {
+            logger.info("Dropped request to add self");
+            return false;
         }
-        return addSuperPeerNetworkRoutingTableEntry(node);
     }
 
     /**
@@ -109,11 +117,17 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return True if adding was successful
      */
     public boolean addAssignedOrdinaryNetworkRoutingTableEntry(String ip, int port) {
-        Node node = get(ip, port);
-        if (node == null) {
-            node = new Node(ip, port);
+        if (!(Objects.equals(ip, serviceHolder.getConfiguration().getIp())
+                && port == serviceHolder.getConfiguration().getPeerListeningPort())) {
+            Node node = get(ip, port);
+            if (node == null) {
+                node = new Node(ip, port);
+            }
+            return addAssignedOrdinaryNetworkRoutingTableEntry(node);
+        } else {
+            logger.info("Dropped request to add self");
+            return false;
         }
-        return addAssignedOrdinaryNetworkRoutingTableEntry(node);
     }
 
     /**
@@ -209,6 +223,8 @@ public class SuperPeerRoutingTable extends RoutingTable {
     @Override
     public void collectGarbage() {
         super.collectGarbage();
+
+        // Removing inactive super peer network nodes
         superPeerNetworkNodesLock.writeLock().lock();
         try {
             removeInactiveNodesFromSet(superPeerNetworkNodes);
@@ -216,6 +232,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
             superPeerNetworkNodesLock.writeLock().unlock();
         }
 
+        // Removing inactive assigned ordinary peer nodes
         assignedOrdinaryPeerNodesLock.writeLock().lock();
         try {
             removeInactiveNodesFromSet(assignedOrdinaryPeerNodes);

@@ -25,7 +25,6 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
     private static final Logger logger = LoggerFactory.getLogger(RMINetworkHandler.class);
 
     private Registry registry;
-    private Remote remote;
     private String rmiRegistryEntry;
 
     public RMINetworkHandler(ServiceHolder serviceHolder) {
@@ -42,30 +41,37 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
         if (!running) {
             super.startListening();
             int port = serviceHolder.getConfiguration().getPeerListeningPort();
-            logger.debug("Starting listening at port " + port);
+            logger.info("Starting listening at port " + port);
             try {
-                closeRMIService();
+                // Remove this from the registry if this had been already registered
+                removeNetworkHandlerFromRMIService();
+
+                // Starting the RMI registry. Fails if it is already running.
                 try {
                     LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT);
                 } catch (RemoteException e) {
                     logger.warn("RMI registry already exists at port "
                             + serviceHolder.getConfiguration().getPeerListeningPort(), e);
                 }
+
+                // Retrieving reference to RMI registry
                 registry = LocateRegistry.getRegistry(
                         serviceHolder.getConfiguration().getIp(),
                         Constants.RMI_REGISTRY_PORT
                 );
+
+                // Rebinding this object in the RMI registry
                 try {
-                    remote = UnicastRemoteObject.exportObject(this, port);
+                    Remote remote = UnicastRemoteObject.exportObject(this, port);
+                    rmiRegistryEntry = getRMIRegistryEntry(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort()
+                    );
+                    registry.rebind(rmiRegistryEntry, remote);
                 } catch (RemoteException e) {
                     logger.warn("Failed to export remote", e);
                 }
-                rmiRegistryEntry = getRMIRegistryEntry(
-                        serviceHolder.getConfiguration().getIp(),
-                        serviceHolder.getConfiguration().getPeerListeningPort()
-                );
-                registry.rebind(rmiRegistryEntry, remote);
-                logger.debug("Bind RMI registry item " + rmiRegistryEntry
+                logger.info("Bind RMI registry item " + rmiRegistryEntry
                         + " with object from class " + this.getClass());
             } catch (RemoteException e) {
                 logger.warn("Failed to start listening at port " + port, e);
@@ -93,9 +99,9 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
 
     @Override
     public void shutdown() {
-        logger.debug("Shutting down RMI network handler");
+        logger.info("Shutting down RMI network handler");
         running = false;
-        closeRMIService();
+        removeNetworkHandlerFromRMIService();
     }
 
     @Override
@@ -110,7 +116,7 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
                     serviceHolder.getConfiguration().getPeerListeningPort(),
                     message.toString()
             );
-            logger.debug("Message " + message.toString() + " sent to node " + ip + ":" + port);
+            logger.info("Message " + message.toString() + " sent to node " + ip + ":" + port);
         } catch (RemoteException | NotBoundException e) {
             logger.warn("Failed to send message " + message.toString() + " to node " + ip + ":" + port, e);
             runTasksOnMessageSendFailed(ip, port, message);
@@ -125,17 +131,17 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
     /**
      * Remove the served RMI objects.
      */
-    private void closeRMIService() {
+    private void removeNetworkHandlerFromRMIService() {
         try {
             while (UnicastRemoteObject.unexportObject(this, false)) { }
-            logger.debug("Un-exported object");
+            logger.info("Un-exported object");
         } catch (NoSuchObjectException e) {
             logger.warn("Failed to un-export object", e);
         }
         if (registry != null) {
             try {
                 registry.unbind(rmiRegistryEntry);
-                logger.debug("Unbind RMI registry item " + rmiRegistryEntry);
+                logger.info("Unbind RMI registry item " + rmiRegistryEntry);
             } catch (RemoteException | NotBoundException e) {
                 logger.warn("Failed to stop listening", e);
             }

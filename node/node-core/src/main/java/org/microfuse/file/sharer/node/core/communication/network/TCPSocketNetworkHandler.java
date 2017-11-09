@@ -40,7 +40,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
     public void startListening() {
         if (!running) {
             super.startListening();
-            new Thread(() -> {
+            Thread thread = new Thread(() -> {
                 while (running) {
                     int portNumber = serviceHolder.getConfiguration().getPeerListeningPort();
                     Socket clientSocket = null;
@@ -49,7 +49,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
                         serverSocket = new ServerSocket(portNumber);
                         serverSocket.setReuseAddress(false);
 
-                        logger.debug("Started listening at " + portNumber + ".");
+                        logger.info("Started listening at " + portNumber + ".");
                         while (running && !restartRequired) {
                             clientSocket = serverSocket.accept();
                             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
@@ -67,7 +67,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
                             );
                         }
                     } catch (IOException e) {
-                        logger.debug("Listening stopped", e);
+                        logger.info("Listening stopped", e);
                     } finally {
                         Closeables.closeQuietly(in);
                         try {
@@ -77,7 +77,9 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
                         closeSocket();
                     }
                 }
-            }).start();
+            });
+            thread.setDaemon(true);
+            thread.start();
         } else {
             logger.warn("The TCP network handler is already listening. Ignored request to start again.");
         }
@@ -100,7 +102,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void shutdown() {
-        logger.debug("Shutting down TCP network handler");
+        logger.info("Shutting down TCP network handler");
         running = false;
         closeSocket();
     }
@@ -114,9 +116,9 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
         ) {
             out.write(message.toString());
-            logger.debug("Message " + message.toString() + " sent to node " + ip + ":" + port);
+            logger.info("Message " + message.toString() + " sent to node " + ip + ":" + port);
         } catch (IOException e) {
-            logger.debug("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
+            logger.info("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
             runTasksOnMessageSendFailed(ip, port, message);
         }
     }

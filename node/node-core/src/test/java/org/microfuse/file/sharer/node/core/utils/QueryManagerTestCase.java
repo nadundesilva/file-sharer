@@ -6,7 +6,7 @@ import org.microfuse.file.sharer.node.commons.communication.messaging.MessageTyp
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.core.BaseTestCase;
 import org.microfuse.file.sharer.node.core.communication.messaging.Message;
-import org.microfuse.file.sharer.node.core.communication.network.udp.UDPSocketNetworkHandler;
+import org.microfuse.file.sharer.node.core.communication.network.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;
 import org.mockito.Mockito;
@@ -75,6 +75,7 @@ public class QueryManagerTestCase extends BaseTestCase {
         usedMessage.setType(MessageType.SER);
         usedMessage.setData(MessageIndexes.SER_SOURCE_IP, configuration.getIp());
         usedMessage.setData(MessageIndexes.SER_SOURCE_PORT, Integer.toString(configuration.getPeerListeningPort()));
+        usedMessage.setData(MessageIndexes.SER_SEQUENCE_NUMBER, "0");
         usedMessage.setData(MessageIndexes.SER_FILE_NAME, "Cars");
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(NodeConstants.INITIAL_HOP_COUNT + 1));
 

@@ -4,7 +4,6 @@ package org.microfuse.file.sharer.node.commons.communication.network;
  * Network handler types.
  */
 public enum NetworkHandlerType {
-    WEB_SERVICES("Web Services"),
     RMI("Remote Method Invocation"),
     TCP_SOCKET("TCP Socket"),
     UDP_SOCKET("UDP Socket");

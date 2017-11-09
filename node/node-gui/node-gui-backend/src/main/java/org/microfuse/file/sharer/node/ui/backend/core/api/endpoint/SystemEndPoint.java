@@ -1,6 +1,7 @@
 package org.microfuse.file.sharer.node.ui.backend.core.api.endpoint;
 
 import com.google.gson.Gson;
+import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.ui.backend.commons.Status;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
@@ -44,6 +45,16 @@ public class SystemEndPoint {
         Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
         FileSharerHolder.getFileSharer().shutdown();
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(Constants.TASK_INTERVAL);
+            } catch (InterruptedException ignored) {
+            }
+            System.exit(0);
+        });
+        thread.setDaemon(true);
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.start();
 
         String jsonString = new Gson().toJson(response);
         return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();

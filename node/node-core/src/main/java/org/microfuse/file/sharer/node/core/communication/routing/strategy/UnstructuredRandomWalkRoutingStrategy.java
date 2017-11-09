@@ -25,7 +25,10 @@ public class UnstructuredRandomWalkRoutingStrategy extends RoutingStrategy {
 
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
+        // Getting all the unstructured network nodes
         Set<Node> forwardingNodes = routingTable.getAllUnstructuredNetworkNodes();
-        return getRandomNode(forwardingNodes, fromNode);
+
+        // Selecting a random node
+        return getRandomNode(message, forwardingNodes, fromNode);
     }
 }

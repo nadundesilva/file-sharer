@@ -98,15 +98,19 @@ public class UDPMessage implements Cloneable {
     public static UDPMessage parse(String messageString) {
         UDPMessage udpMessage = new UDPMessage();
 
+        // Getting the UDP message type
         int firstSeparatorIndex = messageString.indexOf(MESSAGE_DATA_SEPARATOR);
         udpMessage.setType(UDPMessageType.valueOf(messageString.substring(0, firstSeparatorIndex)));
 
+        // Getting the message IP
         int secondSeparatorIndex = messageString.indexOf(MESSAGE_DATA_SEPARATOR, firstSeparatorIndex + 1);
         udpMessage.setIp(messageString.substring(firstSeparatorIndex + 1, secondSeparatorIndex));
 
+        // Getting the message port
         int thirdSeparatorIndex = messageString.indexOf(MESSAGE_DATA_SEPARATOR, secondSeparatorIndex + 1);
         udpMessage.setPort(Integer.parseInt(messageString.substring(secondSeparatorIndex + 1, thirdSeparatorIndex)));
 
+        // Getting the sequence number
         int forthSeparatorIndex = messageString.indexOf(MESSAGE_DATA_SEPARATOR, thirdSeparatorIndex + 1);
         if (forthSeparatorIndex < 0) {
             forthSeparatorIndex = messageString.length();
@@ -114,6 +118,7 @@ public class UDPMessage implements Cloneable {
         udpMessage.setSequenceNumber(
                 Long.parseLong(messageString.substring(thirdSeparatorIndex + 1, forthSeparatorIndex)));
 
+        // Getting the message delivered by the UDP layer
         if (forthSeparatorIndex < messageString.length()) {
             udpMessage.setMessage(Message.parse(messageString.substring(forthSeparatorIndex + 1)));
         }

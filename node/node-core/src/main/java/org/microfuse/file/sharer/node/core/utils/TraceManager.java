@@ -40,7 +40,7 @@ public class TraceManager implements Tracer {
             LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT);
         } catch (RemoteException e) {
             logger.warn("RMI registry already exists at port "
-                    + serviceHolder.getConfiguration().getTracerServePort(), e);
+                    + Constants.RMI_REGISTRY_PORT, e);
         }
         try {
             registry = LocateRegistry.getRegistry(
@@ -220,5 +220,15 @@ public class TraceManager implements Tracer {
     @Override
     public void removeAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2) {
         network.removeAssignedOrdinaryPeerConnection(ip1, port1, ip2, port2);
+    }
+
+    @Override
+    public void promoteToSuperPeer(String ip, int port) {
+        network.getNode(ip, port).setPeerType(PeerType.SUPER_PEER);
+    }
+
+    @Override
+    public void demoteToOrdinaryPeer(String ip, int port) {
+        network.getNode(ip, port).setPeerType(PeerType.ORDINARY_PEER);
     }
 }

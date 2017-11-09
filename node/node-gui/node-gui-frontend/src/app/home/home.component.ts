@@ -4,6 +4,7 @@ import {HttpClient} from '@angular/common/http';
 import {TracerEnableConfirmationComponent} from '../trace/tracer-enable-confirmation.component';
 import {MatDialog} from '@angular/material';
 import {Router} from '@angular/router';
+import {ShutdownConfirmationComponent} from './shutdown-confirmation.component';
 
 @Component({
   selector: 'app-home',
@@ -26,6 +27,26 @@ export class HomeComponent implements OnInit {
     }).afterClosed().subscribe(enableTracer => {
       if (enableTracer) {
         this.router.navigateByUrl('/trace');
+      }
+    });
+  }
+
+  openShutdownDialog(): void {
+    this.dialog.open(ShutdownConfirmationComponent, {
+      width: '250px'
+    }).afterClosed().subscribe(shutdown => {
+      if (shutdown) {
+        this.utils.showNotification('Shutting down');
+        this.http.post<ServerResponse<any>>(
+          Constants.API_ENDPOINT + Constants.API_SYSTEM_ENDPOINT + Constants.API_SYSTEM_ENDPOINT_SHUTDOWN_PATH,
+          {}
+        ).subscribe(response => {
+          if (response.status === ServerResponseStatus.SUCCESS) {
+            this.utils.showNotification('Successfully shutdown');
+          } else {
+            this.utils.showNotification('Failed to shutdown');
+          }
+        });
       }
     });
   }

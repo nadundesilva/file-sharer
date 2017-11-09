@@ -64,11 +64,17 @@ public abstract class RoutingTable {
      * @return True if adding was successful
      */
     public boolean addUnstructuredNetworkRoutingTableEntry(String ip, int port) {
-        Node node = get(ip, port);
-        if (node == null) {
-            node = new Node(ip, port);
+        if (!(Objects.equals(ip, serviceHolder.getConfiguration().getIp())
+                && port == serviceHolder.getConfiguration().getPeerListeningPort())) {
+            Node node = get(ip, port);
+            if (node == null) {
+                node = new Node(ip, port);
+            }
+            return addUnstructuredNetworkRoutingTableEntry(node);
+        } else {
+            logger.info("Dropped request to add self");
+            return false;
         }
-        return addUnstructuredNetworkRoutingTableEntry(node);
     }
 
     /**

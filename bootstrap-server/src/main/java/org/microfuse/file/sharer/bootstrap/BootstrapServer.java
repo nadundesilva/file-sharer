@@ -34,7 +34,7 @@ public class BootstrapServer {
 
     public void start() {
         if (!running) {
-            new Thread(() -> {
+            Thread thread = new Thread(() -> {
                 running = true;
                 String s;
                 try {
@@ -154,7 +154,10 @@ public class BootstrapServer {
                     logger.error("Bootstrap server error.", e);
                 }
                 logger.info("Bootstrap server closed.");
-            }).start();
+            });
+            thread.setDaemon(true);
+            thread.setPriority(Thread.MAX_PRIORITY);
+            thread.start();
         }
     }
 

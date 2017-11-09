@@ -8,7 +8,7 @@ import org.microfuse.file.sharer.node.commons.communication.routing.strategy.Rou
  */
 public class NodeConstants {
     public static final String DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS = "127.0.0.1";
-    public static final String DEFAULT_USERNAME = "microfuse.2017";
+    public static final String DEFAULT_USERNAME_PREFIX = "microfuse.2017_";
     public static final String DEFAULT_IP_ADDRESS = "127.0.0.1";
     public static final String DEFAULT_TRACER_SERVE_IP = "127.0.0.1";
     public static final String DEFAULT_RMI_REGISTRY_ENTRY_PREFIX = "microfuse.2017.RMI_";

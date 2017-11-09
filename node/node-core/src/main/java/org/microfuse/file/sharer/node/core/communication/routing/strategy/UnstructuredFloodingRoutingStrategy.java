@@ -28,14 +28,17 @@ public class UnstructuredFloodingRoutingStrategy extends RoutingStrategy {
     @Override
     public Set<Node> getForwardingNodes(RoutingTable routingTable, Node fromNode, Message message) {
         Set<Node> forwardingNodes = routingTable.getAllUnstructuredNetworkNodes();
+
+        // Removing the node which sent the message to this node
         if (fromNode != null) {
             forwardingNodes.remove(fromNode);
         }
 
+        // Removing inactive nodes
         forwardingNodes = forwardingNodes.stream().parallel()
-                .filter(node -> node.isActive())
+                .filter(Node::isActive)
                 .collect(Collectors.toSet());
 
-        return new HashSet<>(forwardingNodes);
+        return filterUnCachedNodes(message, new HashSet<>(forwardingNodes));
     }
 }

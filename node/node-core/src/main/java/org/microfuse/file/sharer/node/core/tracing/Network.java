@@ -64,9 +64,9 @@ public class Network {
         try {
             isSuccessful = unstructuredNetwork.add(connection);
             if (isSuccessful) {
-                logger.debug("Added unstructured network connection " + connection.toString());
+                logger.info("Added unstructured network connection " + connection.toString());
             } else {
-                logger.debug("Failed to add unstructured network connection " + connection.toString());
+                logger.info("Failed to add unstructured network connection " + connection.toString());
             }
         } finally {
             unstructuredNetworkLock.writeLock().unlock();
@@ -90,9 +90,9 @@ public class Network {
         try {
             isSuccessful = unstructuredNetwork.remove(connection);
             if (isSuccessful) {
-                logger.debug("Removed unstructured network connection " + connection.toString());
+                logger.info("Removed unstructured network connection " + connection.toString());
             } else {
-                logger.debug("Failed to remove unstructured network connection " + connection.toString());
+                logger.info("Failed to remove unstructured network connection " + connection.toString());
             }
         } finally {
             unstructuredNetworkLock.writeLock().unlock();
@@ -121,9 +121,9 @@ public class Network {
         try {
             isSuccessful = superPeerNetwork.add(connection);
             if (isSuccessful) {
-                logger.debug("Added super peer network connection " + connection.toString());
+                logger.info("Added super peer network connection " + connection.toString());
             } else {
-                logger.debug("Failed to add super peer network connection " + connection.toString());
+                logger.info("Failed to add super peer network connection " + connection.toString());
             }
         } finally {
             superPeerNetworkLock.writeLock().unlock();
@@ -147,9 +147,9 @@ public class Network {
         try {
             isSuccessful = superPeerNetwork.remove(connection);
             if (isSuccessful) {
-                logger.debug("Removed super peer network connection " + connection.toString());
+                logger.info("Removed super peer network connection " + connection.toString());
             } else {
-                logger.debug("Failed to remove super peer network connection " + connection.toString());
+                logger.info("Failed to remove super peer network connection " + connection.toString());
             }
         } finally {
             superPeerNetworkLock.writeLock().unlock();
@@ -178,9 +178,9 @@ public class Network {
         try {
             isSuccessful = assignedSuperPeersNetwork.add(connection);
             if (isSuccessful) {
-                logger.debug("Added assigned ordinary peer network connection " + connection.toString());
+                logger.info("Added assigned ordinary peer network connection " + connection.toString());
             } else {
-                logger.debug("Failed to add assigned ordinary peer network connection " + connection.toString());
+                logger.info("Failed to add assigned ordinary peer network connection " + connection.toString());
             }
         } finally {
             assignedSuperPeersNetworkLock.writeLock().unlock();
@@ -204,9 +204,9 @@ public class Network {
         try {
             isSuccessful = assignedSuperPeersNetwork.remove(connection);
             if (isSuccessful) {
-                logger.debug("Removed assigned ordinary peer network connection " + connection.toString());
+                logger.info("Removed assigned ordinary peer network connection " + connection.toString());
             } else {
-                logger.debug("Failed to remove assigned ordinary peer network connection " + connection.toString());
+                logger.info("Failed to remove assigned ordinary peer network connection " + connection.toString());
             }
         } finally {
             assignedSuperPeersNetworkLock.writeLock().unlock();

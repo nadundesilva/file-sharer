@@ -26,6 +26,8 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
 
     public OrdinaryPeerRoutingTable(ServiceHolder serviceHolder, SuperPeerRoutingTable superPeerRoutingTable) {
         this(serviceHolder);
+
+        // Copying all the unstructured nodes
         superPeerRoutingTable.getAllUnstructuredNetworkNodes()
                 .forEach(this::addUnstructuredNetworkRoutingTableEntry);
     }
@@ -46,11 +48,16 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
      * @param port The port of the super peer to be assigned to this node
      */
     public void setAssignedSuperPeer(String ip, int port) {
-        Node node = get(ip, port);
-        if (node == null) {
-            node = new Node(ip, port);
+        if (!(Objects.equals(ip, serviceHolder.getConfiguration().getIp())
+                && port == serviceHolder.getConfiguration().getPeerListeningPort())) {
+            Node node = get(ip, port);
+            if (node == null) {
+                node = new Node(ip, port);
+            }
+            setAssignedSuperPeer(node);
+        } else {
+            logger.info("Dropped request to add self");
         }
-        setAssignedSuperPeer(node);
     }
 
     @Override
@@ -90,6 +97,8 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
     @Override
     public void collectGarbage() {
         super.collectGarbage();
+
+        // Removing the assigned super peer if it is inactive
         if (assignedSuperPeer != null && !assignedSuperPeer.isActive()) {
             removeFromAll(assignedSuperPeer.getIp(), assignedSuperPeer.getPort());
         }
@@ -102,7 +111,7 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
      */
     private void setAssignedSuperPeer(Node node) {
         if (node != null) {
-            logger.debug("Adding assigned super peer to " + node.toString());
+            logger.info("Adding assigned super peer to " + node.toString());
 
             // Notifying the tracer
             Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
@@ -118,7 +127,7 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
                 }
             }
         } else {
-            logger.debug("Removing assigned super peer");
+            logger.info("Removing assigned super peer");
 
             // Notifying the tracer
             Tracer tracer = serviceHolder.getTraceManager().getTracerReference();

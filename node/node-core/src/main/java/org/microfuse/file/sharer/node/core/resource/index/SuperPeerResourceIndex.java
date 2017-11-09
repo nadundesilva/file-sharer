@@ -56,9 +56,9 @@ public class SuperPeerResourceIndex extends ResourceIndex {
             try {
                 isSuccessful = aggregatedResources.add(resourceIndexItem);
                 if (isSuccessful) {
-                    logger.debug("Added resource " + resourceIndexItem.toString() + " to aggregated resources.");
+                    logger.info("Added resource " + resourceIndexItem.toString() + " to aggregated resources.");
                 } else {
-                    logger.debug("Failed to add resource " + resourceIndexItem.toString()
+                    logger.info("Failed to add resource " + resourceIndexItem.toString()
                             + " to aggregated resources.");
                 }
             } finally {
@@ -75,7 +75,7 @@ public class SuperPeerResourceIndex extends ResourceIndex {
                 aggregatedResourcesLock.readLock().unlock();
             }
         } else {
-            logger.debug("Request to add resource " + resourceName + " from unknown node "
+            logger.info("Request to add resource " + resourceName + " from unknown node "
                     + ip + ":" + port + " ignored");
         }
     }
@@ -107,7 +107,7 @@ public class SuperPeerResourceIndex extends ResourceIndex {
                 isSuccessful = resourceIndexItem.removeNode(node);
                 removeEmptyAggregatedResources();
             } else {
-                logger.debug("Request to remove resource " + resourceName + " from unknown node "
+                logger.info("Request to remove resource " + resourceName + " from unknown node "
                         + ip + ":" + port + " ignored");
             }
         }
@@ -155,7 +155,7 @@ public class SuperPeerResourceIndex extends ResourceIndex {
         aggregatedResourcesLock.writeLock().lock();
         try {
             aggregatedResources.clear();
-            logger.debug("Cleared aggregated resources.");
+            logger.info("Cleared aggregated resources.");
         } finally {
             aggregatedResourcesLock.writeLock().unlock();
         }
@@ -192,7 +192,7 @@ public class SuperPeerResourceIndex extends ResourceIndex {
                 ).collect(Collectors.toSet());
 
         garbageNodes.forEach(node -> {
-            logger.debug("Removed inactive node " + node.toString() + " from the routing table");
+            logger.info("Removed inactive node " + node.toString() + " from the routing table");
             removeNodeFromAggregatedResources(node.getIp(), node.getPort());
         });
     }
@@ -230,10 +230,10 @@ public class SuperPeerResourceIndex extends ResourceIndex {
 
             emptyResources.forEach(aggregatedResource -> {
                 if (aggregatedResources.remove(aggregatedResource)) {
-                    logger.debug("Removed resource " + aggregatedResource.toString()
+                    logger.info("Removed resource " + aggregatedResource.toString()
                             + " from aggregated resources since it does not have any more nodes.");
                 } else {
-                    logger.debug("Failed to remove resource " + aggregatedResource.toString()
+                    logger.info("Failed to remove resource " + aggregatedResource.toString()
                             + " from aggregated resources although it does not have any more nodes.");
                 }
             });

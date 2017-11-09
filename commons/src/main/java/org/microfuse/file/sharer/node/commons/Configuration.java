@@ -12,7 +12,7 @@ import org.microfuse.file.sharer.node.commons.peer.NodeState;
 public class Configuration {
     private String bootstrapServerIP;
     private int bootstrapServerPort;
-    private String username;
+    private String usernamePrefix;
     private String tracerServeIP;
     private int tracerServePort;
     private String ip;
@@ -40,7 +40,7 @@ public class Configuration {
     public void loadDefaults() {
         bootstrapServerIP = NodeConstants.DEFAULT_BOOTSTRAP_SERVER_IP_ADDRESS;
         bootstrapServerPort = Constants.BOOTSTRAP_SERVER_PORT;
-        username = NodeConstants.DEFAULT_USERNAME;
+        usernamePrefix = NodeConstants.DEFAULT_USERNAME_PREFIX;
         tracerServeIP = NodeConstants.DEFAULT_TRACER_SERVE_IP;
         tracerServePort = NodeConstants.DEFAULT_TRACER_SERVE_PORT;
         ip = NodeConstants.DEFAULT_IP_ADDRESS;
@@ -86,12 +86,12 @@ public class Configuration {
         this.bootstrapServerPort = bootstrapServerPort;
     }
 
-    public String getUsername() {
-        return username;
+    public String getUsernamePrefix() {
+        return usernamePrefix;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUsernamePrefix(String usernamePrefix) {
+        this.usernamePrefix = usernamePrefix;
     }
 
     public String getTracerServeIP() {

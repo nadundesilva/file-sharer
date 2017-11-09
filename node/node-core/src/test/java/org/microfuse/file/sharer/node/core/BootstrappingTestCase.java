@@ -56,7 +56,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         String localhostIP = "127.0.0.1";
 
         delay = 1000;
-        shutDownDelay = delay + Constants.CONTINUOUS_TASK_INTERVAL + Constants.THREAD_DISABLE_TIMEOUT;
+        shutDownDelay = delay + Constants.TASK_INTERVAL + Constants.THREAD_DISABLE_TIMEOUT;
         bootstrapServer = new BootstrapServer();
         fileSharer = new FileSharer();
         Whitebox.setInternalState(fileSharer, "serviceHolder", serviceHolder);
@@ -219,6 +219,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         ServiceHolder serviceHolder1 = (ServiceHolder) internalStateServiceHolder1;
         serviceHolder1.getConfiguration().setIp(node1.getIp());
         serviceHolder1.getConfiguration().setPeerListeningPort(node1.getPort());
+        serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
 
         fileSharer1.start();
         waitFor(delay);
@@ -287,6 +288,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         ServiceHolder serviceHolder1 = (ServiceHolder) internalStateServiceHolder1;
         serviceHolder1.getConfiguration().setIp(node1.getIp());
         serviceHolder1.getConfiguration().setPeerListeningPort(node1.getPort());
+        serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
 
         FileSharer fileSharer2 = new FileSharer();
         Object internalStateServiceHolder2 = Whitebox.getInternalState(fileSharer2, "serviceHolder");
@@ -394,6 +396,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         ServiceHolder serviceHolder1 = (ServiceHolder) internalStateServiceHolder1;
         serviceHolder1.getConfiguration().setIp(node1.getIp());
         serviceHolder1.getConfiguration().setPeerListeningPort(node1.getPort());
+        serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
 
         FileSharer fileSharer2 = new FileSharer();
         Object internalStateServiceHolder2 = Whitebox.getInternalState(fileSharer2, "serviceHolder");

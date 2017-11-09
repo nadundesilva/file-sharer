@@ -15,6 +15,7 @@ export class Constants {
   public static API_CONFIG_ENDPOINT_DEFAULTS_PATH = 'defaults/';
   public static API_SYSTEM_ENDPOINT = 'system/';
   public static API_SYSTEM_ENDPOINT_RESTART_PATH = 'restart/';
+  public static API_SYSTEM_ENDPOINT_SHUTDOWN_PATH = 'shutdown/';
   public static API_TRACE_ENDPOINT = 'trace/';
   public static API_TRACE_ENDPOINT_MODE_PATH = 'mode/';
   public static API_TRACE_ENDPOINT_NETWORK_PATH = 'network/';

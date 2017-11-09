@@ -90,7 +90,7 @@ export class ConfigComponent implements OnInit {
 class Config {
   bootstrapServerIP: string;
   bootstrapServerPort: number;
-  username: string;
+  usernamePrefix: string;
   tracerServeIP: string;
   tracerServePort: number;
   ip: string;

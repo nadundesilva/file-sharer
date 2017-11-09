@@ -3,7 +3,6 @@ package org.microfuse.file.sharer.node.core.communication.network;
 import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
 import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.network.rmi.RMINetworkHandler;
-import org.microfuse.file.sharer.node.core.communication.network.udp.UDPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +39,6 @@ public abstract class NetworkHandler {
     static {
         // Populating the network handler class map
         networkHandlerClassMap = new HashMap<>();
-        networkHandlerClassMap.put(NetworkHandlerType.WEB_SERVICES, WebServicesNetworkHandler.class);
         networkHandlerClassMap.put(NetworkHandlerType.RMI, RMINetworkHandler.class);
         networkHandlerClassMap.put(NetworkHandlerType.TCP_SOCKET, TCPSocketNetworkHandler.class);
         networkHandlerClassMap.put(NetworkHandlerType.UDP_SOCKET, UDPSocketNetworkHandler.class);
@@ -119,7 +117,7 @@ public abstract class NetworkHandler {
      * @param message     The message received
      */
     protected void runTasksOnMessageReceived(String fromAddress, int fromPort, Message message) {
-        logger.debug("Message " + message.toString() + " received from node " + fromAddress + ":" + fromPort);
+        logger.info("Message " + message.toString() + " received from node " + fromAddress + ":" + fromPort);
         listenersListLock.readLock().lock();
         try {
             listenerHandlerExecutorServiceLock.readLock().lock();
@@ -143,7 +141,7 @@ public abstract class NetworkHandler {
      * @param message   The message
      */
     protected void runTasksOnMessageSendFailed(String toAddress, int toPort, Message message) {
-        logger.debug("Failed to send message " + message + " to " + toAddress + ":" + toPort);
+        logger.info("Failed to send message " + message + " to " + toAddress + ":" + toPort);
         listenersListLock.readLock().lock();
         try {
             listenerHandlerExecutorServiceLock.readLock().lock();
@@ -171,9 +169,9 @@ public abstract class NetworkHandler {
         try {
             isSuccessful = listenersList.add(listener);
             if (isSuccessful) {
-                logger.debug("Registered network handler listener " + listener.getClass());
+                logger.info("Registered network handler listener " + listener.getClass());
             } else {
-                logger.debug("Failed to register network handler listener " + listener.getClass());
+                logger.info("Failed to register network handler listener " + listener.getClass());
             }
         } finally {
             listenersListLock.writeLock().unlock();
@@ -193,9 +191,9 @@ public abstract class NetworkHandler {
         try {
             isSuccessful = listenersList.remove(listener);
             if (isSuccessful) {
-                logger.debug("Unregistered network handler listener " + listener.getClass());
+                logger.info("Unregistered network handler listener " + listener.getClass());
             } else {
-                logger.debug("Failed to unregister network handler listener " + listener.getClass());
+                logger.info("Failed to unregister network handler listener " + listener.getClass());
             }
         } finally {
             listenersListLock.writeLock().unlock();
@@ -210,7 +208,7 @@ public abstract class NetworkHandler {
         listenersListLock.writeLock().lock();
         try {
             listenersList.clear();
-            logger.debug("Cleared network handler listeners");
+            logger.info("Cleared network handler listeners");
         } finally {
             listenersListLock.writeLock().unlock();
         }

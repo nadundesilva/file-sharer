@@ -52,7 +52,7 @@ public class SuperPeerRandomWalkRoutingStrategy extends RoutingStrategy {
             }
 
             if (forwardingNodes == null || forwardingNodes.size() == 0) {
-                // Random walking the super-peer network
+                // Getting all the super peers
                 forwardingNodes = ((SuperPeerRoutingTable) routingTable).getAllSuperPeerNetworkNodes();
             }
         } else if (routingTable instanceof OrdinaryPeerRoutingTable) {
@@ -60,6 +60,15 @@ public class SuperPeerRandomWalkRoutingStrategy extends RoutingStrategy {
         } else {
             logger.warn("Unknown routing table");
         }
-        return getRandomNode(forwardingNodes, fromNode);
+
+        // Selecting a random node
+        forwardingNodes = getRandomNode(message, forwardingNodes, fromNode);
+
+        // Sending to unstructured nodes since no nodes were found
+        if (forwardingNodes.size() == 0) {
+            forwardingNodes = getRandomNode(message, routingTable.getAllUnstructuredNetworkNodes(), fromNode);
+        }
+
+        return forwardingNodes;
     }
 }

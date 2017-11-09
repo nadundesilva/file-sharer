@@ -28,8 +28,10 @@ public class QueryManager implements RouterListener {
 
     private ServiceHolder serviceHolder;
 
-    private Map<String, List<AggregatedResource>> queryResults;
     private final ReadWriteLock queryResultsLock;
+
+    private Map<String, List<AggregatedResource>> queryResults;
+    private long sequenceNumber;
 
     public QueryManager(ServiceHolder serviceHolder) {
         this.serviceHolder = serviceHolder;
@@ -37,15 +39,16 @@ public class QueryManager implements RouterListener {
 
         queryResultsLock = new ReentrantReadWriteLock();
         queryResults = new HashMap<>();
+        sequenceNumber = 0;
     }
 
     @Override
     public void onMessageReceived(Node fromNode, Message message) {
-        logger.debug("Received message " + message.toString() + " from node " + fromNode.toString());
+        logger.info("Received message " + message.toString() + " from node " + fromNode.toString());
         if (message.getType() == MessageType.SER_OK) {
             handleSerOkMessages(fromNode, message);
         } else {
-            logger.debug("Message " + message.toString() + " of unrecognized type ignored ");
+            logger.info("Message " + message.toString() + " of unrecognized type ignored ");
         }
     }
 
@@ -73,6 +76,7 @@ public class QueryManager implements RouterListener {
         message.setType(MessageType.SER);
         message.setData(MessageIndexes.SER_SOURCE_IP, configuration.getIp());
         message.setData(MessageIndexes.SER_SOURCE_PORT, Integer.toString(configuration.getPeerListeningPort()));
+        message.setData(MessageIndexes.SER_SEQUENCE_NUMBER, Long.toString(sequenceNumber++));
         message.setData(MessageIndexes.SER_FILE_NAME, queryString);
         message.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
         serviceHolder.getRouter().route(message);

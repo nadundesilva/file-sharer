@@ -7,6 +7,7 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.microfuse.file.sharer.node.commons.tracing.TracingMode;
 import org.microfuse.file.sharer.node.ui.backend.commons.ServerConstants;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ConfigEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.OverlayNetworkEndPoint;
@@ -45,7 +46,7 @@ public class ServerLauncher {
 
         // Reading console parameters
         for (int i = 0; i < args.length;) {
-            if (Objects.equals(args[i], ServerConstants.WEB_APP_PORT_CONSOLE_ARGUEMENT_KEY)) {
+            if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_WEB_APP_PORT)) {
                 String argument = args[i + 1];
                 try {
                     webAppPort = Integer.parseInt(argument);
@@ -53,6 +54,9 @@ public class ServerLauncher {
                 } catch (NumberFormatException e) {
                     logger.warn("Invalid web app port " + argument + " provided. Using " + webAppPort + " instead.");
                 }
+            } else if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_TRACER)) {
+                FileSharerHolder.getFileSharer().getServiceHolder().getTraceManager().changeMode(TracingMode.TRACER);
+                i += 2;
             }
         }
 
@@ -65,6 +69,7 @@ public class ServerLauncher {
             try {
                 Tomcat tomcat = new Tomcat();
                 tomcat.setPort(port);
+                tomcat.setSilent(true);
 
                 // Adding the main servlet
                 Context context = tomcat.addWebapp("", new File(ServerConstants.WEB_APP_DIRECTORY).getAbsolutePath());

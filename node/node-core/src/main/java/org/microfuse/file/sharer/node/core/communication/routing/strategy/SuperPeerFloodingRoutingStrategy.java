@@ -64,17 +64,28 @@ public class SuperPeerFloodingRoutingStrategy extends RoutingStrategy {
         }
 
         if (forwardingNodes != null) {
+            // Removing the node which sent the message to this node
             if (fromNode != null) {
                 forwardingNodes.remove(fromNode);
             }
         } else {
+            // Adding an empty set since no nodes were selected
             forwardingNodes = new HashSet<>();
         }
 
+        // Removing inactive nodes
         forwardingNodes = forwardingNodes.stream().parallel()
                 .filter(Node::isActive)
                 .collect(Collectors.toSet());
 
-        return new HashSet<>(forwardingNodes);
+        // Removing nodes to which this message had been already sent
+        forwardingNodes = filterUnCachedNodes(message, new HashSet<>(forwardingNodes));
+
+        // Sending through the unstructured network if no nodes are found
+        if (forwardingNodes.size() == 0) {
+            forwardingNodes = filterUnCachedNodes(message, routingTable.getAllUnstructuredNetworkNodes());
+        }
+
+        return forwardingNodes;
     }
 }
