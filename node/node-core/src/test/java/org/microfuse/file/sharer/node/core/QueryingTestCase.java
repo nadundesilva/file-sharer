@@ -329,9 +329,9 @@ public class QueryingTestCase extends BaseTestCase {
         List<AggregatedResource> resources =
                 fileSharers[5].getServiceHolder().getQueryManager().getQueryResults("Spider Man");
         Assert.assertEquals(resources.size(), 1);
-        Assert.assertEquals(resources.get(0).getName(), "Spider Man");
+        Assert.assertEquals(resources.get(0).getName(), "Amazing Spider Man");
         Assert.assertEquals(resources.get(0).getNodeCount(), 1);
-        Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 1)));
+        Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 3)));
     }
 
     @Test(priority = 2)
@@ -349,9 +349,9 @@ public class QueryingTestCase extends BaseTestCase {
         List<AggregatedResource> resources =
                 fileSharers[5].getServiceHolder().getQueryManager().getQueryResults("Spider");
         Assert.assertEquals(resources.size(), 1);
-        Assert.assertEquals(resources.get(0).getName(), "Spider Man");
+        Assert.assertEquals(resources.get(0).getName(), "Amazing Spider Man");
         Assert.assertEquals(resources.get(0).getNodeCount(), 1);
-        Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 1)));
+        Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 3)));
     }
 
     @Test(priority = 3)
@@ -409,9 +409,9 @@ public class QueryingTestCase extends BaseTestCase {
             List<AggregatedResource> resources =
                     fileSharers[5].getServiceHolder().getQueryManager().getQueryResults("Spider Man");
             Assert.assertEquals(resources.size(), 1);
-            Assert.assertEquals(resources.get(0).getName(), "Spider Man");
+            Assert.assertEquals(resources.get(0).getName(), "Amazing Spider Man");
             Assert.assertEquals(resources.get(0).getNodeCount(), 1);
-            Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 1)));
+            Assert.assertTrue(resources.get(0).getAllNodes().contains(new Node(localhostIP, fileSharer1Port + 3)));
         }
         {
             List<AggregatedResource> resources =

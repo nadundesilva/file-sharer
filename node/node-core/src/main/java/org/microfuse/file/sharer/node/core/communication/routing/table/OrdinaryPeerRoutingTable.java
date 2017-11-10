@@ -1,12 +1,10 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
-import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.rmi.RemoteException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -112,36 +110,8 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
     private void setAssignedSuperPeer(Node node) {
         if (node != null) {
             logger.info("Adding assigned super peer to " + node.toString());
-
-            // Notifying the tracer
-            Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
-            if (tracer != null) {
-                try {
-                    tracer.addAssignedOrdinaryPeerConnection(
-                            serviceHolder.getConfiguration().getIp(),
-                            serviceHolder.getConfiguration().getPeerListeningPort(),
-                            node.getIp(), node.getPort()
-                    );
-                } catch (RemoteException e) {
-                    logger.warn("Failed to add assigned ordinary peer connection to the tracer", e);
-                }
-            }
         } else {
             logger.info("Removing assigned super peer");
-
-            // Notifying the tracer
-            Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
-            if (tracer != null) {
-                try {
-                    tracer.removeAssignedOrdinaryPeerConnection(
-                            serviceHolder.getConfiguration().getIp(),
-                            serviceHolder.getConfiguration().getPeerListeningPort(),
-                            assignedSuperPeer.getIp(), assignedSuperPeer.getPort()
-                    );
-                } catch (RemoteException e) {
-                    logger.warn("Failed to remove assigned ordinary peer connection from the tracer", e);
-                }
-            }
         }
         this.assignedSuperPeer = node;
     }

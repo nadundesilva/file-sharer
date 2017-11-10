@@ -23,7 +23,7 @@ public class MessageTestCase {
     public void initializeMethod() {
         logger.info("Initializing Message Test");
 
-        List<String> messageData = Lists.newArrayList("129.82.62.142", "5070", "Lord of the Rings");
+        List<String> messageData = Lists.newArrayList("129.82.62.142", "5070", "0", "Lord of the Rings", "0");
 
         message = new Message();
         message.setType(MessageType.SER);
@@ -38,7 +38,7 @@ public class MessageTestCase {
     public void testToString() {
         logger.info("Running Message Test 01 - To string");
 
-        Assert.assertEquals(message.toString(), "0047 SER 129.82.62.142 5070 \"Lord of the Rings\"");
+        Assert.assertEquals(message.toString(), "0051 SER 129.82.62.142 5070 0 \"Lord of the Rings\" 0");
     }
 
     @Test(priority = 2)

@@ -19,10 +19,7 @@ import {AddResourceDialogComponent} from './home/resources/add-resource-dialog.c
 import {ConfigComponent} from './config/config.component';
 import {HomeComponent} from './home/home.component';
 import {FlexLayoutModule} from '@angular/flex-layout';
-import {TraceComponent} from './trace/trace.component';
-import {TracerEnableConfirmationComponent} from './trace/tracer-enable-confirmation.component';
 import {D3Service} from 'd3-ng2-service';
-import {TraceNetworkComponent} from './trace/trace-network/trace-network.component';
 import {ShutdownConfirmationComponent} from './home/shutdown-confirmation.component';
 
 const appRoutes: Routes = [
@@ -33,10 +30,6 @@ const appRoutes: Routes = [
   {
     path: 'config',
     component: ConfigComponent
-  },
-  {
-    path: 'trace',
-    component: TraceComponent
   },
   {
     path: '',
@@ -52,11 +45,10 @@ const appRoutes: Routes = [
 @NgModule({
   declarations: [
     AppComponent, HomeComponent, QueryComponent, NetworkComponent, ResourcesComponent, AddResourceDialogComponent,
-    ConfigComponent, TraceComponent, TracerEnableConfirmationComponent, TraceNetworkComponent,
-    ShutdownConfirmationComponent
+    ConfigComponent, ShutdownConfirmationComponent
   ],
   entryComponents: [
-    AddResourceDialogComponent, TracerEnableConfirmationComponent, ShutdownConfirmationComponent
+    AddResourceDialogComponent, ShutdownConfirmationComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes), FlexLayoutModule, BrowserModule, BrowserAnimationsModule, HttpClientModule,

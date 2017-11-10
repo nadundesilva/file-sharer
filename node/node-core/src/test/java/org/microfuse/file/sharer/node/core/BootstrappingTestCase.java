@@ -579,9 +579,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer4.start();
         waitFor(delay);
 
-        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay * 2);
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer.start();
-        waitFor(delay * 6);
+        waitFor(delay * 3);
 
         try {
             {
@@ -780,9 +780,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer4.start();
         waitFor(delay);
 
-        serviceHolder5.getConfiguration().setSerSuperPeerTimeout(delay * 2);
+        serviceHolder5.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer5.start();
-        waitFor(delay * 6);
+        waitFor(delay * 3);
 
         fileSharer.start();
         waitFor(delay);
@@ -1023,9 +1023,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         waitFor(delay);
 
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay * 2);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer4.start();
-        waitFor(delay * 6);
+        waitFor(delay * 3);
 
         fileSharer5.start();
         waitFor(delay);
@@ -1033,9 +1033,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer6.start();
         waitFor(delay);
 
-        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay * 2);
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer.start();
-        waitFor(delay * 6);
+        waitFor(delay * 3);
 
         try {
             {
@@ -1286,9 +1286,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         waitFor(delay);
 
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay * 2);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer4.start();
-        waitFor(delay * 6);
+        waitFor(delay * 3);
 
         fileSharer5.start();
         waitFor(delay);
@@ -1297,9 +1297,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         waitFor(delay);
 
         serviceHolder7.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay * 2);
+        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer7.start();
-        waitFor(delay * 6);
+        waitFor(delay * 3);
 
         fileSharer8.start();
         waitFor(delay);
@@ -1307,9 +1307,9 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer9.start();
         waitFor(delay);
 
-        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay * 2);
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer.start();
-        waitFor(delay * 6);
+        waitFor(delay * 3);
 
         try {
             {
@@ -1553,7 +1553,7 @@ public class BootstrappingTestCase extends BaseTestCase {
     }
 
     @Test(priority = 11)
-    public void testResourceIndexPopulation() {
+    public void testResourcePopulation() {
         logger.info("Running Bootstrapping Test 11 - Resource index population");
 
         FileSharer fileSharer1 = new FileSharer();
@@ -1671,48 +1671,54 @@ public class BootstrappingTestCase extends BaseTestCase {
         resourceIndices.addOwnedResource("Despicable Me 3", null);
 
         serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder1.getConfiguration().setGossipingInterval(delay);
+        serviceHolder1.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder1.getConfiguration().setHeartbeatInterval(delay);
         fileSharer1.start();
-        waitFor(delay * 8);
+        waitFor(delay * 2);
 
+        serviceHolder2.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer2.start();
         waitFor(delay);
 
+        serviceHolder3.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer3.start();
         waitFor(delay);
 
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay * 2);
-        serviceHolder4.getConfiguration().setGossipingInterval(delay);
+        serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder4.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder4.getConfiguration().setHeartbeatInterval(delay);
         fileSharer4.start();
-        waitFor(delay * 8);
+        waitFor(delay * 3);
 
+        serviceHolder5.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer5.start();
         waitFor(delay);
 
+        serviceHolder6.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer6.start();
         waitFor(delay);
 
         serviceHolder7.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
-        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay * 2);
-        serviceHolder7.getConfiguration().setGossipingInterval(delay);
+        serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder7.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder7.getConfiguration().setHeartbeatInterval(delay);
         fileSharer7.start();
-        waitFor(delay * 8);
+        waitFor(delay * 3);
 
+        serviceHolder8.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer8.start();
         waitFor(delay);
 
+        serviceHolder9.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer9.start();
         waitFor(delay);
 
-        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay * 2);
-        serviceHolder.getConfiguration().setGossipingInterval(delay);
+        serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
+        serviceHolder.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder.getConfiguration().setHeartbeatInterval(delay);
         fileSharer.start();
-        waitFor(delay * 8);
+        waitFor(delay * 3);
 
         try {
             {

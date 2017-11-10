@@ -57,16 +57,16 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
         waitFor(delay);
 
         message1 = Message.parse("0049 " + MessageType.SER.getValue() + " 127.0.0.1 "
-                + peerListeningPort1 + " \"Lord of the Rings\" "
+                + peerListeningPort1 + " 0 \"Lord of the Rings\" "
                 + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1));
         message2 = Message.parse("0049 " + MessageType.SER.getValue() + " 127.0.0.1 "
-                + peerListeningPort1 + " Cars "
+                + peerListeningPort1 + " 1 Cars "
                 + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1));
         message3 = Message.parse("0049 " + MessageType.SER.getValue() + " 127.0.0.1 "
-                + peerListeningPort1 + " \"Iron Man\" "
+                + peerListeningPort1 + " 2 \"Iron Man\" "
                 + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1));
         message4 = Message.parse("0049 " + MessageType.SER.getValue() + " 127.0.0.1 "
-                + peerListeningPort1 + " \"Iron Man 2\" "
+                + peerListeningPort1 + " 3 \"Iron Man 2\" "
                 + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1));
     }
 

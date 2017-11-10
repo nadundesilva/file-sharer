@@ -230,7 +230,7 @@ public class RouterTestCase extends BaseTestCase {
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
-        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.INACTIVE);
+        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.PENDING_INACTIVATION);
     }
 
     @Test(priority = 2)
@@ -256,7 +256,7 @@ public class RouterTestCase extends BaseTestCase {
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
-        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.INACTIVE);
+        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.PENDING_INACTIVATION);
     }
 
     @Test(priority = 2)
@@ -285,7 +285,7 @@ public class RouterTestCase extends BaseTestCase {
                 Integer.toString(Integer.parseInt(usedMessage.getData(MessageIndexes.SER_HOP_COUNT)) + 1));
 
         Mockito.verify(router, Mockito.times(0)).runTasksOnMessageReceived(fromNode, usedMessage);
-        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.INACTIVE);
+        Mockito.verify(fromNode, Mockito.times(1)).setState(NodeState.PENDING_INACTIVATION);
     }
 
     @Test(priority = 3)

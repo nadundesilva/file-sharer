@@ -23,6 +23,7 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
 
     private OrdinaryPeerRoutingTable routingTable;
     private UnstructuredFloodingRoutingStrategy unstructuredFloodingRoutingStrategy;
+    private Message message;
     private Node fromNode;
     private Node node1;
     private Node node2;
@@ -35,6 +36,7 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
         unstructuredFloodingRoutingStrategy = new UnstructuredFloodingRoutingStrategy(serviceHolder);
 
         routingTable = Mockito.spy(new OrdinaryPeerRoutingTable(serviceHolder));
+        message = Message.parse("0047 SER 129.82.62.142 5070 0 \"Lord of the Rings\" 0");
 
         fromNode = Mockito.mock(Node.class);
         node1 = Mockito.mock(Node.class);
@@ -66,7 +68,7 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
         logger.info("Running Unstructured Flooding Routing Strategy Test 02 - Get forwarding nodes");
 
         Set<Node> forwardingNodes = unstructuredFloodingRoutingStrategy.getForwardingNodes(routingTable,
-                fromNode, Mockito.mock(Message.class));
+                fromNode, message);
 
         Assert.assertEquals(forwardingNodes.size(), 3);
         Assert.assertTrue(forwardingNodes.contains(node1));
@@ -80,7 +82,7 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
                 "in the starting node");
 
         Set<Node> forwardingNodes = unstructuredFloodingRoutingStrategy.getForwardingNodes(routingTable,
-                null, Mockito.mock(Message.class));
+                null, message);
 
         Assert.assertEquals(forwardingNodes.size(), 4);
         Assert.assertTrue(forwardingNodes.contains(fromNode));
@@ -97,7 +99,7 @@ public class UnstructuredFloodingRoutingStrategyTestCase extends BaseTestCase {
         Mockito.when(node1.isActive()).thenReturn(false);
 
         Set<Node> forwardingNodes = unstructuredFloodingRoutingStrategy.getForwardingNodes(routingTable,
-                fromNode, Mockito.mock(Message.class));
+                fromNode, message);
 
         Assert.assertEquals(forwardingNodes.size(), 2);
         Assert.assertTrue(forwardingNodes.contains(node2));

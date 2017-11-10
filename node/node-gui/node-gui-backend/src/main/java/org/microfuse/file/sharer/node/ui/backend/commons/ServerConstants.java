@@ -8,9 +8,6 @@ public class ServerConstants {
     public static final String WEB_APP_DIRECTORY = "app";
     public static final String WEB_APP_API_URL = "/api";
 
-    public static final String CONSOLE_ARGUMENT_KEY_WEB_APP_PORT = "--ui-port";
-    public static final String CONSOLE_ARGUMENT_KEY_TRACER = "--tracer";
-
     private ServerConstants() {   // Preventing from being initiated
     }
 }

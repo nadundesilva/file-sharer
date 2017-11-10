@@ -16,14 +16,12 @@ import org.microfuse.file.sharer.node.core.communication.routing.strategy.Routin
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
-import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.rmi.RemoteException;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,7 +41,6 @@ public class ServiceHolder {
     private ResourceIndex resourceIndex;
     private OverlayNetworkManager overlayNetworkManager;
     private QueryManager queryManager;
-    private TraceManager traceManager;
 
     private Lock peerTypeLock;
     private Lock configurationLock;
@@ -51,7 +48,6 @@ public class ServiceHolder {
     private Lock resourceIndexLock;
     private Lock overlayNetworkManagerLock;
     private Lock queryManagerLock;
-    private Lock traceManagerLock;
 
     private Thread automatedGarbageCollectionThread;
     private boolean automatedGarbageCollectionEnabled;
@@ -65,7 +61,6 @@ public class ServiceHolder {
         resourceIndexLock = new ReentrantLock();
         overlayNetworkManagerLock = new ReentrantLock();
         queryManagerLock = new ReentrantLock();
-        traceManagerLock = new ReentrantLock();
 
         automatedGarbageCollectionEnabled = false;
         automatedGarbageCollectionLock = new ReentrantLock();
@@ -179,16 +174,6 @@ public class ServiceHolder {
             routerLock.unlock();
         }
         logger.info("Promoted to super peer");
-
-        // Notifying the tracer
-        Tracer tracer = getTraceManager().getTracerReference();
-        if (tracer != null) {
-            try {
-                tracer.promoteToSuperPeer(getConfiguration().getIp(), getConfiguration().getPeerListeningPort());
-            } catch (RemoteException e) {
-                logger.warn("Failed to notify the tracer of the promotion", e);
-            }
-        }
     }
 
     /**
@@ -219,16 +204,6 @@ public class ServiceHolder {
             routerLock.unlock();
         }
         logger.info("Demoted to ordinary peer");
-
-        // Notifying the tracer
-        Tracer tracer = getTraceManager().getTracerReference();
-        if (tracer != null) {
-            try {
-                tracer.demoteToOrdinaryPeer(getConfiguration().getIp(), getConfiguration().getPeerListeningPort());
-            } catch (RemoteException e) {
-                logger.warn("Failed to notify the tracer of the demotion", e);
-            }
-        }
     }
 
     /**
@@ -288,14 +263,6 @@ public class ServiceHolder {
             logger.info("Cleared query manager");
         } finally {
             queryManagerLock.unlock();
-        }
-
-        traceManagerLock.lock();
-        try {
-            traceManager = null;
-            logger.info("Cleared tracing manager");
-        } finally {
-            traceManagerLock.unlock();
         }
     }
 
@@ -398,25 +365,6 @@ public class ServiceHolder {
             return queryManager;
         } finally {
             queryManagerLock.unlock();
-        }
-    }
-
-    /**
-     * Get the tracing manager singleton instance.
-     * This is not a singleton.
-     * However this is the instance used by all classes in the file sharer.
-     *
-     * @return The Tracing Manager
-     */
-    public TraceManager getTraceManager() {
-        traceManagerLock.lock();
-        try {
-            if (traceManager == null) {
-                traceManager = new TraceManager(this);
-            }
-            return traceManager;
-        } finally {
-            traceManagerLock.unlock();
         }
     }
 

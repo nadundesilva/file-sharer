@@ -7,14 +7,12 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.microfuse.file.sharer.node.commons.tracing.TracingMode;
 import org.microfuse.file.sharer.node.ui.backend.commons.ServerConstants;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ConfigEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.OverlayNetworkEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.QueryEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ResourcesEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.SystemEndPoint;
-import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.TraceEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.filter.CORSFilter;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.slf4j.Logger;
@@ -25,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Objects;
 import javax.servlet.ServletException;
 
 /**
@@ -38,35 +35,12 @@ public class ServerLauncher {
     private static final String CORS_FILTER_NAME = "cors-filter";
     private static final Class<?>[] endpointClassList = new Class<?>[]{
             ConfigEndPoint.class, QueryEndPoint.class, OverlayNetworkEndPoint.class, ResourcesEndPoint.class,
-            SystemEndPoint.class, TraceEndPoint.class
+            SystemEndPoint.class
     };
 
     public static void main(String[] args) {
-        int webAppPort = ServerConstants.WEB_APP_PORT;
-        boolean isTracer = false;
-
-        // Reading console parameters
-        for (int i = 0; i < args.length;) {
-            if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_WEB_APP_PORT)) {
-                String argument = args[i + 1];
-                try {
-                    webAppPort = Integer.parseInt(argument);
-                    i += 2;
-                } catch (NumberFormatException e) {
-                    logger.warn("Invalid web app port " + argument + " provided. Using " + webAppPort + " instead.");
-                }
-            } else if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_TRACER)) {
-                isTracer = true;
-                i += 2;
-            }
-        }
-
-        if (isTracer) {
-            FileSharerHolder.getFileSharer().getServiceHolder().getTraceManager().changeMode(TracingMode.TRACER);
-        } else {
-            FileSharerHolder.getFileSharer().start();       // Instantiating the file sharer
-        }
-        startTomcatServer(webAppPort);
+        FileSharerHolder.getFileSharer().start();           // Instantiating the file sharer
+        startTomcatServer(ServerConstants.WEB_APP_PORT);
     }
 
     private static void startTomcatServer(int port) {

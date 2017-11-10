@@ -24,6 +24,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
 
     private RoutingTable routingTable;
     private UnstructuredRandomWalkRoutingStrategy unstructuredRandomWalkRoutingStrategy;
+    private Message message;
     private Node fromNode;
     private Node node1;
     private Node node2;
@@ -36,6 +37,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
         unstructuredRandomWalkRoutingStrategy = new UnstructuredRandomWalkRoutingStrategy(serviceHolder);
 
         routingTable = Mockito.spy(new OrdinaryPeerRoutingTable(serviceHolder));
+        message = Message.parse("0047 SER 129.82.62.142 5070 0 \"Lord of the Rings\" 0");
 
         fromNode = Mockito.mock(Node.class);
         node1 = Mockito.mock(Node.class);
@@ -66,7 +68,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
         logger.info("Running Unstructured Random Walk Routing Strategy Test 02 - Get forwarding nodes");
 
         Set<Node> forwardingNodes = unstructuredRandomWalkRoutingStrategy.getForwardingNodes(routingTable,
-                fromNode, Mockito.mock(Message.class));
+                fromNode, message);
 
         Assert.assertEquals(forwardingNodes.size(), 1);
         Assert.assertTrue(forwardingNodes.contains(node1) || forwardingNodes.contains(node2) ||
@@ -79,7 +81,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
                 "in the starting node");
 
         Set<Node> forwardingNodes = unstructuredRandomWalkRoutingStrategy.getForwardingNodes(routingTable,
-                null, Mockito.mock(Message.class));
+                null, message);
 
         Assert.assertEquals(forwardingNodes.size(), 1);
         Assert.assertTrue(forwardingNodes.contains(fromNode) || forwardingNodes.contains(node1) ||
@@ -94,7 +96,7 @@ public class UnstructuredRandomWalkRoutingStrategyTestCase extends BaseTestCase 
         Mockito.when(node1.isActive()).thenReturn(false);
 
         Set<Node> forwardingNodes = unstructuredRandomWalkRoutingStrategy.getForwardingNodes(routingTable,
-                fromNode, Mockito.mock(Message.class));
+                fromNode, message);
 
         Assert.assertEquals(forwardingNodes.size(), 1);
         Assert.assertTrue(forwardingNodes.contains(node2) || forwardingNodes.contains(node3));
