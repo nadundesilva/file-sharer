@@ -4,6 +4,7 @@ import com.google.common.io.Closeables;
 import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandlerType;
 import org.microfuse.file.sharer.node.core.communication.messaging.Message;
+import org.microfuse.file.sharer.node.core.communication.messaging.TCPMessage;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +61,10 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
                             while ((inputLine = in.readLine()) != null) {
                                 message.append(inputLine);
                             }
+
+                            TCPMessage tcpMessage = TCPMessage.parse(message.toString());
                             runTasksOnMessageReceived(
-                                    clientSocket.getInetAddress().getHostAddress(),
-                                    clientSocket.getPort(),
-                                    Message.parse(message.toString())
+                                    tcpMessage.getSourceIP(), tcpMessage.getSourcePort(), tcpMessage.getMessage()
                             );
                         }
                     } catch (IOException e) {
@@ -109,17 +110,22 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
 
     @Override
     public void sendMessage(String ip, int port, Message message) {
+        TCPMessage tcpMessage = new TCPMessage();
+        tcpMessage.setSourceIP(serviceHolder.getConfiguration().getIp());
+        tcpMessage.setSourcePort(serviceHolder.getConfiguration().getPeerListeningPort());
+        tcpMessage.setMessage(message);
+
         try (
                 Socket sendSocket = new Socket(ip, port);
                 PrintWriter out = new PrintWriter(new OutputStreamWriter(sendSocket.getOutputStream(),
                         Constants.DEFAULT_CHARSET), true)
 
         ) {
-            out.write(message.toString());
-            logger.info("Message " + message.toString() + " sent to node " + ip + ":" + port);
+            out.write(tcpMessage.toString());
+            logger.info("Message " + tcpMessage.toString() + " sent to node " + ip + ":" + port);
         } catch (IOException e) {
-            logger.info("Failed to send message " + message.toString() + " to " + ip + ":" + port, e);
-            runTasksOnMessageSendFailed(ip, port, message);
+            logger.info("Failed to send message " + tcpMessage.toString() + " to " + ip + ":" + port, e);
+            runTasksOnMessageSendFailed(ip, port, tcpMessage.getMessage());
         }
     }
 

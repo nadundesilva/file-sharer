@@ -12,6 +12,7 @@ public class Constants {
     public static final int THREAD_DISABLE_TIMEOUT = 1000;
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+    public static final String LOCALHOST = "127.0.0.1";
     public static final int RMI_REGISTRY_PORT = 12452;
     public static final String RMI_REGISTRY_ENTRY_TRACER = "tracer";
     public static final String RMI_REGISTRY_ENTRY_NETWORK_HANDLER = "network_handler";

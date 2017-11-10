@@ -72,8 +72,8 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                                     + ":" + incomingPacket.getPort() + " : " + messageString);
 
                             UDPMessage udpMessage = UDPMessage.parse(messageString);
-                            String fromIP = udpMessage.getIp();
-                            int fromPort = udpMessage.getPort();
+                            String fromIP = udpMessage.getSourceIP();
+                            int fromPort = udpMessage.getSourcePort();
 
                             boolean isRelevant = false;
                             synchronized (this) {
@@ -108,8 +108,8 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                             if (isRelevant) {
                                 UDPMessage ackMessage = new UDPMessage();
                                 ackMessage.setType(UDPMessageType.DATA_ACK);
-                                ackMessage.setIp(serviceHolder.getConfiguration().getIp());
-                                ackMessage.setPort(serviceHolder.getConfiguration().getPeerListeningPort());
+                                ackMessage.setSourceIP(serviceHolder.getConfiguration().getIp());
+                                ackMessage.setSourcePort(serviceHolder.getConfiguration().getPeerListeningPort());
                                 ackMessage.setSequenceNumber(udpMessage.getSequenceNumber());
 
                                 sendMessage(fromIP, fromPort, ackMessage);
@@ -158,8 +158,8 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
     public void sendMessage(String ip, int port, Message message) {
         UDPMessage udpMessage = new UDPMessage();
         udpMessage.setType(UDPMessageType.DATA);
-        udpMessage.setIp(serviceHolder.getConfiguration().getIp());
-        udpMessage.setPort(serviceHolder.getConfiguration().getPeerListeningPort());
+        udpMessage.setSourceIP(serviceHolder.getConfiguration().getIp());
+        udpMessage.setSourcePort(serviceHolder.getConfiguration().getPeerListeningPort());
         udpMessage.setSequenceNumber(sequenceNumber++);
         udpMessage.setMessage(message);
 

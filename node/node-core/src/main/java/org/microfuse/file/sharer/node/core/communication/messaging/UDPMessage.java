@@ -10,8 +10,8 @@ import java.util.Objects;
  */
 public class UDPMessage implements Cloneable {
     private UDPMessageType type;
-    private String ip;
-    private int port;
+    private String sourceIP;
+    private int sourcePort;
     private long sequenceNumber;
     private Message message;
     private int usedRetriesCount;
@@ -32,20 +32,20 @@ public class UDPMessage implements Cloneable {
         this.type = type;
     }
 
-    public String getIp() {
-        return ip;
+    public String getSourceIP() {
+        return sourceIP;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setSourceIP(String sourceIP) {
+        this.sourceIP = sourceIP;
     }
 
-    public int getPort() {
-        return port;
+    public int getSourcePort() {
+        return sourcePort;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setSourcePort(int sourcePort) {
+        this.sourcePort = sourcePort;
     }
 
     public long getSequenceNumber() {
@@ -81,10 +81,10 @@ public class UDPMessage implements Cloneable {
             clone = new UDPMessage();
         }
         clone.setType(type);
-        clone.setIp(ip);
-        clone.setPort(port);
+        clone.setSourceIP(sourceIP);
+        clone.setSourcePort(sourcePort);
         clone.setSequenceNumber(sequenceNumber);
-        clone.setMessage(message);
+        clone.setMessage((message != null ? message.clone() : null));
         clone.setUsedRetriesCount(usedRetriesCount);
         return clone;
     }
@@ -104,11 +104,12 @@ public class UDPMessage implements Cloneable {
 
         // Getting the message IP
         int secondSeparatorIndex = messageString.indexOf(MESSAGE_DATA_SEPARATOR, firstSeparatorIndex + 1);
-        udpMessage.setIp(messageString.substring(firstSeparatorIndex + 1, secondSeparatorIndex));
+        udpMessage.setSourceIP(messageString.substring(firstSeparatorIndex + 1, secondSeparatorIndex));
 
-        // Getting the message port
+        // Getting the message sourcePort
         int thirdSeparatorIndex = messageString.indexOf(MESSAGE_DATA_SEPARATOR, secondSeparatorIndex + 1);
-        udpMessage.setPort(Integer.parseInt(messageString.substring(secondSeparatorIndex + 1, thirdSeparatorIndex)));
+        udpMessage.setSourcePort(
+                Integer.parseInt(messageString.substring(secondSeparatorIndex + 1, thirdSeparatorIndex)));
 
         // Getting the sequence number
         int forthSeparatorIndex = messageString.indexOf(MESSAGE_DATA_SEPARATOR, thirdSeparatorIndex + 1);
@@ -128,8 +129,9 @@ public class UDPMessage implements Cloneable {
 
     @Override
     public String toString() {
-        return type.toString() + MESSAGE_DATA_SEPARATOR + ip + MESSAGE_DATA_SEPARATOR + port + MESSAGE_DATA_SEPARATOR
-                + sequenceNumber + (message != null ? MESSAGE_DATA_SEPARATOR + message.toString() : "");
+        return type.toString() + MESSAGE_DATA_SEPARATOR + sourceIP + MESSAGE_DATA_SEPARATOR + sourcePort
+                + MESSAGE_DATA_SEPARATOR + sequenceNumber
+                + (message != null ? MESSAGE_DATA_SEPARATOR + message.toString() : "");
     }
 
     @Override
@@ -137,8 +139,8 @@ public class UDPMessage implements Cloneable {
         if (object != null && object instanceof UDPMessage) {
             UDPMessage messageObject = (UDPMessage) object;
             return Objects.equals(messageObject.getType(), getType())
-                    && Objects.equals(messageObject.getIp(), getIp())
-                    && Objects.equals(messageObject.getPort(), getPort())
+                    && Objects.equals(messageObject.getSourceIP(), getSourceIP())
+                    && Objects.equals(messageObject.getSourcePort(), getSourcePort())
                     && Objects.equals(messageObject.getSequenceNumber(), getSequenceNumber());
         }
         return false;
@@ -146,6 +148,7 @@ public class UDPMessage implements Cloneable {
 
     @Override
     public int hashCode() {
-        return (getType().toString() + " " + getSequenceNumber()).hashCode();
+        return (getType().toString() + MESSAGE_DATA_SEPARATOR + getSourceIP() + MESSAGE_DATA_SEPARATOR
+                + getSourcePort() + MESSAGE_DATA_SEPARATOR + getSequenceNumber()).hashCode();
     }
 }

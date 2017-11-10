@@ -56,21 +56,18 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
 
                 // Retrieving reference to RMI registry
                 registry = LocateRegistry.getRegistry(
-                        serviceHolder.getConfiguration().getIp(),
+                        Constants.LOCALHOST,
                         Constants.RMI_REGISTRY_PORT
                 );
 
                 // Rebinding this object in the RMI registry
-                try {
-                    Remote remote = UnicastRemoteObject.exportObject(this, port);
-                    rmiRegistryEntry = getRMIRegistryEntry(
-                            serviceHolder.getConfiguration().getIp(),
-                            serviceHolder.getConfiguration().getPeerListeningPort()
-                    );
-                    registry.rebind(rmiRegistryEntry, remote);
-                } catch (RemoteException e) {
-                    logger.warn("Failed to export remote", e);
-                }
+                Remote remote = UnicastRemoteObject.exportObject(this, port);
+                rmiRegistryEntry = getRMIRegistryEntry(
+                        serviceHolder.getConfiguration().getIp(),
+                        serviceHolder.getConfiguration().getPeerListeningPort()
+                );
+                registry.rebind(rmiRegistryEntry, remote);
+
                 logger.info("Bind RMI registry item " + rmiRegistryEntry
                         + " with object from class " + this.getClass());
             } catch (RemoteException e) {
@@ -137,14 +134,6 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
             logger.info("Un-exported object");
         } catch (NoSuchObjectException e) {
             logger.warn("Failed to un-export object", e);
-        }
-        if (registry != null) {
-            try {
-                registry.unbind(rmiRegistryEntry);
-                logger.info("Unbind RMI registry item " + rmiRegistryEntry);
-            } catch (RemoteException | NotBoundException e) {
-                logger.warn("Failed to stop listening", e);
-            }
         }
     }
 
