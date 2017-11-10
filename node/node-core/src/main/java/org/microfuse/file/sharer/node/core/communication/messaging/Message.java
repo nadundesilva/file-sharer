@@ -51,6 +51,10 @@ public class Message implements Cloneable {
         data.add(index, dataItem);
     }
 
+    public void removeData(int index) {
+        data.remove(index);
+    }
+
     @Override
     public Message clone() {
         Message clone;

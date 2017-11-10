@@ -141,7 +141,7 @@ public class Router implements NetworkHandlerListener {
 
         // Marking the node as inactive
         if (receivingNode != null) {
-            receivingNode.setState(NodeState.INACTIVE);
+            receivingNode.setState(NodeState.PENDING_INACTIVATION);
         }
 
         // Creating new node object if it is not present in the routing table
@@ -177,7 +177,6 @@ public class Router implements NetworkHandlerListener {
 
                 if (retry) {
                     logger.info("Retrying to send failed message " + message.toString());
-                    routingStrategy.notifyFailedMessages(message, receivingNode);
                     route(message);
                 }
             }

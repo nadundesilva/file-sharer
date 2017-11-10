@@ -193,7 +193,7 @@ public abstract class RoutingTable {
         try {
             isSuccessful = unstructuredNetworkNodes.add(node);
             if (isSuccessful) {
-                logger.debug("Added node " + node.toString() + " to unstructured network.");
+                logger.info("Added node " + node.toString() + " to unstructured network.");
 
                 // Notifying the tracer
                 Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
@@ -209,7 +209,7 @@ public abstract class RoutingTable {
                     }
                 }
             } else {
-                logger.debug("Failed to add node " + node.toString() + " to unstructured network.");
+                logger.info("Failed to add node " + node.toString() + " to unstructured network.");
             }
         } finally {
             unstructuredNetworkNodesLock.writeLock().unlock();
@@ -229,7 +229,7 @@ public abstract class RoutingTable {
         try {
             isSuccessful = unstructuredNetworkNodes.remove(node);
             if (isSuccessful) {
-                logger.debug("Removed node " + node.toString() + " from unstructured network.");
+                logger.info("Removed node " + node.toString() + " from unstructured network.");
 
                 // Notifying the tracer
                 Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
@@ -245,7 +245,7 @@ public abstract class RoutingTable {
                     }
                 }
             } else {
-                logger.debug("Failed to remove node " + node.toString() + " from unstructured network.");
+                logger.info("Failed to remove node " + node.toString() + " from unstructured network.");
             }
         } finally {
             unstructuredNetworkNodesLock.writeLock().unlock();
@@ -259,7 +259,7 @@ public abstract class RoutingTable {
                 .collect(Collectors.toSet());
 
         garbageNodes.forEach(node -> {
-            logger.debug("Removed inactive node " + node.toString() + " from the routing table");
+            logger.info("Removed inactive node " + node.toString() + " from the routing table");
             removeFromAll(node.getIp(), node.getPort());
         });
     }

@@ -79,11 +79,11 @@ public class SuperPeerFloodingRoutingStrategy extends RoutingStrategy {
                 .collect(Collectors.toSet());
 
         // Removing nodes to which this message had been already sent
-        forwardingNodes = filterUnCachedNodes(message, new HashSet<>(forwardingNodes));
+        forwardingNodes = filterUnCachedNodes(message, fromNode, new HashSet<>(forwardingNodes));
 
         // Sending through the unstructured network if no nodes are found
         if (forwardingNodes.size() == 0) {
-            forwardingNodes = filterUnCachedNodes(message, routingTable.getAllUnstructuredNetworkNodes());
+            forwardingNodes = filterUnCachedNodes(message, fromNode, routingTable.getAllUnstructuredNetworkNodes());
         }
 
         return forwardingNodes;

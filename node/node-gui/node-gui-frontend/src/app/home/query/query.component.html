@@ -15,6 +15,10 @@
         </mat-select>
       </mat-form-field>
     </div>
+    <div fxFlex>
+      <button mat-button *ngIf="runningQueries && runningQueries.length > 0" (click)="clearResources()"><mat-icon>clear_all
+      1</mat-icon> Clear Resources</button>
+    </div>
   </div>
   <mat-card class="mat-elevation-z8" *ngIf="queryResults && !queryResults.isEmpty()">
     <mat-table #table [dataSource]="queryResults">

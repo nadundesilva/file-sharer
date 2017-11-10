@@ -11,6 +11,7 @@ import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -55,6 +56,16 @@ public class QueryEndPoint {
         QueryManager queryManager = FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager();
         List<AggregatedResource> aggregatedResourceList = queryManager.getQueryResults(queryString);
         response.put(APIConstants.DATA, aggregatedResourceList);
+
+        String jsonString = new Gson().toJson(response);
+        return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
+    }
+
+    @DELETE
+    public Response clearResults() {
+        Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
+
+        FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager().clearQueryResults();
 
         String jsonString = new Gson().toJson(response);
         return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();

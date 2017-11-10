@@ -87,12 +87,12 @@ public class ServiceHolder {
                         }
                         collectGarbage();
                     }
-                    logger.debug("Stopped gossiping");
+                    logger.info("Stopped gossiping");
                 });
                 automatedGarbageCollectionThread.setPriority(Thread.MIN_PRIORITY);
                 automatedGarbageCollectionThread.setDaemon(true);
                 automatedGarbageCollectionThread.start();
-                logger.debug("Started automated garbage collection");
+                logger.info("Started automated garbage collection");
             }
         } finally {
             automatedGarbageCollectionLock.unlock();
@@ -120,7 +120,7 @@ public class ServiceHolder {
      * Collect garbage objects.
      */
     public void collectGarbage() {
-        logger.debug("Collecting routing table garbage");
+        logger.info("Collecting routing table garbage");
         routerLock.lock();
         try {
             if (router != null) {
@@ -130,7 +130,7 @@ public class ServiceHolder {
             routerLock.unlock();
         }
 
-        logger.debug("Collecting resource index garbage");
+        logger.info("Collecting resource index garbage");
         resourceIndexLock.lock();
         try {
             if (resourceIndex != null) {
@@ -140,7 +140,7 @@ public class ServiceHolder {
             resourceIndexLock.unlock();
         }
 
-        logger.debug("Collecting routing strategy garbage");
+        logger.info("Collecting routing strategy garbage");
         routerLock.lock();
         try {
             if (router != null) {
@@ -178,7 +178,7 @@ public class ServiceHolder {
         } finally {
             routerLock.unlock();
         }
-        logger.debug("Promoted to super peer");
+        logger.info("Promoted to super peer");
 
         // Notifying the tracer
         Tracer tracer = getTraceManager().getTracerReference();
@@ -218,7 +218,7 @@ public class ServiceHolder {
         } finally {
             routerLock.unlock();
         }
-        logger.debug("Demoted to ordinary peer");
+        logger.info("Demoted to ordinary peer");
 
         // Notifying the tracer
         Tracer tracer = getTraceManager().getTracerReference();
@@ -241,7 +241,7 @@ public class ServiceHolder {
                 router.shutdown();
             }
             router = null;
-            logger.debug("Cleared router");
+            logger.info("Cleared router");
         } finally {
             routerLock.unlock();
         }
@@ -252,7 +252,7 @@ public class ServiceHolder {
                 overlayNetworkManager.cancelSearchForSuperPeer();
             }
             overlayNetworkManager = null;
-            logger.debug("Cleared overlay network manager");
+            logger.info("Cleared overlay network manager");
         } finally {
             overlayNetworkManagerLock.unlock();
         }
@@ -260,7 +260,7 @@ public class ServiceHolder {
         peerTypeLock.lock();
         try {
             peerType = null;
-            logger.debug("Cleared peer type");
+            logger.info("Cleared peer type");
         } finally {
             peerTypeLock.unlock();
         }
@@ -269,7 +269,7 @@ public class ServiceHolder {
         try {
             saveConfigurationToFile(configuration);
             configuration = null;
-            logger.debug("Cleared configuration");
+            logger.info("Cleared configuration");
         } finally {
             configurationLock.unlock();
         }
@@ -277,7 +277,7 @@ public class ServiceHolder {
         resourceIndexLock.lock();
         try {
             resourceIndex = null;
-            logger.debug("Cleared resource index");
+            logger.info("Cleared resource index");
         } finally {
             resourceIndexLock.unlock();
         }
@@ -285,7 +285,7 @@ public class ServiceHolder {
         queryManagerLock.lock();
         try {
             queryManager = null;
-            logger.debug("Cleared query manager");
+            logger.info("Cleared query manager");
         } finally {
             queryManagerLock.unlock();
         }
@@ -293,7 +293,7 @@ public class ServiceHolder {
         traceManagerLock.lock();
         try {
             traceManager = null;
-            logger.debug("Cleared tracing manager");
+            logger.info("Cleared tracing manager");
         } finally {
             traceManagerLock.unlock();
         }

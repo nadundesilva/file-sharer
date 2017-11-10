@@ -43,6 +43,7 @@ public class ServerLauncher {
 
     public static void main(String[] args) {
         int webAppPort = ServerConstants.WEB_APP_PORT;
+        boolean isTracer = false;
 
         // Reading console parameters
         for (int i = 0; i < args.length;) {
@@ -55,12 +56,16 @@ public class ServerLauncher {
                     logger.warn("Invalid web app port " + argument + " provided. Using " + webAppPort + " instead.");
                 }
             } else if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_TRACER)) {
-                FileSharerHolder.getFileSharer().getServiceHolder().getTraceManager().changeMode(TracingMode.TRACER);
+                isTracer = true;
                 i += 2;
             }
         }
 
-        FileSharerHolder.getFileSharer().start();       // Instantiating the file sharer
+        if (isTracer) {
+            FileSharerHolder.getFileSharer().getServiceHolder().getTraceManager().changeMode(TracingMode.TRACER);
+        } else {
+            FileSharerHolder.getFileSharer().start();       // Instantiating the file sharer
+        }
         startTomcatServer(webAppPort);
     }
 

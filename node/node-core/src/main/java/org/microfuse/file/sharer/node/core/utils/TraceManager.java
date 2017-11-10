@@ -59,7 +59,7 @@ public class TraceManager implements Tracer {
      */
     public void changeMode(TracingMode mode) {
         if (this.mode != mode) {
-            logger.debug("Changed the tracing mode to " + mode.getValue());
+            logger.info("Changed the tracing mode to " + mode.getValue());
             this.mode = mode;
 
             // Starting/stopping Java RMI serving Tracer
@@ -122,7 +122,7 @@ public class TraceManager implements Tracer {
                 logger.warn("Failed to get hold of the tracer stub", e);
             }
         } else {
-            logger.debug("Ignored request to get tracer reference since this is not a traceable node");
+            logger.info("Ignored request to get tracer reference since this is not a traceable node");
         }
         return tracer;
     }
@@ -131,7 +131,7 @@ public class TraceManager implements Tracer {
      * Start serving tracer in the RMI registry.
      */
     private void startServingTracer() {
-        logger.debug("Starting tracer listening");
+        logger.info("Starting tracer listening");
         if (mode == TracingMode.TRACER) {
             try {
                 if (stub == null) {
@@ -139,13 +139,13 @@ public class TraceManager implements Tracer {
                             this, serviceHolder.getConfiguration().getTracerServePort());
                 }
                 registry.rebind(Constants.RMI_REGISTRY_ENTRY_TRACER, stub);
-                logger.debug("Bind RMI registry item " + Constants.RMI_REGISTRY_ENTRY_TRACER
+                logger.info("Bind RMI registry item " + Constants.RMI_REGISTRY_ENTRY_TRACER
                         + " with object from class " + this.getClass());
             } catch (RemoteException e) {
                 logger.warn("Failed to serve the RMI remote", e);
             }
         } else {
-            logger.debug("Ignored request to serve tracer since this is not a tracer");
+            logger.info("Ignored request to serve tracer since this is not a tracer");
         }
     }
 
@@ -153,22 +153,22 @@ public class TraceManager implements Tracer {
      * Stop serving tracer in the RMI registry.
      */
     private void stopServingTracer() {
-        logger.debug("Stopping tracer listening");
+        logger.info("Stopping tracer listening");
         if (mode == TracingMode.TRACER) {
             try {
                 while (UnicastRemoteObject.unexportObject(this, false)) { }
-                logger.debug("Un-exported object");
+                logger.info("Un-exported object");
             } catch (NoSuchObjectException e) {
                 logger.warn("Failed to un-export object", e);
             }
             try {
                 registry.unbind(Constants.RMI_REGISTRY_ENTRY_TRACER);
-                logger.debug("Unbind RMI registry item " + Constants.RMI_REGISTRY_ENTRY_TRACER);
+                logger.info("Unbind RMI registry item " + Constants.RMI_REGISTRY_ENTRY_TRACER);
             } catch (NotBoundException | RemoteException e) {
                 logger.warn("Failed to stop serving tracer");
             }
         } else {
-            logger.debug("Ignored request to stop serve tracer since this is not a tracer");
+            logger.info("Ignored request to stop serve tracer since this is not a tracer");
         }
     }
 
@@ -189,7 +189,7 @@ public class TraceManager implements Tracer {
         } else {
             network.getNode(ip, port).setPeerType(PeerType.ORDINARY_PEER);
         }
-        logger.debug("Registered new node " + ip + ":" + "port");
+        logger.info("Registered new node " + ip + ":" + "port");
     }
 
     @Override

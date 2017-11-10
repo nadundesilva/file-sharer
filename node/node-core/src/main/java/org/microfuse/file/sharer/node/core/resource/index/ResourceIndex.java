@@ -12,11 +12,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -191,9 +190,22 @@ public class ResourceIndex {
     protected Set<Resource> matchResourcesWithName(Collection<Resource> resources, String resourceName) {
         return resources.stream().parallel()
                 .filter(resource -> {
-                    Pattern pattern = Pattern.compile("(\\w|^)" + resourceName + "(\\s|$)");
-                    Matcher matcher = pattern.matcher(resource.getName());
-                    return matcher.find();
+                    String[] resourceTokens = resource.getName().toLowerCase().split(" ");
+                    String[] queryNameTokens = resourceName.toLowerCase().split(" ");
+
+                    for (int i = 0; i < queryNameTokens.length; i++) {
+                        boolean tokenFound = false;
+                        for (int j = 0; j < resourceTokens.length; j++) {
+                            if (Objects.equals(queryNameTokens[i], resourceTokens[j])) {
+                                tokenFound = true;
+                                break;
+                            }
+                        }
+                        if (!tokenFound) {
+                            return false;
+                        }
+                    }
+                    return true;
                 })
                 .collect(Collectors.toSet());
     }

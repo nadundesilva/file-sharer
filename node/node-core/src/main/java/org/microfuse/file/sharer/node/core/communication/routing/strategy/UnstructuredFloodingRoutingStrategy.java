@@ -39,6 +39,6 @@ public class UnstructuredFloodingRoutingStrategy extends RoutingStrategy {
                 .filter(Node::isActive)
                 .collect(Collectors.toSet());
 
-        return filterUnCachedNodes(message, new HashSet<>(forwardingNodes));
+        return filterUnCachedNodes(message, fromNode, new HashSet<>(forwardingNodes));
     }
 }

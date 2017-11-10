@@ -257,7 +257,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
             }
             isSuccessful = superPeerNetworkNodes.add(node);
             if (isSuccessful) {
-                logger.debug("Added node " + node.toString() + " to super peer network.");
+                logger.info("Added node " + node.toString() + " to super peer network.");
 
                 // Notifying the tracer
                 Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
@@ -273,7 +273,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
                     }
                 }
             } else {
-                logger.debug("Failed to add node " + node.toString() + " to super peer network.");
+                logger.info("Failed to add node " + node.toString() + " to super peer network.");
             }
         } finally {
             superPeerNetworkNodesLock.writeLock().unlock();
@@ -293,7 +293,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
         try {
             isSuccessful = superPeerNetworkNodes.remove(node);
             if (isSuccessful) {
-                logger.debug("Removed node " + node.toString() + " from super peer network.");
+                logger.info("Removed node " + node.toString() + " from super peer network.");
 
                 // Notifying the tracer
                 Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
@@ -309,7 +309,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
                     }
                 }
             } else {
-                logger.debug("Failed to remove node " + node.toString() + " from super peer network.");
+                logger.info("Failed to remove node " + node.toString() + " from super peer network.");
             }
         } finally {
             superPeerNetworkNodesLock.writeLock().unlock();
@@ -334,7 +334,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
                 }
                 isSuccessful = assignedOrdinaryPeerNodes.add(node);
                 if (isSuccessful) {
-                    logger.debug("Added node " + node.toString() + " to assigned ordinary peers.");
+                    logger.info("Added node " + node.toString() + " to assigned ordinary peers.");
 
                     // Notifying the tracer
                     Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
@@ -350,11 +350,11 @@ public class SuperPeerRoutingTable extends RoutingTable {
                         }
                     }
                 } else {
-                    logger.debug("Failed to add node " + node.toString() + " to assigned ordinary peers.");
+                    logger.info("Failed to add node " + node.toString() + " to assigned ordinary peers.");
                 }
             } else {
                 isSuccessful = false;
-                logger.debug("Assigned super peer node count already at maximum size "
+                logger.info("Assigned super peer node count already at maximum size "
                         + assignedOrdinaryPeerNodes.size());
             }
         } finally {
@@ -375,7 +375,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
         try {
             isSuccessful = assignedOrdinaryPeerNodes.remove(node);
             if (isSuccessful) {
-                logger.debug("Remove node " + node.toString() + " from assigned ordinary peers.");
+                logger.info("Remove node " + node.toString() + " from assigned ordinary peers.");
 
                 // Notifying the tracer
                 Tracer tracer = serviceHolder.getTraceManager().getTracerReference();
@@ -391,7 +391,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
                     }
                 }
             } else {
-                logger.debug("Failed to remove node " + node.toString() + " from assigned ordinary peers.");
+                logger.info("Failed to remove node " + node.toString() + " from assigned ordinary peers.");
             }
         } finally {
             assignedOrdinaryPeerNodesLock.writeLock().unlock();

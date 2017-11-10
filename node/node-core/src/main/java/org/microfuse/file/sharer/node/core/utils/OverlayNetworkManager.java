@@ -60,7 +60,7 @@ public class OverlayNetworkManager implements RouterListener {
 
     @Override
     public void onMessageReceived(Node fromNode, Message message) {
-        logger.debug("Received message " + message.toString() + " from node " + fromNode.toString());
+        logger.info("Received message " + message.toString() + " from node " + fromNode.toString());
         switch (message.getType()) {
             case REG_OK:
                 handleRegOkMessage(fromNode, message);
@@ -108,22 +108,19 @@ public class OverlayNetworkManager implements RouterListener {
                 handleListSuperPeerConnectionsOkMessage(fromNode, message);
                 break;
             default:
-                logger.debug("Message " + message.toString() + " of unrecognized type ignored");
+                logger.info("Message " + message.toString() + " of unrecognized type ignored");
         }
     }
 
     @Override
     public void onMessageSendFailed(Node toNode, Message message) {
-        logger.debug("Sending message " + message.toString() + " failed to node " + toNode.toString());
+        logger.info("Sending message " + message.toString() + " failed to node " + toNode.toString());
         switch (message.getType()) {
             case JOIN_SUPER_PEER:
                 searchForSuperPeer();
                 break;
-            case SER_SUPER_PEER:
-                selfPromoteSuperPeer(true);
-                break;
             default:
-                logger.debug("Message send failed " + message.toString() + " of unrecognized type ignored");
+                logger.info("Message send failed " + message.toString() + " of unrecognized type ignored");
         }
     }
 
@@ -143,12 +140,12 @@ public class OverlayNetworkManager implements RouterListener {
                         }
                         gossip();
                     }
-                    logger.debug("Stopped gossiping");
+                    logger.info("Stopped gossiping");
                 });
                 gossipingThread.setPriority(Thread.MIN_PRIORITY);
                 gossipingThread.setDaemon(true);
                 gossipingThread.start();
-                logger.debug("Started gossiping");
+                logger.info("Started gossiping");
             }
         } finally {
             gossipingLock.unlock();
@@ -179,7 +176,7 @@ public class OverlayNetworkManager implements RouterListener {
     public void gossip() {
         if (serviceHolder.getRouter().getRoutingTable().getAllUnstructuredNetworkNodes().size() <=
                 serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
-            logger.debug("Gossiping to grow the unstructured network");
+            logger.info("Gossiping to grow the unstructured network");
             List<Node> nodes = new ArrayList<>(serviceHolder.getRouter().getRoutingTable().getAll());
 
             if (nodes.size() > 0) {
@@ -188,7 +185,7 @@ public class OverlayNetworkManager implements RouterListener {
 
                 RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
                 if (routingTable instanceof SuperPeerRoutingTable) {
-                    logger.debug("Gossiping to grow the super peer network");
+                    logger.info("Gossiping to grow the super peer network");
                     List<Node> superPeerNodes =
                             new ArrayList<>(((SuperPeerRoutingTable) routingTable).getAllSuperPeerNetworkNodes());
                     if (superPeerNodes.size() > 0) {
@@ -218,7 +215,7 @@ public class OverlayNetworkManager implements RouterListener {
         }
 
         if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
-            logger.debug("Gossiping to grow the aggregated resources index");
+            logger.info("Gossiping to grow the aggregated resources index");
 
             RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
             if (routingTable instanceof SuperPeerRoutingTable) {
@@ -322,7 +319,7 @@ public class OverlayNetworkManager implements RouterListener {
                     ));
                 } catch (InterruptedException ignored) {
                 }
-                logger.debug("Searching for super peer");
+                logger.info("Searching for super peer");
                 if (serSuperPeerStartThread != null) {
                     RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
                     if (routingTable instanceof OrdinaryPeerRoutingTable) {
@@ -345,7 +342,7 @@ public class OverlayNetworkManager implements RouterListener {
                                     Thread.sleep(serviceHolder.getConfiguration().getSerSuperPeerTimeout());
                                 } catch (InterruptedException ignored) {
                                 }
-                                logger.debug("Search for super peer timed out");
+                                logger.info("Search for super peer timed out");
                                 if (serSuperPeerTimeoutThread != null) {
                                     selfPromoteSuperPeer(false);
                                     serSuperPeerTimeoutThread = null;
@@ -366,8 +363,9 @@ public class OverlayNetworkManager implements RouterListener {
      * Cancel the searching for super peers.
      */
     public void cancelSearchForSuperPeer() {
-        logger.debug("Cancelling search for super peer");
+        logger.info("Cancelling search for super peer");
         if (serSuperPeerStartThread != null) {
+            serSuperPeerStartThread.interrupt();
             Thread thread = serSuperPeerStartThread;
             serSuperPeerStartThread = null;
             thread.interrupt();
@@ -386,11 +384,11 @@ public class OverlayNetworkManager implements RouterListener {
      * @param joinSuperPeers Join the super peers in the super peer cache.
      */
     private void selfPromoteSuperPeer(boolean joinSuperPeers) {
-        logger.debug("Self promote super peer");
+        logger.info("Self promote super peer");
         serviceHolder.promoteToSuperPeer();
 
         if (joinSuperPeers) {
-            logger.debug("Connecting to all the nodes in the super peer cache");
+            logger.info("Connecting to all the nodes in the super peer cache");
             fullSuperPeerCacheLock.lock();
             try {
                 for (Node node : fullSuperPeerCache) {
@@ -453,7 +451,7 @@ public class OverlayNetworkManager implements RouterListener {
                 // Retrying
                 serviceHolder.getConfiguration()
                         .setPeerListeningPort(serviceHolder.getConfiguration().getPeerListeningPort() + 1);
-                logger.debug("Changing peer listening port to "
+                logger.info("Changing peer listening port to "
                         + serviceHolder.getConfiguration().getPeerListeningPort() + " and retrying");
                 register();
                 break;
@@ -512,7 +510,7 @@ public class OverlayNetworkManager implements RouterListener {
                 MessageConstants.UNREG_OK_VALUE_ERROR)) {
             logger.warn("Failed to create unstructured connection with " + fromNode.toString());
         } else {
-            logger.debug("Unknown value " + message.getData(MessageIndexes.UNREG_OK_VALUE) + " in message \""
+            logger.info("Unknown value " + message.getData(MessageIndexes.UNREG_OK_VALUE) + " in message \""
                     + message.toString() + "\"");
         }
     }
@@ -545,7 +543,7 @@ public class OverlayNetworkManager implements RouterListener {
                     superPeerNodeIP = ordinaryPeerRoutingTable.getAssignedSuperPeer().getIp();
                     superPeerNodePort = ordinaryPeerRoutingTable.getAssignedSuperPeer().getPort();
                 } else {
-                    logger.debug("Assigned super peer is dead");
+                    logger.info("Assigned super peer is dead");
                 }
             } else {
                 logger.warn("Inconsistent ordinary peer type and super peer routing table");
@@ -610,7 +608,7 @@ public class OverlayNetworkManager implements RouterListener {
                 MessageConstants.JOIN_OK_VALUE_ERROR)) {
             logger.warn("Failed to create unstructured connection with " + newIP + ":" + newPort);
         } else {
-            logger.debug("Unknown value " + message.getData(MessageIndexes.JOIN_OK_VALUE) + " in message \""
+            logger.info("Unknown value " + message.getData(MessageIndexes.JOIN_OK_VALUE) + " in message \""
                     + message.toString() + "\"");
         }
     }
@@ -662,7 +660,7 @@ public class OverlayNetworkManager implements RouterListener {
                 MessageConstants.LEAVE_OK_VALUE_ERROR)) {
             logger.warn("Failed to disconnect unstructured connection with " + leavingIP + ":" + leavingPort);
         } else {
-            logger.debug("Unknown value " + message.getData(MessageIndexes.LEAVE_OK_VALUE) + " in message \""
+            logger.info("Unknown value " + message.getData(MessageIndexes.LEAVE_OK_VALUE) + " in message \""
                     + message.toString() + "\"");
         }
     }
@@ -1095,7 +1093,7 @@ public class OverlayNetworkManager implements RouterListener {
             listResourcesMessage.setData(MessageIndexes.LIST_RESOURCES_PORT,
                     Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
-            logger.debug("Requesting to list owned resource from node " + node.toString());
+            logger.info("Requesting to list owned resource from node " + node.toString());
             serviceHolder.getRouter().sendMessage(node, listResourcesMessage);
         });
     }
@@ -1114,7 +1112,7 @@ public class OverlayNetworkManager implements RouterListener {
             listUnstructuredConnections.setData(MessageIndexes.LIST_UNSTRUCTURED_CONNECTIONS_PORT,
                     Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
-            logger.debug("Requesting to list unstructured connections from node " + node.toString());
+            logger.info("Requesting to list unstructured connections from node " + node.toString());
             serviceHolder.getRouter().sendMessage(node, listUnstructuredConnections);
         });
     }
@@ -1133,7 +1131,7 @@ public class OverlayNetworkManager implements RouterListener {
             listUnstructuredConnections.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_PORT,
                     Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
 
-            logger.debug("Requesting to list super peer connections from node " + node.toString());
+            logger.info("Requesting to list super peer connections from node " + node.toString());
             serviceHolder.getRouter().sendMessage(node, listUnstructuredConnections);
         });
     }

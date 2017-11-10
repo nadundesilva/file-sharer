@@ -104,6 +104,7 @@
                             <id>file-sharer</id>
                         </program>
                     </programs>
+                    <repositoryLayout>flat</repositoryLayout>
                 </configuration>
                 <executions>
                     <execution>

@@ -54,6 +54,19 @@ export class QueryComponent implements OnInit, OnDestroy {
     }
   }
 
+  clearResources(): void {
+    this.http.delete<ServerResponse<any>>(
+      Constants.API_ENDPOINT + Constants.API_QUERY_ENDPOINT
+    ).subscribe(response => {
+      if (response.status === ServerResponseStatus.SUCCESS) {
+        this.utils.showNotification('Successfully cleared search results');
+        this.fetchRunningQueries();
+      } else {
+        this.utils.showNotification('Error in clearing search results');
+      }
+    });
+  }
+
   private startFetchingRunningQueries(): void {
     this.stopFetchingRunningQueries();
     const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);

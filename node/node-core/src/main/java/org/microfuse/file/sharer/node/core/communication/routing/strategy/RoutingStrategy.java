@@ -1,5 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.routing.strategy;
 
+import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
@@ -129,7 +130,7 @@ public abstract class RoutingStrategy {
                     .collect(Collectors.toSet());
 
             // Removing nodes to which this message had been already routed to
-            forwardingNodes = filterUnCachedNodes(message, forwardingNodes);
+            forwardingNodes = filterUnCachedNodes(message, fromNode, forwardingNodes);
 
             // Selecting a random node
             int forwardNodeIndex = -1;
@@ -178,10 +179,18 @@ public abstract class RoutingStrategy {
      * The current forwarding nodes are added to the cache as well.
      *
      * @param message         The message to be cached
+     * @param fromNode        The node which sent the message
      * @param forwardingNodes The nodes to be filtered
      * @return The nodes which are not currently in the cache
      */
-    protected Set<Node> filterUnCachedNodes(Message message, Set<Node> forwardingNodes) {
+    protected Set<Node> filterUnCachedNodes(Message message, Node fromNode, Set<Node> forwardingNodes) {
+        message = message.clone();
+        if (message.getType() == MessageType.SER) {
+            message.removeData(MessageIndexes.SER_HOP_COUNT);
+        } else if (message.getType() == MessageType.SER_SUPER_PEER) {
+            message.removeData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT);
+        }
+
         CacheEntry cacheEntry = null;
         MessageType messageType = message.getType();
         if (messageType == MessageType.SER) {
@@ -189,7 +198,7 @@ public abstract class RoutingStrategy {
         } else if (messageType == MessageType.SER_SUPER_PEER) {
             cacheEntry = serSuperPeerMessageCache.computeIfAbsent(message, k -> new CacheEntry());
         } else {
-            logger.debug("Unknown type of message"
+            logger.info("Unknown type of message"
                     + (messageType == null ? "" : " belonging to type " + messageType.getValue())
                     + " not added to the cache");
         }
@@ -201,27 +210,9 @@ public abstract class RoutingStrategy {
             forwardingNodes.removeAll(cacheEntry.getAllForwardedNodes());
 
             cacheEntry.addAllForwardedNodes(forwardingNodes);
+            cacheEntry.addForwardedNode(fromNode);
         }
 
         return forwardingNodes;
-    }
-
-    /**
-     * Notify the routing strategy of failed sent messages.
-     *
-     * @param message The message which was sent
-     * @param node    The node to which the message was sent
-     */
-    public void notifyFailedMessages(Message message, Node node) {
-        MessageType messageType = message.getType();
-        if (messageType == MessageType.SER) {
-            serMessageCache.get(message).removeForwardedNode(node);
-        } else if (messageType == MessageType.SER_SUPER_PEER) {
-            serSuperPeerMessageCache.get(message).removeForwardedNode(node);
-        } else {
-            logger.debug("Unknown type of message"
-                    + (messageType == null ? "" : " belonging to type " + messageType.getValue())
-                    + " not added to the cache");
-        }
     }
 }
