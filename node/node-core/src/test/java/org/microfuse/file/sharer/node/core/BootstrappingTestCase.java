@@ -101,7 +101,7 @@ public class BootstrappingTestCase extends BaseTestCase {
         node9.setIp(localhostIP);
         node9.setPort(9769);
 
-        bootstrapServer.start();
+        bootstrapServer.startInThread();
         waitFor(delay);
     }
 

@@ -105,7 +105,7 @@ public class ServerLauncher {
 
                 tomcat.getServer().await();
             } catch (LifecycleException | ServletException e) {
-                logger.error("Failed to start server : " + e.getMessage());
+                logger.error("Failed to startInThread server : " + e.getMessage());
             }
         });
         thread.setPriority(Thread.NORM_PRIORITY);

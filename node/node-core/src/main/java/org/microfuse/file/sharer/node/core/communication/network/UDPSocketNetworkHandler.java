@@ -124,7 +124,7 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
             thread.setDaemon(true);
             thread.start();
         } else {
-            logger.warn("The UDP network handler is already listening. Ignored request to start again.");
+            logger.warn("The UDP network handler is already listening. Ignored request to startInThread again.");
         }
     }
 

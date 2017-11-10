@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 @Path("/system")
 public class SystemEndPoint {
     @POST
-    @Path("/start")
+    @Path("/startInThread")
     public Response start() {
         Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 

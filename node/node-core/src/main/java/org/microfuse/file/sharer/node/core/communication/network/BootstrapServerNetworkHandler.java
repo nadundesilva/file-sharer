@@ -87,7 +87,7 @@ public class BootstrapServerNetworkHandler extends NetworkHandler {
 
     @Override
     public void startListening() {
-        logger.info("Ignoring request to start listening since the bootstrap server does not initiate communication");
+        logger.info("Ignoring request to startInThread listening since the bootstrap server does not initiate communication");
     }
 
     @Override

@@ -71,10 +71,10 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
                 logger.info("Bind RMI registry item " + rmiRegistryEntry
                         + " with object from class " + this.getClass());
             } catch (RemoteException e) {
-                logger.warn("Failed to start listening at port " + port, e);
+                logger.warn("Failed to startInThread listening at port " + port, e);
             }
         } else {
-            logger.warn("The RMI network handler is already listening. Ignored request to start again.");
+            logger.warn("The RMI network handler is already listening. Ignored request to startInThread again.");
         }
     }
 

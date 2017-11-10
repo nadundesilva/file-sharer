@@ -37,7 +37,7 @@ public class BootstrapServerNetworkHandlerTestCase extends BaseTestCase {
         localhostIP = "127.0.0.1";
 
         bootstrapServer = new BootstrapServer();
-        bootstrapServer.start();
+        bootstrapServer.startInThread();
         waitFor(delay);
 
         bootstrapServerNetworkHandler = Mockito.spy(new BootstrapServerNetworkHandler(serviceHolder));

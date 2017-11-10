@@ -82,7 +82,7 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
             thread.setDaemon(true);
             thread.start();
         } else {
-            logger.warn("The TCP network handler is already listening. Ignored request to start again.");
+            logger.warn("The TCP network handler is already listening. Ignored request to startInThread again.");
         }
     }
 

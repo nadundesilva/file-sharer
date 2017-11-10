@@ -105,7 +105,7 @@ public class QueryingTestCase extends BaseTestCase {
         resourceIndices10.addOwnedResource("Underworld", null);
         resourceIndices10.addOwnedResource("Despicable Me 3", null);
 
-        bootstrapServer.start();
+        bootstrapServer.startInThread();
         waitFor(delay);
 
         for (int i = 0; i < fileSharers.length; i++) {

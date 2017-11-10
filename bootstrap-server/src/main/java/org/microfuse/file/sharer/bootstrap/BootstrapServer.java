@@ -32,132 +32,140 @@ public class BootstrapServer {
         nodes = new ArrayList<>();
     }
 
+    /**
+     * Start the bootstrap server in a different thread.
+     */
+    public void startInThread() {
+        Thread thread = new Thread(this::start);
+        thread.setDaemon(true);
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.start();
+    }
+
+    /**
+     * Start the bootstrap server in the current thread.
+     */
     public void start() {
         if (!running) {
-            Thread thread = new Thread(() -> {
-                running = true;
-                String s;
-                try {
-                    socket = new DatagramSocket(Constants.BOOTSTRAP_SERVER_PORT);
+            running = true;
+            String s;
+            try {
+                socket = new DatagramSocket(Constants.BOOTSTRAP_SERVER_PORT);
 
-                    logger.info("Bootstrap Server created at " + Constants.BOOTSTRAP_SERVER_PORT
-                            + ". Waiting for incoming data.");
+                logger.info("Bootstrap Server created at " + Constants.BOOTSTRAP_SERVER_PORT
+                        + ". Waiting for incoming data.");
 
-                    while (running) {
-                        byte[] buffer = new byte[65536];
-                        DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
-                        socket.receive(incoming);
+                while (running) {
+                    byte[] buffer = new byte[65536];
+                    DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(incoming);
 
-                        byte[] data = incoming.getData();
-                        s = new String(data, 0, incoming.getLength(), Constants.DEFAULT_CHARSET);
+                    byte[] data = incoming.getData();
+                    s = new String(data, 0, incoming.getLength(), Constants.DEFAULT_CHARSET);
 
-                        logger.info("Received message " + s + " from node "
-                                + incoming.getAddress().getHostAddress() + ":" + incoming.getPort());
+                    logger.info("Received message " + s + " from node "
+                            + incoming.getAddress().getHostAddress() + ":" + incoming.getPort());
 
-                        StringTokenizer st = new StringTokenizer(s, " ");
-                        st.nextToken();
-                        String command = st.nextToken();
+                    StringTokenizer st = new StringTokenizer(s, " ");
+                    st.nextToken();
+                    String command = st.nextToken();
 
-                        if (Objects.equals(command, MessageType.REG.getValue())) {
-                            StringBuilder reply = new StringBuilder(MessageType.REG_OK.getValue() + " ");
+                    if (Objects.equals(command, MessageType.REG.getValue())) {
+                        StringBuilder reply = new StringBuilder(MessageType.REG_OK.getValue() + " ");
 
-                            String ip = st.nextToken();
-                            int port = Integer.parseInt(st.nextToken());
-                            String username = st.nextToken();
-                            if (nodes.size() == 0) {
-                                reply.append("0");
-                                nodes.add(new Neighbour(ip, port, username));
-                            } else {
-                                boolean isOkay = true;
-                                for (Neighbour node : nodes) {
-                                    if (node.getPort() == port) {
-                                        if (node.getUsername().equals(username)) {
-                                            reply.append("9998");
-                                        } else {
-                                            reply.append("9997");
-                                        }
-                                        isOkay = false;
-                                    }
-                                }
-                                if (isOkay) {
-                                    if (nodes.size() == 1) {
-                                        reply.append("1 ")
-                                                .append(nodes.get(0).getIp())
-                                                .append(" ")
-                                                .append(nodes.get(0).getPort());
-                                    } else if (nodes.size() == 2) {
-                                        reply.append("2 ")
-                                                .append(nodes.get(0).getIp())
-                                                .append(" ")
-                                                .append(nodes.get(0).getPort()).append(" ")
-                                                .append(nodes.get(1).getIp())
-                                                .append(" ").append(nodes.get(1).getPort());
-                                    } else {
-                                        Random r = new Random();
-                                        int low = 0;
-                                        int high = nodes.size();
-                                        int random1 = r.nextInt(high - low) + low;
-                                        int random2 = r.nextInt(high - low) + low;
-                                        while (random1 == random2) {
-                                            random2 = r.nextInt(high - low) + low;
-                                        }
-                                        logger.info(random1 + " " + random2);
-                                        reply.append("2 ")
-                                                .append(nodes.get(random1).getIp())
-                                                .append(" ")
-                                                .append(nodes.get(random1).getPort())
-                                                .append(" ")
-                                                .append(nodes.get(random2).getIp())
-                                                .append(" ")
-                                                .append(nodes.get(random2).getPort());
-                                    }
-                                    nodes.add(new Neighbour(ip, port, username));
-                                }
-                            }
-
-                            String stringReply = String.format("%04d", reply.length() + 5) + " " + reply.toString();
-
-                            DatagramPacket dpReply = new DatagramPacket(
-                                    stringReply.getBytes(Constants.DEFAULT_CHARSET),
-                                    stringReply.getBytes(Constants.DEFAULT_CHARSET).length,
-                                    incoming.getAddress(), incoming.getPort());
-                            socket.send(dpReply);
-                        } else if (Objects.equals(command, MessageType.UNREG.getValue())) {
-                            String ip = st.nextToken();
-                            int port = Integer.parseInt(st.nextToken());
-                            for (int i = 0; i < nodes.size(); i++) {
-                                if (Objects.equals(nodes.get(i).getIp(), ip) && nodes.get(i).getPort() == port) {
-                                    nodes.remove(i);
-                                    String reply = "0012 " + MessageType.UNREG_OK.getValue() + " 0";
-                                    DatagramPacket dpReply = new DatagramPacket(
-                                            reply.getBytes(Constants.DEFAULT_CHARSET),
-                                            reply.getBytes(Constants.DEFAULT_CHARSET).length,
-                                            incoming.getAddress(), incoming.getPort());
-                                    socket.send(dpReply);
-                                }
-                            }
-                        } else if (Objects.equals(command, MessageType.ECHO.getValue())) {
+                        String ip = st.nextToken();
+                        int port = Integer.parseInt(st.nextToken());
+                        String username = st.nextToken();
+                        if (nodes.size() == 0) {
+                            reply.append("0");
+                            nodes.add(new Neighbour(ip, port, username));
+                        } else {
+                            boolean isOkay = true;
                             for (Neighbour node : nodes) {
-                                logger.info(node.getIp() + " " + node.getPort()
-                                        + " " + node.getUsername());
+                                if (node.getPort() == port) {
+                                    if (node.getUsername().equals(username)) {
+                                        reply.append("9998");
+                                    } else {
+                                        reply.append("9997");
+                                    }
+                                    isOkay = false;
+                                }
                             }
-                            String reply = "0012 " + MessageType.ECHO_OK.getValue() + " 0";
-                            DatagramPacket dpReply = new DatagramPacket(
-                                    reply.getBytes(Constants.DEFAULT_CHARSET),
-                                    reply.getBytes(Constants.DEFAULT_CHARSET).length, incoming.getAddress(),
-                                    incoming.getPort());
-                            socket.send(dpReply);
+                            if (isOkay) {
+                                if (nodes.size() == 1) {
+                                    reply.append("1 ")
+                                            .append(nodes.get(0).getIp())
+                                            .append(" ")
+                                            .append(nodes.get(0).getPort());
+                                } else if (nodes.size() == 2) {
+                                    reply.append("2 ")
+                                            .append(nodes.get(0).getIp())
+                                            .append(" ")
+                                            .append(nodes.get(0).getPort()).append(" ")
+                                            .append(nodes.get(1).getIp())
+                                            .append(" ").append(nodes.get(1).getPort());
+                                } else {
+                                    Random r = new Random();
+                                    int low = 0;
+                                    int high = nodes.size();
+                                    int random1 = r.nextInt(high - low) + low;
+                                    int random2 = r.nextInt(high - low) + low;
+                                    while (random1 == random2) {
+                                        random2 = r.nextInt(high - low) + low;
+                                    }
+                                    logger.info(random1 + " " + random2);
+                                    reply.append("2 ")
+                                            .append(nodes.get(random1).getIp())
+                                            .append(" ")
+                                            .append(nodes.get(random1).getPort())
+                                            .append(" ")
+                                            .append(nodes.get(random2).getIp())
+                                            .append(" ")
+                                            .append(nodes.get(random2).getPort());
+                                }
+                                nodes.add(new Neighbour(ip, port, username));
+                            }
                         }
 
+                        String stringReply = String.format("%04d", reply.length() + 5) + " " + reply.toString();
+
+                        DatagramPacket dpReply = new DatagramPacket(
+                                stringReply.getBytes(Constants.DEFAULT_CHARSET),
+                                stringReply.getBytes(Constants.DEFAULT_CHARSET).length,
+                                incoming.getAddress(), incoming.getPort());
+                        socket.send(dpReply);
+                    } else if (Objects.equals(command, MessageType.UNREG.getValue())) {
+                        String ip = st.nextToken();
+                        int port = Integer.parseInt(st.nextToken());
+                        for (int i = 0; i < nodes.size(); i++) {
+                            if (Objects.equals(nodes.get(i).getIp(), ip) && nodes.get(i).getPort() == port) {
+                                nodes.remove(i);
+                                String reply = "0012 " + MessageType.UNREG_OK.getValue() + " 0";
+                                DatagramPacket dpReply = new DatagramPacket(
+                                        reply.getBytes(Constants.DEFAULT_CHARSET),
+                                        reply.getBytes(Constants.DEFAULT_CHARSET).length,
+                                        incoming.getAddress(), incoming.getPort());
+                                socket.send(dpReply);
+                            }
+                        }
+                    } else if (Objects.equals(command, MessageType.ECHO.getValue())) {
+                        for (Neighbour node : nodes) {
+                            logger.info(node.getIp() + " " + node.getPort()
+                                    + " " + node.getUsername());
+                        }
+                        String reply = "0012 " + MessageType.ECHO_OK.getValue() + " 0";
+                        DatagramPacket dpReply = new DatagramPacket(
+                                reply.getBytes(Constants.DEFAULT_CHARSET),
+                                reply.getBytes(Constants.DEFAULT_CHARSET).length, incoming.getAddress(),
+                                incoming.getPort());
+                        socket.send(dpReply);
                     }
-                } catch (IOException e) {
-                    logger.error("Bootstrap server error.", e);
+
                 }
-                logger.info("Bootstrap server closed.");
-            });
-            thread.setDaemon(true);
-            thread.setPriority(Thread.MAX_PRIORITY);
-            thread.start();
+            } catch (IOException e) {
+                logger.error("Bootstrap server error.", e);
+            }
+            logger.info("Bootstrap server closed.");
         }
     }
 
