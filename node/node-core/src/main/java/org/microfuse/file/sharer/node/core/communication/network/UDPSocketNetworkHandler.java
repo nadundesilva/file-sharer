@@ -75,13 +75,13 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                             String fromIP = udpMessage.getSourceIP();
                             int fromPort = udpMessage.getSourcePort();
 
-                            boolean isRelevant = false;
                             synchronized (this) {
                                 if (udpMessage.getType() == UDPMessageType.DATA) {
                                     Node fromNode = new Node(fromIP, fromPort);
                                     long lastSequenceNumber = dataSequenceNumbers.computeIfAbsent(fromNode, k -> -1L);
                                     long currentSequenceNumber = udpMessage.getSequenceNumber();
 
+                                    boolean isRelevant = false;
                                     if (currentSequenceNumber > lastSequenceNumber) {
                                         for (long i = lastSequenceNumber + 1; i < currentSequenceNumber; i++) {
                                             missingDataSequenceNumbers.add(i);
@@ -95,26 +95,23 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                                                 + fromIP + ";" + fromPort);
                                     }
 
+                                    UDPMessage ackMessage = new UDPMessage();
+                                    ackMessage.setType(UDPMessageType.DATA_ACK);
+                                    ackMessage.setSourceIP(serviceHolder.getConfiguration().getIp());
+                                    ackMessage.setSourcePort(serviceHolder.getConfiguration().getPeerListeningPort());
+                                    ackMessage.setSequenceNumber(udpMessage.getSequenceNumber());
+
+                                    sendMessage(fromIP, fromPort, ackMessage);
+
                                     if (isRelevant) {
                                         dataSequenceNumbers.put(fromNode, currentSequenceNumber);
+                                        runTasksOnMessageReceived(fromIP, fromPort, udpMessage.getMessage());
                                     }
                                 } else if (udpMessage.getType() == UDPMessageType.DATA_ACK) {
                                     removeMessagePendingDataAck(
                                             incomingPacket.getAddress().getHostAddress(),
                                             incomingPacket.getPort(), udpMessage);
                                 }
-                            }
-
-                            if (isRelevant) {
-                                UDPMessage ackMessage = new UDPMessage();
-                                ackMessage.setType(UDPMessageType.DATA_ACK);
-                                ackMessage.setSourceIP(serviceHolder.getConfiguration().getIp());
-                                ackMessage.setSourcePort(serviceHolder.getConfiguration().getPeerListeningPort());
-                                ackMessage.setSequenceNumber(udpMessage.getSequenceNumber());
-
-                                sendMessage(fromIP, fromPort, ackMessage);
-
-                                runTasksOnMessageReceived(fromIP, fromPort, udpMessage.getMessage());
                             }
                         }
                     } catch (IOException e) {
