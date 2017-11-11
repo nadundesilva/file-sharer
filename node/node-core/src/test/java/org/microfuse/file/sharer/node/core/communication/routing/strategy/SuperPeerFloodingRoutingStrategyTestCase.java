@@ -42,6 +42,9 @@ public class SuperPeerFloodingRoutingStrategyTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Super Peer Flooding Routing Strategy Test");
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(100);
         superPeerFloodingRoutingStrategy = new SuperPeerFloodingRoutingStrategy(serviceHolder);
 
         ordinaryPeerRoutingTable = Mockito.spy(new OrdinaryPeerRoutingTable(serviceHolder));

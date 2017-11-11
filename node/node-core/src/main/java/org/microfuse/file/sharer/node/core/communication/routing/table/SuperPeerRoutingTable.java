@@ -249,15 +249,21 @@ public class SuperPeerRoutingTable extends RoutingTable {
         boolean isSuccessful;
         superPeerNetworkNodesLock.writeLock().lock();
         try {
-            Node existingNode = get(node.getIp(), node.getPort());
-            if (existingNode != null) {
-                node = existingNode;
-            }
-            isSuccessful = superPeerNetworkNodes.add(node);
-            if (isSuccessful) {
-                logger.info("Added node " + node.toString() + " to super peer network.");
+            if (superPeerNetworkNodes.size() < serviceHolder.getConfiguration().getMaxSuperPeerCount()) {
+                Node existingNode = get(node.getIp(), node.getPort());
+                if (existingNode != null) {
+                    node = existingNode;
+                }
+                isSuccessful = superPeerNetworkNodes.add(node);
+                if (isSuccessful) {
+                    logger.info("Added node " + node.toString() + " to super peer network.");
+                } else {
+                    logger.info("Failed to add node " + node.toString() + " to super peer network.");
+                }
             } else {
-                logger.info("Failed to add node " + node.toString() + " to super peer network.");
+                isSuccessful = false;
+                logger.info("Super peer network node count already at maximum size "
+                        + serviceHolder.getConfiguration().getMaxSuperPeerCount());
             }
         } finally {
             superPeerNetworkNodesLock.writeLock().unlock();
@@ -311,7 +317,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
             } else {
                 isSuccessful = false;
                 logger.info("Assigned super peer node count already at maximum size "
-                        + assignedOrdinaryPeerNodes.size());
+                        + serviceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount());
             }
         } finally {
             assignedOrdinaryPeerNodesLock.writeLock().unlock();

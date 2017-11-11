@@ -45,9 +45,9 @@ public class ServiceHolderTestCase extends BaseTestCase {
                 "\"timeToLive\":3," +
                 "\"maxAssignedOrdinaryPeerCount\":13," +
                 "\"maxUnstructuredPeerCount\":24," +
+                "\"maxSuperPeerCount\":65," +
                 "\"heartbeatInterval\":56000," +
                 "\"gossipingInterval\":72000," +
-                "\"networkHandlerSendTimeout\":23000," +
                 "\"networkHandlerThreadCount\":14," +
                 "\"networkHandlerReplyTimeout\":46000," +
                 "\"serSuperPeerTimeout\":74562," +
@@ -73,9 +73,9 @@ public class ServiceHolderTestCase extends BaseTestCase {
         Assert.assertEquals(configuration.getTimeToLive(), 3);
         Assert.assertEquals(configuration.getMaxAssignedOrdinaryPeerCount(), 13);
         Assert.assertEquals(configuration.getMaxUnstructuredPeerCount(), 24);
+        Assert.assertEquals(configuration.getMaxSuperPeerCount(), 65);
         Assert.assertEquals(configuration.getHeartbeatInterval(), 56000);
         Assert.assertEquals(configuration.getGossipingInterval(), 72000);
-        Assert.assertEquals(configuration.getNetworkHandlerSendTimeout(), 23000);
         Assert.assertEquals(configuration.getBootstrapServerReplyWaitTimeout(), 465132);
         Assert.assertEquals(configuration.getSerSuperPeerTimeout(), 74562);
         Assert.assertEquals(configuration.getNetworkHandlerType(), NetworkHandlerType.TCP_SOCKET);
@@ -103,8 +103,6 @@ public class ServiceHolderTestCase extends BaseTestCase {
                 NodeConstants.DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT);
         Assert.assertEquals(configuration.getHeartbeatInterval(), NodeConstants.DEFAULT_HEARTBEAT_INTERVAL);
         Assert.assertEquals(configuration.getGossipingInterval(), NodeConstants.DEFAULT_GOSSIPING_INTERVAL);
-        Assert.assertEquals(configuration.getNetworkHandlerSendTimeout(),
-                NodeConstants.DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT);
         Assert.assertEquals(configuration.getSerSuperPeerTimeout(), NodeConstants.DEFAULT_SER_SUPER_PEER_TIMEOUT);
         Assert.assertEquals(configuration.getNetworkHandlerType(), NodeConstants.DEFAULT_NETWORK_HANDLER);
         Assert.assertEquals(configuration.getRoutingStrategyType(), NodeConstants.DEFAULT_ROUTING_STRATEGY);

@@ -21,12 +21,12 @@ public class NodeTestCase {
 
         node = new Node();
         node.setIp("192.168.1.1");
-        node.setPort(4067);
+        node.setPort(24067);
         node.setState(NodeState.ACTIVE);
 
         nodeCopy = new Node();
         nodeCopy.setIp("192.168.1.1");
-        nodeCopy.setPort("4067");
+        nodeCopy.setPort("24067");
         nodeCopy.setState(NodeState.INACTIVE);
     }
 

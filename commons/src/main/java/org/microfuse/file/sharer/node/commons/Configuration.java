@@ -20,9 +20,9 @@ public class Configuration {
     private int timeToLive;
     private int maxAssignedOrdinaryPeerCount;
     private int maxUnstructuredPeerCount;
+    private int maxSuperPeerCount;
     private int heartbeatInterval;
     private int gossipingInterval;
-    private int networkHandlerSendTimeout;
     private int bootstrapServerReplyWaitTimeout;
     private int serSuperPeerTimeout;
     private int automatedGarbageCollectionInterval;
@@ -46,9 +46,9 @@ public class Configuration {
         timeToLive = NodeConstants.DEFAULT_TIME_TO_LIVE;
         maxAssignedOrdinaryPeerCount = NodeConstants.DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT;
         maxUnstructuredPeerCount = NodeConstants.DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT;
+        maxSuperPeerCount = NodeConstants.DEFAULT_MAX_SUPER_PEER_COUNT;
         heartbeatInterval = NodeConstants.DEFAULT_HEARTBEAT_INTERVAL;
         gossipingInterval = NodeConstants.DEFAULT_GOSSIPING_INTERVAL;
-        networkHandlerSendTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_SEND_TIMEOUT;
         bootstrapServerReplyWaitTimeout = NodeConstants.DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT;
         serSuperPeerTimeout = NodeConstants.DEFAULT_SER_SUPER_PEER_TIMEOUT;
         automatedGarbageCollectionInterval = NodeConstants.DEFAULT_AUTOMATED_GARBAGE_COLLECTION_INTERVAL;
@@ -146,6 +146,14 @@ public class Configuration {
         this.maxUnstructuredPeerCount = maxUnstructuredPeerCount;
     }
 
+    public int getMaxSuperPeerCount() {
+        return maxSuperPeerCount;
+    }
+
+    public void setMaxSuperPeerCount(int maxSuperPeerCount) {
+        this.maxSuperPeerCount = maxSuperPeerCount;
+    }
+
     public int getHeartbeatInterval() {
         return heartbeatInterval;
     }
@@ -160,14 +168,6 @@ public class Configuration {
 
     public void setGossipingInterval(int gossipingInterval) {
         this.gossipingInterval = gossipingInterval;
-    }
-
-    public int getNetworkHandlerSendTimeout() {
-        return networkHandlerSendTimeout;
-    }
-
-    public void setNetworkHandlerSendTimeout(int networkHandlerSendTimeout) {
-        this.networkHandlerSendTimeout = networkHandlerSendTimeout;
     }
 
     public int getBootstrapServerReplyWaitTimeout() {

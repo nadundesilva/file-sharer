@@ -174,50 +174,53 @@ public class OverlayNetworkManager implements RouterListener {
      * This will only happen if the unstructured network peer count is less than the threshold.
      */
     public void gossip() {
-        if (serviceHolder.getRouter().getRoutingTable().getAllUnstructuredNetworkNodes().size() <=
-                serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
-            logger.info("Gossiping to grow the unstructured network");
-            List<Node> nodes = new ArrayList<>(serviceHolder.getRouter().getRoutingTable().getAll());
+        RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
 
-            if (nodes.size() > 0) {
+        List<Node> nodes = new ArrayList<>(routingTable.getAll());
+        if (nodes.size() > 0) {
+            // Finding unstructured connections
+            if (routingTable.getAllUnstructuredNetworkNodes().size()
+                    < serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
+                logger.info("Gossiping to grow the unstructured network");
                 int selectedIndex = ThreadLocalRandom.current().nextInt(0, nodes.size());
                 requestUnstructuredConnections(new HashSet<>(Collections.singletonList(nodes.get(selectedIndex))));
+            }
 
-                RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
-                if (routingTable instanceof SuperPeerRoutingTable) {
-                    logger.info("Gossiping to grow the super peer network");
-                    List<Node> superPeerNodes =
-                            new ArrayList<>(((SuperPeerRoutingTable) routingTable).getAllSuperPeerNetworkNodes());
-                    if (superPeerNodes.size() > 0) {
+            // Finding super peers
+            if (routingTable instanceof SuperPeerRoutingTable) {
+                List<Node> superPeerNodes =
+                        new ArrayList<>(((SuperPeerRoutingTable) routingTable).getAllSuperPeerNetworkNodes());
+                if (superPeerNodes.size() > 0) {
+                    if (superPeerNodes.size() < serviceHolder.getConfiguration().getMaxSuperPeerCount()) {
+                        logger.info("Gossiping to grow the super peer network");
                         int selectedSuperPeerIndex =
                                 ThreadLocalRandom.current().nextInt(0, superPeerNodes.size());
                         requestSuperPeerConnections(
                                 new HashSet<>(Collections.singletonList(superPeerNodes.get(selectedSuperPeerIndex)))
                         );
-                    } else {
-                        searchForSuperPeer();
                     }
-                } else if (routingTable instanceof OrdinaryPeerRoutingTable) {
-                    OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
-                    if (ordinaryPeerRoutingTable.getAssignedSuperPeer() == null) {
-                        searchForSuperPeer();
-                    }
+                } else {
+                    searchForSuperPeer();
                 }
-            } else {
-                // Isolated node
-                unregister();
-                try {
-                    Thread.sleep(Constants.TASK_INTERVAL);
-                } catch (InterruptedException ignored) {
+            } else if (routingTable instanceof OrdinaryPeerRoutingTable) {
+                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
+                if (ordinaryPeerRoutingTable.getAssignedSuperPeer() == null) {
+                    searchForSuperPeer();
                 }
-                register();
             }
+        } else {
+            // Isolated node
+            unregister();
+            try {
+                Thread.sleep(Constants.TASK_INTERVAL);
+            } catch (InterruptedException ignored) {
+            }
+            register();
         }
 
         if (serviceHolder.getPeerType() == PeerType.SUPER_PEER) {
             logger.info("Gossiping to grow the aggregated resources index");
 
-            RoutingTable routingTable = serviceHolder.getRouter().getRoutingTable();
             if (routingTable instanceof SuperPeerRoutingTable) {
                 requestOwnedResourcesList((SuperPeerRoutingTable) routingTable);
             } else {
@@ -1044,7 +1047,7 @@ public class OverlayNetworkManager implements RouterListener {
             }
         } else {
             replyMessage.setData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT,
-                    Integer.toString(MessageConstants.LIST_SUPER_PEER_CONNECTIONS_NOT_SUPER_PEER));
+                    MessageConstants.LIST_SUPER_PEER_CONNECTIONS_NOT_SUPER_PEER);
         }
 
         serviceHolder.getRouter().sendMessage(
@@ -1061,12 +1064,11 @@ public class OverlayNetworkManager implements RouterListener {
      * @param message  The message received
      */
     private void handleListSuperPeerConnectionsOkMessage(Node fromNode, Message message) {
-        int nodesCount = Integer.parseInt(
-                message.getData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT)
-        );
+        String nodesCountString = message.getData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_COUNT);
 
-        if (nodesCount != MessageConstants.LIST_SUPER_PEER_CONNECTIONS_NOT_SUPER_PEER) {
-            for (int i = 0; i < nodesCount * 2; i += 2) {
+        if (!Objects.equals(nodesCountString, MessageConstants.LIST_SUPER_PEER_CONNECTIONS_NOT_SUPER_PEER)) {
+            int nodeCount = Integer.parseInt(nodesCountString);
+            for (int i = 0; i < nodeCount * 2; i += 2) {
                 String ip =
                         message.getData(MessageIndexes.LIST_SUPER_PEER_CONNECTIONS_OK_CONNECTIONS_START_INDEX + i);
                 int port = Integer.parseInt(

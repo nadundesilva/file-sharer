@@ -42,6 +42,9 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Super Peer Random Walk Routing Strategy Test");
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(100);
         superPeerRandomWalkRoutingStrategy = new SuperPeerRandomWalkRoutingStrategy(serviceHolder);
 
         ordinaryPeerRoutingTable = Mockito.spy(new OrdinaryPeerRoutingTable(serviceHolder));

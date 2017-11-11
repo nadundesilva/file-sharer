@@ -189,11 +189,21 @@ public abstract class RoutingTable {
         boolean isSuccessful;
         unstructuredNetworkNodesLock.writeLock().lock();
         try {
-            isSuccessful = unstructuredNetworkNodes.add(node);
-            if (isSuccessful) {
-                logger.info("Added node " + node.toString() + " to unstructured network.");
+            if (unstructuredNetworkNodes.size() < serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
+                Node existingNode = get(node.getIp(), node.getPort());
+                if (existingNode != null) {
+                    node = existingNode;
+                }
+                isSuccessful = unstructuredNetworkNodes.add(node);
+                if (isSuccessful) {
+                    logger.info("Added node " + node.toString() + " to unstructured network.");
+                } else {
+                    logger.info("Failed to add node " + node.toString() + " to unstructured network.");
+                }
             } else {
-                logger.info("Failed to add node " + node.toString() + " to unstructured network.");
+                isSuccessful = false;
+                logger.info("Unstructured network node count already at maximum size "
+                        + serviceHolder.getConfiguration().getMaxUnstructuredPeerCount());
             }
         } finally {
             unstructuredNetworkNodesLock.writeLock().unlock();

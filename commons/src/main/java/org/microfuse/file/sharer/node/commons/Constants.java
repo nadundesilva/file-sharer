@@ -13,9 +13,8 @@ public class Constants {
     public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     public static final String LOCALHOST = "127.0.0.1";
-    public static final int RMI_REGISTRY_PORT = 12452;
-    public static final String RMI_REGISTRY_ENTRY_TRACER = "tracer";
-    public static final String RMI_REGISTRY_ENTRY_NETWORK_HANDLER = "network_handler";
+    public static final int RMI_NETWORK_HANDLER_PORT = 24152;
+    public static final String RMI_REGISTRY_ENTRY_NETWORK_HANDLER_POSTFIX = "_network_handler";
 
     private Constants() {       // Preventing from being initiated
     }

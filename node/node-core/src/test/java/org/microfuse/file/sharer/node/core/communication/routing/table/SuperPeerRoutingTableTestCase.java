@@ -30,7 +30,9 @@ public class SuperPeerRoutingTableTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Super Peer Routing Table Test");
 
-        serviceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(10);
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(100);
         superPeerRoutingTable = new SuperPeerRoutingTable(serviceHolder);
 
         ordinaryPeerNode1 = new Node("192.168.1.1", 4532);

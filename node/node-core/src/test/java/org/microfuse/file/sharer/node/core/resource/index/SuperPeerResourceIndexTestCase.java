@@ -36,6 +36,10 @@ public class SuperPeerResourceIndexTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Super Peer Resource Index Test");
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxAssignedOrdinaryPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
+
         node1 = new Node("192.168.1.1", 6001);
         node2 = new Node("192.168.1.2", 6002);
         Node node3 = new Node("192.168.1.3", 6003);

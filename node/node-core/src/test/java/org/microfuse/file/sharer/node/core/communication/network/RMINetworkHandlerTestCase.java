@@ -39,8 +39,8 @@ public class RMINetworkHandlerTestCase extends BaseTestCase {
 
         delay = 1000;
         localhostIP = "127.0.0.1";
-        peerListeningPort1 = 6756;
-        peerListeningPort2 = 7642;
+        peerListeningPort1 = 27568;
+        peerListeningPort2 = 29643;
 
         ServiceHolder serviceHolder1 = new ServiceHolder();
         serviceHolder1.getConfiguration().setPeerListeningPort(peerListeningPort1);

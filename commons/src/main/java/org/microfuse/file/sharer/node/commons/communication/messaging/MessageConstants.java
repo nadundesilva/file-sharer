@@ -28,10 +28,10 @@ public class MessageConstants {
     public static final String JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL = "9998";
     public static final String JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL_NO_ONE_ELSE = "9999";
 
-    public static final int LIST_UNSTRUCTURED_CONNECTIONS_MAX_COUNT = 2;
-
+    public static final String LIST_SUPER_PEER_CONNECTIONS_NOT_SUPER_PEER = "9999";
     public static final int LIST_SUPER_PEER_CONNECTIONS_MAX_COUNT = 2;
-    public static final int LIST_SUPER_PEER_CONNECTIONS_NOT_SUPER_PEER = 9999;
+
+    public static final int LIST_UNSTRUCTURED_CONNECTIONS_MAX_COUNT = 2;
 
     private MessageConstants() {   // Preventing from being initiated
     }

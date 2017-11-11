@@ -24,9 +24,6 @@ import java.rmi.server.UnicastRemoteObject;
 public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandlerRemote {
     private static final Logger logger = LoggerFactory.getLogger(RMINetworkHandler.class);
 
-    private Registry registry;
-    private String rmiRegistryEntry;
-
     public RMINetworkHandler(ServiceHolder serviceHolder) {
         super(serviceHolder);
     }
@@ -43,29 +40,19 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
             int port = serviceHolder.getConfiguration().getPeerListeningPort();
             logger.info("Starting listening at port " + port);
             try {
-                // Remove this from the registry if this had been already registered
-                removeNetworkHandlerFromRMIService();
-
                 // Starting the RMI registry. Fails if it is already running.
                 try {
-                    LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT);
+                    LocateRegistry.createRegistry(port);
                 } catch (RemoteException e) {
-                    logger.warn("RMI registry already exists at port "
-                            + serviceHolder.getConfiguration().getPeerListeningPort(), e);
+                    logger.warn("Failed to start RMI registry since it already exists at port " + port, e);
                 }
 
                 // Retrieving reference to RMI registry
-                registry = LocateRegistry.getRegistry(
-                        Constants.LOCALHOST,
-                        Constants.RMI_REGISTRY_PORT
-                );
+                Registry registry = LocateRegistry.getRegistry(Constants.LOCALHOST, port);
 
                 // Rebinding this object in the RMI registry
-                Remote remote = UnicastRemoteObject.exportObject(this, port);
-                rmiRegistryEntry = getRMIRegistryEntry(
-                        serviceHolder.getConfiguration().getIp(),
-                        serviceHolder.getConfiguration().getPeerListeningPort()
-                );
+                String rmiRegistryEntry = getRMIRegistryEntry(serviceHolder.getConfiguration().getIp(), port);
+                Remote remote = UnicastRemoteObject.exportObject(this, Constants.RMI_NETWORK_HANDLER_PORT);
                 registry.rebind(rmiRegistryEntry, remote);
 
                 logger.info("Bind RMI registry item " + rmiRegistryEntry
@@ -98,16 +85,26 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
     public void shutdown() {
         logger.info("Shutting down RMI network handler");
         running = false;
-        removeNetworkHandlerFromRMIService();
+        try {
+            while (UnicastRemoteObject.unexportObject(this, false)) { }
+            logger.info("Un-exported object");
+        } catch (NoSuchObjectException e) {
+            logger.warn("Failed to un-export object", e);
+        }
     }
 
     @Override
     public void sendMessage(String ip, int port, Message message) {
         try {
-            Registry receiverRegistry = LocateRegistry.getRegistry(ip, Constants.RMI_REGISTRY_PORT);
+            // Retrieving reference to RMI registry
+            Registry receiverRegistry = LocateRegistry.getRegistry(ip, port);
+
+            // Getting reference to the receiver's remote object
             String remoteRmiRegistryEntry = getRMIRegistryEntry(ip, port);
             RMINetworkHandlerRemote receiverRMINetworkHandler =
                     (RMINetworkHandlerRemote) receiverRegistry.lookup(remoteRmiRegistryEntry);
+
+            // Sending message
             receiverRMINetworkHandler.receiveMessage(
                     serviceHolder.getConfiguration().getIp(),
                     serviceHolder.getConfiguration().getPeerListeningPort(),
@@ -126,18 +123,6 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
     }
 
     /**
-     * Remove the served RMI objects.
-     */
-    private void removeNetworkHandlerFromRMIService() {
-        try {
-            while (UnicastRemoteObject.unexportObject(this, false)) { }
-            logger.info("Un-exported object");
-        } catch (NoSuchObjectException e) {
-            logger.warn("Failed to un-export object", e);
-        }
-    }
-
-    /**
      * Get the RMI network handler registry entry based on ip and port.
      *
      * @param ip   The IP of the peer containing the registry
@@ -146,6 +131,6 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
      */
     private String getRMIRegistryEntry(String ip, int port) {
         return serviceHolder.getConfiguration().getRmiRegistryEntryPrefix() + ip + ":" + port
-                + Constants.RMI_REGISTRY_ENTRY_NETWORK_HANDLER;
+                + Constants.RMI_REGISTRY_ENTRY_NETWORK_HANDLER_POSTFIX;
     }
 }

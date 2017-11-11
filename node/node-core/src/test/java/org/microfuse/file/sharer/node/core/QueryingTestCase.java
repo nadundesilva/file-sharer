@@ -40,7 +40,7 @@ public class QueryingTestCase extends BaseTestCase {
         logger.info("Initializing Querying Test");
 
         delay = 1000;
-        fileSharer1Port = 9871;
+        fileSharer1Port = 29871;
         localhostIP = "127.0.0.1";
         bootstrapServer = new BootstrapServer();
 

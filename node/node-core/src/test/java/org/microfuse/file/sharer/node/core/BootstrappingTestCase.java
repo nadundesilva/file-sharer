@@ -67,39 +67,39 @@ public class BootstrappingTestCase extends BaseTestCase {
 
         node1 = new Node();
         node1.setIp(localhostIP);
-        node1.setPort(9761);
+        node1.setPort(29761);
 
         node2 = new Node();
         node2.setIp(localhostIP);
-        node2.setPort(9762);
+        node2.setPort(29762);
 
         node3 = new Node();
         node3.setIp(localhostIP);
-        node3.setPort(9763);
+        node3.setPort(29763);
 
         node4 = new Node();
         node4.setIp(localhostIP);
-        node4.setPort(9764);
+        node4.setPort(29764);
 
         node5 = new Node();
         node5.setIp(localhostIP);
-        node5.setPort(9765);
+        node5.setPort(29765);
 
         node6 = new Node();
         node6.setIp(localhostIP);
-        node6.setPort(9766);
+        node6.setPort(29766);
 
         node7 = new Node();
         node7.setIp(localhostIP);
-        node7.setPort(9767);
+        node7.setPort(29767);
 
         node8 = new Node();
         node8.setIp(localhostIP);
-        node8.setPort(9768);
+        node8.setPort(29768);
 
         node9 = new Node();
         node9.setIp(localhostIP);
-        node9.setPort(9769);
+        node9.setPort(29769);
 
         bootstrapServer.startInThread();
         waitFor(delay);
@@ -221,9 +221,13 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder1.getConfiguration().setPeerListeningPort(node1.getPort());
         serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
 
+        serviceHolder1.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder1.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer1.start();
         waitFor(delay);
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer.start();
         waitFor(delay);
 
@@ -297,12 +301,18 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder2.getConfiguration().setIp(node2.getIp());
         serviceHolder2.getConfiguration().setPeerListeningPort(node2.getPort());
 
+        serviceHolder1.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder1.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer1.start();
         waitFor(delay);
 
+        serviceHolder2.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder2.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer2.start();
         waitFor(delay);
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer.start();
         waitFor(delay);
 
@@ -412,15 +422,23 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder3.getConfiguration().setIp(node3.getIp());
         serviceHolder3.getConfiguration().setPeerListeningPort(node3.getPort());
 
+        serviceHolder1.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder1.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer1.start();
         waitFor(delay);
 
+        serviceHolder2.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder2.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer2.start();
         waitFor(delay);
 
+        serviceHolder3.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder3.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer3.start();
         waitFor(delay);
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer.start();
         waitFor(delay);
 
@@ -566,19 +584,29 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder4.getConfiguration().setIp(node4.getIp());
         serviceHolder4.getConfiguration().setPeerListeningPort(node4.getPort());
 
+        serviceHolder1.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder1.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
         fileSharer1.start();
         waitFor(delay);
 
+        serviceHolder2.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder2.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer2.start();
         waitFor(delay);
 
+        serviceHolder3.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder3.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer3.start();
         waitFor(delay);
 
+        serviceHolder4.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder4.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer4.start();
         waitFor(delay);
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer.start();
         waitFor(delay * 3);
@@ -767,23 +795,35 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder5.getConfiguration().setIp(node5.getIp());
         serviceHolder5.getConfiguration().setPeerListeningPort(node5.getPort());
 
+        serviceHolder1.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder1.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(3);
         fileSharer1.start();
         waitFor(delay);
 
+        serviceHolder2.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder2.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer2.start();
         waitFor(delay);
 
+        serviceHolder3.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder3.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer3.start();
         waitFor(delay);
 
+        serviceHolder4.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder4.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer4.start();
         waitFor(delay);
 
+        serviceHolder5.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder5.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder5.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer5.start();
         waitFor(delay * 3);
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer.start();
         waitFor(delay);
 
@@ -1012,27 +1052,41 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder6.getConfiguration().setIp(node6.getIp());
         serviceHolder6.getConfiguration().setPeerListeningPort(node6.getPort());
 
+        serviceHolder1.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder1.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         fileSharer1.start();
         waitFor(delay);
 
+        serviceHolder2.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder2.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer2.start();
         waitFor(delay);
 
+        serviceHolder3.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder3.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer3.start();
         waitFor(delay);
 
+        serviceHolder4.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder4.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer4.start();
         waitFor(delay * 3);
 
+        serviceHolder5.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder5.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer5.start();
         waitFor(delay);
 
+        serviceHolder6.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder6.getConfiguration().setMaxSuperPeerCount(100);
         fileSharer6.start();
         waitFor(delay);
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer.start();
         waitFor(delay * 3);
@@ -1275,38 +1329,68 @@ public class BootstrappingTestCase extends BaseTestCase {
         serviceHolder9.getConfiguration().setIp(node9.getIp());
         serviceHolder9.getConfiguration().setPeerListeningPort(node9.getPort());
 
+        serviceHolder1.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder1.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder1.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         fileSharer1.start();
         waitFor(delay);
 
+        serviceHolder2.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder2.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder2.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer2.start();
         waitFor(delay);
 
+        serviceHolder3.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder3.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder3.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer3.start();
         waitFor(delay);
 
+        serviceHolder4.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder4.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder4.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer4.start();
         waitFor(delay * 3);
 
+        serviceHolder5.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder5.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder5.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer5.start();
         waitFor(delay);
 
+        serviceHolder6.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder6.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder6.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer6.start();
         waitFor(delay);
 
+        serviceHolder7.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder7.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder7.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder7.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer7.start();
         waitFor(delay * 3);
 
+        serviceHolder8.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder8.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder8.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer8.start();
         waitFor(delay);
 
+        serviceHolder9.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder9.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder9.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer9.start();
         waitFor(delay);
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
+        serviceHolder.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
         fileSharer.start();
         waitFor(delay * 3);
@@ -1670,20 +1754,28 @@ public class BootstrappingTestCase extends BaseTestCase {
         resourceIndices.addOwnedResource("Underworld", null);
         resourceIndices.addOwnedResource("Despicable Me 3", null);
 
+        serviceHolder1.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder1.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder1.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         serviceHolder1.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder1.getConfiguration().setHeartbeatInterval(delay);
         fileSharer1.start();
         waitFor(delay * 2);
 
+        serviceHolder2.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder2.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder2.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer2.start();
         waitFor(delay);
 
+        serviceHolder3.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder3.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder3.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer3.start();
         waitFor(delay);
 
+        serviceHolder4.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder4.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder4.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         serviceHolder4.getConfiguration().setSerSuperPeerTimeout(delay);
         serviceHolder4.getConfiguration().setGossipingInterval(delay * 100);
@@ -1691,14 +1783,20 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer4.start();
         waitFor(delay * 3);
 
+        serviceHolder5.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder5.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder5.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer5.start();
         waitFor(delay);
 
+        serviceHolder6.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder6.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder6.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer6.start();
         waitFor(delay);
 
+        serviceHolder7.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder7.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder7.getConfiguration().setMaxAssignedOrdinaryPeerCount(2);
         serviceHolder7.getConfiguration().setSerSuperPeerTimeout(delay);
         serviceHolder7.getConfiguration().setGossipingInterval(delay * 100);
@@ -1706,14 +1804,20 @@ public class BootstrappingTestCase extends BaseTestCase {
         fileSharer7.start();
         waitFor(delay * 3);
 
+        serviceHolder8.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder8.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder8.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer8.start();
         waitFor(delay);
 
+        serviceHolder9.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder9.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder9.getConfiguration().setGossipingInterval(delay * 100);
         fileSharer9.start();
         waitFor(delay);
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
+        serviceHolder.getConfiguration().setMaxSuperPeerCount(100);
         serviceHolder.getConfiguration().setSerSuperPeerTimeout(delay);
         serviceHolder.getConfiguration().setGossipingInterval(delay * 100);
         serviceHolder.getConfiguration().setHeartbeatInterval(delay);

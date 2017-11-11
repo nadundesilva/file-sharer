@@ -28,6 +28,7 @@ public class OrdinaryPeerRoutingTableTestCase extends BaseTestCase {
     public void initializeMethod() {
         logger.info("Initializing Ordinary Peer Routing Table Test");
 
+        serviceHolder.getConfiguration().setMaxUnstructuredPeerCount(100);
         ordinaryPeerRoutingTable = new OrdinaryPeerRoutingTable(serviceHolder);
 
         node1 = new Node("192.168.1.1", 4532);
