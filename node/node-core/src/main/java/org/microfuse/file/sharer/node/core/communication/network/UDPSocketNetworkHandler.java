@@ -56,10 +56,10 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
             startRetryThread();
             Thread thread = new Thread(() -> {
                 while (running) {
-                    int portNumber = serviceHolder.getConfiguration().getPeerListeningPort();
+                    int port = serviceHolder.getConfiguration().getPeerListeningPort();
                     try {
-                        serverSocket = new DatagramSocket(portNumber);
-                        logger.info("Starting listening at " + portNumber + ".");
+                        serverSocket = new DatagramSocket(port);
+                        logger.info("Starting listening at " + port + ".");
                         while (running && !restartRequired) {
                             byte[] buffer = new byte[65536];
                             DatagramPacket incomingPacket = new DatagramPacket(buffer, buffer.length);
@@ -122,9 +122,10 @@ public class UDPSocketNetworkHandler extends NetworkHandler {
                 }
             });
             thread.setDaemon(true);
+            thread.setPriority(Thread.MAX_PRIORITY);
             thread.start();
         } else {
-            logger.warn("The UDP network handler is already listening. Ignored request to startInThread again.");
+            logger.warn("The UDP network handler is already listening. Ignored request to start again.");
         }
     }
 

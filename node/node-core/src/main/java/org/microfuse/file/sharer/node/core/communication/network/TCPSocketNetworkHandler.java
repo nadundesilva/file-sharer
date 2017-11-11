@@ -43,14 +43,14 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
             super.startListening();
             Thread thread = new Thread(() -> {
                 while (running) {
-                    int portNumber = serviceHolder.getConfiguration().getPeerListeningPort();
+                    int port = serviceHolder.getConfiguration().getPeerListeningPort();
                     Socket clientSocket = null;
                     BufferedReader in = null;
                     try {
-                        serverSocket = new ServerSocket(portNumber);
+                        serverSocket = new ServerSocket(port);
                         serverSocket.setReuseAddress(false);
 
-                        logger.info("Started listening at " + portNumber + ".");
+                        logger.info("Started listening at " + port + ".");
                         while (running && !restartRequired) {
                             clientSocket = serverSocket.accept();
                             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),
@@ -80,9 +80,10 @@ public class TCPSocketNetworkHandler extends NetworkHandler {
                 }
             });
             thread.setDaemon(true);
+            thread.setPriority(Thread.MAX_PRIORITY);
             thread.start();
         } else {
-            logger.warn("The TCP network handler is already listening. Ignored request to startInThread again.");
+            logger.warn("The TCP network handler is already listening. Ignored request to start again.");
         }
     }
 

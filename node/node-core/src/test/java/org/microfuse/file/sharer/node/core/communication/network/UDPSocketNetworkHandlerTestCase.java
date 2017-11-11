@@ -38,8 +38,8 @@ public class UDPSocketNetworkHandlerTestCase extends BaseTestCase {
 
         delay = 1000;
         localhostIP = "127.0.0.1";
-        peerListeningPort1 = 26756;
-        peerListeningPort2 = 27642;
+        peerListeningPort1 = 24675;
+        peerListeningPort2 = 25134;
         Configuration configuration = serviceHolder.getConfiguration();
 
         configuration.setUdpNetworkHandlerRetryCount(3);

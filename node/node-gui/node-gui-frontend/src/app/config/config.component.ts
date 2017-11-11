@@ -66,23 +66,23 @@ export class ConfigComponent implements OnInit {
   private setConfig(config: Config): void {
     if (config != null) {
       this.config = Object.assign({}, config);
-      this.config.bootstrapServerReplyWaitTimeout = this.config.bootstrapServerReplyWaitTimeout / 1000;
-      this.config.networkHandlerSendTimeout = this.config.networkHandlerSendTimeout / 1000;
-      this.config.serSuperPeerTimeout = this.config.serSuperPeerTimeout / 1000;
       this.config.heartbeatInterval = this.config.heartbeatInterval / 1000;
       this.config.gossipingInterval = this.config.gossipingInterval / 1000;
+      this.config.bootstrapServerReplyWaitTimeout = this.config.bootstrapServerReplyWaitTimeout / 1000;
+      this.config.serSuperPeerTimeout = this.config.serSuperPeerTimeout / 1000;
       this.config.automatedGarbageCollectionInterval = this.config.automatedGarbageCollectionInterval / 1000;
+      this.config.udpNetworkHandlerRetryInterval = this.config.udpNetworkHandlerRetryInterval / 1000;
     }
   }
 
   private getConfig(): Config {
     const config = Object.assign({}, this.config);
-    config.bootstrapServerReplyWaitTimeout = config.bootstrapServerReplyWaitTimeout * 1000;
-    config.networkHandlerSendTimeout = config.networkHandlerSendTimeout * 1000;
-    config.serSuperPeerTimeout = config.serSuperPeerTimeout * 1000;
     config.heartbeatInterval = config.heartbeatInterval * 1000;
     config.gossipingInterval = config.gossipingInterval * 1000;
+    config.bootstrapServerReplyWaitTimeout = config.bootstrapServerReplyWaitTimeout * 1000;
+    config.serSuperPeerTimeout = config.serSuperPeerTimeout * 1000;
     config.automatedGarbageCollectionInterval = config.automatedGarbageCollectionInterval * 1000;
+    config.udpNetworkHandlerRetryInterval = config.udpNetworkHandlerRetryInterval * 1000;
     return config;
   }
 }
@@ -91,18 +91,16 @@ class Config {
   bootstrapServerIP: string;
   bootstrapServerPort: number;
   usernamePrefix: string;
-  tracerServeIP: string;
-  tracerServePort: number;
   ip: string;
   peerListeningPort: number;
   networkHandlerThreadCount: number;
+  rmiRegistryEntryPrefix: string;
   timeToLive: number;
   maxAssignedOrdinaryPeerCount: number;
   maxUnstructuredPeerCount: number;
+  maxSuperPeerCount: number;
   heartbeatInterval: number;
   gossipingInterval: number;
-  networkHandlerSendTimeout: number;
-  rmiRegistryEntryPrefix: string;
   bootstrapServerReplyWaitTimeout: number;
   serSuperPeerTimeout: number;
   automatedGarbageCollectionInterval: number;

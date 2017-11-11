@@ -39,6 +39,8 @@ public class ServerLauncher {
     };
 
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileSharerHolder.getFileSharer().shutdown()));
+
         FileSharerHolder.getFileSharer().start();           // Instantiating the file sharer
         startTomcatServer(ServerConstants.WEB_APP_PORT);
     }
@@ -50,10 +52,12 @@ public class ServerLauncher {
                 tomcat.setPort(port);
                 tomcat.setSilent(true);
 
-                // Adding the main servlet
+                // Creating the context
                 Context context = tomcat.addWebapp("", new File(ServerConstants.WEB_APP_DIRECTORY).getAbsolutePath());
+
+                // Adding the main servlet
                 ServletContainer servletContainer = new ServletContainer(new ResourceConfig(endpointClassList));
-                Tomcat.addServlet(context, MAIN_SERVLET_NAME, servletContainer);
+                tomcat.addServlet("", MAIN_SERVLET_NAME, servletContainer);
                 context.addServletMapping(ServerConstants.WEB_APP_API_URL + "/*", MAIN_SERVLET_NAME);
 
                 // Creating CORS filter definition

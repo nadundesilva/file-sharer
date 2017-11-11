@@ -37,22 +37,24 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
     public void startListening() {
         if (!running) {
             super.startListening();
+            System.setProperty("java.rmi.server.hostname", serviceHolder.getConfiguration().getIp());
             int port = serviceHolder.getConfiguration().getPeerListeningPort();
             logger.info("Starting listening at port " + port);
             try {
                 // Starting the RMI registry. Fails if it is already running.
                 try {
-                    LocateRegistry.createRegistry(port);
+                    LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT);
                 } catch (RemoteException e) {
-                    logger.warn("Failed to start RMI registry since it already exists at port " + port, e);
+                    logger.warn("Failed to start RMI registry since it already exists at port "
+                            + Constants.RMI_REGISTRY_PORT, e);
                 }
 
                 // Retrieving reference to RMI registry
-                Registry registry = LocateRegistry.getRegistry(Constants.LOCALHOST, port);
+                Registry registry = LocateRegistry.getRegistry(Constants.LOCALHOST, Constants.RMI_REGISTRY_PORT);
 
                 // Rebinding this object in the RMI registry
                 String rmiRegistryEntry = getRMIRegistryEntry(serviceHolder.getConfiguration().getIp(), port);
-                Remote remote = UnicastRemoteObject.exportObject(this, Constants.RMI_NETWORK_HANDLER_PORT);
+                Remote remote = UnicastRemoteObject.exportObject(this, port);
                 registry.rebind(rmiRegistryEntry, remote);
 
                 logger.info("Bind RMI registry item " + rmiRegistryEntry
@@ -97,7 +99,7 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
     public void sendMessage(String ip, int port, Message message) {
         try {
             // Retrieving reference to RMI registry
-            Registry receiverRegistry = LocateRegistry.getRegistry(ip, port);
+            Registry receiverRegistry = LocateRegistry.getRegistry(ip, Constants.RMI_REGISTRY_PORT);
 
             // Getting reference to the receiver's remote object
             String remoteRmiRegistryEntry = getRMIRegistryEntry(ip, port);

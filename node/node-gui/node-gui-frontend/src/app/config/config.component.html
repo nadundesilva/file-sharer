@@ -33,21 +33,6 @@
     </mat-card-content>
   </mat-card>
   <mat-card fxFlex>
-    <mat-card-title>Tracing</mat-card-title>
-    <mat-card-content>
-      <div>
-        <mat-form-field>
-          <input matInput placeholder="Tracer IP Address" [(ngModel)]="config.tracerServeIP">
-        </mat-form-field>
-      </div>
-      <div>
-        <mat-form-field>
-          <input matInput placeholder="Tracer Port" [(ngModel)]="config.tracerServePort">
-        </mat-form-field>
-      </div>
-    </mat-card-content>
-  </mat-card>
-  <mat-card fxFlex>
     <mat-card-title>Node</mat-card-title>
     <mat-card-content>
       <div>
@@ -98,12 +83,6 @@
       <div>
         <mat-form-field>
           <span matSuffix>seconds</span>
-          <input matInput placeholder="Network Handler Send Timeout" [(ngModel)]="config.networkHandlerSendTimeout">
-        </mat-form-field>
-      </div>
-      <div>
-        <mat-form-field>
-          <span matSuffix>seconds</span>
           <input matInput placeholder="UDP Network Handler Retry Interval" [(ngModel)]="config.udpNetworkHandlerRetryInterval">
         </mat-form-field>
       </div>
@@ -147,12 +126,17 @@
     <mat-card-content>
       <div>
         <mat-form-field>
-          <input matInput placeholder="Max Assigned Ordinary Peer Count" [(ngModel)]="config.maxAssignedOrdinaryPeerCount">
+          <input matInput placeholder="Maximum Unstructured Peer Connections Count" [(ngModel)]="config.maxUnstructuredPeerCount">
         </mat-form-field>
       </div>
       <div>
         <mat-form-field>
-          <input matInput placeholder="Maximum Unstructured Peer Count" [(ngModel)]="config.maxUnstructuredPeerCount">
+          <input matInput placeholder="Maximum Super Peer Connections Count" [(ngModel)]="config.maxSuperPeerCount">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Max Assigned Ordinary Peers Count" [(ngModel)]="config.maxAssignedOrdinaryPeerCount">
         </mat-form-field>
       </div>
       <div>

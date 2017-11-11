@@ -77,15 +77,18 @@ public class FileSharer {
      */
     private void shutdownInCurrentThread() {
         logger.info("Shutting down the Node");
+
+        logger.info("Leaving the network");
         serviceHolder.getOverlayNetworkManager().unregister();
         serviceHolder.getOverlayNetworkManager().leave();
 
-        // Waiting with a time out to leave the network
+        // Waiting with a time out to threads to exit
         try {
-            Thread.sleep(Constants.TASK_INTERVAL);
+            Thread.sleep(Constants.THREAD_DISABLE_TIMEOUT);
         } catch (InterruptedException ignored) {
         }
 
+        logger.info("Disabling background workers");
         serviceHolder.disableAutomatedGarbageCollection();
         serviceHolder.getOverlayNetworkManager().disableGossiping();
         serviceHolder.getOverlayNetworkManager().disableHeartBeat();
@@ -96,6 +99,7 @@ public class FileSharer {
         } catch (InterruptedException ignored) {
         }
 
+        logger.info("Disabling all services");
         serviceHolder.clear();
     }
 }

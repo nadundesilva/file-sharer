@@ -48,7 +48,7 @@ public class QueryManager implements RouterListener {
         if (message.getType() == MessageType.SER_OK) {
             handleSerOkMessages(fromNode, message);
         } else {
-            logger.info("Message " + message.toString() + " of unrecognized type ignored ");
+            logger.info("Ignored message " + message.toString() + " of unrecognized type ");
         }
     }
 

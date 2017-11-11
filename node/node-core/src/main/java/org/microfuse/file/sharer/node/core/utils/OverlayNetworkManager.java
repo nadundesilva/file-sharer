@@ -108,7 +108,7 @@ public class OverlayNetworkManager implements RouterListener {
                 handleListSuperPeerConnectionsOkMessage(fromNode, message);
                 break;
             default:
-                logger.info("Message " + message.toString() + " of unrecognized type ignored");
+                logger.info("Ignored message " + message.toString() + " of unrecognized type");
         }
     }
 
@@ -120,7 +120,7 @@ public class OverlayNetworkManager implements RouterListener {
                 searchForSuperPeer();
                 break;
             default:
-                logger.info("Message send failed " + message.toString() + " of unrecognized type ignored");
+                logger.info("Ignored message send failed " + message.toString() + " of unrecognized type");
         }
     }
 

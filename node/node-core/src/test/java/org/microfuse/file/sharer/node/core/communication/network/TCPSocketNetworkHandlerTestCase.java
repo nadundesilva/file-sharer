@@ -38,8 +38,8 @@ public class TCPSocketNetworkHandlerTestCase extends BaseTestCase {
 
         delay = 1000;
         localhostIP = "127.0.0.1";
-        peerListeningPort1 = 26756;
-        peerListeningPort2 = 27642;
+        peerListeningPort1 = 23475;
+        peerListeningPort2 = 21765;
         Configuration configuration = serviceHolder.getConfiguration();
 
         configuration.setPeerListeningPort(peerListeningPort1);
