@@ -7,6 +7,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
 import {Subscription} from 'rxjs/Subscription';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-trace',
@@ -18,7 +19,7 @@ export class TraceComponent implements OnInit, OnDestroy {
   network: Network;
   networkDetailsFetchSubscription: Subscription;
 
-  constructor(private http: HttpClient, private utils: Utils) {
+  constructor(private http: HttpClient, private router: Router) {
     this.network = new Network();
   }
 
@@ -46,6 +47,8 @@ export class TraceComponent implements OnInit, OnDestroy {
           this.markConnections(this.network.unstructuredNetwork, ConnectionType.SUB);
           this.markConnections(this.network.superPeerNetwork, ConnectionType.MAIN);
           this.markConnections(this.network.assignedSuperPeersNetwork, ConnectionType.SUB);
+        } else if (response.status === ServerResponseStatus.IN_FILE_SHARER_MODE) {
+          this.router.navigateByUrl('/home');
         } else {
           this.network.nodes = [];
           this.network.unstructuredNetwork = [];

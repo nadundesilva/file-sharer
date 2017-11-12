@@ -121,12 +121,14 @@ public class FileSharerTracer implements Tracer {
 
             superPeerRoutingTable.getAllSuperPeerNetworkNodes().forEach(node ->
                     network.addSuperPeerNetworkConnection(ip, port, node.getIp(), node.getPort()));
-        } else {
+        } else if (currentRoutingTable instanceof OrdinaryPeerRoutingTable) {
             network.getNode(ip, port).setPeerType(PeerType.ORDINARY_PEER);
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) currentRoutingTable;
 
             Node node = ordinaryPeerRoutingTable.getAssignedSuperPeer();
             network.addAssignedOrdinaryPeerConnection(ip, port, node.getIp(), node.getPort());
+        } else {
+            logger.warn("Unknown routing table type");
         }
         logger.info("Registered new node " + ip + ":" + "port");
     }

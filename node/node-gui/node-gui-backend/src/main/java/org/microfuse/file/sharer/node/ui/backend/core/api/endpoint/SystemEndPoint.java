@@ -2,12 +2,14 @@ package org.microfuse.file.sharer.node.ui.backend.core.api.endpoint;
 
 import com.google.gson.Gson;
 import org.microfuse.file.sharer.node.commons.Constants;
+import org.microfuse.file.sharer.node.ui.backend.commons.APIConstants;
 import org.microfuse.file.sharer.node.ui.backend.commons.Status;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerMode;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
 
 import java.util.Map;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
@@ -74,6 +76,17 @@ public class SystemEndPoint {
         } else {
             response = ResponseUtils.generateCustomResponse(Status.IN_TRACER_MODE);
         }
+
+        String jsonString = new Gson().toJson(response);
+        return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
+    }
+
+    @GET
+    @Path("/mode")
+    public Response getMode() {
+        Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
+
+        response.put(APIConstants.DATA, FileSharerHolder.getMode());
 
         String jsonString = new Gson().toJson(response);
         return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();

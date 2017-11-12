@@ -63,7 +63,7 @@ public class TraceEndPoint {
     public Response getNetwork() {
         Map<String, Object> response;
 
-        if (FileSharerHolder.getMode() == FileSharerMode.FILE_SHARER) {
+        if (FileSharerHolder.getMode() == FileSharerMode.TRACER) {
             response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
             Network network = FileSharerHolder.getTracer().getNetwork();

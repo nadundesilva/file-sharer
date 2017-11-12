@@ -4,6 +4,7 @@ import {
   Utils
 } from '../commons';
 import {HttpClient} from '@angular/common/http';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-config',
@@ -16,7 +17,7 @@ export class ConfigComponent implements OnInit {
   networkHandlerType = NetworkHandlerType;
   routingStrategyType = RoutingStrategyType;
 
-  constructor(private http: HttpClient, private utils: Utils) { }
+  constructor(private http: HttpClient, private router: Router, private utils: Utils) { }
 
   ngOnInit(): void {
     this.fetchConfiguration();
@@ -28,6 +29,8 @@ export class ConfigComponent implements OnInit {
         if (response.status === ServerResponseStatus.SUCCESS) {
           this.setConfig(response.data);
           this.utils.showNotification('Successfully loaded the configuration.');
+        } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+          this.router.navigateByUrl('/tracer');
         } else {
           this.setConfig(null);
           this.utils.showNotification('Failed to load the configuration.');
@@ -43,6 +46,8 @@ export class ConfigComponent implements OnInit {
         this.utils.showNotification('Successfully loaded the configuration default values. ' +
           'The new configuration will take effect in a moment.');
         this.setConfig(response.data);
+      } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+        this.router.navigateByUrl('/tracer');
       } else {
         this.utils.showNotification('Failed to load configuration default values.');
       }
@@ -57,6 +62,8 @@ export class ConfigComponent implements OnInit {
       if (response.status === ServerResponseStatus.SUCCESS) {
         this.utils.showNotification('Successfully saved the configuration. ' +
           'The new configuration will take effect in a moment.');
+      } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+        this.router.navigateByUrl('/tracer');
       } else {
         this.utils.showNotification('Failed to save the configuration');
       }

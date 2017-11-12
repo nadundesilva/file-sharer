@@ -4,6 +4,7 @@ import {Constants, ServerResponse, ServerResponseStatus, Utils} from '../../comm
 import {PickedFile} from 'angular-file-picker';
 import {MatDialog} from '@angular/material';
 import {AddResourceDialogComponent} from './add-resource-dialog.component';
+import {Router} from '@angular/router';
 
 class ResourceListItem {
   name: string;
@@ -19,7 +20,7 @@ export class ResourcesComponent implements OnInit {
 
   @ViewChild('resourcesList') resourcesListElement: ElementRef;
 
-  constructor(private http: HttpClient, private utils: Utils, private dialog: MatDialog) { }
+  constructor(private http: HttpClient, private router: Router, private utils: Utils, private dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.fetchResources();
@@ -33,6 +34,8 @@ export class ResourcesComponent implements OnInit {
             newResource.selected = true;
             return newResource;
           });
+        } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+          this.router.navigateByUrl('/tracer');
         } else {
           this.resources = [];
         }
@@ -94,6 +97,8 @@ export class ResourcesComponent implements OnInit {
     ).subscribe(response => {
         if (response.status === ServerResponseStatus.SUCCESS) {
           this.utils.showNotification('Successfully saved selected available resources');
+        } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+          this.router.navigateByUrl('/tracer');
         } else {
           this.utils.showNotification('Failed to save selected available resources');
         }

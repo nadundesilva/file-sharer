@@ -1,0 +1,13 @@
+.logo > div:nth-child(2) {
+  height: 50%;
+  text-align: center;
+  align-content: center;
+}
+
+.logo > div:nth-child(2) > h1 {
+  font-family: Roboto, serif;
+}
+
+.logo > div:nth-child(2) > mat-spinner {
+  margin: 0 auto;
+}

@@ -35,7 +35,8 @@ public class OverlayNetworkEndPoint {
             PeerType peerType = FileSharerHolder.getFileSharer().getServiceHolder().getPeerType();
             data.put(APIConstants.PEER_TYPE, peerType.toString());
 
-            RoutingTable routingTable = FileSharerHolder.getFileSharer().getServiceHolder().getRouter().getRoutingTable();
+            RoutingTable routingTable =
+                    FileSharerHolder.getFileSharer().getServiceHolder().getRouter().getRoutingTable();
 
             Set<Node> unstructuredNetworkNodes = routingTable.getAllUnstructuredNetworkNodes();
             unstructuredNetworkNodes = unstructuredNetworkNodes.stream().parallel()

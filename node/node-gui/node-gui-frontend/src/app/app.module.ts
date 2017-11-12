@@ -23,8 +23,13 @@ import {D3Service} from 'd3-ng2-service';
 import {ShutdownConfirmationComponent} from './home/shutdown-confirmation.component';
 import {TraceComponent} from './trace/trace.component';
 import {TraceNetworkComponent} from './trace/trace-network/trace-network.component';
+import {WelcomeComponent} from './welcome/welcome.component';
 
 const appRoutes: Routes = [
+  {
+    path: '',
+    component: WelcomeComponent
+  },
   {
     path: 'home',
     component: HomeComponent
@@ -34,20 +39,19 @@ const appRoutes: Routes = [
     component: ConfigComponent
   },
   {
-    path: '',
-    redirectTo: '/home',
-    pathMatch: 'full'
+    path: 'tracer',
+    component: TraceComponent
   },
   {
     path: '**',
-    redirectTo: '/home'
+    redirectTo: '/'
   }
 ];
 
 @NgModule({
   declarations: [
     AppComponent, HomeComponent, QueryComponent, NetworkComponent, ResourcesComponent, AddResourceDialogComponent,
-    ConfigComponent, ShutdownConfirmationComponent, TraceComponent, TraceNetworkComponent
+    ConfigComponent, ShutdownConfirmationComponent, TraceComponent, TraceNetworkComponent, WelcomeComponent
   ],
   entryComponents: [
     AddResourceDialogComponent, ShutdownConfirmationComponent

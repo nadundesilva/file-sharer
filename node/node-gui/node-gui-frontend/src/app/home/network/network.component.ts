@@ -4,6 +4,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
 import {Subscription} from 'rxjs/Subscription';
+import {Router} from '@angular/router';
 
 class NodeInfo {
   peerType: PeerType;
@@ -28,7 +29,7 @@ export class NetworkComponent implements OnInit, OnDestroy {
   nodeInfo: NodeInfo;
   nodeInfoFetchSubscription: Subscription;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router: Router) {
   }
 
   ngOnInit(): void {
@@ -57,6 +58,8 @@ export class NetworkComponent implements OnInit, OnDestroy {
                 this.nodeInfo.assignedSuperPeer = response.data.assignedSuperPeer;
               }
             }
+          } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+            this.router.navigateByUrl('/tracer');
           } else {
             this.nodeInfo = null;
           }

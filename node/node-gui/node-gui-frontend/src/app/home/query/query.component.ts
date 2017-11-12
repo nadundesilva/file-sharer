@@ -4,6 +4,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
 import {Subscription} from 'rxjs/Subscription';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-query',
@@ -23,7 +24,7 @@ export class QueryComponent implements OnInit, OnDestroy {
 
   @ViewChild('filter') filterElement: ElementRef;
 
-  constructor(private http: HttpClient, private utils: Utils) {
+  constructor(private http: HttpClient, private router: Router, private utils: Utils) {
   }
 
   ngOnInit(): void {
@@ -45,6 +46,8 @@ export class QueryComponent implements OnInit, OnDestroy {
         if (response.status === ServerResponseStatus.SUCCESS) {
           this.utils.showNotification('Successfully started search ' + queryString);
           this.fetchRunningQueries();
+        } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+          this.router.navigateByUrl('/tracer');
         } else {
           this.utils.showNotification('Error in starting search ' + queryString);
         }
@@ -61,6 +64,8 @@ export class QueryComponent implements OnInit, OnDestroy {
       if (response.status === ServerResponseStatus.SUCCESS) {
         this.utils.showNotification('Successfully cleared search results');
         this.fetchRunningQueries();
+      } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+        this.router.navigateByUrl('/tracer');
       } else {
         this.utils.showNotification('Error in clearing search results');
       }
@@ -85,6 +90,8 @@ export class QueryComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         if (response.status === ServerResponseStatus.SUCCESS) {
           this.runningQueries = response.data;
+        } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+          this.router.navigateByUrl('/tracer');
         } else {
           this.runningQueries = [];
         }
@@ -111,6 +118,8 @@ export class QueryComponent implements OnInit, OnDestroy {
       ).subscribe(response => {
         if (response.status === ServerResponseStatus.SUCCESS) {
           this.queryResults = new TableDataSource<AggregatedResource>(response.data);
+        } else if (response.status === ServerResponseStatus.IN_TRACER_MODE) {
+          this.router.navigateByUrl('/tracer');
         } else {
           this.queryResults = new TableDataSource<AggregatedResource>([]);
         }

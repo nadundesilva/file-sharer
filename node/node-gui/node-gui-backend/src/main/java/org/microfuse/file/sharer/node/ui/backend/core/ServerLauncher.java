@@ -8,7 +8,12 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.microfuse.file.sharer.node.ui.backend.commons.ServerConstants;
-import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.*;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ConfigEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.OverlayNetworkEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.QueryEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ResourcesEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.SystemEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.TraceEndPoint;
 import org.microfuse.file.sharer.node.ui.backend.core.filter.CORSFilter;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerMode;
@@ -38,12 +43,25 @@ public class ServerLauncher {
 
     public static void main(String[] args) {
         boolean isTracer = false;
+        int webAppPort = ServerConstants.WEB_APP_PORT;
 
         // Reading console parameters
         for (int i = 0; i < args.length;) {
-            if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_TRACER)) {
+            if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_WEB_APP_PORT)) {
+                String argument = args[i + 1];
+                try {
+                    webAppPort = Integer.parseInt(argument);
+                    i += 2;
+                } catch (NumberFormatException e) {
+                    logger.warn("Invalid web app port " + argument + " provided. Using " + webAppPort + " instead");
+                    i += 1;
+                }
+            } else if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_TRACER)) {
                 isTracer = true;
                 i += 2;
+            } else {
+                logger.warn("Unknown console argument " + args[i]);
+                i += 1;
             }
         }
 
@@ -56,7 +74,7 @@ public class ServerLauncher {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> FileSharerHolder.getFileSharer().shutdown()));
             FileSharerHolder.getFileSharer().start();
         }
-        startTomcatServer(ServerConstants.WEB_APP_PORT);
+        startTomcatServer(webAppPort);
     }
 
     private static void startTomcatServer(int port) {

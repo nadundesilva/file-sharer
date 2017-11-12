@@ -1,7 +1,7 @@
 package org.microfuse.file.sharer.node.ui.backend.commons;
 
 /**
- * The response status
+ * The response status.
  */
 public enum Status {
     SUCCESS,
