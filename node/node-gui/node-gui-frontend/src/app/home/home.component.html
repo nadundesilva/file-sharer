@@ -2,9 +2,9 @@
   <h1 class="mat-h1">{{ title }}</h1>
   <span fxFlex></span>
   <div class="top-menu">
-    <mat-slide-toggle color="primary" [(ngModel)]="traceable" (change)="onTracingModeChange()">Traceable</mat-slide-toggle>
-    <button mat-button color="primary" routerLink="/config"><mat-icon>settings</mat-icon></button>
-    <button mat-button color="primary" (click)="openShutdownDialog()"><mat-icon>power_settings_new</mat-icon></button>
+    <mat-slide-toggle color="primary" [(ngModel)]="traceable" (change)="onTracingModeChange()" matTooltip="Traceable State">Traceable</mat-slide-toggle>
+    <button mat-button color="primary" routerLink="/config" matTooltip="Settings"><mat-icon>settings</mat-icon></button>
+    <button mat-button color="primary" (click)="openShutdownDialog()" matTooltip="Shutdown"><mat-icon>power_settings_new</mat-icon></button>
   </div>
 </div>
 <mat-tab-group>

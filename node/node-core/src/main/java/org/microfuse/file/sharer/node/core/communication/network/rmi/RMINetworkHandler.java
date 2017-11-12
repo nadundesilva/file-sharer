@@ -54,7 +54,7 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
         if (!running) {
             super.startListening();
 
-            System.setProperty("java.rmi.server.hostname", serviceHolder.getConfiguration().getIp());
+            System.setProperty(Constants.RMI_HOME_SYSTEM_PROPERTY, serviceHolder.getConfiguration().getIp());
 
             int port = serviceHolder.getConfiguration().getPeerListeningPort();
             try {

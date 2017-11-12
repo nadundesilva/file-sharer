@@ -68,7 +68,7 @@ public class FileSharerTracer implements Tracer {
      * Start serving tracer in the RMI registry.
      */
     public void start() {
-        System.setProperty("java.rmi.server.hostname", serviceHolder.getConfiguration().getIp());
+        System.setProperty(Constants.RMI_HOME_SYSTEM_PROPERTY, serviceHolder.getConfiguration().getTracerIP());
 
         try {
             Remote stub = UnicastRemoteObject.exportObject(

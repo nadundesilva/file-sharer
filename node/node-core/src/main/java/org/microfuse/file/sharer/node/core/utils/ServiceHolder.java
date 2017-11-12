@@ -183,6 +183,16 @@ public class ServiceHolder {
             routerLock.unlock();
         }
         logger.info("Promoted to super peer");
+
+        // Notifying the tracer
+        Tracer tracer = getTracer();
+        if (tracer != null) {
+            try {
+                tracer.promoteToSuperPeer(getConfiguration().getIp(), getConfiguration().getPeerListeningPort());
+            } catch (RemoteException e) {
+                logger.warn("Failed to notify tracer of the promotion", e);
+            }
+        }
     }
 
     /**
@@ -213,6 +223,16 @@ public class ServiceHolder {
             routerLock.unlock();
         }
         logger.info("Demoted to ordinary peer");
+
+        // Notifying the tracer
+        Tracer tracer = getTracer();
+        if (tracer != null) {
+            try {
+                tracer.demoteToOrdinaryPeer(getConfiguration().getIp(), getConfiguration().getPeerListeningPort());
+            } catch (RemoteException e) {
+                logger.warn("Failed to notify tracer of the demotion", e);
+            }
+        }
     }
 
     /**

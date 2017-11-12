@@ -2,13 +2,13 @@
   <h1 class="mat-h1">{{ title }}</h1>
   <span fxFlex></span>
   <div class="top-menu">
-    <button mat-button color="primary" routerLink="/home"><mat-icon>home</mat-icon></button>
+    <button mat-button color="primary" routerLink="/home" matTooltip="Home"><mat-icon>home</mat-icon></button>
   </div>
 </div>
 <div>
-  <button mat-button (click)="save()"><mat-icon>save</mat-icon> Save</button>
-  <button mat-button (click)="fetchConfiguration()"><mat-icon>undo</mat-icon> Discard Changes</button>
-  <button mat-button (click)="loadDefaults()"><mat-icon>restore</mat-icon> Load Default Values</button>
+  <button mat-button (click)="save()" matTooltip="Save the configuration"><mat-icon>save</mat-icon> Save</button>
+  <button mat-button (click)="fetchConfiguration()" matTooltip="Discard the current changes made to the configuration"><mat-icon>undo</mat-icon> Discard Changes</button>
+  <button mat-button (click)="loadDefaults()" matTooltip="Load the default values of the file sharer"><mat-icon>restore</mat-icon> Load Default Values</button>
 </div>
 <div fxLayoutWrap *ngIf="config">
   <mat-card fxFlex>

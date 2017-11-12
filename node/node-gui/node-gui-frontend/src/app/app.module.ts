@@ -6,7 +6,8 @@ import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
   MatButtonModule, MatCardModule, MatDialogModule, MatIconModule, MatInputModule, MatListModule, MatPaginatorModule,
-  MatSelectModule, MatSlideToggleModule, MatSnackBarModule, MatTableModule, MatTabsModule, MatToolbarModule
+  MatSelectModule, MatSlideToggleModule, MatSnackBarModule, MatTableModule, MatTabsModule, MatToolbarModule,
+  MatTooltipModule
 } from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import {QueryComponent} from './home/query/query.component';
@@ -60,7 +61,7 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes), FlexLayoutModule, BrowserModule, BrowserAnimationsModule, HttpClientModule,
     MatTableModule, MatPaginatorModule, MatSelectModule, FormsModule, MatTabsModule, MatListModule, MatSnackBarModule,
     MatInputModule, MatButtonModule, MatCardModule, FilePickerModule, MatDialogModule, MatIconModule, MatToolbarModule,
-    MatSlideToggleModule
+    MatSlideToggleModule, MatTooltipModule
   ],
   providers: [Utils, D3Service],
   bootstrap: [AppComponent]

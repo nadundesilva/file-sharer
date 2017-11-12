@@ -16,6 +16,7 @@ public class Constants {
     public static final int RMI_REGISTRY_PORT = 33333;
     public static final String RMI_REGISTRY_ENTRY_NETWORK_HANDLER_POSTFIX = "_network_handler";
     public static final String RMI_REGISTRY_ENTRY_TRACER = "tracer";
+    public static final String RMI_HOME_SYSTEM_PROPERTY = "java.rmi.server.hostname";
 
     private Constants() {       // Preventing from being initiated
     }

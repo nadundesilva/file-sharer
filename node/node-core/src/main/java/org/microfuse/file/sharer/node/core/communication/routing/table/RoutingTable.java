@@ -1,11 +1,14 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
+import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -197,6 +200,20 @@ public abstract class RoutingTable {
                 isSuccessful = unstructuredNetworkNodes.add(node);
                 if (isSuccessful) {
                     logger.info("Added node " + node.toString() + " to unstructured network.");
+
+                    // Notifying the tracer
+                    Tracer tracer = serviceHolder.getTracer();
+                    if (tracer != null) {
+                        try {
+                            tracer.addUnstructuredNetworkConnection(
+                                    serviceHolder.getConfiguration().getIp(),
+                                    serviceHolder.getConfiguration().getPeerListeningPort(),
+                                    node.getIp(), node.getPort()
+                            );
+                        } catch (RemoteException e) {
+                            logger.warn("Failed to add unstructured network connection to the tracer", e);
+                        }
+                    }
                 } else {
                     logger.info("Failed to add node " + node.toString() + " to unstructured network.");
                 }
@@ -224,6 +241,20 @@ public abstract class RoutingTable {
             isSuccessful = unstructuredNetworkNodes.remove(node);
             if (isSuccessful) {
                 logger.info("Removed node " + node.toString() + " from unstructured network.");
+
+                // Notifying the tracer
+                Tracer tracer = serviceHolder.getTracer();
+                if (tracer != null) {
+                    try {
+                        tracer.removeUnstructuredNetworkConnection(
+                                serviceHolder.getConfiguration().getIp(),
+                                serviceHolder.getConfiguration().getPeerListeningPort(),
+                                node.getIp(), node.getPort()
+                        );
+                    } catch (RemoteException e) {
+                        logger.warn("Failed to remove unstructured network connection from the tracer", e);
+                    }
+                }
             } else {
                 logger.info("Failed to remove node " + node.toString() + " from unstructured network.");
             }
@@ -233,9 +264,14 @@ public abstract class RoutingTable {
         return isSuccessful;
     }
 
+    /**
+     * Remove the inactive nodes from a set of nodes.
+     *
+     * @param nodeSet The set of nodes from which the inactive nodes should be remove
+     */
     protected void removeInactiveNodesFromSet(Set<Node> nodeSet) {
         Set<Node> garbageNodes = nodeSet.stream().parallel()
-                .filter(node -> !node.isActive())
+                .filter(node -> node.getState() == NodeState.INACTIVE)
                 .collect(Collectors.toSet());
 
         garbageNodes.forEach(node -> {

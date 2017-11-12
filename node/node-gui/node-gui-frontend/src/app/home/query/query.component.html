@@ -3,21 +3,20 @@
   <div fxLayoutWrap>
     <div fxFlex>
       <mat-form-field>
-        <input matInput placeholder="Query" [(ngModel)]="queryString">
+        <input matInput placeholder="Query" [(ngModel)]="queryString" matTooltip="Enter the name of the file to query for">
       </mat-form-field>
-      <button mat-button (click)="query()"><mat-icon>search</mat-icon> Search</button>
+      <button mat-button (click)="query()" matTooltip="Run a query on {{ (queryString ? queryString : 'a file') }}"><mat-icon>search</mat-icon> Search</button>
     </div>
     <div fxFlex>
       <mat-form-field>
-        <mat-select placeholder="Query to view result for" [(ngModel)]="selectedRunningQuery" (change)="fetchQueryResults()">
+        <mat-select placeholder="Query to view result for" [(ngModel)]="selectedRunningQuery" (change)="fetchQueryResults()" matTooltip="Select the query for which the results should be shown">
           <mat-option *ngIf="runningQueries && runningQueries.length > 0" aria-selected="true">None</mat-option>
           <mat-option *ngFor="let runningQuery of runningQueries" [value]="runningQuery">{{ runningQuery }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
     <div fxFlex>
-      <button mat-button *ngIf="runningQueries && runningQueries.length > 0" (click)="clearResources()"><mat-icon>clear_all
-      1</mat-icon> Clear Resources</button>
+      <button mat-button *ngIf="runningQueries && runningQueries.length > 0" (click)="clearResources()" matTooltip="Clear the results for all queries"><mat-icon>clear_all</mat-icon> Clear Resources</button>
     </div>
   </div>
   <mat-card class="mat-elevation-z8" *ngIf="queryResults && !queryResults.isEmpty()">

@@ -1,10 +1,12 @@
 package org.microfuse.file.sharer.node.core.communication.routing.table;
 
 import org.microfuse.file.sharer.node.commons.peer.Node;
+import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.rmi.RemoteException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -113,6 +115,34 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
         } else {
             logger.info("Removing assigned super peer");
         }
+
+        // Notifying the tracer
+        Tracer tracer = serviceHolder.getTracer();
+        if (tracer != null) {
+            if (this.assignedSuperPeer != null) {
+                try {
+                    tracer.removeAssignedOrdinaryPeerConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            this.assignedSuperPeer.getIp(), this.assignedSuperPeer.getPort()
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to add assigned super peer to the tracer", e);
+                }
+            }
+            if (node != null) {
+                try {
+                    tracer.addAssignedOrdinaryPeerConnection(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            node.getIp(), node.getPort()
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to remove assigned super peer from the tracer", e);
+                }
+            }
+        }
+
         this.assignedSuperPeer = node;
     }
 }
