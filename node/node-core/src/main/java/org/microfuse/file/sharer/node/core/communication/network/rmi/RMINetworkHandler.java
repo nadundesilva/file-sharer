@@ -24,8 +24,24 @@ import java.rmi.server.UnicastRemoteObject;
 public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandlerRemote {
     private static final Logger logger = LoggerFactory.getLogger(RMINetworkHandler.class);
 
+    private Registry registry;
+
     public RMINetworkHandler(ServiceHolder serviceHolder) {
         super(serviceHolder);
+        // Starting the RMI registry. Fails if it is already running.
+        try {
+            LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT);
+        } catch (RemoteException e) {
+            logger.warn("Failed to start RMI registry since it already exists at port "
+                    + Constants.RMI_REGISTRY_PORT, e);
+        }
+
+        // Retrieving reference to RMI registry
+        try {
+            registry = LocateRegistry.getRegistry(Constants.LOCALHOST, Constants.RMI_REGISTRY_PORT);
+        } catch (RemoteException e) {
+            logger.warn("Failed to locate registry", e);
+        }
     }
 
     @Override
@@ -37,21 +53,11 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
     public void startListening() {
         if (!running) {
             super.startListening();
+
             System.setProperty("java.rmi.server.hostname", serviceHolder.getConfiguration().getIp());
+
             int port = serviceHolder.getConfiguration().getPeerListeningPort();
-            logger.info("Starting listening at port " + port);
             try {
-                // Starting the RMI registry. Fails if it is already running.
-                try {
-                    LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT);
-                } catch (RemoteException e) {
-                    logger.warn("Failed to start RMI registry since it already exists at port "
-                            + Constants.RMI_REGISTRY_PORT, e);
-                }
-
-                // Retrieving reference to RMI registry
-                Registry registry = LocateRegistry.getRegistry(Constants.LOCALHOST, Constants.RMI_REGISTRY_PORT);
-
                 // Rebinding this object in the RMI registry
                 String rmiRegistryEntry = getRMIRegistryEntry(serviceHolder.getConfiguration().getIp(), port);
                 Remote remote = UnicastRemoteObject.exportObject(this, port);
@@ -62,6 +68,7 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
             } catch (RemoteException e) {
                 logger.warn("Failed to startInThread listening at port " + port, e);
             }
+            logger.info("Started listening at port " + port);
         } else {
             logger.warn("The RMI network handler is already listening. Ignored request to startInThread again.");
         }
@@ -87,6 +94,18 @@ public class RMINetworkHandler extends NetworkHandler implements RMINetworkHandl
     public void shutdown() {
         logger.info("Shutting down RMI network handler");
         running = false;
+
+        // Removing this object from the RMI registry
+        try {
+            registry.unbind(getRMIRegistryEntry(
+                    serviceHolder.getConfiguration().getIp(),
+                    serviceHolder.getConfiguration().getPeerListeningPort()
+            ));
+        } catch (RemoteException | NotBoundException e) {
+            logger.warn("Failed to unbind object from the registry", e);
+        }
+
+        // Un-exporting this object
         try {
             while (UnicastRemoteObject.unexportObject(this, false)) { }
             logger.info("Un-exported object");

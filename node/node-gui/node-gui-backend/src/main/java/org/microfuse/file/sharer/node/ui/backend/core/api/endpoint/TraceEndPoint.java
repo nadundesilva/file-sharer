@@ -1,18 +1,15 @@
 package org.microfuse.file.sharer.node.ui.backend.core.api.endpoint;
 
 import com.google.gson.Gson;
-import org.microfuse.file.sharer.node.core.resource.AggregatedResource;
-import org.microfuse.file.sharer.node.core.utils.QueryManager;
+import org.microfuse.file.sharer.node.commons.tracing.TraceableState;
+import org.microfuse.file.sharer.node.core.tracing.Network;
 import org.microfuse.file.sharer.node.ui.backend.commons.APIConstants;
 import org.microfuse.file.sharer.node.ui.backend.commons.Status;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerMode;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -21,20 +18,20 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Querying related end point.
+ * Tracing related endpoint.
  */
-@Path("/query")
-public class QueryEndPoint {
+@Path("/trace")
+public class TraceEndPoint {
     @POST
-    @Path("/{queryString}")
-    public Response runQuery(@PathParam("queryString") String queryString) {
+    @Path("/state/{state}")
+    public Response changeState(@PathParam("state") String stateString) {
         Map<String, Object> response;
 
         if (FileSharerHolder.getMode() == FileSharerMode.FILE_SHARER) {
             response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
-            QueryManager queryManager = FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager();
-            queryManager.query(queryString);
+            TraceableState traceable = TraceableState.valueOf(stateString);
+            FileSharerHolder.getFileSharer().getServiceHolder().changeTraceableState(traceable);
         } else {
             response = ResponseUtils.generateCustomResponse(Status.IN_TRACER_MODE);
         }
@@ -44,15 +41,15 @@ public class QueryEndPoint {
     }
 
     @GET
-    public Response getQueryResult() {
+    @Path("/state")
+    public Response getMode() {
         Map<String, Object> response;
 
         if (FileSharerHolder.getMode() == FileSharerMode.FILE_SHARER) {
             response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
-            QueryManager queryManager = FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager();
-            Set<String> runningQueryStrings = queryManager.getRunningQueryStrings();
-            response.put(APIConstants.DATA, runningQueryStrings);
+            response.put(APIConstants.DATA,
+                    FileSharerHolder.getFileSharer().getServiceHolder().getTraceableState());
         } else {
             response = ResponseUtils.generateCustomResponse(Status.IN_TRACER_MODE);
         }
@@ -62,34 +59,17 @@ public class QueryEndPoint {
     }
 
     @GET
-    @Path("/{queryString}")
-    public Response getQueryResult(@PathParam("queryString") String queryString) {
+    @Path("/network")
+    public Response getNetwork() {
         Map<String, Object> response;
 
         if (FileSharerHolder.getMode() == FileSharerMode.FILE_SHARER) {
             response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
-            QueryManager queryManager = FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager();
-            List<AggregatedResource> aggregatedResourceList = queryManager.getQueryResults(queryString);
-            response.put(APIConstants.DATA, aggregatedResourceList);
+            Network network = FileSharerHolder.getTracer().getNetwork();
+            response.put(APIConstants.DATA, network);
         } else {
-            response = ResponseUtils.generateCustomResponse(Status.IN_TRACER_MODE);
-        }
-
-        String jsonString = new Gson().toJson(response);
-        return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
-    }
-
-    @DELETE
-    public Response clearResults() {
-        Map<String, Object> response;
-
-        if (FileSharerHolder.getMode() == FileSharerMode.FILE_SHARER) {
-            response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
-
-            FileSharerHolder.getFileSharer().getServiceHolder().getQueryManager().clearQueryResults();
-        } else {
-            response = ResponseUtils.generateCustomResponse(Status.IN_TRACER_MODE);
+            response = ResponseUtils.generateCustomResponse(Status.IN_FILE_SHARER_MODE);
         }
 
         String jsonString = new Gson().toJson(response);

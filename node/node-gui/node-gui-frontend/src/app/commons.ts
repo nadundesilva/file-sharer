@@ -14,16 +14,17 @@ export class Constants {
   public static API_CONFIG_ENDPOINT = 'config/';
   public static API_CONFIG_ENDPOINT_DEFAULTS_PATH = 'defaults/';
   public static API_SYSTEM_ENDPOINT = 'system/';
-  public static API_SYSTEM_ENDPOINT_RESTART_PATH = 'restart/';
   public static API_SYSTEM_ENDPOINT_SHUTDOWN_PATH = 'shutdown/';
   public static API_TRACE_ENDPOINT = 'trace/';
-  public static API_TRACE_ENDPOINT_MODE_PATH = 'mode/';
+  public static API_TRACE_ENDPOINT_STATE_PATH = 'state/';
   public static API_TRACE_ENDPOINT_NETWORK_PATH = 'network/';
   public static REFRESH_FREQUENCY = 3000;
 }
 
 export enum ServerResponseStatus {
   SUCCESS = <any>'SUCCESS',
+  IN_TRACER_MODE = <any>'IN_TRACER_MODE',
+  IN_FILE_SHARER_MODE = <any>'IN_FILE_SHARER_MODE',
   ERROR = <any>'ERROR'
 }
 
@@ -41,9 +42,8 @@ export enum RoutingStrategyType {
   SUPER_PEER_RANDOM_WALK = <any>'SUPER_PEER_RANDOM_WALK'
 }
 
-export enum TracingMode {
+export enum TraceableState {
   TRACEABLE = <any>'TRACEABLE',
-  TRACER = <any>'TRACER',
   OFF = <any>'OFF'
 }
 
@@ -85,6 +85,7 @@ export class NetworkConnection {
 }
 
 export class Network {
+  nodes: TraceableNode[] = [];
   unstructuredNetwork: NetworkConnection[] = [];
   superPeerNetwork: NetworkConnection[] = [];
   assignedSuperPeersNetwork: NetworkConnection[] = [];
@@ -98,31 +99,9 @@ export class Utils {
   public showNotification(message: string): void {
     this.snackBar.open(message, 'Close', {duration: 3000});
   }
-
-  public restart() {
-    this.http.post<ServerResponse<any>>(
-      Constants.API_ENDPOINT + Constants.API_SYSTEM_ENDPOINT + Constants.API_SYSTEM_ENDPOINT_RESTART_PATH, {}
-    ).subscribe(response => {
-      if (response.status === ServerResponseStatus.SUCCESS) {
-        this.showNotification('Restarting server');
-      } else {
-        this.showNotification('Failed to restart server');
-      }
-    });
-  }
 }
 
 export class TableDataSource<T> extends DataSource<T> {
-  _filterChange = new BehaviorSubject('');
-
-  get filter(): string {
-    return this._filterChange.value;
-  }
-
-  set filter(filter: string) {
-    this._filterChange.next(filter);
-  }
-
   constructor(private data: T[]) {
     super();
   }

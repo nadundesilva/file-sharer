@@ -1,19 +1,18 @@
-package org.microfuse.file.sharer.node.commons.tracing;
+package org.microfuse.file.sharer.node.ui.backend.core.utils;
 
 /**
- * Tracing modes used by nodes.
+ * Mode of the current file sharer.
  */
-public enum  TracingMode {
-    TRACEABLE("Traceable"),
-    TRACER("Tracer"),
-    OFF("Off");
+public enum FileSharerMode {
+    FILE_SHARER("File Sharer"),
+    TRACER("File Sharer Tracer");
 
     /**
      * Contains the value to be displayed.
      */
     private String value;
 
-    TracingMode(String value) {
+    FileSharerMode(String value) {
         this.value = value;
     }
 

@@ -9,6 +9,7 @@ import org.microfuse.file.sharer.node.commons.communication.network.NetworkHandl
 import org.microfuse.file.sharer.node.commons.communication.routing.strategy.RoutingStrategyType;
 import org.microfuse.file.sharer.node.commons.peer.NodeConstants;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
+import org.microfuse.file.sharer.node.commons.tracing.TraceableState;
 import org.microfuse.file.sharer.node.core.communication.network.NetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.network.TCPSocketNetworkHandler;
 import org.microfuse.file.sharer.node.core.communication.routing.Router;
@@ -16,12 +17,17 @@ import org.microfuse.file.sharer.node.core.communication.routing.strategy.Routin
 import org.microfuse.file.sharer.node.core.communication.routing.strategy.UnstructuredFloodingRoutingStrategy;
 import org.microfuse.file.sharer.node.core.resource.index.ResourceIndex;
 import org.microfuse.file.sharer.node.core.resource.index.SuperPeerResourceIndex;
+import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,6 +42,7 @@ public class ServiceHolder {
     private static final Logger logger = LoggerFactory.getLogger(ServiceHolder.class);
 
     private PeerType peerType;
+    private TraceableState traceableState;
     private Configuration configuration;
     private Router router;
     private ResourceIndex resourceIndex;
@@ -43,6 +50,7 @@ public class ServiceHolder {
     private QueryManager queryManager;
 
     private Lock peerTypeLock;
+    private Lock traceableStateLock;
     private Lock configurationLock;
     private Lock routerLock;
     private Lock resourceIndexLock;
@@ -56,6 +64,7 @@ public class ServiceHolder {
 
     public ServiceHolder() {
         peerTypeLock = new ReentrantLock();
+        traceableStateLock = new ReentrantLock();
         configurationLock = new ReentrantLock();
         routerLock = new ReentrantLock();
         resourceIndexLock = new ReentrantLock();
@@ -238,6 +247,14 @@ public class ServiceHolder {
             logger.info("Cleared peer type");
         } finally {
             peerTypeLock.unlock();
+        }
+
+        traceableStateLock.lock();
+        try {
+            traceableState = null;
+            logger.info("Cleared traceable state");
+        } finally {
+            traceableStateLock.unlock();
         }
 
         configurationLock.lock();
@@ -451,6 +468,73 @@ public class ServiceHolder {
             saveConfigurationToFile(configuration);
         } finally {
             configurationLock.unlock();
+        }
+    }
+
+    /**
+     * Get a tracer reference.
+     * Returns null if the tracing mode of this node is not traceable.
+     *
+     * @return The tracer RMI reference
+     */
+    public Tracer getTracer() {
+        Tracer tracer = null;
+        if (getTraceableState() == TraceableState.TRACEABLE) {
+            try {
+                Registry tracerRegistry = LocateRegistry.getRegistry(
+                        getConfiguration().getTracerIP(),
+                        Constants.RMI_REGISTRY_PORT
+                );
+                tracer = (Tracer) tracerRegistry.lookup(Constants.RMI_REGISTRY_ENTRY_TRACER);
+            } catch (NotBoundException | RemoteException e) {
+                logger.warn("Failed to get hold of the tracer stub", e);
+            }
+        } else {
+            logger.info("Ignored request to get tracer reference since this is not a traceable node");
+        }
+        return tracer;
+    }
+
+    /**
+     * Change the tracing mode of this node.
+     *
+     * @param traceableState The new tracing mode to be used.
+     */
+    public void changeTraceableState(TraceableState traceableState) {
+        if (getTraceableState() != traceableState) {
+            this.traceableState = traceableState;
+
+            // Register in the tracer
+            Tracer tracer = getTracer();
+            if (tracer != null) {
+                try {
+                    tracer.register(
+                            getConfiguration().getIp(),
+                            getConfiguration().getPeerListeningPort(),
+                            getRouter().getRoutingTable()
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to register node in tracer", e);
+                }
+            }
+            logger.info("Changed the traceable state to " + traceableState.getValue());
+        }
+    }
+
+    /**
+     * Get the current tracing mode.
+     *
+     * @return The current tracing mode
+     */
+    public TraceableState getTraceableState() {
+        traceableStateLock.lock();
+        try {
+            if (traceableState == null) {
+                traceableState = TraceableState.OFF;
+            }
+            return traceableState;
+        } finally {
+            traceableStateLock.unlock();
         }
     }
 

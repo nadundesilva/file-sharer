@@ -588,10 +588,12 @@ public class OverlayNetworkManager implements RouterListener {
                 OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
 
                 if (ordinaryPeerRoutingTable.getAssignedSuperPeer() == null) {
-                    String superPeerIP = message.getData(MessageIndexes.JOIN_OK_SUPER_PEER_IP);
-                    String superPeerPort = message.getData(MessageIndexes.JOIN_OK_SUPER_PEER_PORT);
 
-                    if (superPeerIP != null && superPeerPort != null) {
+                    if (MessageIndexes.JOIN_OK_SUPER_PEER_IP < message.getData().size() &&
+                            MessageIndexes.JOIN_OK_SUPER_PEER_PORT < message.getData().size()) {
+                        String superPeerIP = message.getData(MessageIndexes.JOIN_OK_SUPER_PEER_IP);
+                        String superPeerPort = message.getData(MessageIndexes.JOIN_OK_SUPER_PEER_PORT);
+
                         if (serviceHolder.getRouter().getRoutingTable() instanceof OrdinaryPeerRoutingTable) {
                             Node superPeerNode = new Node();
                             superPeerNode.setIp(superPeerIP);

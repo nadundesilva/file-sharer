@@ -28,6 +28,8 @@ public class Configuration {
     private int automatedGarbageCollectionInterval;
     private int udpNetworkHandlerRetryInterval;
     private int udpNetworkHandlerRetryCount;
+    private String tracerIP;
+    private int tracerPort;
     private NetworkHandlerType networkHandlerType;
     private RoutingStrategyType routingStrategyType;
 
@@ -54,6 +56,8 @@ public class Configuration {
         automatedGarbageCollectionInterval = NodeConstants.DEFAULT_AUTOMATED_GARBAGE_COLLECTION_INTERVAL;
         udpNetworkHandlerRetryInterval = NodeConstants.DEFAULT_UDP_NETWORK_HANDLER_RETRY_INTERVAL;
         udpNetworkHandlerRetryCount = NodeConstants.DEFAULT_UDP_NETWORK_HANDLER_RETRY_COUNT;
+        tracerIP = NodeConstants.DEFAULT_TRACER_IP;
+        tracerPort = NodeConstants.DEFAULT_TRACER_PORT;
         networkHandlerType = NodeConstants.DEFAULT_NETWORK_HANDLER;
         routingStrategyType = NodeConstants.DEFAULT_ROUTING_STRATEGY;
     }
@@ -208,6 +212,22 @@ public class Configuration {
 
     public void setUdpNetworkHandlerRetryCount(int udpNetworkHandlerRetryCount) {
         this.udpNetworkHandlerRetryCount = udpNetworkHandlerRetryCount;
+    }
+
+    public String getTracerIP() {
+        return tracerIP;
+    }
+
+    public void setTracerIP(String tracerIP) {
+        this.tracerIP = tracerIP;
+    }
+
+    public int getTracerPort() {
+        return tracerPort;
+    }
+
+    public void setTracerPort(int tracerPort) {
+        this.tracerPort = tracerPort;
     }
 
     public NetworkHandlerType getNetworkHandlerType() {

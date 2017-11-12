@@ -1,9 +1,11 @@
 package org.microfuse.file.sharer.node.ui.backend.commons;
 
 /**
- * Created by nadun on 21-May-17.
+ * The response status
  */
 public enum Status {
     SUCCESS,
-    ERROR;
+    IN_TRACER_MODE,
+    IN_FILE_SHARER_MODE,
+    ERROR
 }

@@ -8,13 +8,10 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.microfuse.file.sharer.node.ui.backend.commons.ServerConstants;
-import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ConfigEndPoint;
-import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.OverlayNetworkEndPoint;
-import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.QueryEndPoint;
-import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.ResourcesEndPoint;
-import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.SystemEndPoint;
+import org.microfuse.file.sharer.node.ui.backend.core.api.endpoint.*;
 import org.microfuse.file.sharer.node.ui.backend.core.filter.CORSFilter;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
+import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 import javax.servlet.ServletException;
 
 /**
@@ -35,13 +33,29 @@ public class ServerLauncher {
     private static final String CORS_FILTER_NAME = "cors-filter";
     private static final Class<?>[] endpointClassList = new Class<?>[]{
             ConfigEndPoint.class, QueryEndPoint.class, OverlayNetworkEndPoint.class, ResourcesEndPoint.class,
-            SystemEndPoint.class
+            SystemEndPoint.class, TraceEndPoint.class
     };
 
     public static void main(String[] args) {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileSharerHolder.getFileSharer().shutdown()));
+        boolean isTracer = false;
 
-        FileSharerHolder.getFileSharer().start();           // Instantiating the file sharer
+        // Reading console parameters
+        for (int i = 0; i < args.length;) {
+            if (Objects.equals(args[i], ServerConstants.CONSOLE_ARGUMENT_KEY_TRACER)) {
+                isTracer = true;
+                i += 2;
+            }
+        }
+
+        if (isTracer) {
+            FileSharerHolder.setMode(FileSharerMode.TRACER);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> FileSharerHolder.getTracer().shutdown()));
+            FileSharerHolder.getTracer().start();
+        } else {
+            FileSharerHolder.setMode(FileSharerMode.FILE_SHARER);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> FileSharerHolder.getFileSharer().shutdown()));
+            FileSharerHolder.getFileSharer().start();
+        }
         startTomcatServer(ServerConstants.WEB_APP_PORT);
     }
 

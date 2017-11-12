@@ -9,6 +9,7 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeer
 import org.microfuse.file.sharer.node.ui.backend.commons.APIConstants;
 import org.microfuse.file.sharer.node.ui.backend.commons.Status;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
+import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerMode;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
 
 import java.util.HashMap;
@@ -30,45 +31,49 @@ public class OverlayNetworkEndPoint {
         Status responseStatus = Status.SUCCESS;
         Map<String, Object> data = new HashMap<>();
 
-        PeerType peerType = FileSharerHolder.getFileSharer().getServiceHolder().getPeerType();
-        data.put(APIConstants.PEER_TYPE, peerType.toString());
+        if (FileSharerHolder.getMode() == FileSharerMode.FILE_SHARER) {
+            PeerType peerType = FileSharerHolder.getFileSharer().getServiceHolder().getPeerType();
+            data.put(APIConstants.PEER_TYPE, peerType.toString());
 
-        RoutingTable routingTable = FileSharerHolder.getFileSharer().getServiceHolder().getRouter().getRoutingTable();
+            RoutingTable routingTable = FileSharerHolder.getFileSharer().getServiceHolder().getRouter().getRoutingTable();
 
-        Set<Node> unstructuredNetworkNodes = routingTable.getAllUnstructuredNetworkNodes();
-        unstructuredNetworkNodes = unstructuredNetworkNodes.stream().parallel()
-                .filter(Node::isActive)
-                .collect(Collectors.toSet());
-        data.put(APIConstants.UNSTRUCTURED_NETWORK, unstructuredNetworkNodes);
+            Set<Node> unstructuredNetworkNodes = routingTable.getAllUnstructuredNetworkNodes();
+            unstructuredNetworkNodes = unstructuredNetworkNodes.stream().parallel()
+                    .filter(Node::isActive)
+                    .collect(Collectors.toSet());
+            data.put(APIConstants.UNSTRUCTURED_NETWORK, unstructuredNetworkNodes);
 
-        if (peerType == PeerType.SUPER_PEER) {
-            if (routingTable instanceof SuperPeerRoutingTable) {
-                SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
+            if (peerType == PeerType.SUPER_PEER) {
+                if (routingTable instanceof SuperPeerRoutingTable) {
+                    SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) routingTable;
 
-                Set<Node> superPeerNetworkNodes = superPeerRoutingTable.getAllSuperPeerNetworkNodes();
-                superPeerNetworkNodes = superPeerNetworkNodes.stream().parallel()
-                        .filter(Node::isActive)
-                        .collect(Collectors.toSet());
-                data.put(APIConstants.SUPER_PEER_NETWORK, superPeerNetworkNodes);
+                    Set<Node> superPeerNetworkNodes = superPeerRoutingTable.getAllSuperPeerNetworkNodes();
+                    superPeerNetworkNodes = superPeerNetworkNodes.stream().parallel()
+                            .filter(Node::isActive)
+                            .collect(Collectors.toSet());
+                    data.put(APIConstants.SUPER_PEER_NETWORK, superPeerNetworkNodes);
 
-                Set<Node> assignedOrdinaryPeerNodes = superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes();
-                assignedOrdinaryPeerNodes = assignedOrdinaryPeerNodes.stream().parallel()
-                        .filter(Node::isActive)
-                        .collect(Collectors.toSet());
-                data.put(APIConstants.ASSIGNED_ORDINARY_PEERS, assignedOrdinaryPeerNodes);
-            } else {
-                responseStatus = Status.ERROR;
-            }
-        } else {
-            if (routingTable instanceof OrdinaryPeerRoutingTable) {
-                OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
-                Node assignedSuperPeer = ordinaryPeerRoutingTable.getAssignedSuperPeer();
-                if (assignedSuperPeer != null && assignedSuperPeer.isActive()) {
-                    data.put(APIConstants.ASSIGNED_SUPER_PEER, assignedSuperPeer);
+                    Set<Node> assignedOrdinaryPeerNodes = superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes();
+                    assignedOrdinaryPeerNodes = assignedOrdinaryPeerNodes.stream().parallel()
+                            .filter(Node::isActive)
+                            .collect(Collectors.toSet());
+                    data.put(APIConstants.ASSIGNED_ORDINARY_PEERS, assignedOrdinaryPeerNodes);
+                } else {
+                    responseStatus = Status.ERROR;
                 }
             } else {
-                responseStatus = Status.ERROR;
+                if (routingTable instanceof OrdinaryPeerRoutingTable) {
+                    OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) routingTable;
+                    Node assignedSuperPeer = ordinaryPeerRoutingTable.getAssignedSuperPeer();
+                    if (assignedSuperPeer != null && assignedSuperPeer.isActive()) {
+                        data.put(APIConstants.ASSIGNED_SUPER_PEER, assignedSuperPeer);
+                    }
+                } else {
+                    responseStatus = Status.ERROR;
+                }
             }
+        } else {
+            responseStatus = Status.IN_TRACER_MODE;
         }
 
         Map<String, Object> response = ResponseUtils.generateCustomResponse(responseStatus);

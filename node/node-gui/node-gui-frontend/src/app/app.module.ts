@@ -21,6 +21,8 @@ import {HomeComponent} from './home/home.component';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {D3Service} from 'd3-ng2-service';
 import {ShutdownConfirmationComponent} from './home/shutdown-confirmation.component';
+import {TraceComponent} from './trace/trace.component';
+import {TraceNetworkComponent} from './trace/trace-network/trace-network.component';
 
 const appRoutes: Routes = [
   {
@@ -45,7 +47,7 @@ const appRoutes: Routes = [
 @NgModule({
   declarations: [
     AppComponent, HomeComponent, QueryComponent, NetworkComponent, ResourcesComponent, AddResourceDialogComponent,
-    ConfigComponent, ShutdownConfirmationComponent
+    ConfigComponent, ShutdownConfirmationComponent, TraceComponent, TraceNetworkComponent
   ],
   entryComponents: [
     AddResourceDialogComponent, ShutdownConfirmationComponent

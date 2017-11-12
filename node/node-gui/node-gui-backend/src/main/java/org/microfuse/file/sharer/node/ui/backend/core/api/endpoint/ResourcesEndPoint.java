@@ -7,6 +7,7 @@ import org.microfuse.file.sharer.node.ui.backend.commons.APIConstants;
 import org.microfuse.file.sharer.node.ui.backend.commons.Status;
 import org.microfuse.file.sharer.node.ui.backend.core.api.request.SaveResourcesRequest;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
+import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerMode;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.ResponseUtils;
 
 import java.util.Map;
@@ -25,11 +26,17 @@ import javax.ws.rs.core.Response;
 public class ResourcesEndPoint {
     @GET
     public Response getResourcesList() {
-        Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
+        Map<String, Object> response;
 
-        ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
-        Set<OwnedResource> ownedResources = resourceIndex.getAllOwnedResources();
-        response.put(APIConstants.DATA, ownedResources);
+        if (FileSharerHolder.getMode() == FileSharerMode.FILE_SHARER) {
+            response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
+
+            ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
+            Set<OwnedResource> ownedResources = resourceIndex.getAllOwnedResources();
+            response.put(APIConstants.DATA, ownedResources);
+        } else {
+            response = ResponseUtils.generateCustomResponse(Status.IN_TRACER_MODE);
+        }
 
         String jsonString = new Gson().toJson(response);
         return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
@@ -38,11 +45,18 @@ public class ResourcesEndPoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveResourcesList(SaveResourcesRequest request) {
-        Map<String, Object> response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
+        Map<String, Object> response;
 
-        ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
-        resourceIndex.clear();
-        request.getResourceNames().forEach(resourceName -> resourceIndex.addOwnedResource(resourceName, null));
+        if (FileSharerHolder.getMode() == FileSharerMode.FILE_SHARER) {
+            response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
+
+            ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
+            resourceIndex.clear();
+            request.getResourceNames().forEach(resourceName ->
+                    resourceIndex.addOwnedResource(resourceName, null));
+        } else {
+            response = ResponseUtils.generateCustomResponse(Status.IN_TRACER_MODE);
+        }
 
         String jsonString = new Gson().toJson(response);
         return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
