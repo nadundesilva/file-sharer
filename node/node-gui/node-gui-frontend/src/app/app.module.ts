@@ -25,6 +25,8 @@ import {ShutdownConfirmationComponent} from './home/shutdown-confirmation.compon
 import {TraceComponent} from './trace/trace.component';
 import {TraceNetworkComponent} from './trace/trace-network/trace-network.component';
 import {WelcomeComponent} from './welcome/welcome.component';
+import {StatsComponent} from './trace/stats/stats.component';
+import {StatsTableComponent} from './trace/stats/stats-table/stats-table.component';
 
 const appRoutes: Routes = [
   {
@@ -52,7 +54,8 @@ const appRoutes: Routes = [
 @NgModule({
   declarations: [
     AppComponent, HomeComponent, QueryComponent, NetworkComponent, ResourcesComponent, AddResourceDialogComponent,
-    ConfigComponent, ShutdownConfirmationComponent, TraceComponent, TraceNetworkComponent, WelcomeComponent
+    ConfigComponent, ShutdownConfirmationComponent, TraceComponent, TraceNetworkComponent, WelcomeComponent,
+    StatsComponent, StatsTableComponent
   ],
   entryComponents: [
     AddResourceDialogComponent, ShutdownConfirmationComponent

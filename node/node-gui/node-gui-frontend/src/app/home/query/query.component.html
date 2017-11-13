@@ -5,7 +5,7 @@
       <mat-form-field>
         <input matInput placeholder="Query" [(ngModel)]="queryString" matTooltip="Enter the name of the file to query for">
       </mat-form-field>
-      <button mat-button (click)="query()" matTooltip="Run a query on {{ (queryString ? queryString : 'a file') }}"><mat-icon>search</mat-icon> Search</button>
+      <button mat-button (click)="query()" matTooltip="Run a query for {{ (queryString ? queryString : 'a file') }}"><mat-icon>search</mat-icon> Search</button>
     </div>
     <div fxFlex>
       <mat-form-field>

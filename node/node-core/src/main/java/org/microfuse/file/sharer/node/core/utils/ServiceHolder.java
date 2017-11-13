@@ -48,6 +48,7 @@ public class ServiceHolder {
     private ResourceIndex resourceIndex;
     private OverlayNetworkManager overlayNetworkManager;
     private QueryManager queryManager;
+    private TraceManager traceManager;
 
     private Lock peerTypeLock;
     private Lock traceableStateLock;
@@ -56,6 +57,7 @@ public class ServiceHolder {
     private Lock resourceIndexLock;
     private Lock overlayNetworkManagerLock;
     private Lock queryManagerLock;
+    private Lock traceManagerLock;
 
     private Thread automatedGarbageCollectionThread;
     private boolean automatedGarbageCollectionEnabled;
@@ -70,6 +72,7 @@ public class ServiceHolder {
         resourceIndexLock = new ReentrantLock();
         overlayNetworkManagerLock = new ReentrantLock();
         queryManagerLock = new ReentrantLock();
+        traceManagerLock = new ReentrantLock();
 
         automatedGarbageCollectionEnabled = false;
         automatedGarbageCollectionLock = new ReentrantLock();
@@ -301,6 +304,17 @@ public class ServiceHolder {
         } finally {
             queryManagerLock.unlock();
         }
+
+        traceManagerLock.lock();
+        try {
+            if (traceManager != null) {
+                traceManager.shutdown();
+            }
+            traceManager = null;
+            logger.info("Cleared trace manager");
+        } finally {
+            traceManagerLock.unlock();
+        }
     }
 
     /**
@@ -527,6 +541,12 @@ public class ServiceHolder {
             // Register in the tracer
             Tracer tracer = getTracer();
             if (tracer != null) {
+                traceManagerLock.lock();
+                try {
+                    getTraceManager().start();
+                } finally {
+                    traceManagerLock.unlock();
+                }
                 try {
                     tracer.register(
                             getConfiguration().getIp(),
@@ -535,6 +555,13 @@ public class ServiceHolder {
                     );
                 } catch (RemoteException e) {
                     logger.warn("Failed to register node in tracer", e);
+                }
+            } else {
+                traceManagerLock.lock();
+                try {
+                    getTraceManager().shutdown();
+                } finally {
+                    traceManagerLock.unlock();
                 }
             }
             logger.info("Changed the traceable state to " + traceableState.getValue());
@@ -630,5 +657,22 @@ public class ServiceHolder {
             router = new Router(instantiateNetworkHandler(), instantiateRoutingStrategy(), this);
         }
         return router;
+    }
+
+    /**
+     * Get the trace manager instance.
+     *
+     * @return The trace manager instance
+     */
+    private TraceManager getTraceManager() {
+        traceManagerLock.lock();
+        try {
+            if (traceManager == null) {
+                traceManager = new TraceManager(this);
+            }
+            return traceManager;
+        } finally {
+            traceManagerLock.unlock();
+        }
     }
 }

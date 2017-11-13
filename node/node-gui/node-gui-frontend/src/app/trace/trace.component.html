@@ -1,17 +1,30 @@
 <div>
   <h1 class="mat-h1">{{ title }}</h1>
 </div>
-<mat-tab-group>
+<mat-tab-group [selectedIndex]="0">
   <mat-tab>
     <ng-template mat-tab-label>
-      Super Peer Network
+      Network
     </ng-template>
-    <app-trace-network [network]="network.superPeerNetwork.concat(network.assignedSuperPeersNetwork)" [nodes]="network.nodes"></app-trace-network>
+    <mat-tab-group [selectedIndex]="0">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          Super Peer Network
+        </ng-template>
+        <app-trace-network [network]="network.superPeerNetwork.concat(network.assignedSuperPeersNetwork)" [nodes]="network.nodes"></app-trace-network>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          Unstructured Network
+        </ng-template>
+        <app-trace-network [network]="network.unstructuredNetwork" [nodes]="network.nodes"></app-trace-network>
+      </mat-tab>
+    </mat-tab-group>
   </mat-tab>
   <mat-tab>
     <ng-template mat-tab-label>
-      Unstructured Network
+      Statistics
     </ng-template>
-    <app-trace-network [network]="network.unstructuredNetwork" [nodes]="network.nodes"></app-trace-network>
+    <app-stats [nodes]="network.nodes"></app-stats>
   </mat-tab>
 </mat-tab-group>

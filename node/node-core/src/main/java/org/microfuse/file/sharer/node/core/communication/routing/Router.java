@@ -1,6 +1,5 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
-import org.microfuse.file.sharer.node.commons.communication.messaging.MessageConstants;
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
@@ -17,11 +16,13 @@ import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryP
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.resource.OwnedResource;
+import org.microfuse.file.sharer.node.core.tracing.Tracer;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -323,6 +324,20 @@ public class Router implements NetworkHandlerListener {
         try {
             logger.info("Sending message " + message.toString() + " to node " + ip + ":" + port);
             networkHandler.sendMessage(ip, port, message);
+
+            // Notifying the tracer
+            Tracer tracer = serviceHolder.getTracer();
+            if (tracer != null) {
+                try {
+                    tracer.notifyMessageSend(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            message
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to notify tracer of sending message", e);
+                }
+            }
         } finally {
             networkHandlerLock.readLock().unlock();
         }
@@ -342,6 +357,20 @@ public class Router implements NetworkHandlerListener {
         try {
             logger.info("Sending message to bootstrap server " + message.toString() + " to node " + ip + ":" + port);
             bootstrapServerNetworkHandler.sendMessage(ip, port, message);
+
+            // Notifying the tracer
+            Tracer tracer = serviceHolder.getTracer();
+            if (tracer != null) {
+                try {
+                    tracer.notifyMessageSend(
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            message
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to notify tracer of sending message", e);
+                }
+            }
         } finally {
             bootstrapServerNetworkHandlerLock.readLock().unlock();
         }
@@ -556,7 +585,7 @@ public class Router implements NetworkHandlerListener {
         if (messageType != null && messageType == MessageType.SER) {
             // Checking owned resources
             Set<OwnedResource> ownedResources = serviceHolder.getResourceIndex()
-                    .findOwnedResources(message.getData(MessageIndexes.SER_FILE_NAME));
+                    .findOwnedResources(message.getData(MessageIndexes.SER_QUERY));
 
             if (ownedResources.size() > 0) {
                 logger.info("Resource requested by \"" + message.toString() + "\" found in owned resources");
@@ -567,7 +596,10 @@ public class Router implements NetworkHandlerListener {
 
                 // Preparing the SER_OK message data
                 List<String> serOkData = new ArrayList<>();
-                serOkData.add(MessageIndexes.SER_OK_QUERY_STRING, message.getData(MessageIndexes.SER_FILE_NAME));
+                serOkData.add(MessageIndexes.SER_OK_QUERY_STRING, message.getData(MessageIndexes.SER_QUERY));
+                serOkData.add(MessageIndexes.SER_OK_SEQUENCE_NUMBER,
+                        message.getData(MessageIndexes.SER_SEQUENCE_NUMBER));
+                serOkData.add(MessageIndexes.SER_OK_HOP_COUNT, message.getData(MessageIndexes.SER_HOP_COUNT));
                 serOkData.add(MessageIndexes.SER_OK_FILE_COUNT, Integer.toString(ownedResources.size()));
                 serOkData.add(MessageIndexes.SER_OK_IP, serviceHolder.getConfiguration().getIp());
                 serOkData.add(MessageIndexes.SER_OK_PORT,
@@ -593,11 +625,9 @@ public class Router implements NetworkHandlerListener {
                 if (hopCount <= serviceHolder.getConfiguration().getTimeToLive()) {
                     forwardNode(fromNode, message);
                 } else {
-                    logger.info("Sending search failed back to search request source node "
-                            + message.getData(MessageIndexes.SER_SOURCE_IP) + ":"
-                            + message.getData(MessageIndexes.SER_SOURCE_PORT)
-                            + " since the hop count of the message " + message.toString()
-                            + " is higher than time to live " + serviceHolder.getConfiguration().getTimeToLive());
+                    logger.info("Dropped message " + message.toString() + " since the hop count of the message "
+                            + message.toString() + " is higher than time to live "
+                            + serviceHolder.getConfiguration().getTimeToLive());
                 }
             }
         } else if (messageType != null && messageType == MessageType.SER_SUPER_PEER) {
@@ -608,6 +638,10 @@ public class Router implements NetworkHandlerListener {
                 serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP, serviceHolder.getConfiguration().getIp());
                 serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_PORT,
                         Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+                serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_SEQUENCE_NUMBER,
+                        message.getData(MessageIndexes.SER_SUPER_PEER_SEQUENCE_NUMBER));
+                serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_HOP_COUNT,
+                        message.getData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT));
 
                 sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
                         Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
@@ -623,22 +657,9 @@ public class Router implements NetworkHandlerListener {
                 if (hopCount <= serviceHolder.getConfiguration().getTimeToLive()) {
                     forwardNode(fromNode, message);
                 } else {
-                    // Unable to find a super peer
-                    Message serOkMessage = new Message();
-                    serOkMessage.setType(MessageType.SER_SUPER_PEER_OK);
-                    serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_IP,
-                            MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_IP);
-                    serOkMessage.setData(MessageIndexes.SER_SUPER_PEER_OK_PORT,
-                            MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT);
-
-                    logger.info("Sending search failed back to search request source node "
-                            + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP) + ":"
-                            + message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)
-                            + " since the hop count of the message " + message.toString()
-                            + " is higher than time to live " + serviceHolder.getConfiguration().getTimeToLive());
-                    sendMessage(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP),
-                            Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT)),
-                            serOkMessage);
+                    logger.info("Dropping message " + message.toString() + " since the hop count of the message "
+                            + message.toString() + " is higher than time to live "
+                            + serviceHolder.getConfiguration().getTimeToLive());
                 }
             }
         } else {

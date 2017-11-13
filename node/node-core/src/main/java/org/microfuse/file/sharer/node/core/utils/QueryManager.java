@@ -77,8 +77,8 @@ public class QueryManager implements RouterListener {
         message.setData(MessageIndexes.SER_SOURCE_IP, configuration.getIp());
         message.setData(MessageIndexes.SER_SOURCE_PORT, Integer.toString(configuration.getPeerListeningPort()));
         message.setData(MessageIndexes.SER_SEQUENCE_NUMBER, Long.toString(sequenceNumber++));
-        message.setData(MessageIndexes.SER_FILE_NAME, queryString);
         message.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
+        message.setData(MessageIndexes.SER_QUERY, queryString);
         serviceHolder.getRouter().route(message);
     }
 
@@ -140,7 +140,7 @@ public class QueryManager implements RouterListener {
 
             if (results != null) {
                 for (int i = 0; i < Integer.parseInt(message.getData(MessageIndexes.SER_OK_FILE_COUNT)); i++) {
-                    String fileName = message.getData(MessageIndexes.SER_OK_FILE_NAME_START + (i + 1));
+                    String fileName = message.getData(MessageIndexes.SER_OK_FILE_NAME_START + i);
 
                     AggregatedResource aggregatedResource = null;
                     for (AggregatedResource result : results) {

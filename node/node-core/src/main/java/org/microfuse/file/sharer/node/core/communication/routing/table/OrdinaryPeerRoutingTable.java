@@ -16,7 +16,8 @@ import java.util.Set;
  * Contains the connections and the previous node in paths the message travels.
  */
 public class OrdinaryPeerRoutingTable extends RoutingTable {
-    private static final Logger logger = LoggerFactory.getLogger(OrdinaryPeerRoutingTable.class);
+    private static final long serialVersionUID = 105L;
+    private static final transient Logger logger = LoggerFactory.getLogger(OrdinaryPeerRoutingTable.class);
 
     private Node assignedSuperPeer;
 

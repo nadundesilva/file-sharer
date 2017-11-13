@@ -76,8 +76,8 @@ public class QueryManagerTestCase extends BaseTestCase {
         usedMessage.setData(MessageIndexes.SER_SOURCE_IP, configuration.getIp());
         usedMessage.setData(MessageIndexes.SER_SOURCE_PORT, Integer.toString(configuration.getPeerListeningPort()));
         usedMessage.setData(MessageIndexes.SER_SEQUENCE_NUMBER, "0");
-        usedMessage.setData(MessageIndexes.SER_FILE_NAME, "Cars");
         usedMessage.setData(MessageIndexes.SER_HOP_COUNT, Integer.toString(NodeConstants.INITIAL_HOP_COUNT + 1));
+        usedMessage.setData(MessageIndexes.SER_QUERY, "Cars");
 
         Mockito.verify(router, Mockito.times(1)).route(usedMessage);
     }

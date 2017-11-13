@@ -1,0 +1,84 @@
+<mat-tab-group [selectedIndex]="0">
+  <mat-tab>
+    <ng-template mat-tab-label>
+      Aggregated
+    </ng-template>
+    <div class="mat-card">
+      <app-stats-table [dataSource]="generalStatisticsDataSource" [title]="'General'"></app-stats-table>
+      <app-stats-table [dataSource]="serMessageStatisticsDataSource" [title]="'Search Messages'"></app-stats-table>
+      <app-stats-table [dataSource]="serSuperPeerMessageStatisticsDataSource" [title]="'Search For Super Peer Messages'"></app-stats-table>
+    </div>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      Search Messages
+    </ng-template>
+    <div class="mat-card">
+      <mat-card>
+        <mat-table #table [dataSource]="serMessagesDataSource" *ngIf="serMessagesDataSource && serMessagesDataSource.size() > 0">
+          <ng-container matColumnDef="sequence-number">
+            <mat-header-cell *matHeaderCellDef>Sequence Number</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ message[0] }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="query">
+            <mat-header-cell *matHeaderCellDef>Query</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ message[1].query }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="messages-count">
+            <mat-header-cell *matHeaderCellDef>Messages Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ message[1].messagesCount }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="average-hop-count">
+            <mat-header-cell *matHeaderCellDef>Average Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ average(message[1].hopCounts).toFixed(2) }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="min-hop-count">
+            <mat-header-cell *matHeaderCellDef>Minimum Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ min(message[1].hopCounts) }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="max-hop-count">
+            <mat-header-cell *matHeaderCellDef>Maximum Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ max(message[1].hopCounts) }}</mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="serDisplayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: serDisplayedColumns;"></mat-row>
+        </mat-table>
+      </mat-card>
+    </div>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      Search For Super Peer Messages
+    </ng-template>
+    <div class="mat-card">
+      <mat-card>
+        <mat-table #table [dataSource]="serSuperPeerMessagesDataSource" *ngIf="serSuperPeerMessagesDataSource && serSuperPeerMessagesDataSource.size() > 0">
+          <ng-container matColumnDef="sequence-number">
+            <mat-header-cell *matHeaderCellDef>Sequence Number</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ message[0] }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="messages-count">
+            <mat-header-cell *matHeaderCellDef>Messages Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ message[1].messagesCount }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="average-hop-count">
+            <mat-header-cell *matHeaderCellDef>Average Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ average(message[1].hopCounts).toFixed(2) }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="min-hop-count">
+            <mat-header-cell *matHeaderCellDef>Minimum Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ min(message[1].hopCounts) }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="max-hop-count">
+            <mat-header-cell *matHeaderCellDef>Maximum Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ max(message[1].hopCounts) }}</mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="serSuperPeerDisplayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: serSuperPeerDisplayedColumns;"></mat-row>
+        </mat-table>
+      </mat-card>
+    </div>
+  </mat-tab>
+</mat-tab-group>

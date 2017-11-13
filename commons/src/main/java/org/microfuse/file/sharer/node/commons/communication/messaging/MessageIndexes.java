@@ -48,25 +48,29 @@ public class MessageIndexes {
     public static final int SER_SOURCE_IP = 0;
     public static final int SER_SOURCE_PORT = 1;
     public static final int SER_SEQUENCE_NUMBER = 2;
-    public static final int SER_FILE_NAME = 3;
-    public static final int SER_HOP_COUNT = 4;
+    public static final int SER_HOP_COUNT = 3;
+    public static final int SER_QUERY = 4;
 
     // SER_OK message
     public static final int SER_OK_QUERY_STRING = 0;
-    public static final int SER_OK_FILE_COUNT = 1;
-    public static final int SER_OK_IP = 2;
-    public static final int SER_OK_PORT = 3;
-    public static final int SER_OK_FILE_NAME_START = 3;
+    public static final int SER_OK_SEQUENCE_NUMBER = 1;
+    public static final int SER_OK_HOP_COUNT = 2;
+    public static final int SER_OK_FILE_COUNT = 3;
+    public static final int SER_OK_IP = 4;
+    public static final int SER_OK_PORT = 5;
+    public static final int SER_OK_FILE_NAME_START = 6;
 
     // SER_SUPER_PEER message
-    public static final int SER_SUPER_PEER_SOURCE_IP = 0;
-    public static final int SER_SUPER_PEER_SOURCE_PORT = 1;
-    public static final int SER_SUPER_PEER_SEQUENCE_NUMBER = 2;
+    public static final int SER_SUPER_PEER_SEQUENCE_NUMBER = 0;
+    public static final int SER_SUPER_PEER_SOURCE_IP = 1;
+    public static final int SER_SUPER_PEER_SOURCE_PORT = 2;
     public static final int SER_SUPER_PEER_HOP_COUNT = 3;
 
     // SER_SUPER_PEER_OK message
     public static final int SER_SUPER_PEER_OK_IP = 0;
     public static final int SER_SUPER_PEER_OK_PORT = 1;
+    public static final int SER_SUPER_PEER_OK_SEQUENCE_NUMBER = 2;
+    public static final int SER_SUPER_PEER_OK_HOP_COUNT = 3;
 
     // JOIN_SUPER_PEER
     public static final int JOIN_SUPER_PEER_SOURCE_TYPE = 0;

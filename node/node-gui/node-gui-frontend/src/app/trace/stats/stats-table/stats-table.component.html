@@ -1,0 +1,16 @@
+<mat-card *ngIf="dataSource && dataSource.size() > 0">
+  <h3 class="mat-h3">{{ title }}</h3>
+  <mat-table #table [dataSource]="dataSource">
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+      <mat-cell *matCellDef="let stat">{{ stat[0] }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="value">
+      <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
+      <mat-cell *matCellDef="let stat">{{ stat[1] }}</mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="columns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: columns;"></mat-row>
+  </mat-table>
+</mat-card>

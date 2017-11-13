@@ -94,24 +94,42 @@ export class TraceNetworkComponent implements OnInit, OnChanges {
       && node1.state === node2.state;
   }
 
-  private getLinks(connections: NetworkConnection[]): any {
+  private drawNetwork(): void {
+    const d3 = this.d3;
+
+    this.svg = d3.select(this.parentNativeElement.querySelector('svg'));
+    this.svg.html('');
+
+    this.svg.attr('width', this.width);
+    this.svg.attr('height', this.height);
+
+    this.simulation = d3.forceSimulation()
+      .force('link', d3.forceLink()
+        .id((d: any) => d.id)
+        .distance((d: any) => d.value * 40)
+        .strength(1))
+      .force('charge', d3.forceManyBody())
+      .force('center', d3.forceCenter(this.width / 2, this.height / 2));
+
     const links = [];
-    for (let i = 0; i < connections.length; i++) {
+    for (let i = 0; i < this.network.length; i++) {
       links.push({
-        source: connections[i].node1.ip + ':' + connections[i].node1.port,
-        target: connections[i].node2.ip + ':' + connections[i].node2.port,
-        value: (connections[i].type === ConnectionType.MAIN ? 2 : 1)
+        source: this.network[i].node1.ip + ':' + this.network[i].node1.port,
+        target: this.network[i].node2.ip + ':' + this.network[i].node2.port,
+        value: (this.network[i].type === ConnectionType.MAIN ? 2 : 1)
       });
     }
-    return links;
-  }
 
-  private getNodes(nodes: TraceableNode[], connections: NetworkConnection[]): any {
-    for (let i = 0; i < connections.length; i++) {
-      this.addNode(nodes, connections[i].node1);
-      this.addNode(nodes, connections[i].node2);
+    const networkNodes = [];
+    for (let i = 0; i < this.nodes.length; i++) {
+      this.addNode(networkNodes, this.nodes[i]);
     }
-    return nodes;
+    for (let i = 0; i < this.network.length; i++) {
+      this.addNode(networkNodes, this.network[i].node1);
+      this.addNode(networkNodes, this.network[i].node2);
+    }
+
+    this.render({links: links, nodes: networkNodes});
   }
 
   private addNode(nodes: any, node: TraceableNode): void {
@@ -132,26 +150,6 @@ export class TraceNetworkComponent implements OnInit, OnChanges {
         value: (node.peerType === PeerType.SUPER_PEER ? 1.5 : 1)
       });
     }
-  }
-
-  private drawNetwork(): void {
-    const d3 = this.d3;
-
-    this.svg = d3.select(this.parentNativeElement.querySelector('svg'));
-    this.svg.html('');
-
-    this.svg.attr('width', this.width);
-    this.svg.attr('height', this.height);
-
-    this.simulation = d3.forceSimulation()
-      .force('link', d3.forceLink()
-        .id((d: any) => d.id)
-        .distance((d: any) => d.value * 40)
-        .strength(1))
-      .force('charge', d3.forceManyBody())
-      .force('center', d3.forceCenter(this.width / 2, this.height / 2));
-
-    this.render({links: this.getLinks(this.network), nodes: this.getNodes(this.nodes, this.network)});
   }
 
   private render(graph: any): void {

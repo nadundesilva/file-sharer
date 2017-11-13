@@ -50,7 +50,7 @@ public class SuperPeerRandomWalkRoutingStrategyTestCase extends BaseTestCase {
         ordinaryPeerRoutingTable = Mockito.spy(new OrdinaryPeerRoutingTable(serviceHolder));
         superPeerRoutingTable = Mockito.spy(new SuperPeerRoutingTable(serviceHolder));
         queryResourceName = "Lord of the Rings";
-        message = Message.parse("0047 SER 129.82.62.142 5070 0 \"" + queryResourceName +  "\" 0");
+        message = Message.parse("0047 SER 129.82.62.142 5070 0 0 \"" + queryResourceName +  "\"");
 
         fromNode = new Node("192.168.1.10", 6010);
         fromSuperPeerNode = new Node("192.168.1.11", 6011);

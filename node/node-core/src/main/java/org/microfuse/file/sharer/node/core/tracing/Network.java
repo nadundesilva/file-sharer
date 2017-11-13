@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
@@ -35,7 +37,7 @@ public class Network {
     @Expose(serialize = false)
     private ReadWriteLock assignedSuperPeersNetworkLock;
     @Expose(serialize = false)
-    private ReadWriteLock nodesLock;
+    private Lock nodesLock;
 
     public Network() {
         unstructuredNetwork = new HashSet<>();
@@ -46,7 +48,7 @@ public class Network {
         unstructuredNetworkLock = new ReentrantReadWriteLock();
         superPeerNetworkLock = new ReentrantReadWriteLock();
         assignedSuperPeersNetworkLock = new ReentrantReadWriteLock();
-        nodesLock = new ReentrantReadWriteLock();
+        nodesLock = new ReentrantLock();
     }
 
     /**
@@ -236,10 +238,35 @@ public class Network {
             node = getNodeFromNetworkConnectionsSet(ip, port, assignedSuperPeersNetwork, assignedSuperPeersNetworkLock);
         }
         if (node == null) {
+            nodesLock.lock();
+            try {
+                node = nodes.stream().parallel()
+                        .filter(traceableNode -> traceableNode.equals(ip, port))
+                        .findAny()
+                        .orElse(null);
+            } finally {
+                nodesLock.unlock();
+            }
+        }
+        if (node == null) {
             node = new TraceableNode(ip, port);
-            nodes.add(node);
+            nodesLock.lock();
+            try {
+                nodes.add(node);
+            } finally {
+                nodesLock.unlock();
+            }
         }
         return node;
+    }
+
+    /**
+     * Get the nodes in the network.
+     *
+     * @return The nodes in the network
+     */
+    public Set<TraceableNode> getNodes() {
+        return new HashSet<>(nodes);
     }
 
     /**

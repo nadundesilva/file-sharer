@@ -51,7 +51,7 @@ public class ResourcesEndPoint {
             response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
 
             ResourceIndex resourceIndex = FileSharerHolder.getFileSharer().getServiceHolder().getResourceIndex();
-            resourceIndex.clear();
+            resourceIndex.clearOwnedResources();
             request.getResourceNames().forEach(resourceName ->
                     resourceIndex.addOwnedResource(resourceName, null));
         } else {

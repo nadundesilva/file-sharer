@@ -1,11 +1,14 @@
 package org.microfuse.file.sharer.node.commons.peer;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * The node base interface.
  */
-public class Node {
+public class Node implements Serializable {
+    private static final long serialVersionUID = 105L;
+
     private String ip;
     private int port;
     private NodeState state;

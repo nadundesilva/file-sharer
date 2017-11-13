@@ -4,6 +4,7 @@ import org.microfuse.file.sharer.node.commons.communication.messaging.MessageTyp
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,8 +12,9 @@ import java.util.Objects;
 /**
  * Message class.
  */
-public class Message implements Cloneable {
-    private static final Logger logger = LoggerFactory.getLogger(Message.class);
+public class Message implements Cloneable, Serializable {
+    private static final long serialVersionUID = 105L;
+    private static final transient Logger logger = LoggerFactory.getLogger(Message.class);
 
     private MessageType type;
     private List<String> data;

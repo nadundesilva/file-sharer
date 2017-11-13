@@ -1,6 +1,5 @@
 import {DataSource} from '@angular/cdk/collections';
 import {Observable} from 'rxjs/Observable';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {MatSnackBar} from '@angular/material';
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
@@ -19,6 +18,7 @@ export class Constants {
   public static API_TRACE_ENDPOINT = 'trace/';
   public static API_TRACE_ENDPOINT_STATE_PATH = 'state/';
   public static API_TRACE_ENDPOINT_NETWORK_PATH = 'network/';
+  public static API_TRACE_ENDPOINT_HISTORY_PATH = 'history/';
   public static REFRESH_FREQUENCY = 3000;
 }
 
@@ -113,6 +113,10 @@ export class TableDataSource<T> extends DataSource<T> {
 
   disconnect(): void {
 
+  }
+
+  size(): number {
+    return this.data.length;
   }
 
   isEmpty(): boolean {

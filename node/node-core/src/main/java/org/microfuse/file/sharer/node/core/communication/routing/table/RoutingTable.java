@@ -8,6 +8,7 @@ import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,16 +24,17 @@ import java.util.stream.Collectors;
  * <p>
  * Contains the connections and the previous node in paths the message travels.
  */
-public abstract class RoutingTable {
-    private static final Logger logger = LoggerFactory.getLogger(RoutingTable.class);
+public abstract class RoutingTable implements Serializable {
+    private static final long serialVersionUID = 105L;
+    private static final transient Logger logger = LoggerFactory.getLogger(RoutingTable.class);
 
-    protected ServiceHolder serviceHolder;
+    protected transient ServiceHolder serviceHolder;
 
-    private static Map<PeerType, Class<? extends RoutingTable>> routingTableClassMap;
+    private static transient Map<PeerType, Class<? extends RoutingTable>> routingTableClassMap;
 
     private Set<Node> unstructuredNetworkNodes;
 
-    private final ReadWriteLock unstructuredNetworkNodesLock;
+    private ReadWriteLock unstructuredNetworkNodesLock;
 
     static {
         // Populating the routing table class map

@@ -43,7 +43,7 @@ public class SuperPeerFloodingRoutingStrategy extends RoutingStrategy {
         if (routingTable instanceof SuperPeerRoutingTable && resourceIndex instanceof SuperPeerResourceIndex) {
             // Searching the aggregate index
             Set<AggregatedResource> resources = ((SuperPeerResourceIndex) resourceIndex)
-                    .findAggregatedResources(message.getData(MessageIndexes.SER_FILE_NAME));
+                    .findAggregatedResources(message.getData(MessageIndexes.SER_QUERY));
 
             // Picking a node with a matching resource
             if (resources != null && resources.size() > 0) {

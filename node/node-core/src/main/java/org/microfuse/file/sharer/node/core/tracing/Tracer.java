@@ -1,5 +1,6 @@
 package org.microfuse.file.sharer.node.core.tracing;
 
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 
 import java.rmi.Remote;
@@ -94,4 +95,13 @@ public interface Tracer extends Remote {
      * @param port The port of the node to be demoted
      */
     void demoteToOrdinaryPeer(String ip, int port) throws RemoteException;
+
+    /**
+     * Demote a node to a ordinary peer.
+     *
+     * @param ip      The ip of the node to be demoted
+     * @param port    The port of the node to be demoted
+     * @param message The message sent
+     */
+    void notifyMessageSend(String ip, int port, Message message) throws RemoteException;
 }

@@ -3,6 +3,7 @@ package org.microfuse.file.sharer.node.ui.backend.core.api.endpoint;
 import com.google.gson.Gson;
 import org.microfuse.file.sharer.node.commons.tracing.TraceableState;
 import org.microfuse.file.sharer.node.core.tracing.Network;
+import org.microfuse.file.sharer.node.core.tracing.stats.History;
 import org.microfuse.file.sharer.node.ui.backend.commons.APIConstants;
 import org.microfuse.file.sharer.node.ui.backend.commons.Status;
 import org.microfuse.file.sharer.node.ui.backend.core.utils.FileSharerHolder;
@@ -68,6 +69,24 @@ public class TraceEndPoint {
 
             Network network = FileSharerHolder.getTracer().getNetwork();
             response.put(APIConstants.DATA, network);
+        } else {
+            response = ResponseUtils.generateCustomResponse(Status.IN_FILE_SHARER_MODE);
+        }
+
+        String jsonString = new Gson().toJson(response);
+        return Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
+    }
+
+    @GET
+    @Path("/history")
+    public Response getHistory() {
+        Map<String, Object> response;
+
+        if (FileSharerHolder.getMode() == FileSharerMode.TRACER) {
+            response = ResponseUtils.generateCustomResponse(Status.SUCCESS);
+
+            History history = FileSharerHolder.getTracer().getHistory();
+            response.put(APIConstants.DATA, history);
         } else {
             response = ResponseUtils.generateCustomResponse(Status.IN_FILE_SHARER_MODE);
         }

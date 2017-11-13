@@ -7,7 +7,7 @@
     <button mat-button color="primary" (click)="openShutdownDialog()" matTooltip="Shutdown"><mat-icon>power_settings_new</mat-icon></button>
   </div>
 </div>
-<mat-tab-group>
+<mat-tab-group [selectedIndex]="0">
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon>search</mat-icon> Query

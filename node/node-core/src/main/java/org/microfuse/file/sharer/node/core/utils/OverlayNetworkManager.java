@@ -330,12 +330,12 @@ public class OverlayNetworkManager implements RouterListener {
                         if (ordinaryPeerRoutingTable.getAssignedSuperPeer() == null) {
                             Message searchSuperPeerMessage = new Message();
                             searchSuperPeerMessage.setType(MessageType.SER_SUPER_PEER);
+                            searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SEQUENCE_NUMBER,
+                                    Long.toString(sequenceNumber++));
                             searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP,
                                     serviceHolder.getConfiguration().getIp());
                             searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT,
                                     Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
-                            searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_SEQUENCE_NUMBER,
-                                    Long.toString(sequenceNumber++));
                             searchSuperPeerMessage.setData(MessageIndexes.SER_SUPER_PEER_HOP_COUNT,
                                     Integer.toString(NodeConstants.INITIAL_HOP_COUNT));
                             serviceHolder.getRouter().route(searchSuperPeerMessage);
@@ -677,11 +677,7 @@ public class OverlayNetworkManager implements RouterListener {
      * @param message  The message received
      */
     private void handleSerSuperPeerOkMessage(Node fromNode, Message message) {
-        if (!Objects.equals(message.getData(MessageIndexes.SER_SUPER_PEER_OK_IP),
-                MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_IP) &&
-                !Objects.equals(message.getData(MessageIndexes.SER_SUPER_PEER_OK_PORT),
-                        MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT) &&
-                serSuperPeerStartThread != null) {
+        if (serSuperPeerStartThread != null) {
             cancelSearchForSuperPeer();
             connectToSuperPeer(message.getData(MessageIndexes.SER_SUPER_PEER_OK_IP),
                     Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_OK_PORT)));

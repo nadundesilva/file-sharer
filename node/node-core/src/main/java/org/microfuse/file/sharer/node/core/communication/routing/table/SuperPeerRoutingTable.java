@@ -19,13 +19,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Contains the connections and the previous node in paths the message travels.
  */
 public class SuperPeerRoutingTable extends RoutingTable {
-    private static final Logger logger = LoggerFactory.getLogger(SuperPeerRoutingTable.class);
+    private static final long serialVersionUID = 105L;
+    private static final transient Logger logger = LoggerFactory.getLogger(SuperPeerRoutingTable.class);
 
     private Set<Node> superPeerNetworkNodes;
     private Set<Node> assignedOrdinaryPeerNodes;
 
-    private final ReadWriteLock superPeerNetworkNodesLock;
-    private final ReadWriteLock assignedOrdinaryPeerNodesLock;
+    private ReadWriteLock superPeerNetworkNodesLock;
+    private ReadWriteLock assignedOrdinaryPeerNodesLock;
 
     public SuperPeerRoutingTable(ServiceHolder serviceHolder) {
         super(serviceHolder);

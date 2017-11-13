@@ -7,6 +7,7 @@ import org.microfuse.file.sharer.node.commons.peer.PeerType;
  * Node with tracing added tracing information.
  */
 public class TraceableNode extends Node {
+    private static final long serialVersionUID = 105L;
     private PeerType peerType;
 
     public TraceableNode(String ip, int port) {

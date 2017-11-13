@@ -1,7 +1,6 @@
 package org.microfuse.file.sharer.node.core.communication.routing;
 
 import org.microfuse.file.sharer.node.commons.Configuration;
-import org.microfuse.file.sharer.node.commons.communication.messaging.MessageConstants;
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.peer.Node;
@@ -58,11 +57,12 @@ public class RouterTestCase extends BaseTestCase {
         sourceNode.setPort(6534);
 
         serMessage = Message.parse("0049 " + MessageType.SER.getValue() + " " + sourceNode.getIp()
-                + " " + sourceNode.getPort() + " 0 \"Lord of the Rings\" "
-                + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1));
-
-        serSuperPeerMessage = Message.parse("0036 " + MessageType.SER_SUPER_PEER.getValue() + " " + sourceNode.getIp()
                 + " " + sourceNode.getPort() + " 0 "
+                + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1)
+                + " \"Lord of the Rings\" ");
+
+        serSuperPeerMessage = Message.parse("0036 " + MessageType.SER_SUPER_PEER.getValue() + " 0 " + sourceNode.getIp()
+                + " " + sourceNode.getPort() + " "
                 + Integer.toString(NodeConstants.DEFAULT_TIME_TO_LIVE - 1));
 
         RoutingTable routingTable = router.getRoutingTable();
@@ -153,14 +153,14 @@ public class RouterTestCase extends BaseTestCase {
         logger.info("Running Router Test 06 - On " + MessageType.SER.getValue()
                 + " message received with resource in owned resources");
 
-        String ownedResourceName = serMessage.getData(MessageIndexes.SER_FILE_NAME);
+        String ownedResourceName = serMessage.getData(MessageIndexes.SER_QUERY);
         serviceHolder.getResourceIndex().addOwnedResource(ownedResourceName, null);
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
         Message message = Message.parse("0047 " + MessageType.SER_OK.getValue()
-                + " \"" + serMessage.getData(MessageIndexes.SER_FILE_NAME) + "\""
-                + " 1"
+                + " \"" + serMessage.getData(MessageIndexes.SER_QUERY) + "\""
+                + " 0 19 1"
                 + " " + serviceHolder.getConfiguration().getIp()
                 + " " + Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort())
                 + " \"" + ownedResourceName + "\"");
@@ -211,8 +211,9 @@ public class RouterTestCase extends BaseTestCase {
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serMessage);
 
-        Mockito.verify(networkHandler, Mockito.times(0)).sendMessage(
-                Mockito.eq(sourceNode.getIp()), Mockito.eq(sourceNode.getPort()), Mockito.any(Message.class));
+        Mockito.verify(networkHandler, Mockito.times(0))
+                .sendMessage(Mockito.eq(sourceNode.getIp()), Mockito.eq(sourceNode.getPort()),
+                        Mockito.any(Message.class));
     }
 
     @Test(priority = 2)
@@ -317,7 +318,8 @@ public class RouterTestCase extends BaseTestCase {
 
         Message message = Message.parse("0034 " + MessageType.SER_SUPER_PEER_OK.getValue()
                 + " " + serviceHolder.getConfiguration().getIp()
-                + " " + Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort()));
+                + " " + Integer.toString(serviceHolder.getConfiguration().getPeerListeningPort())
+                + " 0 19");
 
         Mockito.verify(networkHandler, Mockito.times(1))
                 .sendMessage(sourceNode.getIp(), sourceNode.getPort(), message);
@@ -365,12 +367,9 @@ public class RouterTestCase extends BaseTestCase {
 
         router.onMessageReceived(fromNode.getIp(), fromNode.getPort(), serSuperPeerMessage);
 
-        Message usedMessage = Message.parse("0049 " + MessageType.SER_SUPER_PEER_OK.getValue()
-                + " " + MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_IP
-                + " " + MessageConstants.SER_SUPER_PEER_OK_NOT_FOUND_PORT);
-
-        Mockito.verify(networkHandler, Mockito.times(1))
-                .sendMessage(sourceNode.getIp(), sourceNode.getPort(), usedMessage);
+        Mockito.verify(networkHandler, Mockito.times(0))
+                .sendMessage(Mockito.eq(sourceNode.getIp()), Mockito.eq(sourceNode.getPort()),
+                        Mockito.any(Message.class));
     }
 
     @Test(priority = 1)

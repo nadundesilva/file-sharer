@@ -20,9 +20,6 @@ public class MessageConstants {
     public static final String UNREG_OK_VALUE_SUCCESS = "0";
     public static final String UNREG_OK_VALUE_ERROR = "9999";
 
-    public static final String SER_SUPER_PEER_OK_NOT_FOUND_IP = "0.0.0.0";
-    public static final String SER_SUPER_PEER_OK_NOT_FOUND_PORT = "0";
-
     public static final String JOIN_SUPER_PEER_OK_VALUE_SUCCESS = "0";
     public static final String JOIN_SUPER_PEER_OK_VALUE_ERROR_NOT_SUPER_PEER = "9997";
     public static final String JOIN_SUPER_PEER_OK_VALUE_ERROR_FULL = "9998";

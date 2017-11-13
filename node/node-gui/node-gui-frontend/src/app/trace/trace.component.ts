@@ -1,7 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {
-  Constants, ServerResponseStatus, TraceableState, ServerResponse, Utils, Network,
-  NetworkConnection, ConnectionType
+  Constants, ServerResponseStatus, ServerResponse, Network, NetworkConnection, ConnectionType
 } from '../commons';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
@@ -17,24 +16,24 @@ export class TraceComponent implements OnInit, OnDestroy {
   title = 'Tracing';
 
   network: Network;
-  networkDetailsFetchSubscription: Subscription;
+  networkFetchSubscription: Subscription;
 
   constructor(private http: HttpClient, private router: Router) {
     this.network = new Network();
   }
 
   ngOnInit(): void {
-    this.startFetchingNetworkDetails();
+    this.startFetchingNetwork();
   }
 
   ngOnDestroy(): void {
-    this.stopFetchingNetworkDetails();
+    this.stopFetchingNetwork();
   }
 
-  private startFetchingNetworkDetails(): void {
-    this.stopFetchingNetworkDetails();
+  private startFetchingNetwork(): void {
+    this.stopFetchingNetwork();
     const timer = Observable.timer(0, Constants.REFRESH_FREQUENCY);
-    this.networkDetailsFetchSubscription = timer.subscribe(t => {
+    this.networkFetchSubscription = timer.subscribe(t => {
       this.http.get<ServerResponse<Network>>(
         Constants.API_ENDPOINT + Constants.API_TRACE_ENDPOINT + Constants.API_TRACE_ENDPOINT_NETWORK_PATH
       ).subscribe(response => {
@@ -59,10 +58,10 @@ export class TraceComponent implements OnInit, OnDestroy {
     });
   }
 
-  private stopFetchingNetworkDetails(): void {
-    if (this.networkDetailsFetchSubscription) {
-      this.networkDetailsFetchSubscription.unsubscribe();
-      this.networkDetailsFetchSubscription = null;
+  private stopFetchingNetwork(): void {
+    if (this.networkFetchSubscription) {
+      this.networkFetchSubscription.unsubscribe();
+      this.networkFetchSubscription = null;
     }
   }
 

@@ -4,12 +4,16 @@ import org.microfuse.file.sharer.node.commons.Constants;
 import org.microfuse.file.sharer.node.commons.peer.Node;
 import org.microfuse.file.sharer.node.commons.peer.NodeState;
 import org.microfuse.file.sharer.node.commons.peer.PeerType;
+import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.communication.routing.table.OrdinaryPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.RoutingTable;
 import org.microfuse.file.sharer.node.core.communication.routing.table.SuperPeerRoutingTable;
 import org.microfuse.file.sharer.node.core.tracing.Network;
+import org.microfuse.file.sharer.node.core.tracing.Traceable;
 import org.microfuse.file.sharer.node.core.tracing.Tracer;
+import org.microfuse.file.sharer.node.core.tracing.stats.History;
 import org.microfuse.file.sharer.node.core.utils.ServiceHolder;
+import org.microfuse.file.sharer.node.core.utils.TraceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +24,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Tracing Manager.
@@ -29,12 +35,21 @@ public class FileSharerTracer implements Tracer {
 
     private ServiceHolder serviceHolder;
     private Network network;
+    private History history;
 
     private Registry registry;
 
+    private final Lock heartBeatLock;
+    private Thread heartBeatThread;
+    private boolean heartBeatingEnabled;
+
     public FileSharerTracer() {
+        heartBeatLock = new ReentrantLock();
+        heartBeatingEnabled = false;
+
         serviceHolder = new ServiceHolder();
         network = new Network();
+        history = new History();
 
         // Starting the RMI registry. Fails if it is already running.
         try {
@@ -56,12 +71,81 @@ public class FileSharerTracer implements Tracer {
     }
 
     /**
+     * Enable heart beating to the nodes.
+     */
+    public void enableHeartBeating() {
+        heartBeatLock.lock();
+        try {
+            if (!heartBeatingEnabled) {
+                heartBeatingEnabled = true;
+                heartBeatThread = new Thread(() -> {
+                    while (heartBeatingEnabled) {
+                        try {
+                            Thread.sleep(serviceHolder.getConfiguration().getHeartbeatInterval());
+                        } catch (InterruptedException ignored) {
+                        }
+                        network.getNodes().forEach(traceableNode -> {
+                            boolean active = false;
+                            try {
+                                Traceable traceable = getTraceable(traceableNode.getIp(), traceableNode.getPort());
+                                if (traceable != null) {
+                                    active = traceable.heartbeat();
+                                }
+                            } catch (RemoteException e) {
+                                logger.warn("Failed to connect to traceable node " + traceableNode.toString());
+                            }
+                            if (active) {
+                                traceableNode.setState(NodeState.ACTIVE);
+                            } else {
+                                traceableNode.setState(NodeState.INACTIVE);
+                            }
+                        });
+                    }
+                    logger.info("Stopped Heart beating");
+                });
+                heartBeatThread.setPriority(Thread.NORM_PRIORITY);
+                heartBeatThread.setDaemon(true);
+                heartBeatThread.start();
+                logger.info("Started Heart beating");
+            }
+        } finally {
+            heartBeatLock.unlock();
+        }
+    }
+
+    /**
+     * Disable heart beating to the nodes.
+     */
+    public void disableHeartBeat() {
+        heartBeatLock.lock();
+        try {
+            if (heartBeatingEnabled) {
+                heartBeatingEnabled = false;
+                if (heartBeatThread != null) {
+                    heartBeatThread.interrupt();
+                }
+            }
+        } finally {
+            heartBeatLock.unlock();
+        }
+    }
+
+    /**
      * Get the network that is being traced.
      *
      * @return The network being traced
      */
     public Network getNetwork() {
         return network;
+    }
+
+    /**
+     * Get the history of the network that is being traced.
+     *
+     * @return The history of the network being traced
+     */
+    public History getHistory() {
+        return history;
     }
 
     /**
@@ -80,6 +164,8 @@ public class FileSharerTracer implements Tracer {
             logger.warn("Failed to serve the RMI remote", e);
         }
         logger.info("Started tracer listening");
+
+        enableHeartBeating();
     }
 
     /**
@@ -103,6 +189,26 @@ public class FileSharerTracer implements Tracer {
         } catch (NoSuchObjectException e) {
             logger.warn("Failed to un-export object", e);
         }
+
+        disableHeartBeat();
+    }
+
+    /**
+     * Get a traceable reference.
+     *
+     * @return The traceable RMI reference
+     */
+    private Traceable getTraceable(String ip, int port) {
+        Traceable traceable = null;
+        try {
+            Registry tracerRegistry = LocateRegistry.getRegistry(ip, Constants.RMI_REGISTRY_PORT);
+            traceable = (Traceable) tracerRegistry.lookup(TraceManager.getRMIRegistryEntry(
+                    serviceHolder.getConfiguration().getRmiRegistryEntryPrefix(), ip, port
+            ));
+        } catch (NotBoundException | RemoteException e) {
+            logger.warn("Failed to get hold of the tracer stub", e);
+        }
+        return traceable;
     }
 
     @Override
@@ -113,7 +219,7 @@ public class FileSharerTracer implements Tracer {
                 network.addUnstructuredNetworkConnection(ip, port, node.getIp(), node.getPort()));
 
         if (currentRoutingTable instanceof SuperPeerRoutingTable) {
-            network.getNode(ip, port).setPeerType(PeerType.SUPER_PEER);
+            promoteToSuperPeer(ip, port);
             SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) currentRoutingTable;
 
             superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes().forEach(node ->
@@ -122,7 +228,7 @@ public class FileSharerTracer implements Tracer {
             superPeerRoutingTable.getAllSuperPeerNetworkNodes().forEach(node ->
                     network.addSuperPeerNetworkConnection(ip, port, node.getIp(), node.getPort()));
         } else if (currentRoutingTable instanceof OrdinaryPeerRoutingTable) {
-            network.getNode(ip, port).setPeerType(PeerType.ORDINARY_PEER);
+            demoteToOrdinaryPeer(ip, port);
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) currentRoutingTable;
 
             Node node = ordinaryPeerRoutingTable.getAssignedSuperPeer();
@@ -166,10 +272,17 @@ public class FileSharerTracer implements Tracer {
     @Override
     public void promoteToSuperPeer(String ip, int port) {
         network.getNode(ip, port).setPeerType(PeerType.SUPER_PEER);
+        logger.info("Node " + ip + ":" + port + " promoted to a super peer");
     }
 
     @Override
     public void demoteToOrdinaryPeer(String ip, int port) {
         network.getNode(ip, port).setPeerType(PeerType.ORDINARY_PEER);
+        logger.info("Node " + ip + ":" + port + " demoted to a ordinary peer");
+    }
+
+    @Override
+    public void notifyMessageSend(String ip, int port, Message message) throws RemoteException {
+        history.notifyMessageSend(message);
     }
 }

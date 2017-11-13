@@ -163,6 +163,13 @@ public class ResourceIndex {
      * Clear the resource index.
      */
     public void clear() {
+        clearOwnedResources();
+    }
+
+    /**
+     * Clear the resources owned by this node.
+     */
+    public void clearOwnedResources() {
         ownedResourcesLock.writeLock().lock();
         try {
             ownedResources.clear();
