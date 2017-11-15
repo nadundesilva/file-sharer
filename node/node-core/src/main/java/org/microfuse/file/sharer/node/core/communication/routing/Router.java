@@ -330,6 +330,7 @@ public class Router implements NetworkHandlerListener {
             if (tracer != null) {
                 try {
                     tracer.notifyMessageSend(
+                            System.currentTimeMillis(),
                             serviceHolder.getConfiguration().getIp(),
                             serviceHolder.getConfiguration().getPeerListeningPort(),
                             message
@@ -363,6 +364,7 @@ public class Router implements NetworkHandlerListener {
             if (tracer != null) {
                 try {
                     tracer.notifyMessageSend(
+                            System.currentTimeMillis(),
                             serviceHolder.getConfiguration().getIp(),
                             serviceHolder.getConfiguration().getPeerListeningPort(),
                             message

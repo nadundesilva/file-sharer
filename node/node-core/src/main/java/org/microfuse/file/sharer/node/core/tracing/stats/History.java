@@ -38,11 +38,12 @@ public class History {
     /**
      * Add a new message to the history.
      *
-     * @param ip      The ip of the node which sent the message
-     * @param port    The port of the node which sent the message
-     * @param message The message that was used.
+     * @param timeStamp The timestamp at which the message was sent
+     * @param ip        The ip of the node which sent the message
+     * @param port      The port of the node which sent the message
+     * @param message   The message that was used.
      */
-    public void notifyMessageSend(String ip, int port, Message message) {
+    public void notifyMessageSend(long timeStamp, String ip, int port, Message message) {
         logger.info("Received notification of message " + message.toString());
         switch (message.getType()) {
             case REG:
@@ -55,7 +56,7 @@ public class History {
             case LEAVE_OK:
             case UNREG:
             case UNREG_OK:
-                addBootstrappingMessageCount(ip, port, message);
+                addBootstrappingMessageCount(timeStamp, ip, port, message);
                 break;
             case HEARTBEAT:
             case HEARTBEAT_OK:
@@ -65,15 +66,15 @@ public class History {
             case LIST_UNSTRUCTURED_CONNECTIONS_OK:
             case LIST_SUPER_PEER_CONNECTIONS:
             case LIST_SUPER_PEER_CONNECTIONS_OK:
-                addMaintenanceMessageCount(ip, port, message);
+                addMaintenanceMessageCount(timeStamp, ip, port, message);
                 break;
             case SER:
             case SER_OK:
-                addSerMessage(ip, port, message);
+                addSerMessage(timeStamp, ip, port, message);
                 break;
             case SER_SUPER_PEER:
             case SER_SUPER_PEER_OK:
-                addSerSuperPeerMessage(ip, port, message);
+                addSerSuperPeerMessage(timeStamp, ip, port, message);
                 break;
             default:
                 logger.debug("Ignored message of type " + message.getType());
@@ -83,11 +84,12 @@ public class History {
     /**
      * Add a new SER and SER_OK message to the history.
      *
-     * @param ip      The ip of the node which sent the message
-     * @param port    The port of the node which sent the message
-     * @param message The message that was used
+     * @param timeStamp The timestamp at which the message was sent
+     * @param ip        The ip of the node which sent the message
+     * @param port      The port of the node which sent the message
+     * @param message   The message that was used
      */
-    private void addSerMessage(String ip, int port, Message message) {
+    private void addSerMessage(long timeStamp, String ip, int port, Message message) {
         int sequenceNumberIndex;
         if (message.getType() == MessageType.SER) {
             sequenceNumberIndex = MessageIndexes.SER_SEQUENCE_NUMBER;
@@ -99,10 +101,13 @@ public class History {
         TraceableNode node = network.getNode(ip, port);
         Map<Long, SerMessage> serMessages = nodeSerMessages.computeIfAbsent(node, traceableNode -> new HashMap<>());
         SerMessage serMessage = serMessages.computeIfAbsent(sequenceNumber,
-                aLong -> new SerMessage(message.getData(MessageIndexes.SER_QUERY)));
+                aLong -> new SerMessage(message.getData(MessageIndexes.SER_QUERY), timeStamp));
 
         serMessage.increaseMessagesCount();
         if (message.getType() == MessageType.SER_OK) {
+            if (serMessage.getHopCounts().size() == 0) {
+                serMessage.setFirstHitTimeStamp(timeStamp);
+            }
             serMessage.addHopCount(Integer.parseInt(message.getData(MessageIndexes.SER_OK_HOP_COUNT)));
         }
     }
@@ -110,11 +115,12 @@ public class History {
     /**
      * Add a new SER_SUPER_PEER or SER_SUPER_PEER_OK message to the history.
      *
-     * @param ip      The ip of the node which sent the message
-     * @param port    The port of the node which sent the message
-     * @param message The message that was used
+     * @param timeStamp The timestamp at which the message was sent
+     * @param ip        The ip of the node which sent the message
+     * @param port      The port of the node which sent the message
+     * @param message   The message that was used
      */
-    private void addSerSuperPeerMessage(String ip, int port, Message message) {
+    private void addSerSuperPeerMessage(long timeStamp, String ip, int port, Message message) {
         int sequenceNumberIndex;
         if (message.getType() == MessageType.SER) {
             sequenceNumberIndex = MessageIndexes.SER_SUPER_PEER_SEQUENCE_NUMBER;
@@ -127,10 +133,13 @@ public class History {
         Map<Long, SerSuperPeerMessage> serSuperPeerMessages =
                 nodeSerSuperPeerMessages.computeIfAbsent(node, traceableNode -> new HashMap<>());
         SerSuperPeerMessage serSuperPeerMessage =
-                serSuperPeerMessages.computeIfAbsent(sequenceNumber, aLong -> new SerSuperPeerMessage());
+                serSuperPeerMessages.computeIfAbsent(sequenceNumber, aLong -> new SerSuperPeerMessage(timeStamp));
 
         serSuperPeerMessage.increaseMessagesCount();
         if (message.getType() == MessageType.SER_SUPER_PEER_OK) {
+            if (serSuperPeerMessage.getHopCounts().size() == 0) {
+                serSuperPeerMessage.setFirstHitTimeStamp(timeStamp);
+            }
             serSuperPeerMessage.addHopCount(
                     Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_OK_HOP_COUNT)));
         }
@@ -139,22 +148,24 @@ public class History {
     /**
      * Add a new bootstrapping message to the history.
      *
-     * @param ip      The ip of the node which sent the message
-     * @param port    The port of the node which sent the message
-     * @param message The message that was used
+     * @param timeStamp The timestamp at which the message was sent
+     * @param ip        The ip of the node which sent the message
+     * @param port      The port of the node which sent the message
+     * @param message   The message that was used
      */
-    private void addBootstrappingMessageCount(String ip, int port, Message message) {
+    private void addBootstrappingMessageCount(long timeStamp, String ip, int port, Message message) {
         bootstrappingMessageCount++;
     }
 
     /**
      * Add a new bootstrapping message to the history.
      *
-     * @param ip      The ip of the node which sent the message
-     * @param port    The port of the node which sent the message
-     * @param message The message that was used
+     * @param timeStamp The timestamp at which the message was sent
+     * @param ip        The ip of the node which sent the message
+     * @param port      The port of the node which sent the message
+     * @param message   The message that was used
      */
-    private void addMaintenanceMessageCount(String ip, int port, Message message) {
+    private void addMaintenanceMessageCount(long timeStamp, String ip, int port, Message message) {
         maintenanceMessageCount++;
     }
 }

@@ -208,6 +208,7 @@ public abstract class RoutingTable implements Serializable {
                     if (tracer != null) {
                         try {
                             tracer.addUnstructuredNetworkConnection(
+                                    System.currentTimeMillis(),
                                     serviceHolder.getConfiguration().getIp(),
                                     serviceHolder.getConfiguration().getPeerListeningPort(),
                                     node.getIp(), node.getPort()
@@ -249,6 +250,7 @@ public abstract class RoutingTable implements Serializable {
                 if (tracer != null) {
                     try {
                         tracer.removeUnstructuredNetworkConnection(
+                                System.currentTimeMillis(),
                                 serviceHolder.getConfiguration().getIp(),
                                 serviceHolder.getConfiguration().getPeerListeningPort(),
                                 node.getIp(), node.getPort()

@@ -7,11 +7,15 @@ import {Router} from '@angular/router';
 
 class SerMessage {
   query: string;
+  startTimeStamp: number;
+  firstHitTimeStamp: number;
   messagesCount: number;
   hopCounts: number[];
 }
 
 class SerSuperPeerMessage {
+  startTimeStamp: number;
+  firstHitTimeStamp: number;
   messagesCount: number;
   hopCounts: number[];
 }
@@ -282,9 +286,20 @@ export class StatsComponent implements OnInit, OnDestroy {
         statistics.push(['Minimum Messages (per query)', this.min(serMessagesCount)]);
         statistics.push(['Maximum Messages (per query)', this.max(serMessagesCount)]);
         statistics.push(['Average Messages (per query)', this.average(serMessagesCount).toFixed(2)]);
-        statistics.push(['Standard Deviation Hops (per query)', this.standardDeviation(serMessagesCount).toFixed(2)]);
+        statistics.push(['Standard Deviation Messages (per query)', this.standardDeviation(serMessagesCount).toFixed(2)]);
       }
       statistics.push(['Total Messages', serMessagesTotal]);
+
+      const serMessagesDelays = [];
+      for (let i = 0; i < this.serMessages.length; i++) {
+        serMessagesDelays.push(this.serMessages[i][2].firstHitTimeStamp - this.serMessages[i][2].firstHitTimeStamp);
+      }
+      if (serMessagesDelays.length > 0) {
+        statistics.push(['Minimum Delay (per query)', this.min(serMessagesDelays) + 'milliseconds']);
+        statistics.push(['Maximum Delay (per query)', this.max(serMessagesDelays) + 'milliseconds']);
+        statistics.push(['Average Delay (per query)', this.average(serMessagesDelays).toFixed(2) + 'milliseconds']);
+        statistics.push(['Standard Deviation Delay (per query)', this.standardDeviation(serMessagesDelays).toFixed(2) + 'milliseconds']);
+      }
 
       this.serMessageStatisticsDataSource = new TableDataSource<[string, string]>(statistics);
     }
@@ -329,10 +344,24 @@ export class StatsComponent implements OnInit, OnDestroy {
         statistics.push(['Minimum Messages (per query)', this.min(serSuperPeerMessagesCounts)]);
         statistics.push(['Maximum Messages (per query)', this.max(serSuperPeerMessagesCounts)]);
         statistics.push(['Average Messages (per query)', this.average(serSuperPeerMessagesCounts).toFixed(2)]);
-        statistics.push(['Standard Deviation Hops (per query)',
+        statistics.push(['Standard Deviation Messages (per query)',
           this.standardDeviation(serSuperPeerMessagesCounts).toFixed(2)]);
       }
       statistics.push(['Total Messages', serSuperPeerMessagesTotal]);
+
+      const serSuperPeerMessagesDelays = [];
+      for (let i = 0; i < this.serSuperPeerMessages.length; i++) {
+        serSuperPeerMessagesDelays.push(
+          this.serSuperPeerMessages[i][2].firstHitTimeStamp - this.serSuperPeerMessages[i][2].firstHitTimeStamp
+        );
+      }
+      if (serSuperPeerMessagesDelays.length > 0) {
+        statistics.push(['Minimum Delay (per query)', this.min(serSuperPeerMessagesDelays) + 'milliseconds']);
+        statistics.push(['Maximum Delay (per query)', this.max(serSuperPeerMessagesDelays) + 'milliseconds']);
+        statistics.push(['Average Delay (per query)', this.average(serSuperPeerMessagesDelays).toFixed(2) + 'milliseconds']);
+        statistics.push(['Standard Deviation Delay (per query)',
+          this.standardDeviation(serSuperPeerMessagesDelays).toFixed(2) + 'milliseconds']);
+      }
 
       this.serSuperPeerMessageStatisticsDataSource = new TableDataSource<[string, string]>(statistics);
     }

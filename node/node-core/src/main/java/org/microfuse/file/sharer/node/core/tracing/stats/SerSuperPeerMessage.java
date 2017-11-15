@@ -7,20 +7,35 @@ import java.util.List;
  * SER_SUPER_PEER type message traced by the tracer.
  */
 public class SerSuperPeerMessage {
+    private long startTimeStamp;
+    private long firstHitTimeStamp;
     private long messagesCount;
     private List<Integer> hopCounts;
 
-    public SerSuperPeerMessage() {
+    public SerSuperPeerMessage(long startTimeStamp) {
+        this.startTimeStamp = startTimeStamp;
         messagesCount = 0;
         hopCounts = new ArrayList<>();
     }
 
-    public void increaseMessagesCount() {
-        messagesCount++;
+    public long getStartTimeStamp() {
+        return startTimeStamp;
+    }
+
+    public long getFirstHitTimeStamp() {
+        return firstHitTimeStamp;
+    }
+
+    public void setFirstHitTimeStamp(long firstHitTimeStamp) {
+        this.firstHitTimeStamp = firstHitTimeStamp;
     }
 
     public long getMessagesCount() {
         return messagesCount;
+    }
+
+    public void increaseMessagesCount() {
+        messagesCount++;
     }
 
     public List<Integer> getHopCounts() {

@@ -123,6 +123,7 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
             if (this.assignedSuperPeer != null) {
                 try {
                     tracer.removeAssignedOrdinaryPeerConnection(
+                            System.currentTimeMillis(),
                             serviceHolder.getConfiguration().getIp(),
                             serviceHolder.getConfiguration().getPeerListeningPort(),
                             this.assignedSuperPeer.getIp(), this.assignedSuperPeer.getPort()
@@ -134,6 +135,7 @@ public class OrdinaryPeerRoutingTable extends RoutingTable {
             if (node != null) {
                 try {
                     tracer.addAssignedOrdinaryPeerConnection(
+                            System.currentTimeMillis(),
                             serviceHolder.getConfiguration().getIp(),
                             serviceHolder.getConfiguration().getPeerListeningPort(),
                             node.getIp(), node.getPort()

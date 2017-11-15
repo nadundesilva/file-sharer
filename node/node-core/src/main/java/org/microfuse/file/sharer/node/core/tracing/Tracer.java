@@ -14,94 +14,111 @@ public interface Tracer extends Remote {
     /**
      * Register node in the tracer.
      *
+     * @param timeStamp           The timestamp at which the operation occurred
      * @param ip                  The ip of the traceable node
      * @param port                The port of the traceable node
      * @param currentRoutingTable The current routing table in the traceable node
      */
-    void register(String ip, int port, RoutingTable currentRoutingTable) throws RemoteException;
+    void register(long timeStamp, String ip, int port, RoutingTable currentRoutingTable)
+            throws RemoteException;
 
     /**
      * Add a unstructured network connection.
      *
-     * @param ip1    The ip of node1
-     * @param port1  The port of node1
-     * @param ip2    The ip of node2
-     * @param port2  The port of node2
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip1       The ip of node1
+     * @param port1     The port of node1
+     * @param ip2       The ip of node2
+     * @param port2     The port of node2
      */
-    void addUnstructuredNetworkConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
+    void addUnstructuredNetworkConnection(long timeStamp, String ip1, int port1, String ip2, int port2)
+            throws RemoteException;
 
     /**
      * Add a super peer network connection.
      *
-     * @param ip1    The ip of node1
-     * @param port1  The port of node1
-     * @param ip2    The ip of node2
-     * @param port2  The port of node2
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip1       The ip of node1
+     * @param port1     The port of node1
+     * @param ip2       The ip of node2
+     * @param port2     The port of node2
      */
-    void addSuperPeerNetworkConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
+    void addSuperPeerNetworkConnection(long timeStamp, String ip1, int port1, String ip2, int port2)
+            throws RemoteException;
 
     /**
      * Add a assigned ordinary peer connection.
      *
-     * @param ip1    The ip of node1
-     * @param port1  The port of node1
-     * @param ip2    The ip of node2
-     * @param port2  The port of node2
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip1       The ip of node1
+     * @param port1     The port of node1
+     * @param ip2       The ip of node2
+     * @param port2     The port of node2
      */
-    void addAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
+    void addAssignedOrdinaryPeerConnection(long timeStamp, String ip1, int port1, String ip2, int port2)
+            throws RemoteException;
 
     /**
      * Remove a unstructured network connection.
      *
-     * @param ip1    The ip of node1
-     * @param port1  The port of node1
-     * @param ip2    The ip of node2
-     * @param port2  The port of node2
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip1       The ip of node1
+     * @param port1     The port of node1
+     * @param ip2       The ip of node2
+     * @param port2     The port of node2
      */
-    void removeUnstructuredNetworkConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
+    void removeUnstructuredNetworkConnection(long timeStamp, String ip1, int port1, String ip2, int port2)
+            throws RemoteException;
 
     /**
      * Remove a super peer network connection.
      *
-     * @param ip1    The ip of node1
-     * @param port1  The port of node1
-     * @param ip2    The ip of node2
-     * @param port2  The port of node2
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip1       The ip of node1
+     * @param port1     The port of node1
+     * @param ip2       The ip of node2
+     * @param port2     The port of node2
      */
-    void removeSuperPeerNetworkConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
+    void removeSuperPeerNetworkConnection(long timeStamp, String ip1, int port1, String ip2, int port2)
+            throws RemoteException;
 
     /**
      * Remove a assigned ordinary peer connection.
      *
-     * @param ip1    The ip of node1
-     * @param port1  The port of node1
-     * @param ip2    The ip of node2
-     * @param port2  The port of node2
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip1       The ip of node1
+     * @param port1     The port of node1
+     * @param ip2       The ip of node2
+     * @param port2     The port of node2
      */
-    void removeAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2) throws RemoteException;
+    void removeAssignedOrdinaryPeerConnection(long timeStamp, String ip1, int port1, String ip2, int port2)
+            throws RemoteException;
 
     /**
      * Promote a node to a super peer.
      *
-     * @param ip   The ip of the node to be promoted
-     * @param port The port of the node to be promoted
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip        The ip of the node to be promoted
+     * @param port      The port of the node to be promoted
      */
-    void promoteToSuperPeer(String ip, int port) throws RemoteException;
+    void promoteToSuperPeer(long timeStamp, String ip, int port) throws RemoteException;
 
     /**
      * Demote a node to a ordinary peer.
      *
-     * @param ip   The ip of the node to be demoted
-     * @param port The port of the node to be demoted
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip        The ip of the node to be demoted
+     * @param port      The port of the node to be demoted
      */
-    void demoteToOrdinaryPeer(String ip, int port) throws RemoteException;
+    void demoteToOrdinaryPeer(long timeStamp, String ip, int port) throws RemoteException;
 
     /**
      * Demote a node to a ordinary peer.
      *
-     * @param ip      The ip of the node to be demoted
-     * @param port    The port of the node to be demoted
-     * @param message The message sent
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip        The ip of the node to be demoted
+     * @param port      The port of the node to be demoted
+     * @param message   The message sent
      */
-    void notifyMessageSend(String ip, int port, Message message) throws RemoteException;
+    void notifyMessageSend(long timeStamp, String ip, int port, Message message) throws RemoteException;
 }

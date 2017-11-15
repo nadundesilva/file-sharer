@@ -212,14 +212,14 @@ public class FileSharerTracer implements Tracer {
     }
 
     @Override
-    public void register(String ip, int port, RoutingTable currentRoutingTable) {
+    public void register(long timeStamp, String ip, int port, RoutingTable currentRoutingTable) {
         network.getNode(ip, port).setState(NodeState.ACTIVE);
 
         currentRoutingTable.getAllUnstructuredNetworkNodes().forEach(node ->
                 network.addUnstructuredNetworkConnection(ip, port, node.getIp(), node.getPort()));
 
         if (currentRoutingTable instanceof SuperPeerRoutingTable) {
-            promoteToSuperPeer(ip, port);
+            promoteToSuperPeer(timeStamp, ip, port);
             SuperPeerRoutingTable superPeerRoutingTable = (SuperPeerRoutingTable) currentRoutingTable;
 
             superPeerRoutingTable.getAllAssignedOrdinaryNetworkNodes().forEach(node ->
@@ -228,7 +228,7 @@ public class FileSharerTracer implements Tracer {
             superPeerRoutingTable.getAllSuperPeerNetworkNodes().forEach(node ->
                     network.addSuperPeerNetworkConnection(ip, port, node.getIp(), node.getPort()));
         } else if (currentRoutingTable instanceof OrdinaryPeerRoutingTable) {
-            demoteToOrdinaryPeer(ip, port);
+            demoteToOrdinaryPeer(timeStamp, ip, port);
             OrdinaryPeerRoutingTable ordinaryPeerRoutingTable = (OrdinaryPeerRoutingTable) currentRoutingTable;
 
             Node node = ordinaryPeerRoutingTable.getAssignedSuperPeer();
@@ -240,49 +240,49 @@ public class FileSharerTracer implements Tracer {
     }
 
     @Override
-    public void addUnstructuredNetworkConnection(String ip1, int port1, String ip2, int port2) {
+    public void addUnstructuredNetworkConnection(long timeStamp, String ip1, int port1, String ip2, int port2) {
         network.addUnstructuredNetworkConnection(ip1, port1, ip2, port2);
     }
 
     @Override
-    public void addSuperPeerNetworkConnection(String ip1, int port1, String ip2, int port2) {
+    public void addSuperPeerNetworkConnection(long timeStamp, String ip1, int port1, String ip2, int port2) {
         network.addSuperPeerNetworkConnection(ip1, port1, ip2, port2);
     }
 
     @Override
-    public void addAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2) {
+    public void addAssignedOrdinaryPeerConnection(long timeStamp, String ip1, int port1, String ip2, int port2) {
         network.addAssignedOrdinaryPeerConnection(ip1, port1, ip2, port2);
     }
 
     @Override
-    public void removeUnstructuredNetworkConnection(String ip1, int port1, String ip2, int port2) {
+    public void removeUnstructuredNetworkConnection(long timeStamp, String ip1, int port1, String ip2, int port2) {
         network.removeUnstructuredNetworkConnection(ip1, port1, ip2, port2);
     }
 
     @Override
-    public void removeSuperPeerNetworkConnection(String ip1, int port1, String ip2, int port2) {
+    public void removeSuperPeerNetworkConnection(long timeStamp, String ip1, int port1, String ip2, int port2) {
         network.removeSuperPeerNetworkConnection(ip1, port1, ip2, port2);
     }
 
     @Override
-    public void removeAssignedOrdinaryPeerConnection(String ip1, int port1, String ip2, int port2) {
+    public void removeAssignedOrdinaryPeerConnection(long timeStamp, String ip1, int port1, String ip2, int port2) {
         network.removeAssignedOrdinaryPeerConnection(ip1, port1, ip2, port2);
     }
 
     @Override
-    public void promoteToSuperPeer(String ip, int port) {
+    public void promoteToSuperPeer(long timeStamp, String ip, int port) {
         network.getNode(ip, port).setPeerType(PeerType.SUPER_PEER);
         logger.info("Node " + ip + ":" + port + " promoted to a super peer");
     }
 
     @Override
-    public void demoteToOrdinaryPeer(String ip, int port) {
+    public void demoteToOrdinaryPeer(long timeStamp, String ip, int port) {
         network.getNode(ip, port).setPeerType(PeerType.ORDINARY_PEER);
         logger.info("Node " + ip + ":" + port + " demoted to a ordinary peer");
     }
 
     @Override
-    public void notifyMessageSend(String ip, int port, Message message) throws RemoteException {
-        history.notifyMessageSend(ip, port, message);
+    public void notifyMessageSend(long timeStamp, String ip, int port, Message message) throws RemoteException {
+        history.notifyMessageSend(timeStamp, ip, port, message);
     }
 }

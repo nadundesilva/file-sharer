@@ -8,11 +8,14 @@ import java.util.List;
  */
 public class SerMessage {
     private String query;
+    private long startTimeStamp;
+    private long firstHitTimeStamp;
     private long messagesCount;
     private List<Integer> hopCounts;
 
-    public SerMessage(String query) {
+    public SerMessage(String query, long startTimeStamp) {
         this.query = query;
+        this.startTimeStamp = startTimeStamp;
         messagesCount = 0;
         hopCounts = new ArrayList<>();
     }
@@ -21,12 +24,24 @@ public class SerMessage {
         return query;
     }
 
-    public void increaseMessagesCount() {
-        messagesCount++;
+    public long getStartTimeStamp() {
+        return startTimeStamp;
+    }
+
+    public long getFirstHitTimeStamp() {
+        return firstHitTimeStamp;
+    }
+
+    public void setFirstHitTimeStamp(long firstHitTimeStamp) {
+        this.firstHitTimeStamp = firstHitTimeStamp;
     }
 
     public long getMessagesCount() {
         return messagesCount;
+    }
+
+    public void increaseMessagesCount() {
+        messagesCount++;
     }
 
     public List<Integer> getHopCounts() {

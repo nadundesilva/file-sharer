@@ -191,7 +191,10 @@ public class ServiceHolder {
         Tracer tracer = getTracer();
         if (tracer != null) {
             try {
-                tracer.promoteToSuperPeer(getConfiguration().getIp(), getConfiguration().getPeerListeningPort());
+                tracer.promoteToSuperPeer(
+                        System.currentTimeMillis(),
+                        getConfiguration().getIp(), getConfiguration().getPeerListeningPort()
+                );
             } catch (RemoteException e) {
                 logger.warn("Failed to notify tracer of the promotion", e);
             }
@@ -231,7 +234,10 @@ public class ServiceHolder {
         Tracer tracer = getTracer();
         if (tracer != null) {
             try {
-                tracer.demoteToOrdinaryPeer(getConfiguration().getIp(), getConfiguration().getPeerListeningPort());
+                tracer.demoteToOrdinaryPeer(
+                        System.currentTimeMillis(),
+                        getConfiguration().getIp(), getConfiguration().getPeerListeningPort()
+                );
             } catch (RemoteException e) {
                 logger.warn("Failed to notify tracer of the demotion", e);
             }
@@ -549,8 +555,8 @@ public class ServiceHolder {
                 }
                 try {
                     tracer.register(
-                            getConfiguration().getIp(),
-                            getConfiguration().getPeerListeningPort(),
+                            System.currentTimeMillis(),
+                            getConfiguration().getIp(), getConfiguration().getPeerListeningPort(),
                             getRouter().getRoutingTable()
                     );
                 } catch (RemoteException e) {

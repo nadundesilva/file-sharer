@@ -266,6 +266,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
                     if (tracer != null) {
                         try {
                             tracer.addSuperPeerNetworkConnection(
+                                    System.currentTimeMillis(),
                                     serviceHolder.getConfiguration().getIp(),
                                     serviceHolder.getConfiguration().getPeerListeningPort(),
                                     node.getIp(), node.getPort()
@@ -307,6 +308,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
                 if (tracer != null) {
                     try {
                         tracer.removeSuperPeerNetworkConnection(
+                                System.currentTimeMillis(),
                                 serviceHolder.getConfiguration().getIp(),
                                 serviceHolder.getConfiguration().getPeerListeningPort(),
                                 node.getIp(), node.getPort()
@@ -348,6 +350,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
                     if (tracer != null) {
                         try {
                             tracer.addAssignedOrdinaryPeerConnection(
+                                    System.currentTimeMillis(),
                                     serviceHolder.getConfiguration().getIp(),
                                     serviceHolder.getConfiguration().getPeerListeningPort(),
                                     node.getIp(), node.getPort()
@@ -389,6 +392,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
                 if (tracer != null) {
                     try {
                         tracer.removeAssignedOrdinaryPeerConnection(
+                                System.currentTimeMillis(),
                                 serviceHolder.getConfiguration().getIp(),
                                 serviceHolder.getConfiguration().getPeerListeningPort(),
                                 node.getIp(), node.getPort()
