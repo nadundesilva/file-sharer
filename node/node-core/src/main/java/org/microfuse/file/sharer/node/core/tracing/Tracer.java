@@ -120,5 +120,17 @@ public interface Tracer extends Remote {
      * @param port      The port of the node to be demoted
      * @param message   The message sent
      */
-    void notifyMessageSend(long timeStamp, String ip, int port, Message message) throws RemoteException;
+    void notifyMessageSend(long timeStamp, String ip, int port, String receiverIP, int receiverPort, Message message)
+            throws RemoteException;
+
+    /**
+     * Demote a node to a ordinary peer.
+     *
+     * @param timeStamp The timestamp at which the operation occurred
+     * @param ip        The ip of the node to be demoted
+     * @param port      The port of the node to be demoted
+     * @param message   The message sent
+     */
+    void notifyMessageReceived(long timeStamp, String ip, int port, String senderIP, int senderPort, Message message)
+            throws RemoteException;
 }

@@ -26,7 +26,7 @@ public class NodeConstants {
     public static final int DEFAULT_UDP_NETWORK_HANDLER_RETRY_INTERVAL = 1000;
     public static final int DEFAULT_UDP_NETWORK_HANDLER_RETRY_COUNT = 5;
     public static final int DEFAULT_TRACER_PORT = 54000;
-    public static final NetworkHandlerType DEFAULT_NETWORK_HANDLER = NetworkHandlerType.TCP_SOCKET;
+    public static final NetworkHandlerType DEFAULT_NETWORK_HANDLER = NetworkHandlerType.RMI;
     public static final RoutingStrategyType DEFAULT_ROUTING_STRATEGY = RoutingStrategyType.SUPER_PEER_FLOODING;
 
     public static final String CONFIG_FILE = "config.json";

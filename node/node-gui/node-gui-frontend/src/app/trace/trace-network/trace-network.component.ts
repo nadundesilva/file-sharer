@@ -38,7 +38,8 @@ export class TraceNetworkComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.network && this.areNetworksDifferent(changes.network) && this.areNodeSetsDifferent(changes.nodes)) {
+    if ((changes.network && this.areNetworksDifferent(changes.network))
+        || (changes.nodes && this.areNodeSetsDifferent(changes.nodes))) {
       this.drawNetwork();
     }
   }

@@ -323,6 +323,7 @@ public class Router implements NetworkHandlerListener {
         networkHandlerLock.readLock().lock();
         try {
             logger.info("Sending message " + message.toString() + " to node " + ip + ":" + port);
+            long timeStamp = System.currentTimeMillis();
             networkHandler.sendMessage(ip, port, message);
 
             // Notifying the tracer
@@ -330,10 +331,10 @@ public class Router implements NetworkHandlerListener {
             if (tracer != null) {
                 try {
                     tracer.notifyMessageSend(
-                            System.currentTimeMillis(),
+                            timeStamp,
                             serviceHolder.getConfiguration().getIp(),
                             serviceHolder.getConfiguration().getPeerListeningPort(),
-                            message
+                            ip, port, message
                     );
                 } catch (RemoteException e) {
                     logger.warn("Failed to notify tracer of sending message", e);
@@ -357,6 +358,7 @@ public class Router implements NetworkHandlerListener {
         bootstrapServerNetworkHandlerLock.readLock().lock();
         try {
             logger.info("Sending message to bootstrap server " + message.toString() + " to node " + ip + ":" + port);
+            long timeStamp = System.currentTimeMillis();
             bootstrapServerNetworkHandler.sendMessage(ip, port, message);
 
             // Notifying the tracer
@@ -364,10 +366,10 @@ public class Router implements NetworkHandlerListener {
             if (tracer != null) {
                 try {
                     tracer.notifyMessageSend(
-                            System.currentTimeMillis(),
+                            timeStamp,
                             serviceHolder.getConfiguration().getIp(),
                             serviceHolder.getConfiguration().getPeerListeningPort(),
-                            message
+                            ip, port, message
                     );
                 } catch (RemoteException e) {
                     logger.warn("Failed to notify tracer of sending message", e);
@@ -459,12 +461,28 @@ public class Router implements NetworkHandlerListener {
      * @param message  The message that was received
      */
     public void runTasksOnMessageReceived(Node fromNode, Message message) {
+        long timeStamp = System.currentTimeMillis();
         listenersListLock.readLock().lock();
         try {
             listenersList.stream().parallel()
                     .forEach(routerListener -> routerListener.onMessageReceived(fromNode, message));
         } finally {
             listenersListLock.readLock().unlock();
+        }
+
+        // Notifying the tracer
+        Tracer tracer = serviceHolder.getTracer();
+        if (tracer != null) {
+            try {
+                tracer.notifyMessageReceived(
+                        timeStamp,
+                        serviceHolder.getConfiguration().getIp(),
+                        serviceHolder.getConfiguration().getPeerListeningPort(),
+                        fromNode.getIp(), fromNode.getPort(), message
+                );
+            } catch (RemoteException e) {
+                logger.warn("Failed to notify tracer of sending message", e);
+            }
         }
     }
 

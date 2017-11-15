@@ -1,7 +1,6 @@
 package org.microfuse.file.sharer.node.core.tracing.stats;
 
 import org.microfuse.file.sharer.node.commons.communication.messaging.MessageIndexes;
-import org.microfuse.file.sharer.node.commons.communication.messaging.MessageType;
 import org.microfuse.file.sharer.node.commons.tracing.TraceableNode;
 import org.microfuse.file.sharer.node.core.communication.messaging.Message;
 import org.microfuse.file.sharer.node.core.tracing.Network;
@@ -17,13 +16,13 @@ import java.util.Map;
 public class History {
     private static final Logger logger = LoggerFactory.getLogger(History.class);
 
-    private Network network;
+    private transient Network network;
 
     private long startUpTimeStamp;
     private Map<TraceableNode, Map<Long, SerMessage>> nodeSerMessages;
     private Map<TraceableNode, Map<Long, SerSuperPeerMessage>> nodeSerSuperPeerMessages;
-    private long bootstrappingMessageCount;
-    private long maintenanceMessageCount;
+    private Map<TraceableNode, Long> bootstrappingMessageCounts;
+    private Map<TraceableNode, Long> maintenanceMessageCounts;
 
     public History(Network network) {
         this.network = network;
@@ -31,8 +30,8 @@ public class History {
         startUpTimeStamp = System.currentTimeMillis();
         nodeSerMessages = new HashMap<>();
         nodeSerSuperPeerMessages = new HashMap<>();
-        bootstrappingMessageCount = 0;
-        maintenanceMessageCount = 0;
+        bootstrappingMessageCounts = new HashMap<>();
+        maintenanceMessageCounts = new HashMap<>();
     }
 
     /**
@@ -43,8 +42,9 @@ public class History {
      * @param port      The port of the node which sent the message
      * @param message   The message that was used.
      */
-    public void notifyMessageSend(long timeStamp, String ip, int port, Message message) {
-        logger.info("Received notification of message " + message.toString());
+    public void notifyMessageSend(long timeStamp, String ip, int port, String receiverIP, int receiverPort,
+                                  Message message) {
+        logger.info("Received notification of sending message " + message.toString());
         switch (message.getType()) {
             case REG:
             case REG_OK:
@@ -56,7 +56,7 @@ public class History {
             case LEAVE_OK:
             case UNREG:
             case UNREG_OK:
-                addBootstrappingMessageCount(timeStamp, ip, port, message);
+                addBootstrappingMessageCount(timeStamp, ip, port, receiverIP, receiverPort, message);
                 break;
             case HEARTBEAT:
             case HEARTBEAT_OK:
@@ -66,18 +66,31 @@ public class History {
             case LIST_UNSTRUCTURED_CONNECTIONS_OK:
             case LIST_SUPER_PEER_CONNECTIONS:
             case LIST_SUPER_PEER_CONNECTIONS_OK:
-                addMaintenanceMessageCount(timeStamp, ip, port, message);
+                addMaintenanceMessageCount(timeStamp, ip, port, receiverIP, receiverPort, message);
                 break;
             case SER:
-            case SER_OK:
-                addSerMessage(timeStamp, ip, port, message);
+                addSerMessageSend(timeStamp, ip, port, receiverIP, receiverPort, message);
                 break;
             case SER_SUPER_PEER:
-            case SER_SUPER_PEER_OK:
-                addSerSuperPeerMessage(timeStamp, ip, port, message);
+                addSerSuperPeerOkMessageSend(timeStamp, ip, port, receiverIP, receiverPort, message);
                 break;
             default:
-                logger.debug("Ignored message of type " + message.getType());
+                logger.debug("Ignored sending of message of type " + message.getType());
+        }
+    }
+
+    public void notifyMessageReceived(long timeStamp, String ip, int port, String receiverIP, int receiverPort,
+                                      Message message) {
+        logger.info("Received notification of receiving message " + message.toString());
+        switch (message.getType()) {
+            case SER_OK:
+                addSerOkMessageOkReceived(timeStamp, ip, port, receiverIP, receiverPort, message);
+                break;
+            case SER_SUPER_PEER_OK:
+                addSerSuperPeerOkMessageReceived(timeStamp, ip, port, receiverIP, receiverPort, message);
+                break;
+            default:
+                logger.debug("Ignored receiving of message of type " + message.getType());
         }
     }
 
@@ -89,27 +102,37 @@ public class History {
      * @param port      The port of the node which sent the message
      * @param message   The message that was used
      */
-    private void addSerMessage(long timeStamp, String ip, int port, Message message) {
-        int sequenceNumberIndex;
-        if (message.getType() == MessageType.SER) {
-            sequenceNumberIndex = MessageIndexes.SER_SEQUENCE_NUMBER;
-        } else {
-            sequenceNumberIndex = MessageIndexes.SER_OK_SEQUENCE_NUMBER;
-        }
-        long sequenceNumber = Long.parseLong(message.getData(sequenceNumberIndex));
+    private void addSerMessageSend(long timeStamp, String ip, int port, String receiverIP, int receiverPort,
+                                   Message message) {
+        long sequenceNumber = Long.parseLong(message.getData(MessageIndexes.SER_SEQUENCE_NUMBER));
+        String query = message.getData(MessageIndexes.SER_QUERY);
+        String sourceIP = message.getData(MessageIndexes.SER_SOURCE_IP);
+        int sourcePort = Integer.parseInt(message.getData(MessageIndexes.SER_SOURCE_PORT));
+        TraceableNode node = network.getNode(sourceIP, sourcePort);
 
-        TraceableNode node = network.getNode(ip, port);
         Map<Long, SerMessage> serMessages = nodeSerMessages.computeIfAbsent(node, traceableNode -> new HashMap<>());
         SerMessage serMessage = serMessages.computeIfAbsent(sequenceNumber,
-                aLong -> new SerMessage(message.getData(MessageIndexes.SER_QUERY), timeStamp));
+                aLong -> new SerMessage(query));
 
         serMessage.increaseMessagesCount();
-        if (message.getType() == MessageType.SER_OK) {
-            if (serMessage.getHopCounts().size() == 0) {
-                serMessage.setFirstHitTimeStamp(timeStamp);
-            }
-            serMessage.addHopCount(Integer.parseInt(message.getData(MessageIndexes.SER_OK_HOP_COUNT)));
+        serMessage.setStartTimeStamp(timeStamp);
+    }
+
+    private void addSerOkMessageOkReceived(long timeStamp, String ip, int port, String receiverIP, int receiverPort,
+                                           Message message) {
+        String query = message.getData(MessageIndexes.SER_OK_QUERY_STRING);
+        long sequenceNumber = Long.parseLong(message.getData(MessageIndexes.SER_OK_SEQUENCE_NUMBER));
+        TraceableNode node = network.getNode(ip, port);
+
+        Map<Long, SerMessage> serMessages = nodeSerMessages.computeIfAbsent(node, traceableNode -> new HashMap<>());
+        SerMessage serMessage = serMessages.computeIfAbsent(sequenceNumber,
+                aLong -> new SerMessage(query));
+
+        serMessage.increaseMessagesCount();
+        if (serMessage.getHopCounts().size() == 0) {
+            serMessage.setFirstHitTimeStamp(timeStamp);
         }
+        serMessage.addHopCount(Integer.parseInt(message.getData(MessageIndexes.SER_OK_HOP_COUNT)));
     }
 
     /**
@@ -120,29 +143,38 @@ public class History {
      * @param port      The port of the node which sent the message
      * @param message   The message that was used
      */
-    private void addSerSuperPeerMessage(long timeStamp, String ip, int port, Message message) {
-        int sequenceNumberIndex;
-        if (message.getType() == MessageType.SER) {
-            sequenceNumberIndex = MessageIndexes.SER_SUPER_PEER_SEQUENCE_NUMBER;
-        } else {
-            sequenceNumberIndex = MessageIndexes.SER_SUPER_PEER_OK_SEQUENCE_NUMBER;
-        }
-        long sequenceNumber = Long.parseLong(message.getData(sequenceNumberIndex));
+    private void addSerSuperPeerOkMessageSend(long timeStamp, String ip, int port, String receiverIP, int receiverPort,
+                                              Message message) {
+        long sequenceNumber = Long.parseLong(message.getData(MessageIndexes.SER_SUPER_PEER_SEQUENCE_NUMBER));
+        String sourceIP = message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_IP);
+        int sourcePort = Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_SOURCE_PORT));
+        TraceableNode node = network.getNode(sourceIP, sourcePort);
+
+        Map<Long, SerSuperPeerMessage> serSuperPeerMessages =
+                nodeSerSuperPeerMessages.computeIfAbsent(node, traceableNode -> new HashMap<>());
+        SerSuperPeerMessage serSuperPeerMessage =
+                serSuperPeerMessages.computeIfAbsent(sequenceNumber, aLong -> new SerSuperPeerMessage());
+
+        serSuperPeerMessage.increaseMessagesCount();
+        serSuperPeerMessage.setStartTimeStamp(timeStamp);
+    }
+
+    private void addSerSuperPeerOkMessageReceived(long timeStamp, String ip, int port, String receiverIP,
+                                                  int receiverPort, Message message) {
+        long sequenceNumber = Long.parseLong(message.getData(MessageIndexes.SER_SUPER_PEER_OK_SEQUENCE_NUMBER));
 
         TraceableNode node = network.getNode(ip, port);
         Map<Long, SerSuperPeerMessage> serSuperPeerMessages =
                 nodeSerSuperPeerMessages.computeIfAbsent(node, traceableNode -> new HashMap<>());
-        SerSuperPeerMessage serSuperPeerMessage =
-                serSuperPeerMessages.computeIfAbsent(sequenceNumber, aLong -> new SerSuperPeerMessage(timeStamp));
+        SerSuperPeerMessage serSuperPeerMessage = serSuperPeerMessages.computeIfAbsent(sequenceNumber,
+                aLong -> new SerSuperPeerMessage());
 
         serSuperPeerMessage.increaseMessagesCount();
-        if (message.getType() == MessageType.SER_SUPER_PEER_OK) {
-            if (serSuperPeerMessage.getHopCounts().size() == 0) {
-                serSuperPeerMessage.setFirstHitTimeStamp(timeStamp);
-            }
-            serSuperPeerMessage.addHopCount(
-                    Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_OK_HOP_COUNT)));
+        if (serSuperPeerMessage.getHopCounts().size() == 0) {
+            serSuperPeerMessage.setFirstHitTimeStamp(timeStamp);
         }
+        serSuperPeerMessage.addHopCount(
+                Integer.parseInt(message.getData(MessageIndexes.SER_SUPER_PEER_OK_HOP_COUNT)));
     }
 
     /**
@@ -153,8 +185,10 @@ public class History {
      * @param port      The port of the node which sent the message
      * @param message   The message that was used
      */
-    private void addBootstrappingMessageCount(long timeStamp, String ip, int port, Message message) {
-        bootstrappingMessageCount++;
+    private void addBootstrappingMessageCount(long timeStamp, String ip, int port, String receiverIP, int receiverPort,
+                                              Message message) {
+        TraceableNode node = network.getNode(ip, port);
+        bootstrappingMessageCounts.compute(node, (traceableNode, aLong) -> (aLong == null ? 0 : aLong) + 1);
     }
 
     /**
@@ -165,7 +199,9 @@ public class History {
      * @param port      The port of the node which sent the message
      * @param message   The message that was used
      */
-    private void addMaintenanceMessageCount(long timeStamp, String ip, int port, Message message) {
-        maintenanceMessageCount++;
+    private void addMaintenanceMessageCount(long timeStamp, String ip, int port, String receiverIP, int receiverPort,
+                                            Message message) {
+        TraceableNode node = network.getNode(ip, port);
+        maintenanceMessageCounts.compute(node, (traceableNode, aLong) -> (aLong == null ? 0 : aLong) + 1);
     }
 }

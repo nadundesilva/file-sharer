@@ -13,15 +13,20 @@ public class SerMessage {
     private long messagesCount;
     private List<Integer> hopCounts;
 
-    public SerMessage(String query, long startTimeStamp) {
+    public SerMessage(String query) {
+        startTimeStamp = 0;
+        firstHitTimeStamp = Long.MAX_VALUE;
         this.query = query;
-        this.startTimeStamp = startTimeStamp;
         messagesCount = 0;
         hopCounts = new ArrayList<>();
     }
 
     public String getQuery() {
         return query;
+    }
+
+    public void setStartTimeStamp(long startTimeStamp) {
+        this.startTimeStamp = startTimeStamp;
     }
 
     public long getStartTimeStamp() {

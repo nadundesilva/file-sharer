@@ -5,9 +5,21 @@
       <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
       <mat-cell *matCellDef="let stat">{{ stat[0] }}</mat-cell>
     </ng-container>
-    <ng-container matColumnDef="value">
-      <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
+    <ng-container matColumnDef="minimum">
+      <mat-header-cell *matHeaderCellDef>Minimum</mat-header-cell>
       <mat-cell *matCellDef="let stat">{{ stat[1] }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="maximum">
+      <mat-header-cell *matHeaderCellDef>Maximum</mat-header-cell>
+      <mat-cell *matCellDef="let stat">{{ stat[2] }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="average">
+      <mat-header-cell *matHeaderCellDef>Average</mat-header-cell>
+      <mat-cell *matCellDef="let stat">{{ stat[3] }}</mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="standard-deviation">
+      <mat-header-cell *matHeaderCellDef>Standard Deviation</mat-header-cell>
+      <mat-cell *matCellDef="let stat">{{ stat[4] }}</mat-cell>
     </ng-container>
 
     <mat-header-row *matHeaderRowDef="columns"></mat-header-row>

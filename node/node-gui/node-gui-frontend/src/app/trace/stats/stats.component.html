@@ -4,9 +4,24 @@
       Aggregated
     </ng-template>
     <div class="mat-card">
-      <app-stats-table [dataSource]="generalStatisticsDataSource" [title]="'General'"></app-stats-table>
+      <mat-card *ngIf="generalStatisticsDataSource && generalStatisticsDataSource.size() > 0">
+        <h3 class="mat-h3">{{ title }}</h3>
+        <mat-table #table [dataSource]="generalStatisticsDataSource">
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+            <mat-cell *matCellDef="let stat">{{ stat[0] }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="value">
+            <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
+            <mat-cell *matCellDef="let stat">{{ stat[1] }}</mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="generalStatisticsColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: generalStatisticsColumns;"></mat-row>
+        </mat-table>
+      </mat-card>
       <app-stats-table [dataSource]="serMessageStatisticsDataSource" [title]="'Search Messages'"></app-stats-table>
-      <app-stats-table [dataSource]="serSuperPeerMessageStatisticsDataSource" [title]="'Search For Super Peer Messages'"></app-stats-table>
+      <app-stats-table [dataSource]="serSuperPeerMessageStatisticsDataSource" [title]="'Search for Super Peer Messages'"></app-stats-table>
     </div>
   </mat-tab>
   <mat-tab>
@@ -57,7 +72,7 @@
   </mat-tab>
   <mat-tab>
     <ng-template mat-tab-label>
-      Search For Super Peer Messages
+      Search for Super Peer Messages
     </ng-template>
     <div class="mat-card">
       <mat-card>

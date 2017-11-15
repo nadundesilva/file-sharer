@@ -1,5 +1,8 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {Constants, ServerResponse, ServerResponseStatus, TableDataSource, TraceableNode} from '../../commons';
+import {
+  Constants, NodeState, PeerType, ServerResponse, ServerResponseStatus, TableDataSource,
+  TraceableNode
+} from '../../commons';
 import {Subscription} from 'rxjs/Subscription';
 import {Observable} from 'rxjs/Observable';
 import {HttpClient} from '@angular/common/http';
@@ -24,8 +27,8 @@ class History {
   startUpTimeStamp: number;
   nodeSerMessages: Map<TraceableNode, Map<number, SerMessage>>;
   nodeSerSuperPeerMessages: Map<TraceableNode, Map<number, SerSuperPeerMessage>>;
-  bootstrappingMessageCount: number;
-  maintenanceMessageCount: number;
+  bootstrappingMessageCounts: Map<TraceableNode, number>;
+  maintenanceMessageCounts: Map<TraceableNode, number>;
 }
 
 @Component({
@@ -42,8 +45,8 @@ export class StatsComponent implements OnInit, OnDestroy {
   startUpTimeStamp: number;
   serMessages: [TraceableNode, number, SerMessage][];
   serSuperPeerMessages: [TraceableNode, number, SerSuperPeerMessage][];
-  bootstrappingMessageCount: number;
-  maintenanceMessageCount: number;
+  bootstrappingMessageCounts: [TraceableNode, number][];
+  maintenanceMessageCounts: [TraceableNode, number][];
 
   serDisplayedColumns = [
     'node', 'sequence-number', 'query', 'messages-count', 'min-hop-count', 'max-hop-count', 'average-hop-count',
@@ -53,11 +56,12 @@ export class StatsComponent implements OnInit, OnDestroy {
     'node', 'sequence-number', 'messages-count', 'min-hop-count', 'max-hop-count', 'average-hop-count',
     'standard-deviation'
   ];
+  generalStatisticsColumns = ['name', 'value'];
 
   serMessagesDataSource: TableDataSource<[number, SerMessage]>;
   serSuperPeerMessagesDataSource: TableDataSource<[number, SerSuperPeerMessage]>;
-
   generalStatisticsDataSource: TableDataSource<[string, string]>;
+
   serMessageStatisticsDataSource: TableDataSource<[string, string]>;
   serSuperPeerMessageStatisticsDataSource: TableDataSource<[string, string]>;
 
@@ -141,38 +145,55 @@ export class StatsComponent implements OnInit, OnDestroy {
         if (response.status === ServerResponseStatus.SUCCESS) {
           this.startUpTimeStamp = response.data.startUpTimeStamp;
 
-          const nodeSerEntries = Object.entries(response.data.nodeSerMessages);
+          const nodeSerMessages = Object.entries(response.data.nodeSerMessages);
           const serMessages = [];
-          for (let i = 0; i < nodeSerEntries.length; i++) {
-            const serEntries = Object.entries(nodeSerEntries[i][1]);
-            for (let j = 0; j < serEntries.length; j++) {
+          for (let i = 0; i < nodeSerMessages.length; i++) {
+            const serMessageEntry = Object.entries(nodeSerMessages[i][1]);
+            for (let j = 0; j < serMessageEntry.length; j++) {
               serMessages.push([
-                nodeSerEntries[i][0],
-                parseInt(serEntries[j][0], 10),
-                <SerMessage> serEntries[j][1]
+                this.getNodeFromList(this.nodes, nodeSerMessages[i][0]),
+                parseInt(serMessageEntry[j][0], 10),
+                serMessageEntry[j][1]
               ]);
             }
           }
           this.serMessages = serMessages;
           this.serMessagesDataSource = new TableDataSource<[number, SerMessage]>(serMessages);
 
-          const nodeSerSuperPeerEntries = Object.entries(response.data.nodeSerSuperPeerMessages);
+          const nodeSerSuperPeerMessages = Object.entries(response.data.nodeSerSuperPeerMessages);
           const serSuperPeerMessages = [];
-          for (let i = 0; i < nodeSerSuperPeerEntries.length; i++) {
-            const serSuperPeerEntries = Object.entries(nodeSerSuperPeerEntries[i][1]);
-            for (let j = 0; j < serSuperPeerEntries.length; j++) {
-              serSuperPeerMessages.push([
-                nodeSerSuperPeerEntries[i][1],
-                parseInt(serSuperPeerEntries[j][0], 10),
-                <SerMessage> serSuperPeerEntries[j][1]
+          for (let i = 0; i < nodeSerSuperPeerMessages.length; i++) {
+            const serSuperPeerMessageEntry = Object.entries(nodeSerSuperPeerMessages[i][1]);
+            for (let j = 0; j < serSuperPeerMessageEntry.length; j++) {
+              serMessages.push([
+                this.getNodeFromList(this.nodes, nodeSerSuperPeerMessages[i][0]),
+                parseInt(serSuperPeerMessageEntry[j][0], 10),
+                serSuperPeerMessageEntry[j][1]
               ]);
             }
           }
           this.serSuperPeerMessages = serSuperPeerMessages;
           this.serSuperPeerMessagesDataSource = new TableDataSource<[number, SerSuperPeerMessage]>(serSuperPeerMessages);
 
-          this.bootstrappingMessageCount = response.data.bootstrappingMessageCount;
-          this.maintenanceMessageCount = response.data.maintenanceMessageCount;
+          const nodeBootstrappingMessageCounts = Object.entries(response.data.bootstrappingMessageCounts);
+          const bootstrappingMessageCounts = [];
+          for (let i = 0; i < nodeBootstrappingMessageCounts.length; i++) {
+            bootstrappingMessageCounts.push([
+              this.getNodeFromList(this.nodes, nodeBootstrappingMessageCounts[i][0]),
+              nodeBootstrappingMessageCounts[i][1]
+            ]);
+          }
+          this.bootstrappingMessageCounts = bootstrappingMessageCounts;
+
+          const nodeMaintenanceMessageCounts = Object.entries(response.data.maintenanceMessageCounts);
+          const maintenanceMessageCounts = [];
+          for (let i = 0; i < nodeMaintenanceMessageCounts.length; i++) {
+            maintenanceMessageCounts.push([
+              this.getNodeFromList(this.nodes, nodeMaintenanceMessageCounts[i][0]),
+              nodeMaintenanceMessageCounts[i][1]
+            ]);
+          }
+          this.maintenanceMessageCounts = maintenanceMessageCounts;
 
           this.generateStatistics();
         } else if (response.status === ServerResponseStatus.IN_FILE_SHARER_MODE) {
@@ -181,8 +202,10 @@ export class StatsComponent implements OnInit, OnDestroy {
           this.startUpTimeStamp = new Date().getTime();
           this.serMessagesDataSource = new TableDataSource<[number, SerMessage]>([]);
           this.serSuperPeerMessagesDataSource = new TableDataSource<[number, SerSuperPeerMessage]>([]);
-          this.bootstrappingMessageCount = 0;
-          this.maintenanceMessageCount = 0;
+          this.serMessages = [];
+          this.serSuperPeerMessages = [];
+          this.bootstrappingMessageCounts = [];
+          this.maintenanceMessageCounts = [];
         }
       });
     });
@@ -221,39 +244,51 @@ export class StatsComponent implements OnInit, OnDestroy {
     return formattedString;
   }
 
+  private getNodeFromList(nodes: TraceableNode[], address: string) {
+    const addressTokens = address.split(':');
+    const ip = addressTokens[0];
+    const port = parseInt(addressTokens[1], 10);
+
+    let node: TraceableNode;
+    for (let i = 0; i > nodes.length; i++) {
+      if ((nodes[i].ip === ip) && (nodes[i].port === port)) {
+        node = nodes[i];
+        break;
+      }
+    }
+    if (!node) {
+      node = new TraceableNode();
+      node.ip = ip;
+      node.port = port;
+      node.state = NodeState.ACTIVE;
+      node.peerType = PeerType.ORDINARY_PEER;
+    }
+    return node;
+  }
+
   private generateStatistics() {
-    {
-      const statistics = [];
-      if (this.formattedElapsedTime) {
-        statistics.push(['System Up Time (H:mm:ss)', this.formattedElapsedTime]);
-      }
-      if (this.nodes) {
-        statistics.push(['Total Nodes', this.nodes.length]);
-      }
-      if (this.bootstrappingMessageCount) {
-        statistics.push(['Total Bootstrapping Messages Count', this.bootstrappingMessageCount]);
-        if (this.nodes.length > 0) {
-          statistics.push(['Bootstrapping Messages Count (per node)',
-            (this.bootstrappingMessageCount / this.nodes.length).toFixed(2)]);
+    const activeNodes = [];
+    if (this.nodes) {
+      for (let i = 0; i < this.nodes.length; i++) {
+        if (this.nodes[i].state !== NodeState.INACTIVE) {
+          activeNodes.push(this.nodes[i]);
         }
       }
-      if (this.maintenanceMessageCount && this.elapsedTime) {
-        const messagesCount = this.maintenanceMessageCount / (this.elapsedTime / 60000);
-        statistics.push(['Maintenance Messages Count (per minute)', messagesCount.toFixed(2)]);
-        if (this.nodes.length > 0) {
-          statistics.push(['Maintenance Messages Count (per minute per node)', (messagesCount / this.nodes.length).toFixed(2)]);
-        }
-      }
-      this.generalStatisticsDataSource = new TableDataSource<[string, string]>(statistics);
     }
 
+    let serMessagesTotal = 0;
     if (this.serMessages) {
       const statistics = [];
 
+      const activeSerMessages = [];
+      for (let i = 0; i < this.serMessages.length; i++) {
+        activeSerMessages.push(this.serMessages[i]);
+      }
+
       const serMessagesHopCounts = [];
       let successfulQueries = 0;
-      for (let i = 0; i < this.serMessages.length; i++) {
-        const hopCounts = this.serMessages[i][2].hopCounts;
+      for (let i = 0; i < activeSerMessages.length; i++) {
+        const hopCounts = activeSerMessages[i][2].hopCounts;
         if (hopCounts.length > 0) {
           successfulQueries++;
           let firstHitHopCount = Number.MAX_VALUE;
@@ -266,51 +301,66 @@ export class StatsComponent implements OnInit, OnDestroy {
           serMessagesHopCounts.push(firstHitHopCount);
         }
       }
-      if (this.serMessages.length > 0) {
-        statistics.push(['Success Rate', (successfulQueries * 100 / this.serMessages.length).toFixed(2) + '%']);
+      if (activeSerMessages.length > 0) {
+        statistics.push(['Success Rate', (successfulQueries * 100 / activeSerMessages.length).toFixed(2) + '%']);
       }
       if (serMessagesHopCounts.length > 0) {
-        statistics.push(['Minimum First Hit Hops (per query)', this.min(serMessagesHopCounts)]);
-        statistics.push(['Maximum First Hit Hops (per query)', this.max(serMessagesHopCounts)]);
-        statistics.push(['Average First Hit Hops (per query)', this.average(serMessagesHopCounts).toFixed(2)]);
-        statistics.push(['Standard Deviation First Hit Hops (per query)', this.standardDeviation(serMessagesHopCounts).toFixed(2)]);
+        statistics.push([
+          'First Hit Hops (per query)',
+          this.min(serMessagesHopCounts),
+          this.max(serMessagesHopCounts),
+          this.average(serMessagesHopCounts).toFixed(2),
+          this.standardDeviation(serMessagesHopCounts).toFixed(2)
+        ]);
       }
 
-      let serMessagesTotal = 0;
       const serMessagesCount = [];
-      for (let i = 0; i < this.serMessages.length; i++) {
-        serMessagesCount.push(this.serMessages[i][2].messagesCount);
-        serMessagesTotal += this.serMessages[i][2].messagesCount;
+      for (let i = 0; i < activeSerMessages.length; i++) {
+        serMessagesCount.push(activeSerMessages[i][2].messagesCount);
+        serMessagesTotal += activeSerMessages[i][2].messagesCount;
       }
       if (serMessagesCount.length > 0) {
-        statistics.push(['Minimum Messages (per query)', this.min(serMessagesCount)]);
-        statistics.push(['Maximum Messages (per query)', this.max(serMessagesCount)]);
-        statistics.push(['Average Messages (per query)', this.average(serMessagesCount).toFixed(2)]);
-        statistics.push(['Standard Deviation Messages (per query)', this.standardDeviation(serMessagesCount).toFixed(2)]);
+        statistics.push([
+          'Messages Count (per query)',
+          this.min(serMessagesCount),
+          this.max(serMessagesCount),
+          this.average(serMessagesCount).toFixed(2),
+          this.standardDeviation(serMessagesCount).toFixed(2)
+        ]);
       }
-      statistics.push(['Total Messages', serMessagesTotal]);
 
       const serMessagesDelays = [];
-      for (let i = 0; i < this.serMessages.length; i++) {
-        serMessagesDelays.push(this.serMessages[i][2].firstHitTimeStamp - this.serMessages[i][2].firstHitTimeStamp);
+      for (let i = 0; i < activeSerMessages.length; i++) {
+        if (activeSerMessages[i][2].hopCounts.length > 0) {
+          serMessagesDelays.push(activeSerMessages[i][2].firstHitTimeStamp - activeSerMessages[i][2].startTimeStamp);
+        }
       }
       if (serMessagesDelays.length > 0) {
-        statistics.push(['Minimum Delay (per query)', this.min(serMessagesDelays) + 'milliseconds']);
-        statistics.push(['Maximum Delay (per query)', this.max(serMessagesDelays) + 'milliseconds']);
-        statistics.push(['Average Delay (per query)', this.average(serMessagesDelays).toFixed(2) + 'milliseconds']);
-        statistics.push(['Standard Deviation Delay (per query)', this.standardDeviation(serMessagesDelays).toFixed(2) + 'milliseconds']);
+        statistics.push([
+          'Delay (milliseconds per query)',
+          this.min(serMessagesDelays),
+          this.max(serMessagesDelays),
+          this.average(serMessagesDelays).toFixed(2),
+          this.standardDeviation(serMessagesDelays).toFixed(2)
+        ]);
       }
 
       this.serMessageStatisticsDataSource = new TableDataSource<[string, string]>(statistics);
     }
 
+    let serSuperPeerMessagesTotal = 0;
     if (this.serSuperPeerMessages) {
       const statistics = [];
 
+      const activeSerSuperPeerMessages = [];
+      for (let i = 0; i < this.serSuperPeerMessages.length; i++) {
+        activeSerSuperPeerMessages.push(this.serSuperPeerMessages[i]);
+      }
+
       const serSuperPeerMessagesHopCounts = [];
       let successfulQueries = 0;
-      for (let i = 0; i < this.serSuperPeerMessages.length; i++) {
-        const hopCounts = this.serSuperPeerMessages[i][2].hopCounts;
+      for (let i = 0; i < activeSerSuperPeerMessages.length; i++) {
+        const hopCounts = activeSerSuperPeerMessages[i][2].hopCounts;
         if (hopCounts.length > 0) {
           successfulQueries++;
           let firstHitHopCount = Number.MAX_VALUE;
@@ -323,47 +373,91 @@ export class StatsComponent implements OnInit, OnDestroy {
           serSuperPeerMessagesHopCounts.push(firstHitHopCount);
         }
       }
-      if (this.serSuperPeerMessages.length > 0) {
-        statistics.push(['Success Rate', (successfulQueries * 100 / this.serSuperPeerMessages.length).toFixed(2) + '%']);
+      if (activeSerSuperPeerMessages.length > 0) {
+        statistics.push(['Success Rate', (successfulQueries * 100 / activeSerSuperPeerMessages.length).toFixed(2) + '%']);
       }
       if (serSuperPeerMessagesHopCounts.length > 0) {
-        statistics.push(['Minimum First Hit Hops (per query)', this.min(serSuperPeerMessagesHopCounts)]);
-        statistics.push(['Maximum First Hit Hops (per query)', this.max(serSuperPeerMessagesHopCounts)]);
-        statistics.push(['Average First Hit Hops (per query)', this.average(serSuperPeerMessagesHopCounts).toFixed(2)]);
-        statistics.push(['Standard Deviation First Hit Hops (per query)',
-          this.standardDeviation(serSuperPeerMessagesHopCounts).toFixed(2)]);
+        statistics.push([
+          'First Hit Hops (per query)',
+          this.min(serSuperPeerMessagesHopCounts),
+          this.max(serSuperPeerMessagesHopCounts),
+          this.average(serSuperPeerMessagesHopCounts).toFixed(2),
+          this.standardDeviation(serSuperPeerMessagesHopCounts).toFixed(2)
+        ]);
       }
 
-      let serSuperPeerMessagesTotal = 0;
       const serSuperPeerMessagesCounts = [];
-      for (let i = 0; i < this.serMessages.length; i++) {
-        serSuperPeerMessagesCounts.push(this.serMessages[i][2].messagesCount);
-        serSuperPeerMessagesTotal += this.serMessages[i][2].messagesCount;
+      for (let i = 0; i < activeSerSuperPeerMessages.length; i++) {
+        serSuperPeerMessagesCounts.push(activeSerSuperPeerMessages[i][2].messagesCount);
+        serSuperPeerMessagesTotal += activeSerSuperPeerMessages[i][2].messagesCount;
       }
       if (serSuperPeerMessagesCounts.length > 0) {
-        statistics.push(['Minimum Messages (per query)', this.min(serSuperPeerMessagesCounts)]);
-        statistics.push(['Maximum Messages (per query)', this.max(serSuperPeerMessagesCounts)]);
-        statistics.push(['Average Messages (per query)', this.average(serSuperPeerMessagesCounts).toFixed(2)]);
-        statistics.push(['Standard Deviation Messages (per query)',
-          this.standardDeviation(serSuperPeerMessagesCounts).toFixed(2)]);
+        statistics.push([
+          'Messages Count (per query)',
+          this.min(serSuperPeerMessagesCounts),
+          this.max(serSuperPeerMessagesCounts),
+          this.average(serSuperPeerMessagesCounts).toFixed(2),
+          this.standardDeviation(serSuperPeerMessagesCounts).toFixed(2)
+        ]);
       }
-      statistics.push(['Total Messages', serSuperPeerMessagesTotal]);
 
       const serSuperPeerMessagesDelays = [];
-      for (let i = 0; i < this.serSuperPeerMessages.length; i++) {
-        serSuperPeerMessagesDelays.push(
-          this.serSuperPeerMessages[i][2].firstHitTimeStamp - this.serSuperPeerMessages[i][2].firstHitTimeStamp
-        );
+      for (let i = 0; i < activeSerSuperPeerMessages.length; i++) {
+        if (activeSerSuperPeerMessages[i][2].hopCounts.length > 0) {
+          serSuperPeerMessagesDelays.push(
+            activeSerSuperPeerMessages[i][2].firstHitTimeStamp - activeSerSuperPeerMessages[i][2].startTimeStamp
+          );
+        }
       }
       if (serSuperPeerMessagesDelays.length > 0) {
-        statistics.push(['Minimum Delay (per query)', this.min(serSuperPeerMessagesDelays) + 'milliseconds']);
-        statistics.push(['Maximum Delay (per query)', this.max(serSuperPeerMessagesDelays) + 'milliseconds']);
-        statistics.push(['Average Delay (per query)', this.average(serSuperPeerMessagesDelays).toFixed(2) + 'milliseconds']);
-        statistics.push(['Standard Deviation Delay (per query)',
-          this.standardDeviation(serSuperPeerMessagesDelays).toFixed(2) + 'milliseconds']);
+        statistics.push([
+          'Delay (milliseconds per query)',
+          this.min(serSuperPeerMessagesDelays),
+          this.max(serSuperPeerMessagesDelays),
+          this.average(serSuperPeerMessagesDelays).toFixed(2),
+          this.standardDeviation(serSuperPeerMessagesDelays).toFixed(2)
+        ]);
       }
 
       this.serSuperPeerMessageStatisticsDataSource = new TableDataSource<[string, string]>(statistics);
+    }
+
+    {
+      const statistics = [];
+      if (this.formattedElapsedTime) {
+        statistics.push(['System Up Time (H:mm:ss)', this.formattedElapsedTime]);
+      }
+      if (this.nodes) {
+        statistics.push(['Total Nodes', this.nodes.length]);
+      }
+      statistics.push(['Total Active Nodes', activeNodes.length]);
+      if (this.bootstrappingMessageCounts) {
+        let activeBootstrappingMessageCounts = 0;
+        for (let i = 0; i < this.bootstrappingMessageCounts.length; i++) {
+          activeBootstrappingMessageCounts += this.bootstrappingMessageCounts[i][1];
+        }
+
+        statistics.push(['Total Bootstrapping Messages Count', activeBootstrappingMessageCounts]);
+        if (activeNodes.length > 0) {
+          statistics.push(['Bootstrapping Messages Count (per node)',
+            (activeBootstrappingMessageCounts / activeNodes.length).toFixed(2)]);
+        }
+      }
+      if (this.maintenanceMessageCounts && this.elapsedTime) {
+        let activeMaintenanceMessageCounts = 0;
+        for (let i = 0; i < this.maintenanceMessageCounts.length; i++) {
+          activeMaintenanceMessageCounts += this.maintenanceMessageCounts[i][1];
+        }
+
+        const messagesCount = activeMaintenanceMessageCounts / (this.elapsedTime / 60000);
+        statistics.push(['Total Maintenance Messages Count (per minute)', messagesCount.toFixed(2)]);
+        if (activeNodes.length > 0) {
+          statistics.push(['Maintenance Messages Count (per minute per node)', (messagesCount / activeNodes.length).toFixed(2)]);
+        }
+      }
+      statistics.push(['Total Search Messages', serMessagesTotal]);
+      statistics.push(['Total Search for Super Peer Messages', serSuperPeerMessagesTotal]);
+      this.generalStatisticsDataSource = new TableDataSource<[string, string]>(statistics);
     }
   }
 }

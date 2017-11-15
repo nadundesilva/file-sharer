@@ -12,7 +12,7 @@ export class StatsTableComponent implements OnInit {
   @Input()
   dataSource: TableDataSource<[string, string]>;
 
-  columns = ['name', 'value'];
+  columns = ['name', 'minimum', 'maximum', 'average', 'standard-deviation'];
 
   constructor() { }
 

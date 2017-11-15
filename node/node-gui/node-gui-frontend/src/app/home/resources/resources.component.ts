@@ -75,10 +75,6 @@ export class ResourcesComponent implements OnInit {
       });
   }
 
-  removeSelectedResources(): void {
-    this.resources = this.resources.filter(resource => !resource.selected);
-  }
-
   selectRandomResources(): void {
     this.setAllSelected(false);
     const count = Math.floor(Math.random() * (this.resources.length / 2)) + Math.floor(this.resources.length / 4);

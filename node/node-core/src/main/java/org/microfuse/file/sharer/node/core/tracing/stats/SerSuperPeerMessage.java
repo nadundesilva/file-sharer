@@ -12,10 +12,15 @@ public class SerSuperPeerMessage {
     private long messagesCount;
     private List<Integer> hopCounts;
 
-    public SerSuperPeerMessage(long startTimeStamp) {
-        this.startTimeStamp = startTimeStamp;
+    public SerSuperPeerMessage() {
+        startTimeStamp = 0;
+        firstHitTimeStamp = Long.MAX_VALUE;
         messagesCount = 0;
         hopCounts = new ArrayList<>();
+    }
+
+    public void setStartTimeStamp(long startTimeStamp) {
+        this.startTimeStamp = startTimeStamp;
     }
 
     public long getStartTimeStamp() {

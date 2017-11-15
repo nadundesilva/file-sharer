@@ -252,36 +252,30 @@ public class SuperPeerRoutingTable extends RoutingTable {
         boolean isSuccessful;
         superPeerNetworkNodesLock.writeLock().lock();
         try {
-            if (superPeerNetworkNodes.size() < serviceHolder.getConfiguration().getMaxSuperPeerCount()) {
-                Node existingNode = get(node.getIp(), node.getPort());
-                if (existingNode != null) {
-                    node = existingNode;
-                }
-                isSuccessful = superPeerNetworkNodes.add(node);
-                if (isSuccessful) {
-                    logger.info("Added node " + node.toString() + " to super peer network.");
+            Node existingNode = get(node.getIp(), node.getPort());
+            if (existingNode != null) {
+                node = existingNode;
+            }
+            isSuccessful = superPeerNetworkNodes.add(node);
+            if (isSuccessful) {
+                logger.info("Added node " + node.toString() + " to super peer network.");
 
-                    // Notifying the tracer
-                    Tracer tracer = serviceHolder.getTracer();
-                    if (tracer != null) {
-                        try {
-                            tracer.addSuperPeerNetworkConnection(
-                                    System.currentTimeMillis(),
-                                    serviceHolder.getConfiguration().getIp(),
-                                    serviceHolder.getConfiguration().getPeerListeningPort(),
-                                    node.getIp(), node.getPort()
-                            );
-                        } catch (RemoteException e) {
-                            logger.warn("Failed to add super peer network connection to the tracer", e);
-                        }
+                // Notifying the tracer
+                Tracer tracer = serviceHolder.getTracer();
+                if (tracer != null) {
+                    try {
+                        tracer.addSuperPeerNetworkConnection(
+                                System.currentTimeMillis(),
+                                serviceHolder.getConfiguration().getIp(),
+                                serviceHolder.getConfiguration().getPeerListeningPort(),
+                                node.getIp(), node.getPort()
+                        );
+                    } catch (RemoteException e) {
+                        logger.warn("Failed to add super peer network connection to the tracer", e);
                     }
-                } else {
-                    logger.info("Failed to add node " + node.toString() + " to super peer network.");
                 }
             } else {
-                isSuccessful = false;
-                logger.info("Super peer network node count already at maximum size "
-                        + serviceHolder.getConfiguration().getMaxSuperPeerCount());
+                logger.info("Failed to add node " + node.toString() + " to super peer network.");
             }
         } finally {
             superPeerNetworkNodesLock.writeLock().unlock();

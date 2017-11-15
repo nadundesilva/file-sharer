@@ -194,36 +194,30 @@ public abstract class RoutingTable implements Serializable {
         boolean isSuccessful;
         unstructuredNetworkNodesLock.writeLock().lock();
         try {
-            if (unstructuredNetworkNodes.size() < serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
-                Node existingNode = get(node.getIp(), node.getPort());
-                if (existingNode != null) {
-                    node = existingNode;
-                }
-                isSuccessful = unstructuredNetworkNodes.add(node);
-                if (isSuccessful) {
-                    logger.info("Added node " + node.toString() + " to unstructured network.");
+            Node existingNode = get(node.getIp(), node.getPort());
+            if (existingNode != null) {
+                node = existingNode;
+            }
+            isSuccessful = unstructuredNetworkNodes.add(node);
+            if (isSuccessful) {
+                logger.info("Added node " + node.toString() + " to unstructured network.");
 
-                    // Notifying the tracer
-                    Tracer tracer = serviceHolder.getTracer();
-                    if (tracer != null) {
-                        try {
-                            tracer.addUnstructuredNetworkConnection(
-                                    System.currentTimeMillis(),
-                                    serviceHolder.getConfiguration().getIp(),
-                                    serviceHolder.getConfiguration().getPeerListeningPort(),
-                                    node.getIp(), node.getPort()
-                            );
-                        } catch (RemoteException e) {
-                            logger.warn("Failed to add unstructured network connection to the tracer", e);
-                        }
+                // Notifying the tracer
+                Tracer tracer = serviceHolder.getTracer();
+                if (tracer != null) {
+                    try {
+                        tracer.addUnstructuredNetworkConnection(
+                                System.currentTimeMillis(),
+                                serviceHolder.getConfiguration().getIp(),
+                                serviceHolder.getConfiguration().getPeerListeningPort(),
+                                node.getIp(), node.getPort()
+                        );
+                    } catch (RemoteException e) {
+                        logger.warn("Failed to add unstructured network connection to the tracer", e);
                     }
-                } else {
-                    logger.info("Failed to add node " + node.toString() + " to unstructured network.");
                 }
             } else {
-                isSuccessful = false;
-                logger.info("Unstructured network node count already at maximum size "
-                        + serviceHolder.getConfiguration().getMaxUnstructuredPeerCount());
+                logger.info("Failed to add node " + node.toString() + " to unstructured network.");
             }
         } finally {
             unstructuredNetworkNodesLock.writeLock().unlock();
