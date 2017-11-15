@@ -48,7 +48,7 @@ public class TraceManager implements Traceable {
     public void start() {
         System.setProperty(Constants.RMI_HOME_SYSTEM_PROPERTY, serviceHolder.getConfiguration().getIp());
 
-        int port = serviceHolder.getConfiguration().getPeerListeningPort();
+        int port = serviceHolder.getConfiguration().getTracerPort();
         try {
             // Rebinding this object in the RMI registry
             String rmiRegistryEntry = getRMIRegistryEntry(

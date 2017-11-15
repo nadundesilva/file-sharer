@@ -16,29 +16,37 @@
     <div class="mat-card">
       <mat-card>
         <mat-table #table [dataSource]="serMessagesDataSource" *ngIf="serMessagesDataSource && serMessagesDataSource.size() > 0">
+          <ng-container matColumnDef="node">
+            <mat-header-cell *matHeaderCellDef>Sequence Number</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ message[0].ip + ':' + message[0].port }}</mat-cell>
+          </ng-container>
           <ng-container matColumnDef="sequence-number">
             <mat-header-cell *matHeaderCellDef>Sequence Number</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ message[0] }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ message[1] }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="query">
             <mat-header-cell *matHeaderCellDef>Query</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ message[1].query }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ message[2].query }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="messages-count">
             <mat-header-cell *matHeaderCellDef>Messages Count</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ message[1].messagesCount }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="average-hop-count">
-            <mat-header-cell *matHeaderCellDef>Average Hop Count</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ average(message[1].hopCounts).toFixed(2) }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ message[2].messagesCount }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="min-hop-count">
             <mat-header-cell *matHeaderCellDef>Minimum Hop Count</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ min(message[1].hopCounts) }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ min(message[2].hopCounts) }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="max-hop-count">
             <mat-header-cell *matHeaderCellDef>Maximum Hop Count</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ max(message[1].hopCounts) }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ max(message[2].hopCounts) }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="average-hop-count">
+            <mat-header-cell *matHeaderCellDef>Average Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ average(message[2].hopCounts).toFixed(2) }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="standard-deviation">
+            <mat-header-cell *matHeaderCellDef>Standard Deviation Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ standardDeviation(message[2].hopCounts).toFixed(2) }}</mat-cell>
           </ng-container>
 
           <mat-header-row *matHeaderRowDef="serDisplayedColumns"></mat-header-row>
@@ -54,25 +62,33 @@
     <div class="mat-card">
       <mat-card>
         <mat-table #table [dataSource]="serSuperPeerMessagesDataSource" *ngIf="serSuperPeerMessagesDataSource && serSuperPeerMessagesDataSource.size() > 0">
+          <ng-container matColumnDef="node">
+            <mat-header-cell *matHeaderCellDef>Sequence Number</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ message[0].ip + ':' + message[0].port }}</mat-cell>
+          </ng-container>
           <ng-container matColumnDef="sequence-number">
             <mat-header-cell *matHeaderCellDef>Sequence Number</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ message[0] }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ message[1] }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="messages-count">
             <mat-header-cell *matHeaderCellDef>Messages Count</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ message[1].messagesCount }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="average-hop-count">
-            <mat-header-cell *matHeaderCellDef>Average Hop Count</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ average(message[1].hopCounts).toFixed(2) }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ message[2].messagesCount }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="min-hop-count">
             <mat-header-cell *matHeaderCellDef>Minimum Hop Count</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ min(message[1].hopCounts) }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ min(message[2].hopCounts) }}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="max-hop-count">
             <mat-header-cell *matHeaderCellDef>Maximum Hop Count</mat-header-cell>
-            <mat-cell *matCellDef="let message">{{ max(message[1].hopCounts) }}</mat-cell>
+            <mat-cell *matCellDef="let message">{{ max(message[2].hopCounts) }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="average-hop-count">
+            <mat-header-cell *matHeaderCellDef>Average Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ average(message[2].hopCounts).toFixed(2) }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="standard-deviation">
+            <mat-header-cell *matHeaderCellDef>Standard Deviation Hop Count</mat-header-cell>
+            <mat-cell *matCellDef="let message">{{ standardDeviation(message[2].hopCounts).toFixed(2) }}</mat-cell>
           </ng-container>
 
           <mat-header-row *matHeaderRowDef="serSuperPeerDisplayedColumns"></mat-header-row>

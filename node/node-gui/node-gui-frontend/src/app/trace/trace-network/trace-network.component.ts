@@ -38,7 +38,7 @@ export class TraceNetworkComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.network && this.isNetworkDifferent(changes.network)) {
+    if (changes.network && this.areNetworksDifferent(changes.network) && this.areNodeSetsDifferent(changes.nodes)) {
       this.drawNetwork();
     }
   }
@@ -49,7 +49,7 @@ export class TraceNetworkComponent implements OnInit, OnChanges {
     this.drawNetwork();
   }
 
-  private isNetworkDifferent(change: SimpleChange): boolean {
+  private areNetworksDifferent(change: SimpleChange): boolean {
     let isDifferent = false;
     if (change.firstChange) {
       isDifferent = true;
@@ -57,26 +57,25 @@ export class TraceNetworkComponent implements OnInit, OnChanges {
       const previousNetwork = <NetworkConnection[]>change.previousValue;
       const currentNetwork = <NetworkConnection[]>change.currentValue;
 
-      isDifferent = this.compareNetworks(previousNetwork, currentNetwork);
-      isDifferent = isDifferent || this.compareNetworks(currentNetwork, previousNetwork);
+      isDifferent = this.areConnectionsDifferent(previousNetwork, currentNetwork);
+      isDifferent = isDifferent || this.areConnectionsDifferent(currentNetwork, previousNetwork);
     }
-
     return isDifferent;
   }
 
-  private compareNetworks(network1: NetworkConnection[], network2: NetworkConnection[]): boolean {
+  private areConnectionsDifferent(network1: NetworkConnection[], network2: NetworkConnection[]): boolean {
     let isDifferent = false;
     outerLoop: for (let i = 0; i < network1.length; i++) {
       const previousNetworkConnection = network1[i];
       for (let j = 0; j < network2.length; j++) {
         const currentNetworkConnection = network2[j];
 
-        if (this.compareNodes(previousNetworkConnection.node1, currentNetworkConnection.node1)) {
-          if (this.compareNodes(previousNetworkConnection.node2, currentNetworkConnection.node2)) {
+        if (this.areNodesEqual(previousNetworkConnection.node1, currentNetworkConnection.node1)) {
+          if (this.areNodesEqual(previousNetworkConnection.node2, currentNetworkConnection.node2)) {
             continue outerLoop;
           }
-        } else if (this.compareNodes(previousNetworkConnection.node1, currentNetworkConnection.node2)) {
-          if (this.compareNodes(previousNetworkConnection.node2, currentNetworkConnection.node1)) {
+        } else if (this.areNodesEqual(previousNetworkConnection.node1, currentNetworkConnection.node2)) {
+          if (this.areNodesEqual(previousNetworkConnection.node2, currentNetworkConnection.node1)) {
             continue outerLoop;
           }
         }
@@ -87,11 +86,33 @@ export class TraceNetworkComponent implements OnInit, OnChanges {
     return isDifferent;
   }
 
-  private compareNodes(node1: TraceableNode, node2: TraceableNode) {
+  private areNodesEqual(node1: TraceableNode, node2: TraceableNode) {
     return node1.ip === node2.ip
       && node1.port === node2.port
       && node1.peerType === node2.peerType
       && node1.state === node2.state;
+  }
+
+  private areNodeSetsDifferent(change: SimpleChange): boolean {
+    let isDifferent = false;
+    if (change.firstChange) {
+      isDifferent = true;
+    } else {
+      const previousNodes = <TraceableNode[]>change.previousValue;
+      const currentNodes = <TraceableNode[]>change.currentValue;
+
+      if (previousNodes.length !== currentNodes.length) {
+        isDifferent = true;
+      } else {
+        for (let i = 0; i < previousNodes.length; i++) {
+          isDifferent = !this.areNodesEqual(previousNodes[i], currentNodes[i]);
+          if (isDifferent) {
+            break;
+          }
+        }
+      }
+    }
+    return isDifferent;
   }
 
   private drawNetwork(): void {

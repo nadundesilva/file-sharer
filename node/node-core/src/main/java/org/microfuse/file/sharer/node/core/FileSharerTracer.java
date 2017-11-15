@@ -49,7 +49,7 @@ public class FileSharerTracer implements Tracer {
 
         serviceHolder = new ServiceHolder();
         network = new Network();
-        history = new History();
+        history = new History(network);
 
         // Starting the RMI registry. Fails if it is already running.
         try {
@@ -236,7 +236,7 @@ public class FileSharerTracer implements Tracer {
         } else {
             logger.warn("Unknown routing table type");
         }
-        logger.info("Registered new node " + ip + ":" + "port");
+        logger.info("Registered new node " + ip + ":" + port);
     }
 
     @Override
@@ -283,6 +283,6 @@ public class FileSharerTracer implements Tracer {
 
     @Override
     public void notifyMessageSend(String ip, int port, Message message) throws RemoteException {
-        history.notifyMessageSend(message);
+        history.notifyMessageSend(ip, port, message);
     }
 }
