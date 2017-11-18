@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 /**
  * The routing table containing the node information for super peers.
@@ -249,14 +250,21 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return True if adding was successful
      */
     private boolean addSuperPeerNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
+        boolean isSuccessful = false;
         superPeerNetworkNodesLock.writeLock().lock();
         try {
             Node existingNode = get(node.getIp(), node.getPort());
             if (existingNode != null) {
                 node = existingNode;
             }
-            isSuccessful = superPeerNetworkNodes.add(node);
+
+            int activeSuperPeerNetworkNodesCount = superPeerNetworkNodes.stream().parallel()
+                    .filter(Node::isActive)
+                    .collect(Collectors.toList()).size();
+            if (activeSuperPeerNetworkNodesCount < serviceHolder.getConfiguration().getMaxSuperPeerCount()){
+                isSuccessful = superPeerNetworkNodes.add(node);
+            }
+
             if (isSuccessful) {
                 logger.info("Added node " + node.toString() + " to super peer network.");
 
@@ -327,7 +335,7 @@ public class SuperPeerRoutingTable extends RoutingTable {
      * @return True if adding was successful
      */
     private boolean addAssignedOrdinaryNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
+        boolean isSuccessful = false;
         assignedOrdinaryPeerNodesLock.writeLock().lock();
         try {
             if (assignedOrdinaryPeerNodes.size() < serviceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
@@ -335,7 +343,15 @@ public class SuperPeerRoutingTable extends RoutingTable {
                 if (existingNode != null) {
                     node = existingNode;
                 }
-                isSuccessful = assignedOrdinaryPeerNodes.add(node);
+
+                int activeAssignedOrdinaryPeerNodesCount = assignedOrdinaryPeerNodes.stream().parallel()
+                        .filter(Node::isActive)
+                        .collect(Collectors.toList()).size();
+                if (activeAssignedOrdinaryPeerNodesCount
+                        < serviceHolder.getConfiguration().getMaxAssignedOrdinaryPeerCount()) {
+                    isSuccessful = assignedOrdinaryPeerNodes.add(node);
+                }
+
                 if (isSuccessful) {
                     logger.info("Added node " + node.toString() + " to assigned ordinary peers.");
 

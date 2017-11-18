@@ -197,8 +197,8 @@ public class ResourceIndex {
     protected Set<Resource> matchResourcesWithName(Collection<Resource> resources, String resourceName) {
         return resources.stream().parallel()
                 .filter(resource -> {
-                    String[] resourceTokens = resource.getName().toLowerCase().split(" ");
-                    String[] queryNameTokens = resourceName.toLowerCase().split(" ");
+                    String[] resourceTokens = resource.getName().toLowerCase().split("\\s+");
+                    String[] queryNameTokens = resourceName.toLowerCase().split("\\s+");
 
                     for (int i = 0; i < queryNameTokens.length; i++) {
                         boolean tokenFound = false;

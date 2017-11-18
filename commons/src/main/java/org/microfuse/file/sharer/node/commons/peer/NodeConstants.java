@@ -18,12 +18,12 @@ public class NodeConstants {
     public static final int DEFAULT_MAX_ASSIGNED_ORDINARY_PEER_COUNT = 2;
     public static final int DEFAULT_MAX_UNSTRUCTURED_PEER_COUNT = 4;
     public static final int DEFAULT_MAX_SUPER_PEER_COUNT = 4;
-    public static final int DEFAULT_HEARTBEAT_INTERVAL = 30000;
-    public static final int DEFAULT_GOSSIPING_INTERVAL = 60000;
+    public static final int DEFAULT_HEARTBEAT_INTERVAL = 5000;
+    public static final int DEFAULT_GOSSIPING_INTERVAL = 30000;
     public static final int DEFAULT_NETWORK_HANDLER_REPLY_TIMEOUT = 6000;
     public static final int DEFAULT_SER_SUPER_PEER_TIMEOUT = 5000;
-    public static final int DEFAULT_AUTOMATED_GARBAGE_COLLECTION_INTERVAL = 300000;
-    public static final int DEFAULT_UDP_NETWORK_HANDLER_RETRY_INTERVAL = 1000;
+    public static final int DEFAULT_AUTOMATED_GARBAGE_COLLECTION_INTERVAL = 120000;
+    public static final int DEFAULT_UDP_NETWORK_HANDLER_RETRY_INTERVAL = 200;
     public static final int DEFAULT_UDP_NETWORK_HANDLER_RETRY_COUNT = 5;
     public static final int DEFAULT_TRACER_PORT = 54000;
     public static final NetworkHandlerType DEFAULT_NETWORK_HANDLER = NetworkHandlerType.RMI;

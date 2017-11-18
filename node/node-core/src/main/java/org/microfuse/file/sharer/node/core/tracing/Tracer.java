@@ -113,7 +113,7 @@ public interface Tracer extends Remote {
     void demoteToOrdinaryPeer(long timeStamp, String ip, int port) throws RemoteException;
 
     /**
-     * Demote a node to a ordinary peer.
+     * Notify of a message sent.
      *
      * @param timeStamp The timestamp at which the operation occurred
      * @param ip        The ip of the node to be demoted
@@ -124,13 +124,14 @@ public interface Tracer extends Remote {
             throws RemoteException;
 
     /**
-     * Demote a node to a ordinary peer.
+     * Notify of a message received.
      *
      * @param timeStamp The timestamp at which the operation occurred
      * @param ip        The ip of the node to be demoted
      * @param port      The port of the node to be demoted
      * @param message   The message sent
      */
-    void notifyMessageReceived(long timeStamp, String ip, int port, String senderIP, int senderPort, Message message)
+    void notifyMessageReceived(long timeStamp, String ip, int port, String receiverIP, int receiverPort,
+                               Message message)
             throws RemoteException;
 }

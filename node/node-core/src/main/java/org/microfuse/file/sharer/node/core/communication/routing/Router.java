@@ -461,28 +461,28 @@ public class Router implements NetworkHandlerListener {
      * @param message  The message that was received
      */
     public void runTasksOnMessageReceived(Node fromNode, Message message) {
-        long timeStamp = System.currentTimeMillis();
         listenersListLock.readLock().lock();
         try {
             listenersList.stream().parallel()
                     .forEach(routerListener -> routerListener.onMessageReceived(fromNode, message));
+            long timeStamp = System.currentTimeMillis();
+
+            // Notifying the tracer
+            Tracer tracer = serviceHolder.getTracer();
+            if (tracer != null) {
+                try {
+                    tracer.notifyMessageReceived(
+                            timeStamp, fromNode.getIp(), fromNode.getPort(),
+                            serviceHolder.getConfiguration().getIp(),
+                            serviceHolder.getConfiguration().getPeerListeningPort(),
+                            message
+                    );
+                } catch (RemoteException e) {
+                    logger.warn("Failed to notify tracer of sending message", e);
+                }
+            }
         } finally {
             listenersListLock.readLock().unlock();
-        }
-
-        // Notifying the tracer
-        Tracer tracer = serviceHolder.getTracer();
-        if (tracer != null) {
-            try {
-                tracer.notifyMessageReceived(
-                        timeStamp,
-                        serviceHolder.getConfiguration().getIp(),
-                        serviceHolder.getConfiguration().getPeerListeningPort(),
-                        fromNode.getIp(), fromNode.getPort(), message
-                );
-            } catch (RemoteException e) {
-                logger.warn("Failed to notify tracer of sending message", e);
-            }
         }
     }
 

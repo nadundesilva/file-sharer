@@ -7,6 +7,7 @@ public class MessageConstants {
     public static final String ECHO_OK_VALUE_SUCCESS = "0";
 
     public static final String JOIN_OK_VALUE_SUCCESS = "0";
+    public static final String JOIN_OK_VALUE_ERROR_FULL = "9998";
     public static final String JOIN_OK_VALUE_ERROR = "9999";
 
     public static final String LEAVE_OK_VALUE_SUCCESS = "0";

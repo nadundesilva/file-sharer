@@ -302,7 +302,8 @@ export class StatsComponent implements OnInit, OnDestroy {
         }
       }
       if (activeSerMessages.length > 0) {
-        statistics.push(['Success Rate', (successfulQueries * 100 / activeSerMessages.length).toFixed(2) + '%']);
+        statistics.push(['Success Rate', '-', '-',
+          (successfulQueries * 100 / activeSerMessages.length).toFixed(2) + '%', '-']);
       }
       if (serMessagesHopCounts.length > 0) {
         statistics.push([
@@ -332,7 +333,11 @@ export class StatsComponent implements OnInit, OnDestroy {
       const serMessagesDelays = [];
       for (let i = 0; i < activeSerMessages.length; i++) {
         if (activeSerMessages[i][2].hopCounts.length > 0) {
-          serMessagesDelays.push(activeSerMessages[i][2].firstHitTimeStamp - activeSerMessages[i][2].startTimeStamp);
+          const firstHitTimeStamp = activeSerMessages[i][2].firstHitTimeStamp;
+          const startTimeStamp = activeSerMessages[i][2].startTimeStamp;
+          if (firstHitTimeStamp !== -1 && startTimeStamp !== -1) {
+            serMessagesDelays.push(firstHitTimeStamp - startTimeStamp);
+          }
         }
       }
       if (serMessagesDelays.length > 0) {
@@ -374,7 +379,8 @@ export class StatsComponent implements OnInit, OnDestroy {
         }
       }
       if (activeSerSuperPeerMessages.length > 0) {
-        statistics.push(['Success Rate', (successfulQueries * 100 / activeSerSuperPeerMessages.length).toFixed(2) + '%']);
+        statistics.push(['Success Rate', '-', '-',
+          (successfulQueries * 100 / activeSerSuperPeerMessages.length).toFixed(2) + '%', '-']);
       }
       if (serSuperPeerMessagesHopCounts.length > 0) {
         statistics.push([
@@ -404,9 +410,11 @@ export class StatsComponent implements OnInit, OnDestroy {
       const serSuperPeerMessagesDelays = [];
       for (let i = 0; i < activeSerSuperPeerMessages.length; i++) {
         if (activeSerSuperPeerMessages[i][2].hopCounts.length > 0) {
-          serSuperPeerMessagesDelays.push(
-            activeSerSuperPeerMessages[i][2].firstHitTimeStamp - activeSerSuperPeerMessages[i][2].startTimeStamp
-          );
+          const firstHitTimeStamp = activeSerSuperPeerMessages[i][2].firstHitTimeStamp;
+          const startTimeStamp = activeSerSuperPeerMessages[i][2].startTimeStamp;
+          if (firstHitTimeStamp !== -1 && startTimeStamp !== -1) {
+            serSuperPeerMessagesDelays.push(firstHitTimeStamp - startTimeStamp);
+          }
         }
       }
       if (serSuperPeerMessagesDelays.length > 0) {

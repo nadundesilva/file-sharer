@@ -288,9 +288,9 @@ public class FileSharerTracer implements Tracer {
     }
 
     @Override
-    public void notifyMessageReceived(long timeStamp, String ip, int port, String senderIP,
-                                      int senderPort, Message message) throws RemoteException {
-        history.notifyMessageReceived(timeStamp, ip, port, senderIP, senderPort, message);
+    public void notifyMessageReceived(long timeStamp, String ip, int port, String receiverIP,
+                                      int receiverPort, Message message) throws RemoteException {
+        history.notifyMessageReceived(timeStamp, ip, port, receiverIP, receiverPort, message);
 
     }
 }

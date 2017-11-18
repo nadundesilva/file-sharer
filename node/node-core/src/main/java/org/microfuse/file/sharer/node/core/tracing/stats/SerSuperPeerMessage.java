@@ -13,14 +13,16 @@ public class SerSuperPeerMessage {
     private List<Integer> hopCounts;
 
     public SerSuperPeerMessage() {
-        startTimeStamp = 0;
-        firstHitTimeStamp = Long.MAX_VALUE;
+        startTimeStamp = -1;
+        firstHitTimeStamp = -1;
         messagesCount = 0;
         hopCounts = new ArrayList<>();
     }
 
     public void setStartTimeStamp(long startTimeStamp) {
-        this.startTimeStamp = startTimeStamp;
+        if (this.startTimeStamp == -1) {
+            this.startTimeStamp = startTimeStamp;
+        }
     }
 
     public long getStartTimeStamp() {
@@ -32,7 +34,9 @@ public class SerSuperPeerMessage {
     }
 
     public void setFirstHitTimeStamp(long firstHitTimeStamp) {
-        this.firstHitTimeStamp = firstHitTimeStamp;
+        if (this.firstHitTimeStamp == -1) {
+            this.firstHitTimeStamp = firstHitTimeStamp;
+        }
     }
 
     public long getMessagesCount() {

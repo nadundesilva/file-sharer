@@ -34,6 +34,8 @@ public class MessageIndexes {
     public static final int JOIN_OK_PORT = 2;
     public static final int JOIN_OK_SUPER_PEER_IP = 3;
     public static final int JOIN_OK_SUPER_PEER_PORT = 4;
+    public static final int JOIN_OK_NEW_IP = 1;
+    public static final int JOIN_OK_NEW_PORT = 2;
 
     // LEAVE message
     public static final int LEAVE_IP = 0;

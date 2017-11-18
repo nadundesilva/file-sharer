@@ -191,14 +191,21 @@ public abstract class RoutingTable implements Serializable {
      * @return True if adding was successful
      */
     protected boolean addUnstructuredNetworkRoutingTableEntry(Node node) {
-        boolean isSuccessful;
+        boolean isSuccessful = false;
         unstructuredNetworkNodesLock.writeLock().lock();
         try {
             Node existingNode = get(node.getIp(), node.getPort());
             if (existingNode != null) {
                 node = existingNode;
             }
-            isSuccessful = unstructuredNetworkNodes.add(node);
+
+            int activeUnstructuredNetworkNodesCount = unstructuredNetworkNodes.stream().parallel()
+                    .filter(Node::isActive)
+                    .collect(Collectors.toList()).size();
+            if (activeUnstructuredNetworkNodesCount < serviceHolder.getConfiguration().getMaxUnstructuredPeerCount()) {
+                isSuccessful = unstructuredNetworkNodes.add(node);
+            }
+
             if (isSuccessful) {
                 logger.info("Added node " + node.toString() + " to unstructured network.");
 
